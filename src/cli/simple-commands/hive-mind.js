@@ -60,6 +60,9 @@ ${chalk.bold('EXAMPLES:')}
 
   ${chalk.gray('# Interactive wizard')}
   claude-flow hive-mind wizard
+  
+  ${chalk.gray('# Spawn with specific configuration')}
+  claude-flow hive-mind spawn "Build API" --worker-types "coder,tester" --memory-size 200
 
   ${chalk.gray('# Spawn with Claude Code coordination')}
   claude-flow hive-mind spawn "Build REST API" --claude
@@ -86,6 +89,7 @@ ${chalk.bold('KEY FEATURES:')}
 ${chalk.bold('OPTIONS:')}
   --queen-type <type>    Queen coordinator type (strategic, tactical, adaptive)
   --max-workers <n>      Maximum worker agents (default: 8)
+  --worker-types <list>  Comma-separated list of worker types
   --consensus <type>     Consensus algorithm (majority, weighted, byzantine)
   --memory-size <mb>     Collective memory size in MB (default: 100)
   --auto-scale           Enable auto-scaling based on workload
@@ -98,6 +102,10 @@ ${chalk.bold('OPTIONS:')}
   --execute              Execute Claude Code spawn commands immediately
   --auto                 (Deprecated: auto-permissions enabled by default)
   --no-auto-permissions  Disable automatic --dangerously-skip-permissions
+  --name <name>          Custom name for the hive mind session
+  --objective <text>     Specify the objective directly
+  --wizard               Run interactive wizard
+  --dry-run              Show what would be done without executing
 
 ${chalk.bold('For more information:')}
 ${chalk.blue('https://github.com/ruvnet/claude-flow/tree/main/docs/hive-mind')}
@@ -299,7 +307,9 @@ const hiveMindWizard = safeInteractive(
       maxWorkers: parseInt(flags.maxWorkers || flags['max-workers'] || '8'),
       consensusAlgorithm: flags.consensus || 'majority',
       autoScale: flags.autoScale || flags['auto-scale'] || false,
-      encryption: flags.encryption || false
+      encryption: flags.encryption || false,
+      memorySize: parseInt(flags.memorySize || flags['memory-size'] || '100'),
+      workerTypes: flags.workerTypes || flags['worker-types'] || config.workerTypes || flags['worker-types'] || null
     };
     
     await spawnSwarm([objective], {
@@ -424,11 +434,13 @@ async function spawnSwarm(args, flags) {
       hiveMind = new HiveMindCore({
         objective,
         name: flags.name || `hive-${Date.now()}`,
-        queenType: flags.queenType || 'strategic',
-        maxWorkers: flags.maxWorkers || 8,
+        queenType: flags.queenType || flags['queen-type'] || 'strategic',
+        maxWorkers: parseInt(flags.maxWorkers || flags['max-workers'] || '8'),
         consensusAlgorithm: flags.consensus || 'majority',
-        autoScale: flags.autoScale !== false,
-        encryption: flags.encryption || false
+        autoScale: flags.autoScale || flags['auto-scale'] !== false,
+        encryption: flags.encryption || false,
+        memorySize: parseInt(flags.memorySize || flags['memory-size'] || '100'),
+        workerTypes: flags.workerTypes || flags['worker-types'] || config.workerTypes || flags['worker-types'] || null
       });
     } catch (error) {
       console.error('HiveMindCore initialization failed:', error);
@@ -567,7 +579,7 @@ async function spawnSwarm(args, flags) {
       consensusAlgorithm: hiveMind.config.consensusAlgorithm,
       autoScale: hiveMind.config.autoScale,
       encryption: hiveMind.config.encryption,
-      workerTypes: flags.workerTypes
+      workerTypes: flags.workerTypes || flags['worker-types'] || config.workerTypes
     });
     
     spinner.text = 'Session tracking established...';
@@ -615,8 +627,8 @@ async function spawnSwarm(args, flags) {
     spinner.text = 'Spawning worker agents...';
     
     // Determine worker types
-    const workerTypes = flags.workerTypes 
-      ? flags.workerTypes.split(',') 
+    const workerTypes = (flags.workerTypes || flags['worker-types']) 
+      ? (flags.workerTypes || flags['worker-types']).split(',') 
       : ['researcher', 'coder', 'analyst', 'tester'];
     
     // Spawn worker agents
@@ -654,7 +666,7 @@ async function spawnSwarm(args, flags) {
     // Initialize collective memory
     const memory = new CollectiveMemory({
       swarmId,
-      maxSize: flags.memorySize || 100
+      maxSize: parseInt(flags.memorySize || flags['memory-size'] || hiveMind.config.memorySize || '100')
     });
     
     // Store initial context
@@ -1672,7 +1684,7 @@ async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, 
     console.log(chalk.gray('─'.repeat(60)));
     console.log(chalk.cyan('Swarm ID:'), swarmId);
     console.log(chalk.cyan('Objective:'), objective);
-    console.log(chalk.cyan('Queen Type:'), flags.queenType || 'strategic');
+    console.log(chalk.cyan('Queen Type:'), flags.queenType || flags['queen-type'] || 'strategic');
     console.log(chalk.cyan('Worker Count:'), workers.length);
     console.log(chalk.cyan('Worker Types:'), Object.keys(workerGroups).join(', '));
     console.log(chalk.cyan('Consensus Algorithm:'), flags.consensus || 'majority');
@@ -1693,7 +1705,7 @@ async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, 
       }
       
       
-      if (claudeAvailable && !flags.dryRun) {
+      if (claudeAvailable && !flags.dryRun && !flags['dry-run']) {
         // Pass the prompt directly as an argument to claude
         const claudeArgs = [hiveMindPrompt];
         
@@ -1713,7 +1725,7 @@ async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, 
         console.log(chalk.blue('  The Queen coordinator will orchestrate all worker agents'));
         console.log(chalk.blue('  Use MCP tools for collective intelligence and task distribution'));
         
-      } else if (flags.dryRun) {
+      } else if (flags.dryRun || flags['dry-run']) {
         console.log(chalk.blue('\nDry run - would execute Claude Code with prompt:'));
         console.log(chalk.gray('Prompt length:'), hiveMindPrompt.length, 'characters');
         console.log(chalk.gray('\nFirst 500 characters of prompt:'));
@@ -1770,7 +1782,7 @@ async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, 
 function generateHiveMindPrompt(swarmId, swarmName, objective, workers, workerGroups, flags) {
   const currentTime = new Date().toISOString();
   const workerTypes = Object.keys(workerGroups);
-  const queenType = flags.queenType || 'strategic';
+  const queenType = flags.queenType || flags['queen-type'] || 'strategic';
   const consensusAlgorithm = flags.consensus || 'majority';
   
   return `🧠 HIVE MIND COLLECTIVE INTELLIGENCE SYSTEM
