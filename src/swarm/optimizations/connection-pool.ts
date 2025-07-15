@@ -1,11 +1,8 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Connection Pool for Claude API
  * Manages reusable connections to improve performance
  */
-
 import { EventEmitter } from 'node:events';
-import { Logger } from '../../core/logger.js';
 // Mock ClaudeAPI for testing when service doesn't exist
 export class ClaudeAPI {
   id: string;
@@ -20,7 +17,7 @@ export class ClaudeAPI {
     return this.isHealthy;
   }
   
-  async complete(options: any): Promise<any> {
+  async complete(options: Record<string, unknown>): Promise<any> {
     // Mock response for testing
     return {
       content: [{ text: `Mock response for: ${options.messages?.[0]?.content || 'test'}` }],
@@ -32,7 +29,6 @@ export class ClaudeAPI {
     };
   }
 }
-
 export interface PoolConfig {
   min: number;
   max: number;
@@ -41,7 +37,6 @@ export interface PoolConfig {
   evictionRunIntervalMillis: number;
   testOnBorrow: boolean;
 }
-
 export interface PooledConnection {
   id: string;
   api: ClaudeAPI;
@@ -50,12 +45,11 @@ export interface PooledConnection {
   lastUsedAt: Date;
   useCount: number;
 }
-
 export class ClaudeConnectionPool extends EventEmitter {
   private connections: Map<string, PooledConnection> = new Map();
   private waitingQueue: Array<{
     resolve: (conn: PooledConnection) => void;
-    reject: (error: Error) => void;
+    reject: (_error: Error) => void;
     timeout: NodeJS.Timeout;
   }> = [];
   
@@ -64,7 +58,7 @@ export class ClaudeConnectionPool extends EventEmitter {
   private evictionTimer?: NodeJS.Timeout;
   private isShuttingDown = false;
   
-  constructor(config: Partial<PoolConfig> = {}) {
+  constructor(config: Partial<PoolConfig> = { /* empty */ }) {
     super();
     
     this.config = {
@@ -87,7 +81,7 @@ export class ClaudeConnectionPool extends EventEmitter {
   
   private async initialize(): Promise<void> {
     // Create minimum connections
-    for (let i = 0; i < this.config.min; i++) {
+    for (let _i = 0; i < this.config.min; i++) {
       await this.createConnection();
     }
     
@@ -97,16 +91,16 @@ export class ClaudeConnectionPool extends EventEmitter {
     }, this.config.evictionRunIntervalMillis);
     
     this.logger.info('Connection pool initialized', {
-      min: this.config.min,
+      min: this.config._min,
       max: this.config.max
     });
   }
   
   private async createConnection(): Promise<PooledConnection> {
-    const id = `conn-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-    const api = new ClaudeAPI();
+    const _id = `conn-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    const _api = new ClaudeAPI();
     
-    const connection: PooledConnection = {
+    const _connection: PooledConnection = {
       id,
       api,
       inUse: false,
@@ -115,7 +109,7 @@ export class ClaudeConnectionPool extends EventEmitter {
       useCount: 0
     };
     
-    this.connections.set(id, connection);
+    this.connections.set(_id, connection);
     this.emit('connection:created', connection);
     
     return connection;
@@ -135,7 +129,7 @@ export class ClaudeConnectionPool extends EventEmitter {
         
         // Test connection if configured
         if (this.config.testOnBorrow) {
-          const isHealthy = await this.testConnection(conn);
+          const _isHealthy = await this.testConnection(conn);
           if (!isHealthy) {
             await this.destroyConnection(conn);
             continue;
@@ -149,7 +143,7 @@ export class ClaudeConnectionPool extends EventEmitter {
     
     // Create new connection if under limit
     if (this.connections.size < this.config.max) {
-      const conn = await this.createConnection();
+      const _conn = await this.createConnection();
       conn.inUse = true;
       conn.useCount++;
       this.emit('connection:acquired', conn);
@@ -157,21 +151,21 @@ export class ClaudeConnectionPool extends EventEmitter {
     }
     
     // Wait for a connection to become available
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        const index = this.waitingQueue.findIndex(item => item.resolve === resolve);
+    return new Promise((_resolve, reject) => {
+      const _timeout = setTimeout(() => {
+        const _index = this.waitingQueue.findIndex(item => item.resolve === resolve);
         if (index !== -1) {
-          this.waitingQueue.splice(index, 1);
+          this.waitingQueue.splice(_index, 1);
         }
         reject(new Error('Connection acquire timeout'));
       }, this.config.acquireTimeoutMillis);
       
-      this.waitingQueue.push({ resolve, reject, timeout });
+      this.waitingQueue.push({ _resolve, _reject, timeout });
     });
   }
   
   async release(connection: PooledConnection): Promise<void> {
-    const conn = this.connections.get(connection.id);
+    const _conn = this.connections.get(connection.id);
     if (!conn) {
       this.logger.warn('Attempted to release unknown connection', { id: connection.id });
       return;
@@ -184,7 +178,7 @@ export class ClaudeConnectionPool extends EventEmitter {
     
     // Check if anyone is waiting for a connection
     if (this.waitingQueue.length > 0) {
-      const waiter = this.waitingQueue.shift();
+      const _waiter = this.waitingQueue.shift();
       if (waiter) {
         clearTimeout(waiter.timeout);
         conn.inUse = true;
@@ -195,7 +189,7 @@ export class ClaudeConnectionPool extends EventEmitter {
   }
   
   async execute<T>(fn: (api: ClaudeAPI) => Promise<T>): Promise<T> {
-    const conn = await this.acquire();
+    const _conn = await this.acquire();
     try {
       return await fn(conn.api);
     } finally {
@@ -207,9 +201,9 @@ export class ClaudeConnectionPool extends EventEmitter {
     try {
       // Simple health check - could be expanded
       return true;
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn('Connection health check failed', { 
-        id: conn.id, 
+        id: conn._id, 
         error: error instanceof Error ? error.message : 'Unknown error' 
       });
       return false;
@@ -227,8 +221,8 @@ export class ClaudeConnectionPool extends EventEmitter {
   }
   
   private evictIdleConnections(): void {
-    const now = Date.now();
-    const idleThreshold = now - this.config.idleTimeoutMillis;
+    const _now = Date.now();
+    const _idleThreshold = now - this.config.idleTimeoutMillis;
     
     for (const conn of this.connections.values()) {
       if (!conn.inUse && 
@@ -256,11 +250,11 @@ export class ClaudeConnectionPool extends EventEmitter {
     this.waitingQueue = [];
     
     // Wait for all connections to be released
-    const maxWaitTime = 30000; // 30 seconds
-    const startTime = Date.now();
+    const _maxWaitTime = 30000; // 30 seconds
+    const _startTime = Date.now();
     
     while (true) {
-      const inUseCount = Array.from(this.connections.values())
+      const _inUseCount = Array.from(this.connections.values())
         .filter(conn => conn.inUse).length;
       
       if (inUseCount === 0) break;
@@ -270,7 +264,7 @@ export class ClaudeConnectionPool extends EventEmitter {
         break;
       }
       
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(_resolve, 100));
     }
     
     // Destroy all connections
@@ -282,13 +276,13 @@ export class ClaudeConnectionPool extends EventEmitter {
   }
   
   getStats() {
-    const connections = Array.from(this.connections.values());
+    const _connections = Array.from(this.connections.values());
     return {
       total: connections.length,
       inUse: connections.filter(c => c.inUse).length,
       idle: connections.filter(c => !c.inUse).length,
       waitingQueue: this.waitingQueue.length,
-      totalUseCount: connections.reduce((sum, c) => sum + c.useCount, 0)
+      totalUseCount: connections.reduce((_sum, c) => sum + c.useCount, 0)
     };
   }
 }

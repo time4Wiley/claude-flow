@@ -1,14 +1,13 @@
+/* eslint-env jest */
 /**
  * Tests for agent command
  */
-
 import { jest } from '@jest/globals';
 import { agentCommand } from '../agent.js';
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
-
 jest.mock('fs-extra');
 jest.mock('ora');
 jest.mock('chalk', () => ({
@@ -22,15 +21,13 @@ jest.mock('chalk', () => ({
     bold: jest.fn(str => str),
   }
 }));
-
 describe('Agent Command', () => {
-  let consoleLogSpy;
-  let consoleErrorSpy;
-  let mockSpinner;
-
+  let consoleLogSpy; // TODO: Remove if unused
+  let consoleErrorSpy; // TODO: Remove if unused
+  let mockSpinner; // TODO: Remove if unused
   beforeEach(() => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleLogSpy = jest.spyOn(_console, 'log').mockImplementation();
+    consoleErrorSpy = jest.spyOn(_console, 'error').mockImplementation();
     
     mockSpinner = {
       start: jest.fn().mockReturnThis(),
@@ -43,18 +40,16 @@ describe('Agent Command', () => {
     
     jest.clearAllMocks();
   });
-
   afterEach(() => {
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
-
   describe('list subcommand', () => {
     test('should list available agent types', async () => {
-      await agentCommand(['list'], {});
+      await agentCommand(['list'], { /* empty */ });
       
       expect(consoleLogSpy).toHaveBeenCalled();
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       
       expect(output).toContain('Available Agent Types');
       expect(output).toContain('researcher');
@@ -65,10 +60,9 @@ describe('Agent Command', () => {
       expect(output).toContain('coordinator');
     });
   });
-
   describe('spawn subcommand', () => {
     test('should spawn an agent with type', async () => {
-      const swarmDir = path.join(process.cwd(), '.claude', 'swarm');
+      const _swarmDir = path.join(process.cwd(), '.claude', 'swarm');
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue({
         id: 'swarm-123',
@@ -76,18 +70,16 @@ describe('Agent Command', () => {
         status: 'active'
       });
       fs.writeJson.mockResolvedValue(undefined);
-
-      await agentCommand(['spawn', 'researcher'], {});
+      await agentCommand(['spawn', 'researcher'], { /* empty */ });
       
       expect(mockSpinner.start).toHaveBeenCalledWith('Spawning researcher agent...');
       expect(mockSpinner.succeed).toHaveBeenCalled();
       expect(fs.writeJson).toHaveBeenCalled();
       
-      const writeCall = fs.writeJson.mock.calls[0];
+      const _writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].agents).toHaveLength(1);
       expect(writeCall[1].agents[0].type).toBe('researcher');
     });
-
     test('should spawn agent with custom name', async () => {
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue({
@@ -96,38 +88,32 @@ describe('Agent Command', () => {
         status: 'active'
       });
       fs.writeJson.mockResolvedValue(undefined);
-
       await agentCommand(['spawn', 'coder'], { name: 'CustomCoder' });
       
-      const writeCall = fs.writeJson.mock.calls[0];
+      const _writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].agents[0].name).toBe('CustomCoder');
     });
-
     test('should error if swarm not initialized', async () => {
       fs.pathExists.mockResolvedValue(false);
-
-      await agentCommand(['spawn', 'researcher'], {});
+      await agentCommand(['spawn', 'researcher'], { /* empty */ });
       
       expect(mockSpinner.fail).toHaveBeenCalledWith(
         expect.stringContaining('No active swarm found')
       );
     });
-
     test('should error for invalid agent type', async () => {
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue({ agents: [] });
-
-      await agentCommand(['spawn', 'invalid-type'], {});
+      await agentCommand(['spawn', 'invalid-type'], { /* empty */ });
       
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Invalid agent type')
       );
     });
   });
-
   describe('status subcommand', () => {
     test('should show agent status', async () => {
-      const mockSwarmData = {
+      const _mockSwarmData = {
         id: 'swarm-123',
         agents: [
           {
@@ -150,13 +136,11 @@ describe('Agent Command', () => {
           }
         ]
       };
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockSwarmData);
-
-      await agentCommand(['status'], {});
+      await agentCommand(['status'], { /* empty */ });
       
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Active Agents');
       expect(output).toContain('Researcher');
       expect(output).toContain('active');
@@ -164,9 +148,8 @@ describe('Agent Command', () => {
       expect(output).toContain('Coder');
       expect(output).toContain('idle');
     });
-
     test('should show specific agent status', async () => {
-      const mockSwarmData = {
+      const _mockSwarmData = {
         agents: [
           {
             id: 'agent-1',
@@ -181,113 +164,98 @@ describe('Agent Command', () => {
           }
         ]
       };
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockSwarmData);
-
-      await agentCommand(['status', 'agent-1'], {});
+      await agentCommand(['status', 'agent-1'], { /* empty */ });
       
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Agent Details');
       expect(output).toContain('Researcher');
       expect(output).toContain('Tasks Completed: 10');
       expect(output).toContain('Success Rate: 95%');
     });
   });
-
   describe('remove subcommand', () => {
     test('should remove an agent', async () => {
-      const mockSwarmData = {
+      const _mockSwarmData = {
         agents: [
           { id: 'agent-1', name: 'Researcher' },
           { id: 'agent-2', name: 'Coder' }
         ]
       };
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockSwarmData);
       fs.writeJson.mockResolvedValue(undefined);
-
-      await agentCommand(['remove', 'agent-1'], {});
+      await agentCommand(['remove', 'agent-1'], { /* empty */ });
       
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
         expect.stringContaining('Agent agent-1 removed')
       );
       
-      const writeCall = fs.writeJson.mock.calls[0];
+      const _writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].agents).toHaveLength(1);
       expect(writeCall[1].agents[0].id).toBe('agent-2');
     });
-
     test('should error if agent not found', async () => {
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue({ agents: [] });
-
-      await agentCommand(['remove', 'nonexistent'], {});
+      await agentCommand(['remove', 'nonexistent'], { /* empty */ });
       
       expect(mockSpinner.fail).toHaveBeenCalledWith(
         expect.stringContaining('Agent nonexistent not found')
       );
     });
   });
-
   describe('assign subcommand', () => {
     test('should assign task to agent', async () => {
-      const mockSwarmData = {
+      const _mockSwarmData = {
         agents: [
           { id: 'agent-1', name: 'Researcher', currentTask: null }
         ]
       };
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockSwarmData);
       fs.writeJson.mockResolvedValue(undefined);
-
-      await agentCommand(['assign', 'agent-1', 'Research new algorithms'], {});
+      await agentCommand(['assign', 'agent-1', 'Research new algorithms'], { /* empty */ });
       
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
         expect.stringContaining('Task assigned to agent-1')
       );
       
-      const writeCall = fs.writeJson.mock.calls[0];
+      const _writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].agents[0].currentTask).toBe('Research new algorithms');
       expect(writeCall[1].agents[0].status).toBe('working');
     });
   });
-
   describe('help subcommand', () => {
     test('should show help when no arguments', async () => {
-      await agentCommand([], {});
+      await agentCommand([], { /* empty */ });
       
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Agent Management');
       expect(output).toContain('USAGE:');
       expect(output).toContain('agent <subcommand>');
       expect(output).toContain('SUBCOMMANDS:');
     });
-
     test('should show help for help subcommand', async () => {
-      await agentCommand(['help'], {});
+      await agentCommand(['help'], { /* empty */ });
       
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Agent Management');
     });
   });
-
   describe('error handling', () => {
     test('should handle file read errors gracefully', async () => {
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockRejectedValue(new Error('Permission denied'));
-
-      await agentCommand(['status'], {});
+      await agentCommand(['status'], { /* empty */ });
       
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error:')
       );
     });
-
     test('should handle invalid subcommands', async () => {
-      await agentCommand(['invalid-subcommand'], {});
+      await agentCommand(['invalid-subcommand'], { /* empty */ });
       
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Unknown subcommand: invalid-subcommand')

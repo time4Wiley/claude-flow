@@ -27,34 +27,31 @@ import { fixHookVariablesCommand, fixHookVariablesCommandConfig } from './simple
 // Note: TypeScript imports commented out for Node.js compatibility
 // import { ruvSwarmAction } from './commands/ruv-swarm.ts';
 // import { configIntegrationAction } from './commands/config-integration.ts';
-
 // Command registry for extensible CLI
-export const commandRegistry = new Map();
-
+export const _commandRegistry = new Map();
 // Register core commands
 export function registerCoreCommands() {
   commandRegistry.set('init', {
-    handler: initCommand,
+    handler: _initCommand,
     description: 'Initialize Claude Code integration files and SPARC development environment',
     usage: 'init [--force] [--minimal] [--sparc]',
     examples: [
       'npx claude-flow@latest init --sparc  # Recommended: Full SPARC setup',
       'init --sparc                         # Initialize with SPARC modes',
-      'init --force --minimal               # Minimal setup, overwrite existing',
+      'init --force --minimal               # Minimal _setup, overwrite existing',
       'init --sparc --force                 # Force SPARC setup'
     ],
     details: `
 The --sparc flag creates a complete development environment:
   • .roomodes file containing 17 specialized SPARC modes
   • CLAUDE.md for AI-readable project instructions
-  • Pre-configured modes: architect, code, tdd, debug, security, and more
+  • Pre-configured modes: _architect, _code, _tdd, _debug, _security, and more
   • Ready for TDD workflows and automated code generation
   
 First-time users should run: npx claude-flow@latest init --sparc`
   });
-
   commandRegistry.set('start', {
-    handler: startCommand,
+    handler: _startCommand,
     description: 'Start the Claude-Flow orchestration system',
     usage: 'start [--daemon] [--port <port>] [--verbose] [--ui] [--web]',
     examples: [
@@ -66,14 +63,13 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'start --web              # Launch web-based UI'
     ]
   });
-
   // Add start-ui as a convenient alias for launching the UI
   commandRegistry.set('start-ui', {
-    handler: async (args, flags) => {
+    handler: async (_args, flags) => {
       // Import and use the direct UI launcher
       const { launchUI } = await import('./simple-commands/start-ui.js');
       // Pass the full raw arguments from process.argv
-      const fullArgs = process.argv.slice(3); // Skip node, script, and command
+      const _fullArgs = process.argv.slice(3); // Skip node, script, and command
       return launchUI(fullArgs);
     },
     description: 'Start the UI interface (web UI by default)',
@@ -84,9 +80,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'start-ui --terminal      # Launch terminal-based UI instead'
     ]
   });
-
   commandRegistry.set('memory', {
-    handler: memoryCommand,
+    handler: _memoryCommand,
     description: 'Memory management operations',
     usage: 'memory <subcommand> [options]',
     examples: [
@@ -96,9 +91,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'memory export backup.json'
     ]
   });
-
   commandRegistry.set('sparc', {
-    handler: sparcCommand,
+    handler: _sparcCommand,
     description: 'SPARC development mode operations',
     usage: 'sparc [subcommand] [options]',
     examples: [
@@ -109,9 +103,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'sparc info architect                      # Mode details'
     ]
   });
-
   commandRegistry.set('agent', {
-    handler: agentCommand,
+    handler: _agentCommand,
     description: 'Manage AI agents and hierarchies',
     usage: 'agent <subcommand> [options]',
     examples: [
@@ -121,9 +114,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'agent ecosystem status'
     ]
   });
-
   commandRegistry.set('task', {
-    handler: taskCommand,
+    handler: _taskCommand,
     description: 'Manage tasks and workflows',
     usage: 'task <subcommand> [options]',
     examples: [
@@ -133,9 +125,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'task coordination status'
     ]
   });
-
   commandRegistry.set('config', {
-    handler: configCommand,
+    handler: _configCommand,
     description: 'Manage system configuration',
     usage: 'config <subcommand> [options]',
     examples: [
@@ -145,9 +136,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'config validate'
     ]
   });
-
   commandRegistry.set('status', {
-    handler: statusCommand,
+    handler: _statusCommand,
     description: 'Show system status and health',
     usage: 'status [--verbose] [--json]',
     examples: [
@@ -156,9 +146,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'status --json'
     ]
   });
-
   commandRegistry.set('mcp', {
-    handler: mcpCommand,
+    handler: _mcpCommand,
     description: 'Manage MCP server and tools',
     usage: 'mcp <subcommand> [options]',
     examples: [
@@ -168,9 +157,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'mcp auth setup'
     ]
   });
-
   commandRegistry.set('monitor', {
-    handler: monitorCommand,
+    handler: _monitorCommand,
     description: 'Real-time system monitoring',
     usage: 'monitor [--watch] [--interval <ms>]',
     examples: [
@@ -180,9 +168,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'monitor --format json'
     ]
   });
-
   commandRegistry.set('swarm', {
-    handler: swarmCommand,
+    handler: _swarmCommand,
     description: 'Swarm-based AI agent coordination',
     usage: 'swarm <objective> [options]',
     examples: [
@@ -192,9 +179,8 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'swarm "Development task" --ui --monitor --background'
     ]
   });
-
   commandRegistry.set('hive-mind', {
-    handler: hiveMindCommand,
+    handler: _hiveMindCommand,
     description: 'Advanced Hive Mind swarm intelligence with collective decision-making',
     usage: 'hive-mind <subcommand> [options]',
     examples: [
@@ -215,21 +201,17 @@ Hive Mind System Features:
   • Real-time monitoring and metrics
   • SQLite-backed persistence
   • MCP tool integration for 87+ operations
-
 Queen Types:
   • Strategic - Long-term planning and optimization
   • Tactical - Task prioritization and rapid response
   • Adaptive - Learning and strategy evolution
-
 Worker Types:
-  • Researcher, Coder, Analyst, Tester
-  • Architect, Reviewer, Optimizer, Documenter
-
+  • _Researcher, _Coder, _Analyst, Tester
+  • _Architect, _Reviewer, _Optimizer, Documenter
 Use 'hive-mind wizard' for interactive setup or 'hive-mind help' for full documentation.`
   });
-
   commandRegistry.set('hive-mind-optimize', {
-    handler: hiveMindOptimizeCommand,
+    handler: _hiveMindOptimizeCommand,
     description: '🔧 Optimize hive mind database for better performance',
     usage: 'hive-mind-optimize [options]',
     examples: [
@@ -241,7 +223,7 @@ Use 'hive-mind wizard' for interactive setup or 'hive-mind help' for full docume
     ],
     details: `
 Hive Mind Database Optimization Features:
-  • Safe, backward-compatible optimizations
+  • _Safe, backward-compatible optimizations
   • Performance indexes for 50% faster queries
   • Memory cleanup and archiving
   • Task archival for space management
@@ -254,17 +236,15 @@ Optimization Levels:
   • v1.2 → v1.3: Performance tracking tables
   • v1.3 → v1.4: Memory optimization features
   • v1.4 → v1.5: Behavioral analysis tracking
-
 Safety Features:
   • Automatic backups before major operations
   • All changes are backward-compatible
   • Existing data is always preserved
   • Rollback capability on errors`
   });
-
   commandRegistry.set('swarm-metrics', {
-    handler: async (args, flags) => {
-      const subcommand = args[0];
+    handler: async (_args, flags) => {
+      const _subcommand = args[0];
       if (subcommand === 'fix') {
         return await fixTaskAttribution();
       } else {
@@ -284,17 +264,14 @@ Swarm Metrics Integration Features:
   • Cross-system swarm performance comparison
   • Database integration status checking
   • Automatic sample task creation for empty swarms
-
 This command helps resolve issues where:
   • Overall task statistics show correctly but per-swarm shows 0/0
   • Multiple swarm systems are not properly integrated
   • Task assignments are missing or incorrectly attributed
-
 Use 'swarm-metrics fix' to automatically repair attribution issues.`
   });
-
   commandRegistry.set('batch', {
-    handler: batchManagerCommand,
+    handler: _batchManagerCommand,
     description: 'Batch operation management and configuration utilities',
     usage: 'batch <command> [options]',
     examples: [
@@ -308,7 +285,7 @@ Use 'swarm-metrics fix' to automatically repair attribution issues.`
     details: `
 Batch operations support:
   • Multiple project initialization with templates
-  • Environment-specific configurations (dev, staging, prod)
+  • Environment-specific configurations (_dev, _staging, prod)
   • Parallel processing with resource management
   • Progress tracking and detailed reporting
   • Configuration validation and estimation tools
@@ -317,9 +294,8 @@ Use with init command:
   claude-flow init --batch-init project1,project2,project3
   claude-flow init --config batch-config.json --parallel`
   });
-
   commandRegistry.set('github', {
-    handler: githubCommand,
+    handler: _githubCommand,
     description: 'GitHub workflow automation with 6 specialized modes',
     usage: 'github <mode> <objective> [options]',
     examples: [
@@ -345,9 +321,8 @@ Advanced features:
   • Automated testing integration and quality gates
   • Release pipeline orchestration with rollback capabilities`
   });
-
   commandRegistry.set('training', {
-    handler: trainingAction,
+    handler: _trainingAction,
     description: 'Neural pattern learning and model updates',
     usage: 'training <command> [options]',
     examples: [
@@ -361,11 +336,10 @@ Neural training commands:
   • pattern-learn: Learn from specific operation outcomes
   • model-update: Update agent models with new insights
   
-Improves task selection accuracy, agent performance prediction, and coordination efficiency.`
+Improves task selection _accuracy, agent performance _prediction, and coordination efficiency.`
   });
-
   commandRegistry.set('analysis', {
-    handler: analysisAction,
+    handler: _analysisAction,
     description: 'Performance and usage analytics',
     usage: 'analysis <command> [options]',
     examples: [
@@ -379,11 +353,10 @@ Analysis commands:
   • performance-report: Generate comprehensive performance reports
   • token-usage: Analyze token consumption and costs
   
-Helps with performance optimization, cost management, and resource allocation.`
+Helps with performance _optimization, cost _management, and resource allocation.`
   });
-
   commandRegistry.set('automation', {
-    handler: automationAction,
+    handler: _automationAction,
     description: 'Intelligent agent and workflow management',
     usage: 'automation <command> [options]',
     examples: [
@@ -399,9 +372,8 @@ Automation commands:
   
 Provides optimal resource allocation and intelligent agent selection.`
   });
-
   commandRegistry.set('coordination', {
-    handler: coordinationAction,
+    handler: _coordinationAction,
     description: 'Swarm and agent orchestration',
     usage: 'coordination <command> [options]',
     examples: [
@@ -415,11 +387,10 @@ Coordination commands:
   • agent-spawn: Spawn and coordinate new agents
   • task-orchestrate: Orchestrate task execution across agents
   
-Enables intelligent task distribution, agent synchronization, and shared memory coordination.`
+Enables intelligent task _distribution, agent _synchronization, and shared memory coordination.`
   });
-
   commandRegistry.set('hooks', {
-    handler: hooksAction,
+    handler: _hooksAction,
     description: 'Lifecycle event management',
     usage: 'hooks <command> [options]',
     examples: [
@@ -437,9 +408,8 @@ Hooks commands:
   
 Enables automated preparation & cleanup, performance tracking, and coordination synchronization.`
   });
-
   commandRegistry.set('hook-safety', {
-    handler: hookSafetyCommand,
+    handler: _hookSafetyCommand,
     description: '🚨 Critical hook safety system - Prevent infinite loops & financial damage',
     usage: 'hook-safety <command> [options]',
     examples: [
@@ -454,36 +424,30 @@ Enables automated preparation & cleanup, performance tracking, and coordination 
   • Bypass API rate limits
   • Cost thousands of dollars per day  
   • Make your system unresponsive
-
 Hook Safety commands:
   • validate: Check Claude Code settings for dangerous patterns
   • status: Show current safety status and execution context
   • reset: Reset circuit breakers and execution counters  
   • safe-mode: Enable/disable safe mode (skips all hooks)
-
 SAFE ALTERNATIVES:
   • Use PostToolUse hooks instead of Stop hooks
   • Implement flag-based update patterns
   • Use 'claude --skip-hooks' for manual updates
   • Create conditional execution scripts
-
 For more information: https://github.com/ruvnet/claude-flow/issues/166`
   });
-
   commandRegistry.set('migrate-hooks', migrateHooksCommandConfig);
-
   commandRegistry.set('fix-hook-variables', {
-    handler: fixHookVariablesCommand,
+    handler: _fixHookVariablesCommand,
     ...fixHookVariablesCommandConfig
   });
-
   commandRegistry.set('hive', {
-    handler: async (args, flags) => {
+    handler: async (_args, flags) => {
       try {
         // Try to load the hive command module
         const { hiveAction } = await import('./commands/hive.js');
-        return hiveAction({ args, flags, command: 'hive' });
-      } catch (error) {
+        return hiveAction({ _args, _flags, command: 'hive' });
+      } catch (_error) {
         // Fallback to simple implementation if module not found
         console.log('🐝 Hive Mind - Advanced Multi-Agent Coordination');
         console.log('');
@@ -495,7 +459,7 @@ For more information: https://github.com/ruvnet/claude-flow/issues/166`
         console.log('');
         console.log('Usage: hive <objective> [options]');
         console.log('');
-        console.log('For full functionality, ensure the hive module is properly built.');
+        console.log('For full _functionality, ensure the hive module is properly built.');
       }
     },
     description: 'Hive Mind - Advanced multi-agent swarm with consensus',
@@ -510,8 +474,8 @@ For more information: https://github.com/ruvnet/claude-flow/issues/166`
     details: `
 Hive Mind features:
   • 👑 Queen-led orchestration with specialized agents
-  • 🗳️ Consensus mechanisms (quorum, unanimous, weighted, leader)
-  • 🏗️ Multiple topologies (hierarchical, mesh, ring, star)
+  • 🗳️ Consensus mechanisms (_quorum, _unanimous, _weighted, leader)
+  • 🏗️ Multiple topologies (_hierarchical, _mesh, _ring, star)
   • 📊 Real-time monitoring dashboard
   • 🧪 SPARC methodology integration
   • 💾 Distributed memory and knowledge sharing
@@ -532,11 +496,10 @@ Options:
   --monitor                 Real-time monitoring
   --background              Run in background`
   });
-
   // Temporarily commented out for Node.js compatibility
   /*
   commandRegistry.set('ruv-swarm', {
-    handler: ruvSwarmAction,
+    handler: _ruvSwarmAction,
     description: 'Advanced AI swarm coordination with neural capabilities',
     usage: 'ruv-swarm <command> [options]',
     examples: [
@@ -560,7 +523,7 @@ Advanced swarm coordination features:
 Commands:
   init        - Initialize swarm with specified topology
   status      - Get current swarm status and metrics
-  spawn       - Spawn specialized agents (researcher, coder, analyst, etc.)
+  spawn       - Spawn specialized agents (_researcher, _coder, _analyst, etc.)
   orchestrate - Coordinate complex tasks across agents
   neural      - Neural pattern training and management
   benchmark   - Performance testing and optimization
@@ -568,11 +531,10 @@ Commands:
   memory      - Memory usage and coordination data`
   });
   */
-
   // Additional ruv-swarm coordination commands - temporarily commented out
   /*
   commandRegistry.set('swarm-init', {
-    handler: async (args, flags) => {
+    handler: async (_args, flags) => {
       const { ruvSwarmAction } = await import('./commands/ruv-swarm.js');
       return ruvSwarmAction({ args: ['init', ...args], flags });
     },
@@ -584,9 +546,8 @@ Commands:
       'swarm-init --topology star --max-agents 5 --strategy balanced'
     ]
   });
-
   commandRegistry.set('neural-spawn', {
-    handler: async (args, flags) => {
+    handler: async (_args, flags) => {
       const { ruvSwarmAction } = await import('./commands/ruv-swarm.js');
       return ruvSwarmAction({ args: ['spawn', ...args], flags });
     },
@@ -598,9 +559,8 @@ Commands:
       'neural-spawn coordinator --name "Project Manager"'
     ]
   });
-
   commandRegistry.set('memory-coordinate', {
-    handler: async (args, flags) => {
+    handler: async (_args, flags) => {
       const { ruvSwarmAction } = await import('./commands/ruv-swarm.js');
       return ruvSwarmAction({ args: ['memory', ...args], flags });
     },
@@ -612,9 +572,8 @@ Commands:
       'memory-coordinate --compress --sync'
     ]
   });
-
   commandRegistry.set('config-integration', {
-    handler: configIntegrationAction,
+    handler: _configIntegrationAction,
     description: 'Enhanced configuration management with ruv-swarm integration',
     usage: 'config-integration <command> [options]',
     examples: [
@@ -634,9 +593,9 @@ Advanced configuration management features:
   • Real-time status monitoring and validation
   
 Presets:
-  development  - Hierarchical topology, specialized strategy, 8 agents
-  research     - Mesh topology, adaptive strategy, 12 agents  
-  production   - Star topology, balanced strategy, 6 agents
+  development  - Hierarchical _topology, specialized _strategy, 8 agents
+  research     - Mesh _topology, adaptive _strategy, 12 agents  
+  production   - Star _topology, balanced _strategy, 6 agents
   
 Commands:
   setup        - Initialize ruv-swarm integration
@@ -649,63 +608,57 @@ Commands:
   });
   */
 }
-
 // Register a new command
-export function registerCommand(name, command) {
+export function registerCommand(_name, command) {
   if (commandRegistry.has(name)) {
     console.warn(`Command '${name}' already exists and will be overwritten`);
   }
   
-  commandRegistry.set(name, {
-    handler: command.handler,
+  commandRegistry.set(_name, {
+    handler: command._handler,
     description: command.description || 'No description available',
     usage: command.usage || `${name} [options]`,
     examples: command.examples || [],
     hidden: command.hidden || false
   });
 }
-
 // Get command handler
 export function getCommand(name) {
   return commandRegistry.get(name);
 }
-
 // List all registered commands
 export function listCommands(includeHidden = false) {
-  const commands = [];
-  for (const [name, command] of commandRegistry.entries()) {
+  const _commands = [];
+  for (const [_name, command] of commandRegistry.entries()) {
     if (includeHidden || !command.hidden) {
       commands.push({
-        name,
+        _name,
         ...command
       });
     }
   }
-  return commands.sort((a, b) => a.name.localeCompare(b.name));
+  return commands.sort((_a, b) => a.name.localeCompare(b.name));
 }
-
 // Check if command exists
 export function hasCommand(name) {
   return commandRegistry.has(name);
 }
-
 // Execute a command
-export async function executeCommand(name, subArgs, flags) {
-  const command = commandRegistry.get(name);
+export async function executeCommand(_name, _subArgs, flags) {
+  const _command = commandRegistry.get(name);
   if (!command) {
     throw new Error(`Unknown command: ${name}`);
   }
   
   try {
-    await command.handler(subArgs, flags);
+    await command.handler(_subArgs, flags);
   } catch (err) {
     throw new Error(`Command '${name}' failed: ${err.message}`);
   }
 }
-
 // Helper to show command help
 export function showCommandHelp(name) {
-  const command = commandRegistry.get(name);
+  const _command = commandRegistry.get(name);
   if (!command) {
     console.log(`Unknown command: ${name}`);
     return;
@@ -730,10 +683,9 @@ export function showCommandHelp(name) {
     }
   }
 }
-
 // Helper to show all commands
 export function showAllCommands() {
-  const commands = listCommands();
+  const _commands = listCommands();
   
   console.log('Available commands:');
   console.log();
@@ -745,6 +697,5 @@ export function showAllCommands() {
   console.log();
   console.log('Use "claude-flow help <command>" for detailed usage information');
 }
-
 // Initialize the command registry
 registerCoreCommands();

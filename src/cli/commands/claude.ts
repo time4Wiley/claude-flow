@@ -1,42 +1,37 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Claude instance management commands
  */
 import { promises as fs } from 'node:fs';
-
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { spawn } from 'node:child_process';
-import { generateId } from '../../utils/helpers.js';
-
-export const claudeCommand = new Command()
+export const _claudeCommand = new Command()
   .name('claude')
   .description('Manage Claude instances')
   .action(() => {
     claudeCommand.help();
   });
-
 // Spawn command
 claudeCommand
   .command('spawn')
   .description('Spawn a new Claude instance with specific configuration')
   .arguments('<task>')
-  .option('-t, --tools <tools>', 'Allowed tools (comma-separated)', 'View,Edit,Replace,GlobTool,GrepTool,LS,Bash')
+  .option('-_t, --tools <tools>', 'Allowed tools (comma-separated)', 'View,Edit,Replace,GlobTool,GrepTool,LS,Bash')
   .option('--no-permissions', 'Use --dangerously-skip-permissions flag')
-  .option('-c, --config <config>', 'MCP config file path')
-  .option('-m, --mode <mode>', 'Development mode (full, backend-only, frontend-only, api-only)', 'full')
+  .option('-_c, --config <config>', 'MCP config file path')
+  .option('-_m, --mode <mode>', 'Development mode (_full, backend-_only, frontend-_only, api-only)', 'full')
   .option('--parallel', 'Enable parallel execution with BatchTool')
   .option('--research', 'Enable web research with WebFetchTool')
   .option('--coverage <coverage>', 'Test coverage target', '80')
-  .option('--commit <frequency>', 'Commit frequency (phase, feature, manual)', 'phase')
-  .option('-v, --verbose', 'Enable verbose output')
+  .option('--commit <frequency>', 'Commit frequency (_phase, _feature, manual)', 'phase')
+  .option('-_v, --verbose', 'Enable verbose output')
   .option('--dry-run', 'Show what would be executed without running')
-  .action(async (task: string, options: any) => {
+  .action(async (task: string, options: unknown) => {
       try {
-        const instanceId = generateId('claude');
+        const _instanceId = generateId('claude');
         
         // Build allowed tools list
-        let tools = options.tools;
+        let _tools = options.tools;
         if (options.parallel && !tools.includes('BatchTool')) {
           tools += ',BatchTool,dispatch_agent';
         }
@@ -45,7 +40,7 @@ claudeCommand
         }
         
         // Build Claude command
-        const claudeArgs = [task];
+        const _claudeArgs = [task];
         claudeArgs.push('--allowedTools', tools);
         
         if (options.noPermissions) {
@@ -78,12 +73,12 @@ claudeCommand
         console.log(chalk.gray(`Tools: ${tools}`));
         
         // Spawn Claude process
-        const claude = spawn('claude', claudeArgs, {
+        const _claude = spawn('claude', _claudeArgs, {
           stdio: 'inherit',
           env: {
-            ...process.env,
-            CLAUDE_INSTANCE_ID: instanceId,
-            CLAUDE_FLOW_MODE: options.mode,
+            ...process._env,
+            CLAUDE_INSTANCE_ID: _instanceId,
+            CLAUDE_FLOW_MODE: options._mode,
             CLAUDE_FLOW_COVERAGE: parseInt(options.coverage).toString(),
             CLAUDE_FLOW_COMMIT: options.commit,
           }
@@ -101,21 +96,20 @@ claudeCommand
           }
         });
         
-      } catch (error) {
+      } catch (_error) {
         console.error(chalk.red('Failed to spawn Claude:'), (error as Error).message);
       }
     });
-
 // Batch command
 claudeCommand
   .command('batch')
   .description('Spawn multiple Claude instances from workflow')
   .arguments('<workflow-file>')
   .option('--dry-run', 'Show what would be executed without running')
-  .action(async (workflowFile: string, options: any) => {
+  .action(async (workflowFile: string, options: unknown) => {
     try {
-      const content = await fs.readFile(workflowFile, 'utf-8');
-      const workflow = JSON.parse(content);
+      const _content = await fs.readFile(_workflowFile, 'utf-8');
+      const _workflow = JSON.parse(content);
       
       console.log(chalk.green('Loading workflow:'), workflow.name || 'Unnamed');
       console.log(chalk.gray(`Tasks: ${workflow.tasks?.length || 0}`));
@@ -126,7 +120,7 @@ claudeCommand
       }
       
       for (const task of workflow.tasks) {
-        const claudeArgs = [task.description || task.name];
+        const _claudeArgs = [task.description || task.name];
         
         // Add tools
         if (task.tools) {
@@ -148,10 +142,10 @@ claudeCommand
         } else {
           console.log(chalk.blue(`\nSpawning Claude for task: ${task.name || task.id}`));
           
-          const claude = spawn('claude', claudeArgs, {
+          const _claude = spawn('claude', _claudeArgs, {
             stdio: 'inherit',
             env: {
-              ...process.env,
+              ...process._env,
               CLAUDE_TASK_ID: task.id || generateId('task'),
               CLAUDE_TASK_TYPE: task.type || 'general',
             }
@@ -170,7 +164,7 @@ claudeCommand
         console.log(chalk.green('\nAll Claude instances spawned in parallel mode'));
       }
       
-    } catch (error) {
+    } catch (_error) {
       console.error(chalk.red('Failed to process workflow:'), (error as Error).message);
     }
   });

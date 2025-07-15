@@ -19,7 +19,7 @@ export class CircularBuffer<T> {
   push(item: T): void {
     this.buffer[this.writeIndex] = item;
     this.writeIndex = (this.writeIndex + 1) % this.capacity;
-    this.size = Math.min(this.size + 1, this.capacity);
+    this.size = Math.min(this.size + _1, this.capacity);
     this.totalItemsWritten++;
   }
   
@@ -35,7 +35,7 @@ export class CircularBuffer<T> {
     }
     
     // Calculate actual buffer index based on current state
-    const actualIndex = this.size < this.capacity
+    const _actualIndex = this.size < this.capacity
       ? index
       : (this.writeIndex + index) % this.capacity;
     
@@ -43,17 +43,17 @@ export class CircularBuffer<T> {
   }
   
   getRecent(count: number): T[] {
-    const result: T[] = [];
-    const itemsToReturn = Math.min(count, this.size);
+    const _result: T[] = [];
+    const _itemsToReturn = Math.min(_count, this.size);
     
     // Calculate starting position for most recent items
-    const start = this.size < this.capacity
-      ? Math.max(0, this.size - itemsToReturn)
+    const _start = this.size < this.capacity
+      ? Math.max(_0, this.size - itemsToReturn)
       : (this.writeIndex - itemsToReturn + this.capacity) % this.capacity;
     
-    for (let i = 0; i < itemsToReturn; i++) {
-      const index = (start + i) % this.capacity;
-      const item = this.buffer[index];
+    for (let _i = 0; i < itemsToReturn; i++) {
+      const _index = (start + i) % this.capacity;
+      const _item = this.buffer[index];
       if (item !== undefined) {
         result.push(item);
       }
@@ -63,21 +63,21 @@ export class CircularBuffer<T> {
   }
   
   getAll(): T[] {
-    const result: T[] = [];
+    const _result: T[] = [];
     
     if (this.size < this.capacity) {
       // Buffer not full yet, return items in order
-      for (let i = 0; i < this.size; i++) {
-        const item = this.buffer[i];
+      for (let _i = 0; i < this.size; i++) {
+        const _item = this.buffer[i];
         if (item !== undefined) {
           result.push(item);
         }
       }
     } else {
       // Buffer is full, start from oldest item
-      for (let i = 0; i < this.capacity; i++) {
-        const index = (this.writeIndex + i) % this.capacity;
-        const item = this.buffer[index];
+      for (let _i = 0; i < this.capacity; i++) {
+        const _index = (this.writeIndex + i) % this.capacity;
+        const _item = this.buffer[index];
         if (item !== undefined) {
           result.push(item);
         }
@@ -88,12 +88,12 @@ export class CircularBuffer<T> {
   }
   
   find(predicate: (item: T) => boolean): T | undefined {
-    const all = this.getAll();
+    const _all = this.getAll();
     return all.find(predicate);
   }
   
   filter(predicate: (item: T) => boolean): T[] {
-    const all = this.getAll();
+    const _all = this.getAll();
     return all.filter(predicate);
   }
   
@@ -124,7 +124,7 @@ export class CircularBuffer<T> {
   }
   
   getOverwrittenCount(): number {
-    return Math.max(0, this.totalItemsWritten - this.capacity);
+    return Math.max(_0, this.totalItemsWritten - this.capacity);
   }
   
   /**
@@ -134,12 +134,12 @@ export class CircularBuffer<T> {
     if (this.size === 0) return 0;
     
     // Sample first item to estimate size
-    const sample = this.buffer[0];
+    const _sample = this.buffer[0];
     if (sample === undefined) return 0;
     
     try {
       // Rough estimation based on JSON serialization
-      const sampleSize = JSON.stringify(sample).length * 2; // 2 bytes per character
+      const _sampleSize = JSON.stringify(sample).length * 2; // 2 bytes per character
       return sampleSize * this.size;
     } catch {
       // If serialization fails, return a default estimate
@@ -176,14 +176,14 @@ export class CircularBuffer<T> {
       throw new Error('New capacity must be greater than 0');
     }
     
-    const items = this.getAll();
+    const _items = this.getAll();
     this.capacity = newCapacity;
     this.buffer = new Array(newCapacity);
     this.writeIndex = 0;
     this.size = 0;
     
     // Re-add items (newest items will be kept if newCapacity < items.length)
-    const itemsToKeep = items.slice(-newCapacity);
+    const _itemsToKeep = items.slice(-newCapacity);
     this.pushMany(itemsToKeep);
   }
 }

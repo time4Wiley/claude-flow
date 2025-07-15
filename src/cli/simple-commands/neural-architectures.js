@@ -14,45 +14,60 @@ import {
   runNeuralInference,
   predictWithNeuralModel
 } from '../utils.js';
-
-export async function neuralArchitecturesAction(subArgs, flags) {
-  const subcommand = subArgs[0];
-  const options = flags;
-
+export async function neuralArchitecturesAction(_subArgs, flags) {
+  const _subcommand = subArgs[0];
+  const _options = flags;
   if (options.help || options.h || !subcommand) {
     showNeuralArchitecturesHelp();
     return;
   }
-
   try {
     switch (subcommand) {
       case 'transformer':
-        await transformerCommand(subArgs.slice(1), flags);
-        break;
+        {
+await transformerCommand(subArgs.slice(1), flags);
+        
+}break;
       case 'lstm':
-        await lstmCommand(subArgs.slice(1), flags);
-        break;
+        {
+await lstmCommand(subArgs.slice(1), flags);
+        
+}break;
       case 'cnn':
-        await cnnCommand(subArgs.slice(1), flags);
-        break;
+        {
+await cnnCommand(subArgs.slice(1), flags);
+        
+}break;
       case 'attention':
-        await attentionCommand(subArgs.slice(1), flags);
-        break;
+        {
+await attentionCommand(subArgs.slice(1), flags);
+        
+}break;
       case 'save':
-        await saveModelCommand(subArgs.slice(1), flags);
-        break;
+        {
+await saveModelCommand(subArgs.slice(1), flags);
+        
+}break;
       case 'load':
-        await loadModelCommand(subArgs.slice(1), flags);
-        break;
+        {
+await loadModelCommand(subArgs.slice(1), flags);
+        
+}break;
       case 'list':
-        await listModelsCommand(subArgs.slice(1), flags);
-        break;
+        {
+await listModelsCommand(subArgs.slice(1), flags);
+        
+}break;
       case 'predict':
-        await predictCommand(subArgs.slice(1), flags);
-        break;
+        {
+await predictCommand(subArgs.slice(1), flags);
+        
+}break;
       case 'wasm-config':
-        await wasmConfigCommand(subArgs.slice(1), flags);
-        break;
+        {
+await wasmConfigCommand(subArgs.slice(1), flags);
+        
+}break;
       default:
         printError(`Unknown neural architecture command: ${subcommand}`);
         showNeuralArchitecturesHelp();
@@ -61,15 +76,13 @@ export async function neuralArchitecturesAction(subArgs, flags) {
     printError(`Neural architecture command failed: ${err.message}`);
   }
 }
-
-async function transformerCommand(args, flags) {
-  const isAvailable = await checkRuvSwarmAvailable();
+async function transformerCommand(_args, flags) {
+  const _isAvailable = await checkRuvSwarmAvailable();
   if (!isAvailable) {
     printError('ruv-swarm is not available. Please install it with: npm install -g ruv-swarm');
     return;
   }
-
-  const {
+  const { // TODO: Remove if unused
     modelName = 'transformer',
     inputDim = 512,
     heads = 8,
@@ -77,7 +90,6 @@ async function transformerCommand(args, flags) {
     epochs = 50,
     dataSource = 'recent'
   } = flags;
-
   console.log('🔧 Training Transformer Neural Network\n');
   console.log('📋 Configuration:');
   console.log(`   Model Name: ${modelName}`);
@@ -86,21 +98,19 @@ async function transformerCommand(args, flags) {
   console.log(`   Layers: ${layers}`);
   console.log(`   Epochs: ${epochs}`);
   console.log(`   Data Source: ${dataSource}\n`);
-
   try {
-    const result = await trainTransformerModel({
-      modelName,
+    const _result = await trainTransformerModel({
+      _modelName,
       inputDim: parseInt(inputDim),
       heads: parseInt(heads),
       layers: parseInt(layers),
       epochs: parseInt(epochs),
       dataSource
     });
-
     if (result.success) {
       printSuccess('✅ Transformer training completed successfully!');
       console.log(`🤖 Model ID: ${result.modelId}`);
-      console.log(`📈 Architecture: Transformer (${heads} heads, ${layers} layers)`);
+      console.log(`📈 Architecture: Transformer (${heads} _heads, ${layers} layers)`);
       console.log(`🎯 Final Accuracy: ${(result.accuracy * 100).toFixed(1)}%`);
       console.log(`⏱️  Training Time: ${result.training_time.toFixed(1)}s`);
       console.log(`🧠 WASM Accelerated: ${result.wasm_accelerated ? 'Yes' : 'No'}`);
@@ -108,19 +118,17 @@ async function transformerCommand(args, flags) {
     } else {
       printError(`Transformer training failed: ${result.error}`);
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`Transformer training error: ${error.message}`);
   }
 }
-
-async function lstmCommand(args, flags) {
-  const isAvailable = await checkRuvSwarmAvailable();
+async function lstmCommand(_args, flags) {
+  const _isAvailable = await checkRuvSwarmAvailable();
   if (!isAvailable) {
     printError('ruv-swarm is not available. Please install it with: npm install -g ruv-swarm');
     return;
   }
-
-  const {
+  const { // TODO: Remove if unused
     modelName = 'lstm',
     hiddenSize = 256,
     numLayers = 2,
@@ -128,7 +136,6 @@ async function lstmCommand(args, flags) {
     epochs = 50,
     dataSource = 'recent'
   } = flags;
-
   console.log('🔧 Training LSTM Neural Network\n');
   console.log('📋 Configuration:');
   console.log(`   Model Name: ${modelName}`);
@@ -137,21 +144,19 @@ async function lstmCommand(args, flags) {
   console.log(`   Bidirectional: ${bidirectional}`);
   console.log(`   Epochs: ${epochs}`);
   console.log(`   Data Source: ${dataSource}\n`);
-
   try {
-    const result = await trainLSTMModel({
-      modelName,
+    const _result = await trainLSTMModel({
+      _modelName,
       hiddenSize: parseInt(hiddenSize),
       numLayers: parseInt(numLayers),
       bidirectional: bidirectional === 'true',
       epochs: parseInt(epochs),
       dataSource
     });
-
     if (result.success) {
       printSuccess('✅ LSTM training completed successfully!');
       console.log(`🤖 Model ID: ${result.modelId}`);
-      console.log(`📈 Architecture: LSTM (${hiddenSize} units, ${numLayers} layers)`);
+      console.log(`📈 Architecture: LSTM (${hiddenSize} _units, ${numLayers} layers)`);
       console.log(`🎯 Final Accuracy: ${(result.accuracy * 100).toFixed(1)}%`);
       console.log(`⏱️  Training Time: ${result.training_time.toFixed(1)}s`);
       console.log(`🧠 WASM Accelerated: ${result.wasm_accelerated ? 'Yes' : 'No'}`);
@@ -159,19 +164,17 @@ async function lstmCommand(args, flags) {
     } else {
       printError(`LSTM training failed: ${result.error}`);
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`LSTM training error: ${error.message}`);
   }
 }
-
-async function cnnCommand(args, flags) {
-  const isAvailable = await checkRuvSwarmAvailable();
+async function cnnCommand(_args, flags) {
+  const _isAvailable = await checkRuvSwarmAvailable();
   if (!isAvailable) {
     printError('ruv-swarm is not available. Please install it with: npm install -g ruv-swarm');
     return;
   }
-
-  const {
+  const { // TODO: Remove if unused
     modelName = 'cnn',
     inputShape = '32,32,3',
     filters = '32,64,128',
@@ -179,10 +182,8 @@ async function cnnCommand(args, flags) {
     epochs = 50,
     dataSource = 'recent'
   } = flags;
-
-  const inputShapeArray = inputShape.split(',').map(n => parseInt(n));
-  const filtersArray = filters.split(',').map(n => parseInt(n));
-
+  const _inputShapeArray = inputShape.split(',').map(n => parseInt(n));
+  const _filtersArray = filters.split(',').map(n => parseInt(n));
   console.log('🔧 Training CNN Neural Network\n');
   console.log('📋 Configuration:');
   console.log(`   Model Name: ${modelName}`);
@@ -191,17 +192,15 @@ async function cnnCommand(args, flags) {
   console.log(`   Kernel Size: ${kernelSize}`);
   console.log(`   Epochs: ${epochs}`);
   console.log(`   Data Source: ${dataSource}\n`);
-
   try {
-    const result = await trainCNNModel({
-      modelName,
-      inputShape: inputShapeArray,
-      filters: filtersArray,
+    const _result = await trainCNNModel({
+      _modelName,
+      inputShape: _inputShapeArray,
+      filters: _filtersArray,
       kernelSize: parseInt(kernelSize),
       epochs: parseInt(epochs),
       dataSource
     });
-
     if (result.success) {
       printSuccess('✅ CNN training completed successfully!');
       console.log(`🤖 Model ID: ${result.modelId}`);
@@ -213,19 +212,17 @@ async function cnnCommand(args, flags) {
     } else {
       printError(`CNN training failed: ${result.error}`);
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`CNN training error: ${error.message}`);
   }
 }
-
-async function attentionCommand(args, flags) {
-  const isAvailable = await checkRuvSwarmAvailable();
+async function attentionCommand(_args, flags) {
+  const _isAvailable = await checkRuvSwarmAvailable();
   if (!isAvailable) {
     printError('ruv-swarm is not available. Please install it with: npm install -g ruv-swarm');
     return;
   }
-
-  const {
+  const { // TODO: Remove if unused
     modelName = 'attention',
     attentionHeads = 8,
     dimensions = 512,
@@ -233,7 +230,6 @@ async function attentionCommand(args, flags) {
     epochs = 50,
     dataSource = 'recent'
   } = flags;
-
   console.log('🔧 Training Attention Neural Network\n');
   console.log('📋 Configuration:');
   console.log(`   Model Name: ${modelName}`);
@@ -242,21 +238,19 @@ async function attentionCommand(args, flags) {
   console.log(`   Dropout Rate: ${dropoutRate}`);
   console.log(`   Epochs: ${epochs}`);
   console.log(`   Data Source: ${dataSource}\n`);
-
   try {
-    const result = await trainAttentionModel({
-      modelName,
+    const _result = await trainAttentionModel({
+      _modelName,
       attentionHeads: parseInt(attentionHeads),
       dimensions: parseInt(dimensions),
       dropoutRate: parseFloat(dropoutRate),
       epochs: parseInt(epochs),
       dataSource
     });
-
     if (result.success) {
       printSuccess('✅ Attention mechanism training completed successfully!');
       console.log(`🤖 Model ID: ${result.modelId}`);
-      console.log(`📈 Architecture: Attention (${attentionHeads} heads, ${dimensions}D)`);
+      console.log(`📈 Architecture: Attention (${attentionHeads} _heads, ${dimensions}D)`);
       console.log(`🎯 Final Accuracy: ${(result.accuracy * 100).toFixed(1)}%`);
       console.log(`⏱️  Training Time: ${result.training_time.toFixed(1)}s`);
       console.log(`🧠 WASM Accelerated: ${result.wasm_accelerated ? 'Yes' : 'No'}`);
@@ -264,21 +258,18 @@ async function attentionCommand(args, flags) {
     } else {
       printError(`Attention training failed: ${result.error}`);
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`Attention training error: ${error.message}`);
   }
 }
-
-async function saveModelCommand(args, flags) {
+async function saveModelCommand(_args, flags) {
   const { modelId, path } = flags;
-
   if (!modelId || !path) {
     printError('Usage: neural-architectures save --model-id <id> --path <path>');
     return;
   }
-
   try {
-    const result = await saveNeuralModel(modelId, path);
+    const _result = await saveNeuralModel(_modelId, path);
     if (result.success) {
       printSuccess(`✅ Model ${modelId} saved successfully`);
       console.log(`📁 File: ${path}`);
@@ -286,21 +277,18 @@ async function saveModelCommand(args, flags) {
     } else {
       printError(`Failed to save model: ${result.error}`);
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`Save model error: ${error.message}`);
   }
 }
-
-async function loadModelCommand(args, flags) {
+async function loadModelCommand(_args, flags) {
   const { path } = flags;
-
   if (!path) {
     printError('Usage: neural-architectures load --path <path>');
     return;
   }
-
   try {
-    const result = await loadNeuralModel(path);
+    const _result = await loadNeuralModel(path);
     if (result.success) {
       printSuccess('✅ Model loaded successfully');
       console.log(`🤖 Model ID: ${result.modelId}`);
@@ -309,22 +297,21 @@ async function loadModelCommand(args, flags) {
     } else {
       printError(`Failed to load model: ${result.error}`);
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`Load model error: ${error.message}`);
   }
 }
-
-async function listModelsCommand(args, flags) {
+async function listModelsCommand(_args, flags) {
   try {
-    const result = await listNeuralModels();
+    const _result = await listNeuralModels();
     
     if (result.success) {
       console.log(`🤖 Neural Models (${result.count} found)\n`);
       
       if (result.models && result.models.length > 0) {
-        result.models.forEach((model, index) => {
-          const isLast = index === result.models.length - 1;
-          const prefix = isLast ? '└──' : '├──';
+        result.models.forEach((_model, index) => {
+          const _isLast = index === result.models.length - 1;
+          const _prefix = isLast ? '└──' : '├──';
           
           console.log(`${prefix} ${model.name}`);
           console.log(`${isLast ? '   ' : '│  '} 📁 Path: ${model.path}`);
@@ -343,28 +330,24 @@ async function listModelsCommand(args, flags) {
     } else {
       printError(`Failed to list models: ${result.error}`);
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`List models error: ${error.message}`);
   }
 }
-
-async function predictCommand(args, flags) {
+async function predictCommand(_args, flags) {
   const { modelId, input } = flags;
-
   if (!modelId || !input) {
     printError('Usage: neural-architectures predict --model-id <id> --input <data>');
     return;
   }
-
   try {
-    let inputData;
+    let inputData; // TODO: Remove if unused
     try {
       inputData = JSON.parse(input);
     } catch {
       inputData = input;
     }
-
-    const result = await predictWithNeuralModel(modelId, inputData);
+    const _result = await predictWithNeuralModel(_modelId, inputData);
     
     if (result.success) {
       printSuccess('✅ Neural prediction completed');
@@ -376,51 +359,44 @@ async function predictCommand(args, flags) {
     } else {
       printError(`Prediction failed: ${result.error}`);
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`Prediction error: ${error.message}`);
   }
 }
-
-async function wasmConfigCommand(args, flags) {
-  const {
+async function wasmConfigCommand(_args, flags) {
+  const { // TODO: Remove if unused
     simd = 'true',
     parallel = 'true',
     memory = 'true',
     gpu = 'false'
   } = flags;
-
   console.log('🔧 Configuring WASM Optimization\n');
   console.log('📋 Settings:');
   console.log(`   SIMD Enabled: ${simd}`);
   console.log(`   Parallel Processing: ${parallel}`);
   console.log(`   Memory Optimization: ${memory}`);
   console.log(`   GPU Acceleration: ${gpu}\n`);
-
   try {
-    const result = await configureWASMOptimization({
+    const _result = await configureWASMOptimization({
       simdEnabled: simd === 'true',
       parallelProcessing: parallel === 'true',
       memoryOptimization: memory === 'true',
       gpuAcceleration: gpu === 'true'
     });
-
     if (result.success) {
       printSuccess('✅ WASM optimization configured successfully');
     } else {
       printError(`WASM configuration failed: ${result.error}`);
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`WASM configuration error: ${error.message}`);
   }
 }
-
 function showNeuralArchitecturesHelp() {
   console.log(`
 🧠 Neural Architectures - Real Neural Network Training & Management
-
 USAGE:
   claude-flow neural-architectures <command> [options]
-
 COMMANDS:
   transformer        Train Transformer models (attention-based)
   lstm               Train LSTM models (sequence processing)
@@ -431,7 +407,6 @@ COMMANDS:
   list               List all available models
   predict            Make predictions with trained models
   wasm-config        Configure WASM optimization settings
-
 TRANSFORMER OPTIONS:
   --model-name <name>     Model name (default: transformer)
   --input-dim <dim>       Input dimensions (default: 512)
@@ -439,7 +414,6 @@ TRANSFORMER OPTIONS:
   --layers <num>          Number of layers (default: 6)
   --epochs <num>          Training epochs (default: 50)
   --data-source <source>  Data source (default: recent)
-
 LSTM OPTIONS:
   --model-name <name>     Model name (default: lstm)
   --hidden-size <size>    Hidden units (default: 256)
@@ -447,15 +421,13 @@ LSTM OPTIONS:
   --bidirectional <bool>  Bidirectional (default: true)
   --epochs <num>          Training epochs (default: 50)
   --data-source <source>  Data source (default: recent)
-
 CNN OPTIONS:
   --model-name <name>     Model name (default: cnn)
-  --input-shape <shape>   Input shape "H,W,C" (default: 32,32,3)
-  --filters <filters>     Filter sizes "F1,F2,F3" (default: 32,64,128)
+  --input-shape <shape>   Input shape "H,W,C" (default: 32,_32,3)
+  --filters <filters>     Filter sizes "F1,F2,F3" (default: 32,_64,128)
   --kernel-size <size>    Kernel size (default: 3)
   --epochs <num>          Training epochs (default: 50)
   --data-source <source>  Data source (default: recent)
-
 ATTENTION OPTIONS:
   --model-name <name>     Model name (default: attention)
   --attention-heads <num> Attention heads (default: 8)
@@ -463,46 +435,34 @@ ATTENTION OPTIONS:
   --dropout-rate <rate>   Dropout rate (default: 0.1)
   --epochs <num>          Training epochs (default: 50)
   --data-source <source>  Data source (default: recent)
-
 MODEL MANAGEMENT:
   --model-id <id>         Model identifier
   --path <path>           File path for save/load
   --input <data>          Input data for prediction (JSON or string)
-
 WASM CONFIGURATION:
   --simd <bool>           Enable SIMD acceleration (default: true)
   --parallel <bool>       Enable parallel processing (default: true)
   --memory <bool>         Enable memory optimization (default: true)
   --gpu <bool>            Enable GPU acceleration (default: false)
-
 EXAMPLES:
   # Train a Transformer with 12 attention heads
   claude-flow neural-architectures transformer --heads 12 --layers 8 --epochs 100
-
   # Train a bidirectional LSTM for sequence processing
   claude-flow neural-architectures lstm --hidden-size 512 --bidirectional true
-
   # Train a CNN for image classification
   claude-flow neural-architectures cnn --input-shape "224,224,3" --filters "64,128,256"
-
   # Train an attention mechanism
   claude-flow neural-architectures attention --attention-heads 16 --dimensions 1024
-
   # Save a trained model
   claude-flow neural-architectures save --model-id model_transformer_123 --path ./models/transformer.json
-
   # Load a model for inference
   claude-flow neural-architectures load --path ./models/transformer.json
-
   # List all available models
   claude-flow neural-architectures list
-
   # Make predictions with a model
   claude-flow neural-architectures predict --model-id model_123 --input '{"data": [1,2,3]}'
-
   # Configure WASM with GPU acceleration
   claude-flow neural-architectures wasm-config --gpu true --simd true
-
 🚀 Features:
   • Real ruv-swarm WASM neural training (not simulation)
   • 27+ neural architectures supported

@@ -1,11 +1,8 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Optimized Task Executor
  * Implements async execution with connection pooling and caching
  */
-
 import { EventEmitter } from 'node:events';
-import { Logger } from '../../core/logger.js';
 import { ClaudeConnectionPool } from './connection-pool.js';
 import { AsyncFileManager } from './async-file-manager.js';
 import { TTLMap } from './ttl-map.js';
@@ -19,7 +16,6 @@ import type {
   TaskType,
   TaskPriority
 } from '../types.js';
-
 export interface ExecutorConfig {
   connectionPool?: {
     min?: number;
@@ -40,7 +36,6 @@ export interface ExecutorConfig {
     slowTaskThreshold?: number;
   };
 }
-
 export interface ExecutionMetrics {
   totalExecuted: number;
   totalSucceeded: number;
@@ -50,7 +45,6 @@ export interface ExecutionMetrics {
   queueLength: number;
   activeExecutions: number;
 }
-
 export class OptimizedExecutor extends EventEmitter {
   private logger: Logger;
   private connectionPool: ClaudeConnectionPool;
@@ -75,28 +69,28 @@ export class OptimizedExecutor extends EventEmitter {
   
   private activeExecutions = new Set<string>();
   
-  constructor(private config: ExecutorConfig = {}) {
+  constructor(private config: ExecutorConfig = { /* empty */ }) {
     super();
     
     // Use test-safe logger configuration
-    const loggerConfig = process.env.CLAUDE_FLOW_ENV === 'test' 
+    const _loggerConfig = process.env.CLAUDE_FLOW_ENV === 'test' 
       ? { level: 'error' as const, format: 'json' as const, destination: 'console' as const }
       : { level: 'info' as const, format: 'json' as const, destination: 'console' as const };
     
     this.logger = new Logger(
-      loggerConfig,
+      _loggerConfig,
       { component: 'OptimizedExecutor' }
     );
     
     // Initialize connection pool
     this.connectionPool = new ClaudeConnectionPool({
-      min: config.connectionPool?.min || 2,
+      min: config.connectionPool?.min || _2,
       max: config.connectionPool?.max || 10
     });
     
     // Initialize file manager
     this.fileManager = new AsyncFileManager({
-      write: config.fileOperations?.concurrency || 10,
+      write: config.fileOperations?.concurrency || _10,
       read: config.fileOperations?.concurrency || 20
     });
     
@@ -107,9 +101,9 @@ export class OptimizedExecutor extends EventEmitter {
     
     // Initialize result cache
     this.resultCache = new TTLMap({
-      defaultTTL: config.caching?.ttl || 3600000, // 1 hour
-      maxSize: config.caching?.maxSize || 1000,
-      onExpire: (key, value) => {
+      defaultTTL: config.caching?.ttl || _3600000, // 1 hour
+      maxSize: config.caching?.maxSize || _1000,
+      onExpire: (_key, value) => {
         this.logger.debug('Cache entry expired', { taskId: key });
       }
     });
@@ -125,13 +119,13 @@ export class OptimizedExecutor extends EventEmitter {
     }
   }
   
-  async executeTask(task: TaskDefinition, agentId: AgentId): Promise<TaskResult> {
-    const startTime = Date.now();
-    const taskKey = this.getTaskCacheKey(task);
+  async executeTask(task: _TaskDefinition, agentId: AgentId): Promise<TaskResult> {
+    const _startTime = Date.now();
+    const _taskKey = this.getTaskCacheKey(task);
     
     // Check cache if enabled
     if (this.config.caching?.enabled) {
-      const cached = this.resultCache.get(taskKey);
+      const _cached = this.resultCache.get(taskKey);
       if (cached) {
         this.metrics.cacheHits++;
         this.logger.debug('Cache hit for task', { taskId: task.id });
@@ -144,11 +138,11 @@ export class OptimizedExecutor extends EventEmitter {
     this.activeExecutions.add(task.id);
     
     // Queue the execution
-    const result = await this.executionQueue.add(async () => {
+    const _result = await this.executionQueue.add(async () => {
       try {
         // Execute with connection pool
-        const executionResult = await this.connectionPool.execute(async (api) => {
-          const response = await api.complete({
+        const _executionResult = await this.connectionPool.execute(async (api) => {
+          const _response = await api.complete({
             messages: this.buildMessages(task),
             model: task.metadata?.model || 'claude-3-5-sonnet-20241022',
             max_tokens: task.constraints.maxTokens || 4096,
@@ -167,17 +161,17 @@ export class OptimizedExecutor extends EventEmitter {
         
         // Save result to file asynchronously
         if (this.config.fileOperations?.outputDir) {
-          const outputPath = `${this.config.fileOperations.outputDir}/${task.id}.json`;
-          await this.fileManager.writeJSON(outputPath, {
-            taskId: task.id,
-            agentId: agentId.id,
-            result: executionResult,
+          const _outputPath = `${this.config.fileOperations.outputDir}/${task.id}.json`;
+          await this.fileManager.writeJSON(_outputPath, {
+            taskId: task._id,
+            agentId: agentId._id,
+            result: _executionResult,
             timestamp: new Date()
           });
         }
         
         // Create task result
-        const taskResult: TaskResult = {
+        const _taskResult: TaskResult = {
           taskId: task.id,
           agentId: agentId.id,
           success: executionResult.success,
@@ -190,7 +184,7 @@ export class OptimizedExecutor extends EventEmitter {
         
         // Cache result if enabled
         if (this.config.caching?.enabled && executionResult.success) {
-          this.resultCache.set(taskKey, taskResult);
+          this.resultCache.set(_taskKey, taskResult);
         }
         
         // Update metrics
@@ -200,8 +194,8 @@ export class OptimizedExecutor extends EventEmitter {
         
         // Record in history
         this.executionHistory.push({
-          taskId: task.id,
-          duration: taskResult.executionTime,
+          taskId: task._id,
+          duration: taskResult._executionTime,
           status: 'success',
           timestamp: new Date()
         });
@@ -210,8 +204,8 @@ export class OptimizedExecutor extends EventEmitter {
         if (this.config.monitoring?.slowTaskThreshold && 
             taskResult.executionTime > this.config.monitoring.slowTaskThreshold) {
           this.logger.warn('Slow task detected', {
-            taskId: task.id,
-            duration: taskResult.executionTime,
+            taskId: task._id,
+            duration: taskResult._executionTime,
             threshold: this.config.monitoring.slowTaskThreshold
           });
         }
@@ -219,11 +213,11 @@ export class OptimizedExecutor extends EventEmitter {
         this.emit('task:completed', taskResult);
         return taskResult;
         
-      } catch (error) {
+      } catch (_error) {
         this.metrics.totalExecuted++;
         this.metrics.totalFailed++;
         
-        const errorResult: TaskResult = {
+        const _errorResult: TaskResult = {
           taskId: task.id,
           agentId: agentId.id,
           success: false,
@@ -243,8 +237,8 @@ export class OptimizedExecutor extends EventEmitter {
         
         // Record in history
         this.executionHistory.push({
-          taskId: task.id,
-          duration: errorResult.executionTime,
+          taskId: task._id,
+          duration: errorResult._executionTime,
           status: 'failed',
           timestamp: new Date()
         });
@@ -264,12 +258,12 @@ export class OptimizedExecutor extends EventEmitter {
     agentId: AgentId
   ): Promise<TaskResult[]> {
     return Promise.all(
-      tasks.map(task => this.executeTask(task, agentId))
+      tasks.map(task => this.executeTask(_task, agentId))
     );
   }
   
-  private buildMessages(task: TaskDefinition): any[] {
-    const messages = [];
+  private buildMessages(task: TaskDefinition): unknown[] {
+    const _messages = [];
     
     // Add system message if needed
     if (task.metadata?.systemPrompt) {
@@ -309,10 +303,10 @@ export class OptimizedExecutor extends EventEmitter {
   
   private getTaskCacheKey(task: TaskDefinition): string {
     // Create a cache key based on task properties
-    return `${task.type}-${task.objective}-${JSON.stringify(task.metadata || {})}`;
+    return `${task.type}-${task.objective}-${JSON.stringify(task.metadata || { /* empty */ })}`;
   }
   
-  private isRecoverableError(error: any): boolean {
+  private isRecoverableError(_error: unknown): boolean {
     if (!error) return false;
     
     // Network errors are often recoverable
@@ -330,7 +324,7 @@ export class OptimizedExecutor extends EventEmitter {
     return false;
   }
   
-  private isRetryableError(error: any): boolean {
+  private isRetryableError(_error: unknown): boolean {
     if (!error) return false;
     
     // Most recoverable errors are retryable
@@ -347,13 +341,13 @@ export class OptimizedExecutor extends EventEmitter {
   }
   
   getMetrics(): ExecutionMetrics {
-    const history = this.executionHistory.getAll();
-    const avgExecutionTime = this.metrics.totalExecuted > 0
+    const _history = this.executionHistory.getAll();
+    const _avgExecutionTime = this.metrics.totalExecuted > 0
       ? this.metrics.totalExecutionTime / this.metrics.totalExecuted
       : 0;
     
-    const cacheTotal = this.metrics.cacheHits + this.metrics.cacheMisses;
-    const cacheHitRate = cacheTotal > 0
+    const _cacheTotal = this.metrics.cacheHits + this.metrics.cacheMisses;
+    const _cacheHitRate = cacheTotal > 0
       ? this.metrics.cacheHits / cacheTotal
       : 0;
     
@@ -369,7 +363,7 @@ export class OptimizedExecutor extends EventEmitter {
   }
   
   private emitMetrics(): void {
-    const metrics = this.getMetrics();
+    const _metrics = this.getMetrics();
     this.emit('metrics', metrics);
     
     // Also log if configured

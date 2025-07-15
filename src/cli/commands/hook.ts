@@ -1,5 +1,4 @@
 import { spawn } from 'child_process';
-import { Logger } from '../../core/logger.js';
 import type {
   PreTaskOptions,
   PostTaskOptions,
@@ -17,20 +16,18 @@ import type {
   MemorySyncOptions,
   TelemetryOptions
 } from './hook-types.js';
-
-const logger = new Logger({
+const _logger = new Logger({
   level: 'info',
   format: 'text',
   destination: 'console'
 }, { prefix: 'Hook' });
-
 // Helper function to build command arguments
-function buildArgs(hookType: string, options: Record<string, any>): string[] {
-  const args = [hookType];
+function buildArgs(hookType: string, options: Record<string, unknown>): string[] {
+  const _args = [hookType];
   
-  Object.entries(options).forEach(([key, value]) => {
+  Object.entries(options).forEach(([_key, value]) => {
     if (value !== undefined && value !== null) {
-      const flagName = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+      const _flagName = key.replace(/([A-Z])/g, '-$1').toLowerCase();
       
       if (typeof value === 'boolean') {
         if (value) {
@@ -46,16 +43,15 @@ function buildArgs(hookType: string, options: Record<string, any>): string[] {
   
   return args;
 }
-
 // Hook subcommand handlers
-const hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
+const _hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
   'pre-task': async (args: string[]) => {
-    const options = parseArgs<PreTaskOptions>(args);
+    const _options = parseArgs<PreTaskOptions>(args);
     await executeHook('pre-task', options);
   },
   
   'post-task': async (args: string[]) => {
-    const options = parseArgs<PostTaskOptions>(args);
+    const _options = parseArgs<PostTaskOptions>(args);
     if (!options.taskId) {
       throw new Error('--task-id is required for post-task hook');
     }
@@ -63,7 +59,7 @@ const hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
   },
   
   'pre-edit': async (args: string[]) => {
-    const options = parseArgs<PreEditOptions>(args);
+    const _options = parseArgs<PreEditOptions>(args);
     if (!options.file) {
       throw new Error('--file is required for pre-edit hook');
     }
@@ -71,7 +67,7 @@ const hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
   },
   
   'post-edit': async (args: string[]) => {
-    const options = parseArgs<PostEditOptions>(args);
+    const _options = parseArgs<PostEditOptions>(args);
     if (!options.file) {
       throw new Error('--file is required for post-edit hook');
     }
@@ -79,7 +75,7 @@ const hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
   },
   
   'pre-command': async (args: string[]) => {
-    const options = parseArgs<PreCommandOptions>(args);
+    const _options = parseArgs<PreCommandOptions>(args);
     if (!options.command) {
       throw new Error('--command is required for pre-command hook');
     }
@@ -87,7 +83,7 @@ const hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
   },
   
   'post-command': async (args: string[]) => {
-    const options = parseArgs<PostCommandOptions>(args);
+    const _options = parseArgs<PostCommandOptions>(args);
     if (!options.command) {
       throw new Error('--command is required for post-command hook');
     }
@@ -95,17 +91,17 @@ const hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
   },
   
   'session-start': async (args: string[]) => {
-    const options = parseArgs<SessionStartOptions>(args);
+    const _options = parseArgs<SessionStartOptions>(args);
     await executeHook('session-start', options);
   },
   
   'session-end': async (args: string[]) => {
-    const options = parseArgs<SessionEndOptions>(args);
+    const _options = parseArgs<SessionEndOptions>(args);
     await executeHook('session-end', options);
   },
   
   'session-restore': async (args: string[]) => {
-    const options = parseArgs<SessionRestoreOptions>(args);
+    const _options = parseArgs<SessionRestoreOptions>(args);
     if (!options.sessionId) {
       throw new Error('--session-id is required for session-restore hook');
     }
@@ -113,7 +109,7 @@ const hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
   },
   
   'pre-search': async (args: string[]) => {
-    const options = parseArgs<PreSearchOptions>(args);
+    const _options = parseArgs<PreSearchOptions>(args);
     if (!options.query) {
       throw new Error('--query is required for pre-search hook');
     }
@@ -121,7 +117,7 @@ const hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
   },
   
   'notification': async (args: string[]) => {
-    const options = parseArgs<NotificationOptions>(args);
+    const _options = parseArgs<NotificationOptions>(args);
     if (!options.message) {
       throw new Error('--message is required for notification hook');
     }
@@ -129,34 +125,33 @@ const hookHandlers: Record<string, (args: string[]) => Promise<void>> = {
   },
   
   'performance': async (args: string[]) => {
-    const options = parseArgs<PerformanceOptions>(args);
+    const _options = parseArgs<PerformanceOptions>(args);
     await executeHook('performance', options);
   },
   
   'memory-sync': async (args: string[]) => {
-    const options = parseArgs<MemorySyncOptions>(args);
+    const _options = parseArgs<MemorySyncOptions>(args);
     await executeHook('memory-sync', options);
   },
   
   'telemetry': async (args: string[]) => {
-    const options = parseArgs<TelemetryOptions>(args);
+    const _options = parseArgs<TelemetryOptions>(args);
     if (!options.event) {
       throw new Error('--event is required for telemetry hook');
     }
     await executeHook('telemetry', options);
   }
 };
-
 // Parse command line arguments
-function parseArgs<T extends Record<string, any>>(args: string[]): T {
-  const options: Record<string, any> = {};
+function parseArgs<T extends Record<string, unknown>>(args: string[]): T {
+  const _options: Record<string, unknown> = { /* empty */ };
   
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
+  for (let _i = 0; i < args.length; i++) {
+    const _arg = args[i];
     
     if (arg.startsWith('--')) {
-      const key = arg.slice(2).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-      const nextArg = args[i + 1];
+      const _key = arg.slice(2).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+      const _nextArg = args[i + 1];
       
       if (!nextArg || nextArg.startsWith('--')) {
         // Boolean flag
@@ -171,19 +166,18 @@ function parseArgs<T extends Record<string, any>>(args: string[]): T {
   
   return options as T;
 }
-
 // Execute hook with ruv-swarm
-async function executeHook(hookType: string, options: Record<string, any>): Promise<void> {
-  const args = buildArgs(hookType, options);
+async function executeHook(hookType: string, options: Record<string, unknown>): Promise<void> {
+  const _args = buildArgs(_hookType, options);
   
   logger.debug(`Executing hook: ruv-swarm hook ${args.join(' ')}`);
   
-  const child = spawn('npx', ['ruv-swarm', 'hook', ...args], {
+  const _child = spawn('npx', ['ruv-swarm', 'hook', ...args], {
     stdio: 'inherit',
     shell: true
   });
   
-  await new Promise<void>((resolve, reject) => {
+  await new Promise<void>((_resolve, reject) => {
     child.on('exit', (code) => {
       if (code === 0) {
         resolve();
@@ -198,9 +192,8 @@ async function executeHook(hookType: string, options: Record<string, any>): Prom
     });
   });
 }
-
 // Main hook command handler
-export const hookCommand = {
+export const _hookCommand = {
   name: 'hook',
   description: 'Execute ruv-swarm hooks for agent coordination',
   action: async ({ args }: HookCommandOptions): Promise<void> => {
@@ -210,8 +203,8 @@ export const hookCommand = {
         return;
       }
       
-      const subcommand = args[0];
-      const handler = hookHandlers[subcommand];
+      const _subcommand = args[0];
+      const _handler = hookHandlers[subcommand];
       
       if (!handler) {
         logger.error(`Unknown hook subcommand: ${subcommand}`);
@@ -221,21 +214,18 @@ export const hookCommand = {
       
       await handler(args.slice(1));
       
-    } catch (error) {
+    } catch (_error) {
       logger.error('Hook command error:', error);
       throw error;
     }
   }
 };
-
 // Show help for hook commands
 function showHookHelp(): void {
   console.log(`
 Claude Flow Hook Commands
 ========================
-
 Available hooks:
-
   pre-task      - Run before starting a task
     --description <desc>      Task description
     --auto-spawn-agents       Auto-spawn agents (default: true)
@@ -243,80 +233,65 @@ Available hooks:
     --estimated-minutes <n>   Estimated duration
     --requires-research       Task requires research
     --requires-testing        Task requires testing
-
   post-task     - Run after completing a task
     --task-id <id>           Task ID (required)
     --analyze-performance    Analyze performance metrics
     --generate-report        Generate completion report
-
   pre-edit      - Run before editing a file
     --file <path>            File path (required)
     --operation <op>         Operation type: read|write|edit|delete
     --validate               Validate file before edit
-
   post-edit     - Run after editing a file
     --file <path>            File path (required)
     --memory-key <key>       Store in memory with key
     --format                 Auto-format code
     --analyze                Analyze changes
-
   pre-command   - Run before executing a command
     --command <cmd>          Command to execute (required)
     --validate               Validate command safety
     --sandbox                Run in sandbox mode
-
   post-command  - Run after executing a command
     --command <cmd>          Command executed (required)
     --exit-code <code>       Command exit code
     --duration <ms>          Execution duration
-
   session-start - Run at session start
     --session-id <id>        Session identifier
     --load-previous          Load previous session data
     --auto-restore           Auto-restore context
-
   session-end   - Run at session end
     --session-id <id>        Session identifier
     --export-metrics         Export performance metrics
     --generate-summary       Generate session summary
     --save-to <path>         Save session data to path
-
   session-restore - Restore a previous session
     --session-id <id>        Session ID to restore (required)
     --load-memory            Load memory state
     --load-agents            Load agent configuration
     --load-tasks             Load task list
-
   pre-search    - Run before searching
     --query <text>           Search query (required)
     --cache-results          Cache search results
     --max-results <n>        Maximum results to return
-
   notification  - Send a notification
     --message <text>         Notification message (required)
     --level <level>          Message level: info|warning|error
     --telemetry              Include in telemetry
     --persist                Persist notification
-
   performance   - Track performance metrics
     --operation <name>       Operation name
     --duration <ms>          Operation duration
     --metrics <json>         Performance metrics as JSON
-
   memory-sync   - Synchronize memory state
     --namespace <name>       Memory namespace
     --direction <dir>        Sync direction: push|pull|sync
     --target <location>      Target location for sync
-
   telemetry     - Send telemetry data
     --event <name>           Event name (required)
     --data <json>            Event data as JSON
     --tags <list>            Comma-separated tags
-
 Common options:
   --verbose                  Show detailed output
   --metadata <json>          Additional metadata as JSON
-
 Examples:
   claude hook pre-task --description "Build REST API" --complexity high
   claude hook post-edit --file src/index.js --memory-key "api/implementation"
@@ -326,9 +301,8 @@ Examples:
   claude hook telemetry --event "task-completed" --data '{"taskId":"123"}'
 `);
 }
-
 // Export hook subcommands for better CLI integration
-export const hookSubcommands = [
+export const _hookSubcommands = [
   'pre-task',
   'post-task',
   'pre-edit',

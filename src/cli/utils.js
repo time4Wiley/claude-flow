@@ -1,37 +1,30 @@
 // utils.js - Shared CLI utility functions
-
 import { Deno, existsSync } from './node-compat.js';
-
 // Color formatting functions
 export function printSuccess(message) {
   console.log(`✅ ${message}`);
 }
-
 export function printError(message) {
   console.log(`❌ ${message}`);
 }
-
 export function printWarning(message) {
   console.log(`⚠️  ${message}`);
 }
-
 export function printInfo(message) {
   console.log(`ℹ️  ${message}`);
 }
-
 // Command validation helpers
-export function validateArgs(args, minLength, usage) {
+export function validateArgs(_args, _minLength, usage) {
   if (args.length < minLength) {
     printError(`Usage: ${usage}`);
     return false;
   }
   return true;
 }
-
 // File system helpers
 export async function ensureDirectory(path) {
   try {
-    await Deno.mkdir(path, { recursive: true });
+    await Deno.mkdir(_path, { recursive: true });
     return true;
   } catch (err) {
     if (err.code !== 'EEXIST') {
@@ -40,7 +33,6 @@ export async function ensureDirectory(path) {
     return true;
   }
 }
-
 export async function fileExists(path) {
   try {
     await Deno.stat(path);
@@ -49,34 +41,29 @@ export async function fileExists(path) {
     return false;
   }
 }
-
 // JSON helpers
-export async function readJsonFile(path, defaultValue = {}) {
+export async function readJsonFile(_path, defaultValue = { /* empty */ }) {
   try {
-    const content = await Deno.readTextFile(path);
+    const _content = await Deno.readTextFile(path);
     return JSON.parse(content);
   } catch {
     return defaultValue;
   }
 }
-
-export async function writeJsonFile(path, data) {
-  await Deno.writeTextFile(path, JSON.stringify(data, null, 2));
+export async function writeJsonFile(_path, data) {
+  await Deno.writeTextFile(_path, JSON.stringify(_data, null, 2));
 }
-
 // String helpers
 export function formatTimestamp(timestamp) {
   return new Date(timestamp).toLocaleString();
 }
-
-export function truncateString(str, length = 100) {
-  return str.length > length ? str.substring(0, length) + '...' : str;
+export function truncateString(_str, length = 100) {
+  return str.length > length ? str.substring(_0, length) + '...' : str;
 }
-
 export function formatBytes(bytes) {
-  const units = ['B', 'KB', 'MB', 'GB'];
-  let size = bytes;
-  let unitIndex = 0;
+  const _units = ['B', 'KB', 'MB', 'GB'];
+  let _size = bytes;
+  let _unitIndex = 0;
   
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
@@ -85,18 +72,17 @@ export function formatBytes(bytes) {
   
   return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
-
 // Command execution helpers
 export function parseFlags(args) {
-  const flags = {};
-  const filteredArgs = [];
+  const _flags = { /* empty */ };
+  const _filteredArgs = [];
   
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
+  for (let _i = 0; i < args.length; i++) {
+    const _arg = args[i];
     
     if (arg.startsWith('--')) {
-      const flagName = arg.substring(2);
-      const nextArg = args[i + 1];
+      const _flagName = arg.substring(2);
+      const _nextArg = args[i + 1];
       
       if (nextArg && !nextArg.startsWith('--')) {
         flags[flagName] = nextArg;
@@ -106,7 +92,7 @@ export function parseFlags(args) {
       }
     } else if (arg.startsWith('-') && arg.length > 1) {
       // Short flags
-      const shortFlags = arg.substring(1);
+      const _shortFlags = arg.substring(1);
       for (const flag of shortFlags) {
         flags[flag] = true;
       }
@@ -117,9 +103,8 @@ export function parseFlags(args) {
   
   return { flags, args: filteredArgs };
 }
-
 // Process execution helpers
-export async function runCommand(command, args = [], options = {}) {
+export async function runCommand(_command, args = [], options = { /* empty */ }) {
   try {
     // Check if we're in Node.js or Deno environment
     if (typeof process !== 'undefined' && process.versions && process.versions.node) {
@@ -128,14 +113,14 @@ export async function runCommand(command, args = [], options = {}) {
       const { promisify } = await import('util');
       
       return new Promise((resolve) => {
-        const child = spawn(command, args, {
+        const _child = spawn(_command, _args, {
           stdio: ['pipe', 'pipe', 'pipe'],
           shell: true,
           ...options
         });
         
-        let stdout = '';
-        let stderr = '';
+        let _stdout = '';
+        let _stderr = '';
         
         child.stdout?.on('data', (data) => {
           stdout += data.toString();
@@ -147,9 +132,9 @@ export async function runCommand(command, args = [], options = {}) {
         
         child.on('close', (code) => {
           resolve({
-            success: code === 0,
-            code: code || 0,
-            stdout: stdout,
+            success: code === _0,
+            code: code || _0,
+            stdout: _stdout,
             stderr: stderr
           });
         });
@@ -157,7 +142,7 @@ export async function runCommand(command, args = [], options = {}) {
         child.on('error', (err) => {
           resolve({
             success: false,
-            code: -1,
+            code: -_1,
             stdout: '',
             stderr: err.message
           });
@@ -165,12 +150,12 @@ export async function runCommand(command, args = [], options = {}) {
       });
     } else {
       // Deno environment
-      const cmd = new Deno.Command(command, {
-        args,
+      const _cmd = new Deno.Command(_command, {
+        _args,
         ...options
       });
       
-      const result = await cmd.output();
+      const _result = await cmd.output();
       
       return {
         success: result.code === 0,
@@ -188,10 +173,9 @@ export async function runCommand(command, args = [], options = {}) {
     };
   }
 }
-
 // Configuration helpers
 export async function loadConfig(path = 'claude-flow.config.json') {
-  const defaultConfig = {
+  const _defaultConfig = {
     terminal: {
       poolSize: 10,
       recycleAfter: 20,
@@ -209,42 +193,36 @@ export async function loadConfig(path = 'claude-flow.config.json') {
   };
   
   try {
-    const content = await Deno.readTextFile(path);
+    const _content = await Deno.readTextFile(path);
     return { ...defaultConfig, ...JSON.parse(content) };
   } catch {
     return defaultConfig;
   }
 }
-
-export async function saveConfig(config, path = 'claude-flow.config.json') {
-  await writeJsonFile(path, config);
+export async function saveConfig(_config, path = 'claude-flow.config.json') {
+  await writeJsonFile(_path, config);
 }
-
 // ID generation
 export function generateId(prefix = '') {
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substr(2, 9);
+  const _timestamp = Date.now();
+  const _random = Math.random().toString(36).substr(_2, 9);
   return prefix ? `${prefix}-${timestamp}-${random}` : `${timestamp}-${random}`;
 }
-
 // Array helpers
-export function chunk(array, size) {
-  const chunks = [];
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size));
+export function chunk(_array, size) {
+  const _chunks = [];
+  for (let _i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(_i, i + size));
   }
   return chunks;
 }
-
 // Environment helpers
-export function getEnvVar(name, defaultValue = null) {
+export function getEnvVar(_name, defaultValue = null) {
   return Deno.env.get(name) ?? defaultValue;
 }
-
-export function setEnvVar(name, value) {
-  Deno.env.set(name, value);
+export function setEnvVar(_name, value) {
+  Deno.env.set(_name, value);
 }
-
 // Validation helpers
 export function isValidJson(str) {
   try {
@@ -254,7 +232,6 @@ export function isValidJson(str) {
     return false;
   }
 }
-
 export function isValidUrl(str) {
   try {
     new URL(str);
@@ -263,25 +240,21 @@ export function isValidUrl(str) {
     return false;
   }
 }
-
 // Progress and status helpers
-export function showProgress(current, total, message = '') {
-  const percentage = Math.round((current / total) * 100);
-  const bar = '█'.repeat(Math.round(percentage / 5)) + '░'.repeat(20 - Math.round(percentage / 5));
+export function showProgress(_current, _total, message = '') {
+  const _percentage = Math.round((current / total) * 100);
+  const _bar = '█'.repeat(Math.round(percentage / 5)) + '░'.repeat(20 - Math.round(percentage / 5));
   console.log(`\r${bar} ${percentage}% ${message}`);
 }
-
 export function clearLine() {
-  console.log('\r\x1b[K');
+  console.log('\rx1b[K');
 }
-
 // Async helpers
 export function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(_resolve, ms));
 }
-
-export async function retry(fn, maxAttempts = 3, delay = 1000) {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+export async function retry(_fn, maxAttempts = _3, delay = 1000) {
+  for (let _attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       return await fn();
     } catch (err) {
@@ -292,27 +265,26 @@ export async function retry(fn, maxAttempts = 3, delay = 1000) {
     }
   }
 }
-
 // Claude Flow MCP integration helpers  
-export async function callRuvSwarmMCP(tool, params = {}) {
+export async function callRuvSwarmMCP(_tool, params = { /* empty */ }) {
   try {
     // First try real ruv-swarm MCP server
-    const tempFile = `/tmp/mcp_request_${Date.now()}.json`;
-    const tempScript = `/tmp/mcp_script_${Date.now()}.sh`;
+    const _tempFile = `/tmp/mcp_request_${Date.now()}.json`;
+    const _tempScript = `/tmp/mcp_script_${Date.now()}.sh`;
     
     // Create JSON-RPC messages for ruv-swarm MCP
-    const initMessage = {
+    const _initMessage = {
       jsonrpc: '2.0',
       id: 1,
       method: 'initialize',
       params: {
         protocolVersion: '2024-11-05',
-        capabilities: { tools: {}, resources: {} },
+        capabilities: { tools: { /* empty */ }, resources: { /* empty */ } },
         clientInfo: { name: 'claude-flow-cli', version: '2.0.0' }
       }
     };
     
-    const toolMessage = {
+    const _toolMessage = {
       jsonrpc: '2.0',
       id: 2,
       method: 'tools/call',
@@ -323,17 +295,17 @@ export async function callRuvSwarmMCP(tool, params = {}) {
     };
     
     // Write messages to temp file
-    const messages = JSON.stringify(initMessage) + '\n' + JSON.stringify(toolMessage);
-    await Deno.writeTextFile(tempFile, messages);
+    const _messages = JSON.stringify(initMessage) + '\n' + JSON.stringify(toolMessage);
+    await Deno.writeTextFile(_tempFile, messages);
     
     // Create a script that feeds the file to the REAL ruv-swarm MCP server
-    const script = `#!/bin/bash
+    const _script = `#!/bin/bash
 timeout 30s npx ruv-swarm mcp start --stdio < "${tempFile}" 2>/dev/null | tail -1
 `;
-    await Deno.writeTextFile(tempScript, script);
-    await Deno.chmod(tempScript, 0o755);
+    await Deno.writeTextFile(_tempScript, script);
+    await Deno.chmod(_tempScript, 0o755);
     
-    const result = await runCommand('bash', [tempScript], {
+    const _result = await runCommand('bash', [tempScript], {
       stdout: 'piped',
       stderr: 'piped'
     });
@@ -348,9 +320,9 @@ timeout 30s npx ruv-swarm mcp start --stdio < "${tempFile}" 2>/dev/null | tail -
     
     if (result.success && result.stdout.trim()) {
       try {
-        const response = JSON.parse(result.stdout.trim());
+        const _response = JSON.parse(result.stdout.trim());
         if (response.result && response.result.content) {
-          const toolResult = JSON.parse(response.result.content[0].text);
+          const _toolResult = JSON.parse(response.result.content[0].text);
           return toolResult;
         }
       } catch (parseError) {
@@ -403,30 +375,29 @@ timeout 30s npx ruv-swarm mcp start --stdio < "${tempFile}" 2>/dev/null | tail -
     };
   }
 }
-
 // Direct ruv-swarm neural training (real WASM implementation)
-export async function callRuvSwarmDirectNeural(params = {}) {
+export async function callRuvSwarmDirectNeural(params = { /* empty */ }) {
   try {
-    const modelName = params.model || 'general';
-    const epochs = params.epochs || 50;
-    const dataSource = params.data || 'recent';
+    const _modelName = params.model || 'general';
+    const _epochs = params.epochs || 50;
+    const _dataSource = params.data || 'recent';
     
     console.log('🧠 Using REAL ruv-swarm WASM neural training...');
     console.log(`🚀 Executing: npx ruv-swarm neural train --model ${modelName} --iterations ${epochs} --data-source ${dataSource}`);
     console.log('📺 LIVE TRAINING OUTPUT:\n');
     
     // Use a different approach to show live output - spawn with stdio inheritance
-    let result;
+    let result; // TODO: Remove if unused
     if (typeof process !== 'undefined' && process.versions && process.versions.node) {
       // Node.js environment - use spawn with stdio inherit
       const { spawn } = await import('child_process');
       
       result = await new Promise((resolve) => {
-        const child = spawn('npx', [
+        const _child = spawn('npx', [
           'ruv-swarm', 
           'neural', 
           'train',
-          '--model', modelName,
+          '--model', _modelName,
           '--iterations', epochs.toString(),
           '--data-source', dataSource,
           '--output-format', 'json'
@@ -437,8 +408,8 @@ export async function callRuvSwarmDirectNeural(params = {}) {
         
         child.on('close', (code) => {
           resolve({
-            success: code === 0,
-            code: code || 0,
+            success: code === _0,
+            code: code || _0,
             stdout: '', // Not captured when using inherit
             stderr: ''
           });
@@ -447,7 +418,7 @@ export async function callRuvSwarmDirectNeural(params = {}) {
         child.on('error', (err) => {
           resolve({
             success: false,
-            code: -1,
+            code: -_1,
             stdout: '',
             stderr: err.message
           });
@@ -459,7 +430,7 @@ export async function callRuvSwarmDirectNeural(params = {}) {
         'ruv-swarm', 
         'neural', 
         'train',
-        '--model', modelName,
+        '--model', _modelName,
         '--iterations', epochs.toString(),
         '--data-source', dataSource,
         '--output-format', 'json'
@@ -482,15 +453,15 @@ export async function callRuvSwarmDirectNeural(params = {}) {
     // Since we used 'inherit', we need to get the training results from the saved JSON file
     try {
       // Read the latest training file
-      const neuralDir = '.ruv-swarm/neural';
-      const files = await Deno.readDir(neuralDir);
-      let latestFile = null;
-      let latestTime = 0;
+      const _neuralDir = '.ruv-swarm/neural';
+      const _files = await Deno.readDir(neuralDir);
+      let _latestFile = null;
+      let _latestTime = 0;
       
       for await (const file of files) {
         if (file.name.startsWith(`training-${modelName}-`) && file.name.endsWith('.json')) {
-          const filePath = `${neuralDir}/${file.name}`;
-          const stat = await Deno.stat(filePath);
+          const _filePath = `${neuralDir}/${file.name}`;
+          const _stat = await Deno.stat(filePath);
           if (stat.mtime > latestTime) {
             latestTime = stat.mtime;
             latestFile = filePath;
@@ -499,8 +470,8 @@ export async function callRuvSwarmDirectNeural(params = {}) {
       }
       
       if (latestFile) {
-        const content = await Deno.readTextFile(latestFile);
-        const realResult = JSON.parse(content);
+        const _content = await Deno.readTextFile(latestFile);
+        const _realResult = JSON.parse(content);
         
         return {
           success: result.code === 0,
@@ -545,21 +516,20 @@ export async function callRuvSwarmDirectNeural(params = {}) {
     throw err;
   }
 }
-
-export async function execRuvSwarmHook(hookName, params = {}) {
+export async function execRuvSwarmHook(_hookName, params = { /* empty */ }) {
   try {
-    const command = 'npx';
-    const args = ['ruv-swarm', 'hook', hookName];
+    const _command = 'npx';
+    const _args = ['ruv-swarm', 'hook', hookName];
     
     // Add parameters as CLI arguments
-    Object.entries(params).forEach(([key, value]) => {
+    Object.entries(params).forEach(([_key, value]) => {
       args.push(`--${key}`);
       if (value !== true && value !== false) {
         args.push(String(value));
       }
     });
     
-    const result = await runCommand(command, args, {
+    const _result = await runCommand(_command, _args, {
       stdout: 'piped',
       stderr: 'piped'
     });
@@ -578,10 +548,9 @@ export async function execRuvSwarmHook(hookName, params = {}) {
     throw err;
   }
 }
-
 export async function checkRuvSwarmAvailable() {
   try {
-    const result = await runCommand('npx', ['ruv-swarm', '--version'], {
+    const _result = await runCommand('npx', ['ruv-swarm', '--version'], {
       stdout: 'piped',
       stderr: 'piped'
     });
@@ -591,37 +560,33 @@ export async function checkRuvSwarmAvailable() {
     return false;
   }
 }
-
 // Neural training specific helpers
-export async function trainNeuralModel(modelName, dataSource, epochs = 50) {
+export async function trainNeuralModel(_modelName, _dataSource, epochs = 50) {
   return await callRuvSwarmMCP('neural_train', {
-    model: modelName,
-    data: dataSource,
-    epochs: epochs,
+    model: _modelName,
+    data: _dataSource,
+    epochs: _epochs,
     timestamp: Date.now()
   });
 }
-
-export async function updateNeuralPattern(operation, outcome, metadata = {}) {
+export async function updateNeuralPattern(_operation, _outcome, metadata = { /* empty */ }) {
   return await callRuvSwarmMCP('neural_patterns', {
     action: 'learn',
-    operation: operation,
-    outcome: outcome,
-    metadata: metadata,
+    operation: _operation,
+    outcome: _outcome,
+    metadata: _metadata,
     timestamp: Date.now()
   });
 }
-
 export async function getSwarmStatus(swarmId = null) {
   return await callRuvSwarmMCP('swarm_status', {
     swarmId: swarmId
   });
 }
-
-export async function spawnSwarmAgent(agentType, config = {}) {
+export async function spawnSwarmAgent(_agentType, config = { /* empty */ }) {
   return await callRuvSwarmMCP('agent_spawn', {
-    type: agentType,
-    config: config,
+    type: _agentType,
+    config: _config,
     timestamp: Date.now()
   });
 }

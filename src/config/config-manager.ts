@@ -1,12 +1,9 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Node.js-compatible Configuration management for Claude-Flow
  */
-
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
-
 export interface Config {
   orchestrator: {
     maxConcurrentAgents: number;
@@ -57,11 +54,10 @@ export interface Config {
     configPath?: string;
   };
 }
-
 /**
  * Default configuration values
  */
-const DEFAULT_CONFIG: Config = {
+const _DEFAULT_CONFIG: Config = {
   orchestrator: {
     maxConcurrentAgents: 10,
     taskQueueSize: 100,
@@ -111,7 +107,6 @@ const DEFAULT_CONFIG: Config = {
     configPath: '.claude/ruv-swarm-config.json',
   },
 };
-
 /**
  * Configuration validation error
  */
@@ -121,7 +116,6 @@ export class ConfigError extends Error {
     this.name = 'ConfigError';
   }
 }
-
 /**
  * Configuration manager for Node.js
  */
@@ -130,12 +124,10 @@ export class ConfigManager {
   private config: Config;
   private configPath?: string;
   private userConfigDir: string;
-
   private constructor() {
     this.config = this.deepClone(DEFAULT_CONFIG);
     this.userConfigDir = path.join(os.homedir(), '.claude-flow');
   }
-
   /**
    * Gets the singleton instance
    */
@@ -145,7 +137,6 @@ export class ConfigManager {
     }
     return ConfigManager.instance;
   }
-
   /**
    * Initialize configuration from file or create default
    */
@@ -153,23 +144,21 @@ export class ConfigManager {
     try {
       await this.load(configPath);
       console.log(`✅ Configuration loaded from: ${configPath}`);
-    } catch (error) {
+    } catch (_error) {
       // Create default config file if it doesn't exist
       await this.createDefaultConfig(configPath);
       console.log(`✅ Default configuration created: ${configPath}`);
     }
   }
-
   /**
    * Creates a default configuration file
    */
   async createDefaultConfig(configPath: string): Promise<void> {
-    const config = this.deepClone(DEFAULT_CONFIG);
-    const content = JSON.stringify(config, null, 2);
-    await fs.writeFile(configPath, content, 'utf8');
+    const _config = this.deepClone(DEFAULT_CONFIG);
+    const _content = JSON.stringify(_config, null, 2);
+    await fs.writeFile(_configPath, _content, 'utf8');
     this.configPath = configPath;
   }
-
   /**
    * Loads configuration from file
    */
@@ -177,17 +166,15 @@ export class ConfigManager {
     if (configPath) {
       this.configPath = configPath;
     }
-
     if (!this.configPath) {
       throw new ConfigError('No configuration file path specified');
     }
-
     try {
-      const content = await fs.readFile(this.configPath, 'utf8');
-      const fileConfig = JSON.parse(content) as Partial<Config>;
+      const _content = await fs.readFile(this._configPath, 'utf8');
+      const _fileConfig = JSON.parse(content) as Partial<Config>;
       
       // Merge with defaults
-      this.config = this.deepMerge(DEFAULT_CONFIG, fileConfig);
+      this.config = this.deepMerge(_DEFAULT_CONFIG, fileConfig);
       
       // Load environment variables
       this.loadFromEnv();
@@ -196,27 +183,25 @@ export class ConfigManager {
       this.validate(this.config);
       
       return this.config;
-    } catch (error) {
+    } catch (_error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
         throw new ConfigError(`Configuration file not found: ${this.configPath}`);
       }
       throw new ConfigError(`Failed to load configuration: ${(error as Error).message}`);
     }
   }
-
   /**
    * Shows current configuration
    */
   show(): Config {
     return this.deepClone(this.config);
   }
-
   /**
    * Gets a configuration value by path
    */
-  get(path: string): any {
-    const keys = path.split('.');
-    let current: any = this.config;
+  get(path: string): unknown {
+    const _keys = path.split('.');
+    let _current: unknown = this.config;
     
     for (const key of keys) {
       if (current && typeof current === 'object' && key in current) {
@@ -228,42 +213,38 @@ export class ConfigManager {
     
     return current;
   }
-
   /**
    * Sets a configuration value by path
    */
-  set(path: string, value: any): void {
-    const keys = path.split('.');
-    let current: any = this.config;
+  set(path: string, value: unknown): void {
+    const _keys = path.split('.');
+    let _current: unknown = this.config;
     
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = keys[i];
+    for (let _i = 0; i < keys.length - 1; i++) {
+      const _key = keys[i];
       if (!(key in current)) {
-        current[key] = {};
+        current[key] = { /* empty */ };
       }
       current = current[key];
     }
     
-    const lastKey = keys[keys.length - 1];
+    const _lastKey = keys[keys.length - 1];
     current[lastKey] = value;
     
     // Validate after setting
     this.validate(this.config);
   }
-
   /**
    * Saves current configuration to file
    */
   async save(configPath?: string): Promise<void> {
-    const savePath = configPath || this.configPath;
+    const _savePath = configPath || this.configPath;
     if (!savePath) {
       throw new ConfigError('No configuration file path specified');
     }
-
-    const content = JSON.stringify(this.config, null, 2);
-    await fs.writeFile(savePath, content, 'utf8');
+    const _content = JSON.stringify(this._config, null, 2);
+    await fs.writeFile(_savePath, _content, 'utf8');
   }
-
   /**
    * Validates the configuration
    */
@@ -275,201 +256,175 @@ export class ConfigManager {
     if (config.orchestrator.taskQueueSize < 1 || config.orchestrator.taskQueueSize > 10000) {
       throw new ConfigError('orchestrator.taskQueueSize must be between 1 and 10000');
     }
-
     // Terminal validation
     if (!['auto', 'vscode', 'native'].includes(config.terminal.type)) {
-      throw new ConfigError('terminal.type must be one of: auto, vscode, native');
+      throw new ConfigError('terminal.type must be one of: _auto, _vscode, native');
     }
     if (config.terminal.poolSize < 1 || config.terminal.poolSize > 50) {
       throw new ConfigError('terminal.poolSize must be between 1 and 50');
     }
-
     // Memory validation
     if (!['sqlite', 'markdown', 'hybrid'].includes(config.memory.backend)) {
-      throw new ConfigError('memory.backend must be one of: sqlite, markdown, hybrid');
+      throw new ConfigError('memory.backend must be one of: _sqlite, _markdown, hybrid');
     }
     if (config.memory.cacheSizeMB < 1 || config.memory.cacheSizeMB > 10000) {
       throw new ConfigError('memory.cacheSizeMB must be between 1 and 10000');
     }
-
     // Coordination validation
     if (config.coordination.maxRetries < 0 || config.coordination.maxRetries > 100) {
       throw new ConfigError('coordination.maxRetries must be between 0 and 100');
     }
-
     // MCP validation
     if (!['stdio', 'http', 'websocket'].includes(config.mcp.transport)) {
-      throw new ConfigError('mcp.transport must be one of: stdio, http, websocket');
+      throw new ConfigError('mcp.transport must be one of: _stdio, _http, websocket');
     }
     if (config.mcp.port < 1 || config.mcp.port > 65535) {
       throw new ConfigError('mcp.port must be between 1 and 65535');
     }
-
     // Logging validation
     if (!['debug', 'info', 'warn', 'error'].includes(config.logging.level)) {
-      throw new ConfigError('logging.level must be one of: debug, info, warn, error');
+      throw new ConfigError('logging.level must be one of: _debug, _info, _warn, error');
     }
     if (!['json', 'text'].includes(config.logging.format)) {
-      throw new ConfigError('logging.format must be one of: json, text');
+      throw new ConfigError('logging.format must be one of: _json, text');
     }
     if (!['console', 'file'].includes(config.logging.destination)) {
-      throw new ConfigError('logging.destination must be one of: console, file');
+      throw new ConfigError('logging.destination must be one of: _console, file');
     }
-
     // ruv-swarm validation
     if (!['mesh', 'hierarchical', 'ring', 'star'].includes(config.ruvSwarm.defaultTopology)) {
-      throw new ConfigError('ruvSwarm.defaultTopology must be one of: mesh, hierarchical, ring, star');
+      throw new ConfigError('ruvSwarm.defaultTopology must be one of: _mesh, _hierarchical, _ring, star');
     }
     if (config.ruvSwarm.maxAgents < 1 || config.ruvSwarm.maxAgents > 100) {
       throw new ConfigError('ruvSwarm.maxAgents must be between 1 and 100');
     }
     if (!['balanced', 'specialized', 'adaptive'].includes(config.ruvSwarm.defaultStrategy)) {
-      throw new ConfigError('ruvSwarm.defaultStrategy must be one of: balanced, specialized, adaptive');
+      throw new ConfigError('ruvSwarm.defaultStrategy must be one of: _balanced, _specialized, adaptive');
     }
   }
-
   /**
    * Loads configuration from environment variables
    */
   private loadFromEnv(): void {
     // Orchestrator settings
-    const maxAgents = process.env.CLAUDE_FLOW_MAX_AGENTS;
+    const _maxAgents = process.env.CLAUDE_FLOW_MAX_AGENTS;
     if (maxAgents) {
-      this.config.orchestrator.maxConcurrentAgents = parseInt(maxAgents, 10);
+      this.config.orchestrator.maxConcurrentAgents = parseInt(_maxAgents, 10);
     }
-
     // Terminal settings
-    const terminalType = process.env.CLAUDE_FLOW_TERMINAL_TYPE;
+    const _terminalType = process.env.CLAUDE_FLOW_TERMINAL_TYPE;
     if (terminalType === 'vscode' || terminalType === 'native' || terminalType === 'auto') {
       this.config.terminal.type = terminalType;
     }
-
     // Memory settings
-    const memoryBackend = process.env.CLAUDE_FLOW_MEMORY_BACKEND;
+    const _memoryBackend = process.env.CLAUDE_FLOW_MEMORY_BACKEND;
     if (memoryBackend === 'sqlite' || memoryBackend === 'markdown' || memoryBackend === 'hybrid') {
       this.config.memory.backend = memoryBackend;
     }
-
     // MCP settings
-    const mcpTransport = process.env.CLAUDE_FLOW_MCP_TRANSPORT;
+    const _mcpTransport = process.env.CLAUDE_FLOW_MCP_TRANSPORT;
     if (mcpTransport === 'stdio' || mcpTransport === 'http' || mcpTransport === 'websocket') {
       this.config.mcp.transport = mcpTransport;
     }
-
-    const mcpPort = process.env.CLAUDE_FLOW_MCP_PORT;
+    const _mcpPort = process.env.CLAUDE_FLOW_MCP_PORT;
     if (mcpPort) {
-      this.config.mcp.port = parseInt(mcpPort, 10);
+      this.config.mcp.port = parseInt(_mcpPort, 10);
     }
-
     // Logging settings
-    const logLevel = process.env.CLAUDE_FLOW_LOG_LEVEL;
+    const _logLevel = process.env.CLAUDE_FLOW_LOG_LEVEL;
     if (logLevel === 'debug' || logLevel === 'info' || logLevel === 'warn' || logLevel === 'error') {
       this.config.logging.level = logLevel;
     }
-
     // ruv-swarm settings
-    const ruvSwarmEnabled = process.env.CLAUDE_FLOW_RUV_SWARM_ENABLED;
+    const _ruvSwarmEnabled = process.env.CLAUDE_FLOW_RUV_SWARM_ENABLED;
     if (ruvSwarmEnabled === 'true' || ruvSwarmEnabled === 'false') {
       this.config.ruvSwarm.enabled = ruvSwarmEnabled === 'true';
     }
-
-    const ruvSwarmTopology = process.env.CLAUDE_FLOW_RUV_SWARM_TOPOLOGY;
+    const _ruvSwarmTopology = process.env.CLAUDE_FLOW_RUV_SWARM_TOPOLOGY;
     if (ruvSwarmTopology === 'mesh' || ruvSwarmTopology === 'hierarchical' || 
         ruvSwarmTopology === 'ring' || ruvSwarmTopology === 'star') {
       this.config.ruvSwarm.defaultTopology = ruvSwarmTopology;
     }
-
-    const ruvSwarmMaxAgents = process.env.CLAUDE_FLOW_RUV_SWARM_MAX_AGENTS;
+    const _ruvSwarmMaxAgents = process.env.CLAUDE_FLOW_RUV_SWARM_MAX_AGENTS;
     if (ruvSwarmMaxAgents) {
-      this.config.ruvSwarm.maxAgents = parseInt(ruvSwarmMaxAgents, 10);
+      this.config.ruvSwarm.maxAgents = parseInt(_ruvSwarmMaxAgents, 10);
     }
   }
-
   /**
    * Deep clone helper
    */
   private deepClone<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj));
   }
-
   /**
    * Get ruv-swarm specific configuration
    */
   getRuvSwarmConfig() {
     return this.deepClone(this.config.ruvSwarm);
   }
-
   /**
    * Get available configuration templates
    */
   getAvailableTemplates(): string[] {
     return ['default', 'development', 'production', 'testing'];
   }
-
   /**
    * Create a configuration template
    */
-  createTemplate(name: string, config: any): void {
+  createTemplate(name: string, config: unknown): void {
     // Implementation for creating templates
     console.log(`Creating template: ${name}`, config);
   }
-
   /**
    * Get format parsers
    */
-  getFormatParsers(): Record<string, any> {
+  getFormatParsers(): Record<string, unknown> {
     return {
       json: { extension: '.json', parse: JSON.parse, stringify: JSON.stringify },
-      yaml: { extension: '.yaml', parse: (content: string) => content, stringify: (obj: any) => JSON.stringify(obj) }
+      yaml: { extension: '.yaml', parse: (content: string) => content, stringify: (obj: Record<string, unknown>) => JSON.stringify(obj) }
     };
   }
-
   /**
    * Validate configuration file
    */
   validateFile(path: string): boolean {
     try {
       // Basic validation - file exists and is valid JSON
-      require('fs').readFileSync(path, 'utf8');
+      require('fs').readFileSync(_path, 'utf8');
       return true;
     } catch {
       return false;
     }
   }
-
   /**
    * Get path history
    */
-  getPathHistory(): any[] {
+  getPathHistory(): unknown[] {
     return []; // Mock implementation
   }
-
   /**
    * Get change history
    */
-  getChangeHistory(): any[] {
+  getChangeHistory(): unknown[] {
     return []; // Mock implementation
   }
-
   /**
    * Backup configuration
    */
   async backup(path: string): Promise<void> {
-    const backupPath = `${path}.backup.${Date.now()}`;
-    const content = JSON.stringify(this.config, null, 2);
-    await fs.writeFile(backupPath, content, 'utf8');
+    const _backupPath = `${path}.backup.${Date.now()}`;
+    const _content = JSON.stringify(this._config, null, 2);
+    await fs.writeFile(_backupPath, _content, 'utf8');
     console.log(`Configuration backed up to: ${backupPath}`);
   }
-
   /**
    * Restore configuration from backup
    */
   async restore(path: string): Promise<void> {
-    const content = await fs.readFile(path, 'utf8');
+    const _content = await fs.readFile(_path, 'utf8');
     this.config = JSON.parse(content);
     console.log(`Configuration restored from: ${path}`);
   }
-
   /**
    * Update ruv-swarm configuration
    */
@@ -477,20 +432,18 @@ export class ConfigManager {
     this.config.ruvSwarm = { ...this.config.ruvSwarm, ...updates };
     this.validate(this.config);
   }
-
   /**
    * Check if ruv-swarm is enabled
    */
   isRuvSwarmEnabled(): boolean {
     return this.config.ruvSwarm.enabled;
   }
-
   /**
    * Generate ruv-swarm command arguments from configuration
    */
   getRuvSwarmArgs(): string[] {
-    const args: string[] = [];
-    const config = this.config.ruvSwarm;
+    const _args: string[] = [];
+    const _config = this.config.ruvSwarm;
     
     if (!config.enabled) {
       return args;
@@ -518,12 +471,11 @@ export class ConfigManager {
     
     return args;
   }
-
   /**
    * Deep merge helper
    */
-  private deepMerge(target: Config, source: Partial<Config>): Config {
-    const result = this.deepClone(target);
+  private deepMerge(target: _Config, source: Partial<Config>): Config {
+    const _result = this.deepClone(target);
     
     if (source.orchestrator) {
       result.orchestrator = { ...result.orchestrator, ...source.orchestrator };
@@ -550,6 +502,5 @@ export class ConfigManager {
     return result;
   }
 }
-
 // Export singleton instance
-export const configManager = ConfigManager.getInstance();
+export const _configManager = ConfigManager.getInstance();

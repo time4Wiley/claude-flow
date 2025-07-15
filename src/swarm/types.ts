@@ -1,34 +1,26 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Comprehensive types and interfaces for the swarm system
  */
-
 import { EventEmitter } from 'node:events';
-
 // ===== CORE SWARM TYPES =====
-
 export interface SwarmId {
   id: string;
   timestamp: number;
   namespace: string;
 }
-
 export interface AgentId {
   id: string;
   swarmId: string;
   type: AgentType;
   instance: number;
 }
-
 export interface TaskId {
   id: string;
   swarmId: string;
   sequence: number;
   priority: number;
 }
-
 // ===== AGENT TYPES =====
-
 export type AgentType = 
   | 'coordinator'    // Orchestrates and manages other agents
   | 'researcher'     // Performs research and data gathering
@@ -41,7 +33,6 @@ export type AgentType =
   | 'documenter'     // Creates and maintains documentation
   | 'monitor'        // Monitors system health and performance
   | 'specialist';    // Domain-specific specialized agent
-
 export type AgentStatus = 
   | 'initializing'   // Agent is starting up
   | 'idle'           // Available for tasks
@@ -51,7 +42,6 @@ export type AgentStatus =
   | 'offline'        // Not available
   | 'terminating'    // Shutting down
   | 'terminated';    // Shut down
-
 export interface AgentCapabilities {
   // Core capabilities
   codeGeneration: boolean;
@@ -83,7 +73,6 @@ export interface AgentCapabilities {
   speed: number;             // Relative speed rating
   quality: number;           // Quality rating
 }
-
 export interface AgentMetrics {
   // Performance metrics
   tasksCompleted: number;
@@ -108,7 +97,6 @@ export interface AgentMetrics {
   lastActivity: Date;
   responseTime: number;
 }
-
 export interface AgentState {
   id: AgentId;
   name: string;
@@ -139,7 +127,6 @@ export interface AgentState {
   childAgents: AgentId[];
   collaborators: AgentId[];
 }
-
 export interface AgentConfig {
   // Behavior settings
   autonomyLevel: number;      // 0-1 how autonomous the agent is
@@ -161,9 +148,8 @@ export interface AgentConfig {
   
   // Specialization
   expertise: Record<string, number>;
-  preferences: Record<string, any>;
+  preferences: Record<string, unknown>;
 }
-
 export interface AgentEnvironment {
   // Runtime environment
   runtime: 'deno' | 'node' | 'claude' | 'browser';
@@ -180,21 +166,18 @@ export interface AgentEnvironment {
   
   // Tool access
   availableTools: string[];
-  toolConfigs: Record<string, any>;
+  toolConfigs: Record<string, unknown>;
 }
-
 export interface AgentError {
   timestamp: Date;
   type: string;
   message: string;
   stack?: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   severity: 'low' | 'medium' | 'high' | 'critical';
   resolved: boolean;
 }
-
 // ===== TASK TYPES =====
-
 export type TaskType = 
   | 'research'       // Information gathering and research
   | 'analysis'       // Data analysis and insights
@@ -221,7 +204,6 @@ export type TaskType =
   | 'trend-analysis'
   | 'business-intelligence'
   | 'quality-analysis' | 'system-design' | 'architecture-review' | 'api-design' | 'cloud-architecture' | 'microservices-design' | 'security-architecture' | 'scalability-design' | 'database-architecture' | 'code-generation' | 'code-review' | 'refactoring' | 'debugging' | 'api-development' | 'database-design' | 'performance-optimization' | 'task-orchestration' | 'progress-tracking' | 'resource-allocation' | 'workflow-management' | 'team-coordination' | 'status-reporting' | 'fact-check' | 'literature-review' | 'market-analysis' | 'unit-testing' | 'integration-testing' | 'e2e-testing' | 'performance-testing' | 'security-testing' | 'api-testing' | 'test-automation' | 'test-analysis';
-
 export type TaskStatus = 
   | 'created'        // Task has been created
   | 'queued'         // Waiting for assignment
@@ -234,14 +216,12 @@ export type TaskStatus =
   | 'timeout'        // Timed out
   | 'retrying'       // Being retried
   | 'blocked';       // Blocked by dependencies
-
 export type TaskPriority = 
   | 'critical'       // Must be done immediately
   | 'high'           // Important, do soon
   | 'normal'         // Standard priority
   | 'low'            // Can be delayed
   | 'background';    // Run when resources available
-
 export interface TaskRequirements {
   // Agent requirements
   agentType?: AgentType;
@@ -257,14 +237,13 @@ export interface TaskRequirements {
   // Environment requirements
   tools: string[];
   permissions: string[];
-  environment?: Record<string, any>;
+  environment?: Record<string, unknown>;
   
   // Quality requirements
   reviewRequired?: boolean;
   testingRequired?: boolean;
   documentationRequired?: boolean;
 }
-
 export interface TaskConstraints {
   // Time constraints
   deadline?: Date;
@@ -287,12 +266,11 @@ export interface TaskConstraints {
   excludedAgents?: AgentId[];
   requiresHuman?: boolean;
 }
-
 export interface TaskResult {
   // Result data
-  output: any;
-  artifacts: Record<string, any>;
-  metadata: Record<string, any>;
+  output: unknown;
+  artifacts: Record<string, unknown>;
+  metadata: Record<string, unknown>;
   
   // Quality metrics
   quality: number;
@@ -305,13 +283,12 @@ export interface TaskResult {
   
   // Validation
   validated: boolean;
-  validationResults?: any;
+  validationResults?: unknown;
   
   // Follow-up
   recommendations?: string[];
   nextSteps?: string[];
 }
-
 export interface TaskDefinition {
   id: TaskId;
   type: TaskType;
@@ -324,14 +301,14 @@ export interface TaskDefinition {
   priority: TaskPriority;
   
   // Input/Output
-  input: any;
-  expectedOutput?: any;
+  input: unknown;
+  expectedOutput?: unknown;
   
   // Execution details
   instructions: string;
-  context: Record<string, any>;
-  parameters?: Record<string, any>;
-  examples?: any[];
+  context: Record<string, unknown>;
+  parameters?: Record<string, unknown>;
+  examples?: unknown[];
   
   // Tracking
   status: TaskStatus;
@@ -352,7 +329,6 @@ export interface TaskDefinition {
   attempts: TaskAttempt[];
   statusHistory: TaskStatusChange[];
 }
-
 export interface TaskAttempt {
   attemptNumber: number;
   agent: AgentId;
@@ -363,7 +339,6 @@ export interface TaskAttempt {
   error?: TaskError;
   resourcesUsed: Record<string, number>;
 }
-
 export interface TaskStatusChange {
   timestamp: Date;
   from: TaskStatus;
@@ -371,26 +346,22 @@ export interface TaskStatusChange {
   reason: string;
   triggeredBy: AgentId | 'system' | 'user';
 }
-
 export interface TaskError {
   type: string;
   message: string;
   code?: string;
   stack?: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   recoverable: boolean;
   retryable: boolean;
 }
-
 // ===== SWARM TYPES =====
-
 export type SwarmMode = 
   | 'centralized'    // Single coordinator manages all
   | 'distributed'    // Multiple coordinators
   | 'hierarchical'   // Tree structure of coordinators
   | 'mesh'           // Peer-to-peer coordination
   | 'hybrid';        // Mixed coordination strategies
-
 export type SwarmStrategy = 
   | 'auto'           // Automatically determine approach
   | 'research'       // Research-focused strategy
@@ -400,7 +371,6 @@ export type SwarmStrategy =
   | 'optimization'   // Performance optimization
   | 'maintenance'    // System maintenance
   | 'custom';        // Custom strategy
-
 export interface SwarmObjective {
   id: string;
   name: string;
@@ -432,7 +402,6 @@ export interface SwarmObjective {
   results?: SwarmResults;
   metrics: SwarmMetrics;
 }
-
 export interface SwarmRequirements {
   // Agent requirements
   minAgents: number;
@@ -454,7 +423,6 @@ export interface SwarmRequirements {
   latencyTarget?: number;
   reliabilityTarget: number;
 }
-
 export interface SwarmConstraints {
   // Time constraints
   deadline?: Date;
@@ -473,7 +441,6 @@ export interface SwarmConstraints {
   recoveryTime: number;
   maintenanceWindows?: TimeWindow[];
 }
-
 export interface SwarmMilestone {
   id: string;
   name: string;
@@ -484,14 +451,12 @@ export interface SwarmMilestone {
   completed: boolean;
   completedAt?: Date;
 }
-
 export interface TimeWindow {
   start: Date;
   end: Date;
   type: 'maintenance' | 'blackout' | 'preferred';
   description: string;
 }
-
 export type SwarmStatus = 
   | 'planning'       // Decomposing objectives into tasks
   | 'initializing'   // Setting up agents and resources
@@ -502,7 +467,6 @@ export type SwarmStatus =
   | 'cancelled'      // Cancelled by user
   | 'recovering'     // Recovering from failure
   | 'optimizing';    // Optimizing performance
-
 export interface SwarmProgress {
   // Task progress
   totalTasks: number;
@@ -529,12 +493,11 @@ export interface SwarmProgress {
   idleAgents: number;
   busyAgents: number;
 }
-
 export interface SwarmResults {
   // Primary outputs
-  outputs: Record<string, any>;
-  artifacts: Record<string, any>;
-  reports: Record<string, any>;
+  outputs: Record<string, unknown>;
+  artifacts: Record<string, unknown>;
+  reports: Record<string, unknown>;
   
   // Quality metrics
   overallQuality: number;
@@ -553,7 +516,6 @@ export interface SwarmResults {
   improvements: string[];
   nextActions: string[];
 }
-
 export interface SwarmMetrics {
   // Performance metrics
   throughput: number;
@@ -579,16 +541,13 @@ export interface SwarmMetrics {
   scheduleVariance: number;
   deadlineAdherence: number;
 }
-
 // ===== COORDINATION TYPES =====
-
 export interface TaskDependency {
   task: TaskId;
   dependsOn: TaskId;
   type: DependencyType;
   constraint?: string;
 }
-
 export type DependencyType = 
   | 'finish-start'   // Must finish before next starts
   | 'start-start'    // Must start before next starts
@@ -597,7 +556,6 @@ export type DependencyType =
   | 'resource'       // Shares a resource
   | 'data'          // Data dependency
   | 'approval';     // Requires approval
-
 export interface CoordinationStrategy {
   name: string;
   description: string;
@@ -617,7 +575,6 @@ export interface CoordinationStrategy {
   // Communication
   communication: CommunicationStrategy;
 }
-
 export type AgentSelectionStrategy = 
   | 'capability-based'   // Select based on capabilities
   | 'load-based'        // Select based on current load
@@ -627,7 +584,6 @@ export type AgentSelectionStrategy =
   | 'affinity-based'   // Prefer agents with domain affinity
   | 'cost-based'       // Select based on cost
   | 'hybrid';          // Combination of strategies
-
 export type TaskSchedulingStrategy = 
   | 'fifo'             // First in, first out
   | 'priority'         // Priority-based scheduling
@@ -636,7 +592,6 @@ export type TaskSchedulingStrategy =
   | 'critical-path'    // Critical path method
   | 'resource-aware'   // Consider resource availability
   | 'adaptive';        // Adaptive scheduling
-
 export type LoadBalancingStrategy = 
   | 'work-stealing'    // Agents steal work from busy agents
   | 'work-sharing'     // Work is proactively shared
@@ -644,7 +599,6 @@ export type LoadBalancingStrategy =
   | 'distributed'      // Distributed load balancing
   | 'predictive'       // Predict and prevent overload
   | 'reactive';        // React to overload conditions
-
 export type FaultToleranceStrategy = 
   | 'retry'            // Retry failed tasks
   | 'redundancy'       // Redundant execution
@@ -653,7 +607,6 @@ export type FaultToleranceStrategy =
   | 'bulkhead'         // Isolate failures
   | 'timeout'          // Timeout protection
   | 'graceful-degradation'; // Degrade gracefully
-
 export type CommunicationStrategy = 
   | 'direct'           // Direct agent-to-agent
   | 'broadcast'        // Broadcast to all
@@ -662,9 +615,7 @@ export type CommunicationStrategy =
   | 'event-driven'     // Event-driven communication
   | 'gossip'           // Gossip protocol
   | 'hierarchical';    // Hierarchical communication
-
 // ===== MEMORY TYPES =====
-
 export interface SwarmMemory {
   // Memory organization
   namespace: string;
@@ -685,7 +636,6 @@ export interface SwarmMemory {
   cacheEnabled: boolean;
   compressionEnabled: boolean;
 }
-
 export interface MemoryPartition {
   id: string;
   name: string;
@@ -706,7 +656,6 @@ export interface MemoryPartition {
   indexed: boolean;
   compressed: boolean;
 }
-
 export type MemoryType = 
   | 'knowledge'        // Knowledge base
   | 'state'           // Agent state
@@ -716,11 +665,10 @@ export type MemoryType =
   | 'communication'   // Communication history
   | 'configuration'   // Configuration data
   | 'metrics';        // Performance metrics
-
 export interface MemoryEntry {
   id: string;
   key: string;
-  value: any;
+  value: unknown;
   
   // Metadata
   type: string;
@@ -743,29 +691,24 @@ export interface MemoryEntry {
   references: string[];
   dependencies: string[];
 }
-
 export type AccessLevel = 
   | 'private'          // Only owner can access
   | 'team'            // Team members can access
   | 'swarm'           // All swarm agents can access
   | 'public'          // Publicly accessible
   | 'system';         // System-level access
-
 export interface MemoryPermissions {
   read: AccessLevel;
   write: AccessLevel;
   delete: AccessLevel;
   share: AccessLevel;
 }
-
 export type ConsistencyLevel = 
   | 'strong'          // Strong consistency
   | 'eventual'        // Eventual consistency
   | 'weak'            // Weak consistency
   | 'session';        // Session consistency
-
 // ===== MONITORING TYPES =====
-
 export interface MonitoringConfig {
   // Collection settings
   metricsEnabled: boolean;
@@ -791,7 +734,6 @@ export interface MonitoringConfig {
   exportFormat: string;
   exportDestination: string;
 }
-
 export interface SystemMetrics {
   timestamp: Date;
   
@@ -818,7 +760,6 @@ export interface SystemMetrics {
   resourceUtilization: Record<string, number>;
   queueLengths: Record<string, number>;
 }
-
 export interface Alert {
   id: string;
   timestamp: Date;
@@ -828,7 +769,7 @@ export interface Alert {
   
   // Context
   source: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   
   // Handling
   acknowledged: boolean;
@@ -839,13 +780,11 @@ export interface Alert {
   escalationLevel: number;
   escalatedAt?: Date;
 }
-
 export type AlertLevel = 
   | 'info'            // Informational
   | 'warning'         // Warning condition
   | 'error'           // Error condition
   | 'critical';       // Critical condition
-
 export type AlertType = 
   | 'system'          // System-level alert
   | 'performance'     // Performance issue
@@ -855,9 +794,7 @@ export type AlertType =
   | 'task'            // Task-specific issue
   | 'swarm'           // Swarm-level issue
   | 'custom';         // Custom alert type
-
 // ===== EVENT TYPES =====
-
 export interface SwarmEvent {
   id: string;
   timestamp: Date;
@@ -865,7 +802,7 @@ export interface SwarmEvent {
   source: string;
   
   // Event data
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   
   // Routing
   targets?: string[];
@@ -879,7 +816,6 @@ export interface SwarmEvent {
   correlationId?: string;
   causationId?: string;
 }
-
 export type EventType = 
   // Swarm events
   | 'swarm.created'
@@ -922,17 +858,15 @@ export type EventType =
   
   // Custom events
   | 'custom.user_defined';
-
 // ===== INTERFACE EXTENSIONS =====
-
 export interface SwarmEventEmitter extends EventEmitter {
   // Event emission
-  emitSwarmEvent(event: SwarmEvent): boolean;
+  emitSwarmEvent(_event: SwarmEvent): boolean;
   emitSwarmEvents(events: SwarmEvent[]): boolean;
   
   // Event handling
-  onSwarmEvent(type: EventType, handler: (event: SwarmEvent) => void): this;
-  offSwarmEvent(type: EventType, handler: (event: SwarmEvent) => void): this;
+  onSwarmEvent(type: _EventType, handler: (event: SwarmEvent) => void): this;
+  offSwarmEvent(type: _EventType, handler: (event: SwarmEvent) => void): this;
   
   // Event filtering
   filterEvents(predicate: (event: SwarmEvent) => boolean): SwarmEvent[];
@@ -940,9 +874,7 @@ export interface SwarmEventEmitter extends EventEmitter {
   // Event correlation
   correlateEvents(correlationId: string): SwarmEvent[];
 }
-
 // ===== UTILITY TYPES =====
-
 export interface SwarmConfig {
   // Basic configuration
   name: string;
@@ -978,7 +910,6 @@ export interface SwarmConfig {
   // Performance settings
   performance: PerformanceConfig;
 }
-
 export interface SecurityConfig {
   authenticationRequired: boolean;
   authorizationRequired: boolean;
@@ -996,7 +927,6 @@ export interface SecurityConfig {
   inputValidation: boolean;
   outputSanitization: boolean;
 }
-
 export interface PerformanceConfig {
   // Concurrency
   maxConcurrency: number;
@@ -1017,7 +947,6 @@ export interface PerformanceConfig {
   connectionPooling: boolean;
   memoryPooling: boolean;
 }
-
 export interface ValidationResult {
   valid: boolean;
   errors: ValidationError[];
@@ -1026,48 +955,38 @@ export interface ValidationResult {
   // Context
   validatedAt: Date;
   validator: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
 }
-
 export interface ValidationError {
   field: string;
   message: string;
   code: string;
   severity: 'error' | 'critical';
 }
-
 export interface ValidationWarning {
   field: string;
   message: string;
   code: string;
   recommendation: string;
 }
-
 // ===== TYPE GUARDS =====
-
-export function isAgentId(obj: any): obj is AgentId {
+export function isAgentId(obj: unknown): obj is AgentId {
   return obj && typeof obj.id === 'string' && typeof obj.swarmId === 'string';
 }
-
-export function isTaskId(obj: any): obj is TaskId {
+export function isTaskId(obj: unknown): obj is TaskId {
   return obj && typeof obj.id === 'string' && typeof obj.swarmId === 'string';
 }
-
-export function isSwarmEvent(obj: any): obj is SwarmEvent {
+export function isSwarmEvent(obj: unknown): obj is SwarmEvent {
   return obj && typeof obj.id === 'string' && typeof obj.type === 'string';
 }
-
-export function isTaskDefinition(obj: any): obj is TaskDefinition {
+export function isTaskDefinition(obj: unknown): obj is TaskDefinition {
   return obj && isTaskId(obj.id) && typeof obj.type === 'string';
 }
-
-export function isAgentState(obj: any): obj is AgentState {
+export function isAgentState(obj: unknown): obj is AgentState {
   return obj && isAgentId(obj.id) && typeof obj.status === 'string';
 }
-
 // ===== CONSTANTS =====
-
-export const SWARM_CONSTANTS = {
+export const _SWARM_CONSTANTS = {
   // Timeouts
   DEFAULT_TASK_TIMEOUT: 5 * 60 * 1000,      // 5 minutes
   DEFAULT_AGENT_TIMEOUT: 30 * 1000,          // 30 seconds
@@ -1093,9 +1012,7 @@ export const SWARM_CONSTANTS = {
   DEFAULT_CPU_LIMIT: 1.0,                    // 1 CPU core
   DEFAULT_DISK_LIMIT: 1024 * 1024 * 1024,    // 1GB
 } as const;
-
 // ===== EXPORTS =====
-
 export default {
   // Type exports are handled by TypeScript
   SWARM_CONSTANTS,

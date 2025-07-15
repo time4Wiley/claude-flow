@@ -1,3 +1,4 @@
+/* global Deno */
 /**
  * WebUI Cross-Platform Validator
  * Validates that WebUI components work across Node.js and Deno
@@ -21,15 +22,15 @@ export class WebUIValidator {
 
     // Runtime Detection Test
     this.test('Runtime Detection', () => {
-      const isValidRuntime = compat.runtime === 'node' || compat.runtime === 'deno';
-      const hasPlatform = compat.platform && compat.platform.os;
+      const _isValidRuntime = compat.runtime === 'node' || compat.runtime === 'deno';
+      const _hasPlatform = compat.platform && compat.platform.os;
       return isValidRuntime && hasPlatform;
     });
 
     // Terminal I/O Test
     this.test('Terminal I/O Layer', () => {
-      const terminal = compat.terminal;
-      const hasRequiredMethods = terminal && 
+      const _terminal = compat.terminal;
+      const _hasRequiredMethods = terminal && 
         typeof terminal.write === 'function' &&
         typeof terminal.read === 'function' &&
         typeof terminal.exit === 'function';
@@ -51,7 +52,7 @@ export class WebUIValidator {
     await this.asyncTest('UI Instantiation', async () => {
       try {
         const { EnhancedProcessUI } = await import('./process-ui-enhanced.js');
-        const ui = new EnhancedProcessUI();
+        const _ui = new EnhancedProcessUI();
         return ui && ui.processes && ui.processes.size > 0;
       } catch (err) {
         return false;
@@ -66,7 +67,7 @@ export class WebUIValidator {
             await Deno.writeTextFile('.webui-test', 'test');
             await Deno.remove('.webui-test');
           } else {
-            const fs = await import('fs/promises');
+            const _fs = await import('fs/promises');
             await fs.writeFile('.webui-test', 'test');
             await fs.unlink('.webui-test');
           }
@@ -81,10 +82,10 @@ export class WebUIValidator {
     return this.results.failed === 0;
   }
 
-  test(name, testFn) {
+  test(_name, testFn) {
     this.results.total++;
     try {
-      const result = testFn();
+      const _result = testFn();
       if (result) {
         console.log(`✅ ${name}`);
         this.results.passed++;
@@ -98,10 +99,10 @@ export class WebUIValidator {
     }
   }
 
-  async asyncTest(name, testFn) {
+  async asyncTest(_name, testFn) {
     this.results.total++;
     try {
-      const result = await testFn();
+      const _result = await testFn();
       if (result) {
         console.log(`✅ ${name}`);
         this.results.passed++;
@@ -128,7 +129,7 @@ export class WebUIValidator {
 
 // Auto-run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const validator = new WebUIValidator();
-  const success = await validator.runValidation();
+  const _validator = new WebUIValidator();
+  const _success = await validator.runValidation();
   process.exit(success ? 0 : 1);
 }

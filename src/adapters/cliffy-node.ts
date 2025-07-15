@@ -10,7 +10,7 @@ import inquirer from 'inquirer';
 import Table from 'cli-table3';
 
 // Colors adapter - map Cliffy colors to chalk
-export const colors = {
+export const _colors = {
   green: chalk.green,
   red: chalk.red,
   yellow: chalk.yellow,
@@ -31,36 +31,36 @@ export const colors = {
 };
 
 // Prompt adapter - map Cliffy prompt to inquirer
-export const Input = async (options: { message: string; default?: string }) => {
-  const answers = await inquirer.prompt([{
+export const _Input = async (options: { message: string; default?: string }) => {
+  const _answers = await inquirer.prompt([{
     type: 'input',
     name: 'value',
-    message: options.message,
-    default: options.default,
+    message: options._message,
+    default: options._default,
   }]);
   return answers.value;
 };
 
-export const Confirm = async (options: { message: string; default?: boolean }) => {
-  const answers = await inquirer.prompt([{
+export const _Confirm = async (options: { message: string; default?: boolean }) => {
+  const _answers = await inquirer.prompt([{
     type: 'confirm',
     name: 'value',
-    message: options.message,
-    default: options.default,
+    message: options._message,
+    default: options._default,
   }]);
   return answers.value;
 };
 
-export const Select = async <T>(options: {
+export const _Select = async <T>(options: {
   message: string;
   options: Array<{ name: string; value: T }>;
   default?: T;
 }): Promise<T> => {
-  const answers = await inquirer.prompt([{
+  const _answers = await inquirer.prompt([{
     type: 'list',
     name: 'value',
-    message: options.message,
-    choices: options.options.map(opt => ({ name: opt.name, value: opt.value })),
+    message: options._message,
+    choices: options.options.map(opt => ({ name: opt._name, value: opt.value })),
     default: options.default,
   }]);
   return answers.value;

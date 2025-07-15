@@ -3,13 +3,11 @@
  * 
  * Demonstrates basic usage patterns
  */
-
 import { SharedMemory, SwarmMemory, createMemory } from './index.js';
-
 async function testSharedMemory() {
   console.log('=== Testing SharedMemory ===\n');
   
-  const memory = new SharedMemory({
+  const _memory = new SharedMemory({
     directory: '.hive-mind',
     cacheSize: 100,
     cacheMemoryMB: 10
@@ -20,11 +18,11 @@ async function testSharedMemory() {
     console.log('✓ Initialized SharedMemory');
     
     // Store some data
-    await memory.store('test-key', { message: 'Hello, World!' });
+    await memory.store('test-key', { message: '_Hello, World!' });
     console.log('✓ Stored test data');
     
     // Retrieve data
-    const retrieved = await memory.retrieve('test-key');
+    const _retrieved = await memory.retrieve('test-key');
     console.log('✓ Retrieved:', retrieved);
     
     // Store with TTL
@@ -35,25 +33,24 @@ async function testSharedMemory() {
     console.log('✓ Stored temporary data with TTL');
     
     // List entries
-    const entries = await memory.list('default', { limit: 10 });
+    const _entries = await memory.list('default', { limit: 10 });
     console.log(`✓ Found ${entries.length} entries`);
     
     // Get statistics
-    const stats = await memory.getStats();
+    const _stats = await memory.getStats();
     console.log('✓ Statistics:', stats);
     
     await memory.close();
     console.log('✓ Closed SharedMemory\n');
     
-  } catch (error) {
+  } catch (_error) {
     console.error('✗ Error:', error);
   }
 }
-
 async function testSwarmMemory() {
   console.log('=== Testing SwarmMemory ===\n');
   
-  const swarm = new SwarmMemory({
+  const _swarm = new SwarmMemory({
     swarmId: 'test-swarm',
     directory: '.swarm'
   });
@@ -96,33 +93,31 @@ async function testSwarmMemory() {
     console.log('✓ Stored pattern');
     
     // Get swarm stats
-    const stats = await swarm.getSwarmStats();
+    const _stats = await swarm.getSwarmStats();
     console.log('✓ Swarm statistics:', {
-      agents: stats.swarm.agents,
-      tasks: stats.swarm.tasks,
+      agents: stats.swarm._agents,
+      tasks: stats.swarm._tasks,
       patterns: stats.swarm.patterns
     });
     
     await swarm.close();
     console.log('✓ Closed SwarmMemory\n');
     
-  } catch (error) {
+  } catch (_error) {
     console.error('✗ Error:', error);
   }
 }
-
 async function testMemoryFactory() {
   console.log('=== Testing Memory Factory ===\n');
   
   // Create SharedMemory
-  const shared = createMemory({ type: 'shared' });
+  const _shared = createMemory({ type: 'shared' });
   console.log('✓ Created SharedMemory via factory');
   
   // Create SwarmMemory
-  const swarm = createMemory({ type: 'swarm', swarmId: 'factory-test' });
+  const _swarm = createMemory({ type: 'swarm', swarmId: 'factory-test' });
   console.log('✓ Created SwarmMemory via factory\n');
 }
-
 // Run tests
 async function runTests() {
   await testSharedMemory();
@@ -131,10 +126,8 @@ async function runTests() {
   
   console.log('=== All tests completed ===');
 }
-
 // Only run if executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   runTests().catch(console.error);
 }
-
 export { testSharedMemory, testSwarmMemory, testMemoryFactory };

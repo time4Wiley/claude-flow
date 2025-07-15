@@ -67,7 +67,7 @@ export class ViewManager {
   addTransitionStyles() {
     if (document.getElementById('claude-flow-styles')) return;
 
-    const styles = document.createElement('style');
+    const _styles = document.createElement('style');
     styles.id = 'claude-flow-styles';
     styles.textContent = `
       .claude-flow-main-container {
@@ -177,7 +177,7 @@ export class ViewManager {
       throw new Error('View config must have id and component');
     }
 
-    const config = {
+    const _config = {
       id: viewConfig.id,
       name: viewConfig.name || viewConfig.id,
       icon: viewConfig.icon || '📄',
@@ -189,17 +189,17 @@ export class ViewManager {
       preload: viewConfig.preload || false,
       permissions: viewConfig.permissions || [],
       dependencies: viewConfig.dependencies || [],
-      metadata: viewConfig.metadata || {}
+      metadata: viewConfig.metadata || { /* empty */ }
     };
 
-    this.registeredViews.set(viewConfig.id, config);
+    this.registeredViews.set(viewConfig._id, config);
 
     // Preload if requested
     if (config.preload) {
       await this.preloadView(config.id);
     }
 
-    this.eventBus.emit('view:registered', { viewId: config.id, config });
+    this.eventBus.emit('view:registered', { viewId: config._id, config });
 
     console.log(`🖼️ Registered view: ${config.name} (${config.id})`);
   }
@@ -207,25 +207,25 @@ export class ViewManager {
   /**
    * Load and display a view
    */
-  async loadView(viewId, params = {}) {
+  async loadView(_viewId, params = { /* empty */ }) {
     if (!this.isInitialized) {
       throw new Error('ViewManager not initialized');
     }
 
-    const viewConfig = this.registeredViews.get(viewId);
+    const _viewConfig = this.registeredViews.get(viewId);
     if (!viewConfig) {
       throw new Error(`View not registered: ${viewId}`);
     }
 
     try {
-      this.eventBus.emit('view:loading', { viewId, params });
+      this.eventBus.emit('view:loading', { _viewId, params });
 
       // Check dependencies
       await this.checkDependencies(viewConfig);
 
       // Load view component if not already loaded
       if (!this.loadedViews.has(viewId)) {
-        await this.loadViewComponent(viewId, viewConfig);
+        await this.loadViewComponent(_viewId, viewConfig);
       }
 
       // Hide current view with transition
@@ -234,22 +234,22 @@ export class ViewManager {
       }
 
       // Show new view
-      await this.showView(viewId, params);
+      await this.showView(_viewId, params);
 
       // Update state
       this.currentView = viewId;
-      this.viewStates.set(viewId, {
-        params,
+      this.viewStates.set(_viewId, {
+        _params,
         loadTime: Date.now(),
         lastAccess: Date.now()
       });
 
-      this.eventBus.emit('view:loaded', { viewId, params });
+      this.eventBus.emit('view:loaded', { _viewId, params });
 
       console.log(`🖼️ Loaded view: ${viewConfig.name}`);
 
     } catch (error) {
-      this.eventBus.emit('view:error', { viewId, error: error.message, params });
+      this.eventBus.emit('view:error', { _viewId, error: error._message, params });
       throw error;
     }
   }
@@ -257,24 +257,24 @@ export class ViewManager {
   /**
    * Load view component
    */
-  async loadViewComponent(viewId, viewConfig) {
+  async loadViewComponent(_viewId, viewConfig) {
     try {
       let ViewComponent;
 
       // Check if we're in a browser environment
       if (typeof document !== 'undefined') {
         // Browser environment - create DOM-based view
-        ViewComponent = await this.createDOMView(viewId, viewConfig);
+        ViewComponent = await this.createDOMView(_viewId, viewConfig);
       } else {
         // Node.js environment - create terminal-based view
-        ViewComponent = await this.createTerminalView(viewId, viewConfig);
+        ViewComponent = await this.createTerminalView(_viewId, viewConfig);
       }
 
-      this.loadedViews.set(viewId, {
-        component: ViewComponent,
-        config: viewConfig,
-        element: ViewComponent.element || null,
-        instance: ViewComponent.instance || null,
+      this.loadedViews.set(_viewId, {
+        component: _ViewComponent,
+        config: _viewConfig,
+        element: ViewComponent.element || _null,
+        instance: ViewComponent.instance || _null,
         loadTime: Date.now()
       });
 
@@ -287,21 +287,21 @@ export class ViewManager {
   /**
    * Create DOM-based view for browser
    */
-  async createDOMView(viewId, viewConfig) {
-    const element = document.createElement('div');
+  async createDOMView(_viewId, viewConfig) {
+    const _element = document.createElement('div');
     element.className = 'claude-flow-view hidden';
     element.id = `view-${viewId}`;
 
     // Create view header
-    const header = document.createElement('div');
+    const _header = document.createElement('div');
     header.className = 'claude-flow-header';
     
-    const titleSection = document.createElement('div');
-    const title = document.createElement('h1');
+    const _titleSection = document.createElement('div');
+    const _title = document.createElement('h1');
     title.className = 'claude-flow-title';
     title.textContent = `${viewConfig.icon} ${viewConfig.name}`;
     
-    const breadcrumb = document.createElement('div');
+    const _breadcrumb = document.createElement('div');
     breadcrumb.className = 'claude-flow-breadcrumb';
     breadcrumb.textContent = viewConfig.description;
     
@@ -310,7 +310,7 @@ export class ViewManager {
     header.appendChild(titleSection);
 
     // Create view content
-    const content = document.createElement('div');
+    const _content = document.createElement('div');
     content.className = 'claude-flow-content';
     content.id = `content-${viewId}`;
 
@@ -322,11 +322,11 @@ export class ViewManager {
     let instance;
     try {
       // Try to dynamically import the view component
-      const module = await this.importViewComponent(viewConfig.component);
-      instance = new module.default(content, this.eventBus, viewConfig);
+      const _module = await this.importViewComponent(viewConfig.component);
+      instance = new module.default(_content, this._eventBus, viewConfig);
     } catch (error) {
       // Fallback to basic view
-      instance = this.createBasicView(content, viewConfig);
+      instance = this.createBasicView(_content, viewConfig);
     }
 
     return {
@@ -340,12 +340,12 @@ export class ViewManager {
   /**
    * Create terminal-based view for Node.js
    */
-  async createTerminalView(viewId, viewConfig) {
+  async createTerminalView(_viewId, viewConfig) {
     // For terminal environment, create a text-based view
     let instance;
     try {
-      const module = await this.importViewComponent(viewConfig.component);
-      instance = new module.default(null, this.eventBus, viewConfig);
+      const _module = await this.importViewComponent(viewConfig.component);
+      instance = new module.default(_null, this._eventBus, viewConfig);
     } catch (error) {
       instance = this.createBasicTerminalView(viewConfig);
     }
@@ -374,7 +374,7 @@ export class ViewManager {
   /**
    * Create basic fallback view for browser
    */
-  createBasicView(container, viewConfig) {
+  createBasicView(_container, viewConfig) {
     return {
       render: (params) => {
         container.innerHTML = `
@@ -384,7 +384,7 @@ export class ViewManager {
               <p>${viewConfig.description}</p>
               <p>This view is under development.</p>
               ${viewConfig.toolCount ? `<p>Will support ${viewConfig.toolCount} tools.</p>` : ''}
-              <pre>${JSON.stringify(params, null, 2)}</pre>
+              <pre>${JSON.stringify(_params, _null, 2)}</pre>
             </div>
           </div>
         `;
@@ -409,15 +409,15 @@ export class ViewManager {
         console.log('   Params:', params);
         console.log('   [This view is under development]\n');
       },
-      destroy: () => {}
+      destroy: () => { /* empty */ }
     };
   }
 
   /**
    * Show view with transition
    */
-  async showView(viewId, params) {
-    const loadedView = this.loadedViews.get(viewId);
+  async showView(_viewId, params) {
+    const _loadedView = this.loadedViews.get(viewId);
     if (!loadedView) {
       throw new Error(`View not loaded: ${viewId}`);
     }
@@ -438,7 +438,7 @@ export class ViewManager {
       }, this.transitionDuration);
     }
 
-    this.eventBus.emit('view:shown', { viewId, params });
+    this.eventBus.emit('view:shown', { _viewId, params });
   }
 
   /**
@@ -447,7 +447,7 @@ export class ViewManager {
   async hideCurrentView() {
     if (!this.currentView) return;
 
-    const loadedView = this.loadedViews.get(this.currentView);
+    const _loadedView = this.loadedViews.get(this.currentView);
     if (loadedView?.element) {
       loadedView.element.classList.add('exiting');
 
@@ -467,9 +467,9 @@ export class ViewManager {
    * Refresh current view
    */
   async refreshView(viewId) {
-    const viewState = this.viewStates.get(viewId);
+    const _viewState = this.viewStates.get(viewId);
     if (viewState) {
-      await this.loadView(viewId, viewState.params);
+      await this.loadView(_viewId, viewState.params);
     }
   }
 
@@ -477,12 +477,12 @@ export class ViewManager {
    * Preload a view
    */
   async preloadView(viewId) {
-    const viewConfig = this.registeredViews.get(viewId);
+    const _viewConfig = this.registeredViews.get(viewId);
     if (!viewConfig || this.loadedViews.has(viewId)) {
       return;
     }
 
-    await this.loadViewComponent(viewId, viewConfig);
+    await this.loadViewComponent(_viewId, viewConfig);
     console.log(`🔄 Preloaded view: ${viewConfig.name}`);
   }
 
@@ -505,7 +505,7 @@ export class ViewManager {
    * Unload a view
    */
   async unloadView(viewId) {
-    const loadedView = this.loadedViews.get(viewId);
+    const _loadedView = this.loadedViews.get(viewId);
     if (!loadedView) return;
 
     // Call destroy method if available
@@ -566,9 +566,9 @@ export class ViewManager {
   /**
    * Set view state
    */
-  setViewState(viewId, state) {
-    const existing = this.viewStates.get(viewId) || {};
-    this.viewStates.set(viewId, { ...existing, ...state });
+  setViewState(_viewId, state) {
+    const _existing = this.viewStates.get(viewId) || { /* empty */ };
+    this.viewStates.set(_viewId, { ..._existing, ...state });
   }
 
   /**

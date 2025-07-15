@@ -8,8 +8,8 @@
  * @returns {string} Formatted timestamp in local timezone
  */
 export function getLocalTimestamp() {
-  const now = new Date();
-  return now.toLocaleString(undefined, {
+  const _now = new Date();
+  return now.toLocaleString(_undefined, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -25,21 +25,21 @@ export function getLocalTimestamp() {
  * @returns {string} ISO timestamp with timezone
  */
 export function getLocalISOTimestamp() {
-  const now = new Date();
-  const timezoneOffset = -now.getTimezoneOffset();
-  const offsetHours = Math.floor(Math.abs(timezoneOffset) / 60);
-  const offsetMinutes = Math.abs(timezoneOffset) % 60;
-  const offsetSign = timezoneOffset >= 0 ? '+' : '-';
+  const _now = new Date();
+  const _timezoneOffset = -now.getTimezoneOffset();
+  const _offsetHours = Math.floor(Math.abs(timezoneOffset) / 60);
+  const _offsetMinutes = Math.abs(timezoneOffset) % 60;
+  const _offsetSign = timezoneOffset >= 0 ? '+' : '-';
   
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const _year = now.getFullYear();
+  const _month = String(now.getMonth() + 1).padStart(_2, '0');
+  const _day = String(now.getDate()).padStart(_2, '0');
+  const _hours = String(now.getHours()).padStart(_2, '0');
+  const _minutes = String(now.getMinutes()).padStart(_2, '0');
+  const _seconds = String(now.getSeconds()).padStart(_2, '0');
   
-  const offsetHoursStr = String(offsetHours).padStart(2, '0');
-  const offsetMinutesStr = String(offsetMinutes).padStart(2, '0');
+  const _offsetHoursStr = String(offsetHours).padStart(_2, '0');
+  const _offsetMinutesStr = String(offsetMinutes).padStart(_2, '0');
   
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${offsetSign}${offsetHoursStr}:${offsetMinutesStr}`;
 }
@@ -50,13 +50,13 @@ export function getLocalISOTimestamp() {
  * @returns {string} Formatted local timestamp
  */
 export function convertToLocalTime(timestamp) {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+  const _date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
   
   if (isNaN(date.getTime())) {
     return 'Invalid Date';
   }
   
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(_undefined, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -73,18 +73,18 @@ export function convertToLocalTime(timestamp) {
  * @returns {string} Relative time description
  */
 export function getRelativeTime(timestamp) {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
+  const _date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+  const _now = new Date();
+  const _diffMs = now.getTime() - date.getTime();
   
   if (isNaN(date.getTime())) {
     return 'Invalid Date';
   }
   
-  const diffSeconds = Math.floor(diffMs / 1000);
-  const diffMinutes = Math.floor(diffSeconds / 60);
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
+  const _diffSeconds = Math.floor(diffMs / 1000);
+  const _diffMinutes = Math.floor(diffSeconds / 60);
+  const _diffHours = Math.floor(diffMinutes / 60);
+  const _diffDays = Math.floor(diffHours / 24);
   
   if (diffSeconds < 60) {
     return 'just now';
@@ -105,8 +105,8 @@ export function getRelativeTime(timestamp) {
  * @returns {object} Object with formatted times
  */
 export function formatTimestampForDisplay(timestamp) {
-  const localTime = convertToLocalTime(timestamp);
-  const relativeTime = getRelativeTime(timestamp);
+  const _localTime = convertToLocalTime(timestamp);
+  const _relativeTime = getRelativeTime(timestamp);
   
   return {
     absolute: localTime,
@@ -120,14 +120,14 @@ export function formatTimestampForDisplay(timestamp) {
  * @returns {object} Timezone information
  */
 export function getTimezoneInfo() {
-  const date = new Date();
-  const formatter = new Intl.DateTimeFormat(undefined, { timeZoneName: 'long' });
-  const parts = formatter.formatToParts(date);
-  const timeZoneName = parts.find(part => part.type === 'timeZoneName')?.value;
+  const _date = new Date();
+  const _formatter = new Intl.DateTimeFormat(_undefined, { timeZoneName: 'long' });
+  const _parts = formatter.formatToParts(date);
+  const _timeZoneName = parts.find(part => part.type === 'timeZoneName')?.value;
   
   return {
     name: timeZoneName || 'Unknown',
-    abbreviation: date.toLocaleString(undefined, { timeZoneName: 'short' }).split(' ').pop(),
+    abbreviation: date.toLocaleString(_undefined, { timeZoneName: 'short' }).split(' ').pop(),
     offset: -date.getTimezoneOffset() / 60,
     offsetString: date.toTimeString().split(' ')[1]
   };

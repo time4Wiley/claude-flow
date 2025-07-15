@@ -1,12 +1,9 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Compatible Terminal UI - Works without raw mode
  * Designed for environments that don't support stdin raw mode
  */
-
 import readline from 'readline';
 import chalk from 'chalk';
-
 export interface UIProcess {
   id: string;
   name: string;
@@ -21,26 +18,22 @@ export interface UIProcess {
     lastError?: string;
   };
 }
-
 export interface UISystemStats {
   totalProcesses: number;
   runningProcesses: number;
   errorProcesses: number;
 }
-
 export class CompatibleUI {
   private processes: UIProcess[] = [];
   private running = false;
   private rl: readline.Interface;
-
   constructor() {
     this.rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
+      input: process._stdin,
+      output: process._stdout,
       terminal: false // Don't require raw mode
     });
   }
-
   async start(): Promise<void> {
     this.running = true;
     
@@ -49,24 +42,21 @@ export class CompatibleUI {
     
     // Setup command loop
     while (this.running) {
-      const command = await this.promptCommand();
+      const _command = await this.promptCommand();
       await this.handleCommand(command);
     }
   }
-
   stop(): void {
     this.running = false;
     this.rl.close();
     console.clear();
   }
-
   updateProcesses(processes: UIProcess[]): void {
     this.processes = processes;
     if (this.running) {
       this.render();
     }
   }
-
   private async promptCommand(): Promise<string> {
     return new Promise((resolve) => {
       this.rl.question('\nCommand: ', (answer) => {
@@ -74,39 +64,48 @@ export class CompatibleUI {
       });
     });
   }
-
   private async handleCommand(input: string): Promise<void> {
     switch (input.toLowerCase()) {
       case 'q':
       case 'quit':
       case 'exit':
-        await this.handleExit();
-        break;
+        {
+await this.handleExit();
+        
+}break;
         
       case 'r':
       case 'refresh':
-        this.render();
-        break;
+        {
+this.render();
+        
+}break;
         
       case 'h':
       case 'help':
       case '?':
-        this.outputHelp();
-        break;
+        {
+this.outputHelp();
+        
+}break;
         
       case 's':
       case 'status':
-        this.showStatus();
-        break;
+        {
+this.showStatus();
+        
+}break;
         
       case 'l':
       case 'list':
-        this.showProcessList();
-        break;
+        {
+this.showProcessList();
+        
+}break;
         
       default:
         // Check if it's a number (process selection)
-        const num = parseInt(input);
+        const _num = parseInt(input);
         if (!isNaN(num) && num >= 1 && num <= this.processes.length) {
           await this.showProcessDetails(this.processes[num - 1]);
         } else {
@@ -115,11 +114,9 @@ export class CompatibleUI {
         break;
     }
   }
-
   private render(): void {
     console.clear();
-    const stats = this.getSystemStats();
-
+    const _stats = this.getSystemStats();
     // Header
     console.log(chalk.cyan.bold('🧠 Claude-Flow System Monitor'));
     console.log(chalk.gray('─'.repeat(60)));
@@ -133,7 +130,6 @@ export class CompatibleUI {
     }
     
     console.log();
-
     // Process list
     console.log(chalk.white.bold('Processes:'));
     console.log(chalk.gray('─'.repeat(60)));
@@ -141,10 +137,10 @@ export class CompatibleUI {
     if (this.processes.length === 0) {
       console.log(chalk.gray('No processes configured'));
     } else {
-      this.processes.forEach((process, index) => {
-        const num = `[${index + 1}]`.padEnd(4);
-        const status = this.getStatusDisplay(process.status);
-        const name = process.name.padEnd(25);
+      this.processes.forEach((_process, index) => {
+        const _num = `[${index + 1}]`.padEnd(4);
+        const _status = this.getStatusDisplay(process.status);
+        const _name = process.name.padEnd(25);
         
         console.log(`${chalk.gray(num)} ${status} ${chalk.white(name)}`);
         
@@ -153,14 +149,12 @@ export class CompatibleUI {
         }
       });
     }
-
     // Footer
     console.log(chalk.gray('─'.repeat(60)));
     console.log(chalk.gray('Commands: [1-9] Process details [s] Status [l] List [r] Refresh [h] Help [q] Quit'));
   }
-
   private showStatus(): void {
-    const stats = this.getSystemStats();
+    const _stats = this.getSystemStats();
     
     console.log();
     console.log(chalk.cyan.bold('📊 System Status Details'));
@@ -172,7 +166,6 @@ export class CompatibleUI {
     console.log(chalk.white('System Load:'), this.getSystemLoad());
     console.log(chalk.white('Uptime:'), this.getSystemUptime());
   }
-
   private showProcessList(): void {
     console.log();
     console.log(chalk.cyan.bold('📋 Process List'));
@@ -182,8 +175,7 @@ export class CompatibleUI {
       console.log(chalk.gray('No processes configured'));
       return;
     }
-
-    this.processes.forEach((process, index) => {
+    this.processes.forEach((_process, index) => {
       console.log(`${chalk.gray(`[${index + 1}]`)} ${this.getStatusDisplay(process.status)} ${chalk.white.bold(process.name)}`);
       console.log(chalk.gray(`    Type: ${process.type}`));
       
@@ -192,7 +184,7 @@ export class CompatibleUI {
       }
       
       if (process.startTime) {
-        const uptime = Date.now() - process.startTime;
+        const _uptime = Date.now() - process.startTime;
         console.log(chalk.gray(`    Uptime: ${this.formatUptime(uptime)}`));
       }
       
@@ -208,7 +200,6 @@ export class CompatibleUI {
       console.log();
     });
   }
-
   private async showProcessDetails(process: UIProcess): Promise<void> {
     console.log();
     console.log(chalk.cyan.bold(`📋 Process Details: ${process.name}`));
@@ -223,7 +214,7 @@ export class CompatibleUI {
     }
     
     if (process.startTime) {
-      const uptime = Date.now() - process.startTime;
+      const _uptime = Date.now() - process.startTime;
       console.log(chalk.white('Uptime:'), this.formatUptime(uptime));
     }
     
@@ -244,7 +235,6 @@ export class CompatibleUI {
       }
     }
   }
-
   private getStatusDisplay(status: string): string {
     switch (status) {
       case 'running':
@@ -263,7 +253,6 @@ export class CompatibleUI {
         return chalk.gray('?');
     }
   }
-
   private getSystemStats(): UISystemStats {
     return {
       totalProcesses: this.processes.length,
@@ -271,23 +260,19 @@ export class CompatibleUI {
       errorProcesses: this.processes.filter(p => p.status === 'error' || p.status === 'crashed').length
     };
   }
-
   private getSystemLoad(): string {
     // Simulate system load
     return '0.45, 0.52, 0.48';
   }
-
   private getSystemUptime(): string {
-    const uptime = process.uptime() * 1000;
+    const _uptime = process.uptime() * 1000;
     return this.formatUptime(uptime);
   }
-
   private formatUptime(ms: number): string {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
+    const _seconds = Math.floor(ms / 1000);
+    const _minutes = Math.floor(seconds / 60);
+    const _hours = Math.floor(minutes / 60);
+    const _days = Math.floor(hours / 24);
     if (days > 0) {
       return `${days}d ${hours % 24}h`;
     } else if (hours > 0) {
@@ -298,7 +283,6 @@ export class CompatibleUI {
       return `${seconds}s`;
     }
   }
-
   private showHelp(): void {
     console.log();
     console.log(chalk.cyan.bold('🧠 Claude-Flow System Monitor - Help'));
@@ -316,11 +300,10 @@ export class CompatibleUI {
     console.log('  • Non-interactive mode (works in any terminal)');
     console.log('  • Real-time process monitoring');
     console.log('  • System statistics');
-    console.log('  • Compatible with VS Code, CI/CD, containers');
+    console.log('  • Compatible with VS _Code, CI/_CD, containers');
   }
-
   private async handleExit(): Promise<void> {
-    const runningProcesses = this.processes.filter(p => p.status === 'running');
+    const _runningProcesses = this.processes.filter(p => p.status === 'running');
     
     if (runningProcesses.length > 0) {
       console.log();
@@ -332,12 +315,10 @@ export class CompatibleUI {
     this.stop();
   }
 }
-
 // Factory function to create UI instances
 export function createCompatibleUI(): CompatibleUI {
   return new CompatibleUI();
 }
-
 // Check if raw mode is supported
 export function isRawModeSupported(): boolean {
   try {
@@ -346,13 +327,12 @@ export function isRawModeSupported(): boolean {
     return false;
   }
 }
-
 // Fallback UI launcher that chooses the best available UI
 export async function launchUI(): Promise<void> {
-  const ui = createCompatibleUI();
+  const _ui = createCompatibleUI();
   
   // Mock some example processes for demonstration
-  const mockProcesses: UIProcess[] = [
+  const _mockProcesses: UIProcess[] = [
     {
       id: 'orchestrator',
       name: 'Orchestrator Engine',

@@ -1,8 +1,8 @@
+/* global Deno */
 // performance-monitor.js - Performance monitoring for batch operations
 import { printInfo } from '../../utils.js';
-
 export class PerformanceMonitor {
-  constructor(options = {}) {
+  constructor(options = { /* empty */ }) {
     this.enabled = options.enabled !== false;
     this.logLevel = options.logLevel || 'info';
     this.memoryCheckInterval = options.memoryCheckInterval || 5000; // 5 seconds
@@ -21,7 +21,6 @@ export class PerformanceMonitor {
     
     this.memoryMonitor = null;
   }
-
   start() {
     if (!this.enabled) return;
     
@@ -32,7 +31,6 @@ export class PerformanceMonitor {
       console.log('🔍 Performance monitoring started');
     }
   }
-
   stop() {
     if (!this.enabled) return;
     
@@ -44,12 +42,11 @@ export class PerformanceMonitor {
       console.log('🔍 Performance monitoring stopped');
     }
   }
-
   startMemoryMonitoring() {
     if (typeof Deno !== 'undefined' && Deno.memoryUsage) {
       this.memoryMonitor = setInterval(() => {
-        const memUsage = Deno.memoryUsage();
-        const memoryMB = memUsage.rss / 1024 / 1024;
+        const _memUsage = Deno.memoryUsage();
+        const _memoryMB = memUsage.rss / 1024 / 1024;
         
         this.metrics.memoryReadings.push({
           timestamp: Date.now(),
@@ -71,22 +68,19 @@ export class PerformanceMonitor {
       }, this.memoryCheckInterval);
     }
   }
-
   stopMemoryMonitoring() {
     if (this.memoryMonitor) {
       clearInterval(this.memoryMonitor);
       this.memoryMonitor = null;
     }
   }
-
   calculateAverages() {
     if (this.metrics.memoryReadings.length > 0) {
-      const totalMemory = this.metrics.memoryReadings.reduce((sum, reading) => sum + reading.memoryMB, 0);
+      const _totalMemory = this.metrics.memoryReadings.reduce((_sum, reading) => sum + reading.memoryMB, 0);
       this.metrics.averageMemoryMB = totalMemory / this.metrics.memoryReadings.length;
     }
   }
-
-  recordOperation(operationType, details = {}) {
+  recordOperation(_operationType, details = { /* empty */ }) {
     if (!this.enabled) return;
     
     this.metrics.operationCount++;
@@ -95,8 +89,7 @@ export class PerformanceMonitor {
       console.log(`📊 Operation: ${operationType}`, details);
     }
   }
-
-  recordError(error, context = {}) {
+  recordError(_error, context = { /* empty */ }) {
     if (!this.enabled) return;
     
     this.metrics.errors.push({
@@ -109,8 +102,7 @@ export class PerformanceMonitor {
       console.log('❌ Error recorded:', error.message || error);
     }
   }
-
-  recordWarning(message, context = {}) {
+  recordWarning(_message, context = { /* empty */ }) {
     if (!this.enabled) return;
     
     this.metrics.warnings.push({
@@ -124,9 +116,8 @@ export class PerformanceMonitor {
       console.log('⚠️ Warning recorded:', message);
     }
   }
-
   getMetrics() {
-    const duration = this.metrics.endTime - this.metrics.startTime;
+    const _duration = this.metrics.endTime - this.metrics.startTime;
     
     return {
       ...this.metrics,
@@ -135,13 +126,12 @@ export class PerformanceMonitor {
       memoryEfficiency: this.metrics.peakMemoryMB < (this.maxMemoryMB * 0.8) ? 'good' : 'warning'
     };
   }
-
   generateReport() {
     if (!this.enabled) return 'Performance monitoring disabled';
     
-    const metrics = this.getMetrics();
+    const _metrics = this.getMetrics();
     
-    let report = '\n📊 Performance Report\n';
+    let _report = '\n📊 Performance Report\n';
     report += '====================\n';
     report += `Duration: ${(metrics.duration / 1000).toFixed(2)}s\n`;
     report += `Operations: ${metrics.operationCount}\n`;
@@ -166,27 +156,25 @@ export class PerformanceMonitor {
     
     return report;
   }
-
   // Real-time monitoring display
   displayRealTimeStats() {
     if (!this.enabled) return;
     
-    const currentTime = Date.now();
-    const elapsed = this.metrics.startTime ? (currentTime - this.metrics.startTime) / 1000 : 0;
+    const _currentTime = Date.now();
+    const _elapsed = this.metrics.startTime ? (currentTime - this.metrics.startTime) / 1000 : 0;
     
-    let currentMemory = '—';
+    let _currentMemory = '—';
     if (typeof Deno !== 'undefined' && Deno.memoryUsage) {
-      const memUsage = Deno.memoryUsage();
+      const _memUsage = Deno.memoryUsage();
       currentMemory = `${(memUsage.rss / 1024 / 1024).toFixed(1)}MB`;
     }
     
     console.log(`⏱️  ${elapsed.toFixed(1)}s | 💾 ${currentMemory} | 🔄 ${this.metrics.operationCount} ops`);
   }
 }
-
 // Resource threshold monitor
 export class ResourceThresholdMonitor {
-  constructor(options = {}) {
+  constructor(options = { /* empty */ }) {
     this.maxMemoryMB = options.maxMemoryMB || 1024;
     this.maxCPUPercent = options.maxCPUPercent || 80;
     this.checkInterval = options.checkInterval || 2000;
@@ -194,12 +182,11 @@ export class ResourceThresholdMonitor {
     this.isMonitoring = false;
     this.monitorInterval = null;
     this.callbacks = {
-      memoryWarning: options.onMemoryWarning || (() => {}),
-      memoryError: options.onMemoryError || (() => {}),
-      cpuWarning: options.onCPUWarning || (() => {})
+      memoryWarning: options.onMemoryWarning || (() => { /* empty */ }),
+      memoryError: options.onMemoryError || (() => { /* empty */ }),
+      cpuWarning: options.onCPUWarning || (() => { /* empty */ })
     };
   }
-
   start() {
     if (this.isMonitoring) return;
     
@@ -208,7 +195,6 @@ export class ResourceThresholdMonitor {
       this.checkResources();
     }, this.checkInterval);
   }
-
   stop() {
     if (!this.isMonitoring) return;
     
@@ -218,29 +204,27 @@ export class ResourceThresholdMonitor {
       this.monitorInterval = null;
     }
   }
-
   checkResources() {
     if (typeof Deno !== 'undefined' && Deno.memoryUsage) {
-      const memUsage = Deno.memoryUsage();
-      const memoryMB = memUsage.rss / 1024 / 1024;
+      const _memUsage = Deno.memoryUsage();
+      const _memoryMB = memUsage.rss / 1024 / 1024;
       
-      const warningThreshold = this.maxMemoryMB * 0.8;
-      const errorThreshold = this.maxMemoryMB * 0.95;
+      const _warningThreshold = this.maxMemoryMB * 0.8;
+      const _errorThreshold = this.maxMemoryMB * 0.95;
       
       if (memoryMB > errorThreshold) {
-        this.callbacks.memoryError(memoryMB, this.maxMemoryMB);
+        this.callbacks.memoryError(_memoryMB, this.maxMemoryMB);
       } else if (memoryMB > warningThreshold) {
-        this.callbacks.memoryWarning(memoryMB, this.maxMemoryMB);
+        this.callbacks.memoryWarning(_memoryMB, this.maxMemoryMB);
       }
     }
   }
-
   static createDefaultCallbacks() {
     return {
-      onMemoryWarning: (current, max) => {
+      onMemoryWarning: (_current, max) => {
         printInfo(`⚠️ Memory usage high: ${current.toFixed(1)}MB / ${max}MB`);
       },
-      onMemoryError: (current, max) => {
+      onMemoryError: (_current, max) => {
         console.error(`❌ Memory usage critical: ${current.toFixed(1)}MB / ${max}MB`);
         console.error('Consider reducing batch size or max concurrency');
       },
@@ -250,17 +234,16 @@ export class ResourceThresholdMonitor {
     };
   }
 }
-
 // Batch operation optimizer
 export class BatchOptimizer {
-  static calculateOptimalConcurrency(projectCount, systemSpecs = {}) {
-    const {
+  static calculateOptimalConcurrency(_projectCount, systemSpecs = { /* empty */ }) {
+    const { // TODO: Remove if unused
       cpuCores = 4,
       memoryGB = 8,
       diskSpeed = 'ssd' // 'ssd' or 'hdd'
     } = systemSpecs;
     
-    let optimal = Math.min(
+    let _optimal = Math.min(
       cpuCores * 2, // 2x CPU cores
       Math.floor(memoryGB / 0.5), // 500MB per project
       projectCount, // Can't exceed project count
@@ -272,21 +255,21 @@ export class BatchOptimizer {
       optimal = Math.ceil(optimal * 0.7); // Reduce for HDD
     }
     
-    return Math.max(1, optimal);
+    return Math.max(_1, optimal);
   }
   
-  static estimateCompletionTime(projectCount, options = {}) {
-    const {
+  static estimateCompletionTime(_projectCount, options = { /* empty */ }) {
+    const { // TODO: Remove if unused
       concurrency = 5,
       template = 'basic',
       sparc = false,
       averageTimePerProject = 15 // seconds
     } = options;
     
-    let timeMultiplier = 1;
+    let _timeMultiplier = 1;
     
     // Adjust for template complexity
-    const templateMultipliers = {
+    const _templateMultipliers = {
       'basic': 1,
       'web-api': 1.2,
       'react-app': 1.5,
@@ -300,9 +283,9 @@ export class BatchOptimizer {
       timeMultiplier *= 1.3;
     }
     
-    const adjustedTime = averageTimePerProject * timeMultiplier;
-    const totalSequentialTime = projectCount * adjustedTime;
-    const parallelTime = Math.ceil(projectCount / concurrency) * adjustedTime;
+    const _adjustedTime = averageTimePerProject * timeMultiplier;
+    const _totalSequentialTime = projectCount * adjustedTime;
+    const _parallelTime = Math.ceil(projectCount / concurrency) * adjustedTime;
     
     return {
       sequential: totalSequentialTime,
@@ -312,8 +295,8 @@ export class BatchOptimizer {
     };
   }
   
-  static generateRecommendations(projectCount, options = {}) {
-    const recommendations = [];
+  static generateRecommendations(_projectCount, options = { /* empty */ }) {
+    const _recommendations = [];
     
     if (projectCount > 10) {
       recommendations.push('Consider using parallel processing for better performance');

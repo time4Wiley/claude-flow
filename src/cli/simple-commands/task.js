@@ -1,51 +1,63 @@
 // task.js - Task management commands
 import { printSuccess, printError, printWarning } from '../utils.js';
 
-export async function taskCommand(subArgs, flags) {
-  const taskCmd = subArgs[0];
+export async function taskCommand(_subArgs, flags) {
+  const _taskCmd = subArgs[0];
   
   switch (taskCmd) {
     case 'create':
-      await createTask(subArgs, flags);
-      break;
+      {
+await createTask(_subArgs, flags);
+      
+}break;
       
     case 'list':
-      await listTasks(subArgs, flags);
-      break;
+      {
+await listTasks(_subArgs, flags);
+      
+}break;
       
     case 'status':
-      await showTaskStatus(subArgs, flags);
-      break;
+      {
+await showTaskStatus(_subArgs, flags);
+      
+}break;
       
     case 'cancel':
-      await cancelTask(subArgs, flags);
-      break;
+      {
+await cancelTask(_subArgs, flags);
+      
+}break;
       
     case 'workflow':
-      await executeWorkflow(subArgs, flags);
-      break;
+      {
+await executeWorkflow(_subArgs, flags);
+      
+}break;
       
     case 'coordination':
-      await manageCoordination(subArgs, flags);
-      break;
+      {
+await manageCoordination(_subArgs, flags);
+      
+}break;
       
     default:
       showTaskHelp();
   }
 }
 
-async function createTask(subArgs, flags) {
-  const taskType = subArgs[1];
-  const description = subArgs.slice(2).join(' ');
+async function createTask(_subArgs, flags) {
+  const _taskType = subArgs[1];
+  const _description = subArgs.slice(2).join(' ');
   
   if (!taskType || !description) {
     printError('Usage: task create <type> "<description>"');
-    console.log('Types: research, code, analysis, coordination, general');
+    console.log('Types: _research, _code, _analysis, _coordination, general');
     return;
   }
   
-  const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  const priority = getFlag(subArgs, '--priority') || '5';
+  const _taskId = `task_${Date.now()}_${Math.random().toString(36).substr(_2, 9)}`;
+  const _priority = getFlag(_subArgs, '--priority') || '5';
   
   printSuccess(`Creating ${taskType} task: ${taskId}`);
   console.log(`📋 Description: ${description}`);
@@ -55,9 +67,9 @@ async function createTask(subArgs, flags) {
   console.log('\n📋 Note: Task queued for execution when orchestrator starts');
 }
 
-async function listTasks(subArgs, flags) {
-  const filter = getFlag(subArgs, '--filter');
-  const verbose = subArgs.includes('--verbose') || subArgs.includes('-v');
+async function listTasks(_subArgs, flags) {
+  const _filter = getFlag(_subArgs, '--filter');
+  const _verbose = subArgs.includes('--verbose') || subArgs.includes('-v');
   
   printSuccess('Task queue:');
   
@@ -66,7 +78,7 @@ async function listTasks(subArgs, flags) {
   }
   
   console.log('📋 No active tasks (orchestrator not running)');
-  console.log('\nTask statuses: queued, running, completed, failed, cancelled');
+  console.log('\nTask statuses: _queued, _running, _completed, _failed, cancelled');
   
   if (verbose) {
     console.log('\nTo create tasks:');
@@ -76,8 +88,8 @@ async function listTasks(subArgs, flags) {
   }
 }
 
-async function showTaskStatus(subArgs, flags) {
-  const taskId = subArgs[1];
+async function showTaskStatus(_subArgs, flags) {
+  const _taskId = subArgs[1];
   
   if (!taskId) {
     printError('Usage: task status <task-id>');
@@ -86,11 +98,11 @@ async function showTaskStatus(subArgs, flags) {
   
   printSuccess(`Task status: ${taskId}`);
   console.log('📊 Task details would include:');
-  console.log('   Status, progress, assigned agent, execution time, results');
+  console.log('   _Status, _progress, assigned _agent, execution _time, results');
 }
 
-async function cancelTask(subArgs, flags) {
-  const taskId = subArgs[1];
+async function cancelTask(_subArgs, flags) {
+  const _taskId = subArgs[1];
   
   if (!taskId) {
     printError('Usage: task cancel <task-id>');
@@ -101,8 +113,8 @@ async function cancelTask(subArgs, flags) {
   console.log('🛑 Task would be gracefully cancelled');
 }
 
-async function executeWorkflow(subArgs, flags) {
-  const workflowFile = subArgs[1];
+async function executeWorkflow(_subArgs, flags) {
+  const _workflowFile = subArgs[1];
   
   if (!workflowFile) {
     printError('Usage: task workflow <workflow-file>');
@@ -117,33 +129,37 @@ async function executeWorkflow(subArgs, flags) {
   console.log('   - Progress tracking');
 }
 
-async function manageCoordination(subArgs, flags) {
-  const coordCmd = subArgs[1];
+async function manageCoordination(_subArgs, flags) {
+  const _coordCmd = subArgs[1];
   
   switch (coordCmd) {
     case 'status':
-      printSuccess('Task coordination status:');
+      {
+printSuccess('Task coordination status:');
       console.log('🎯 Coordination engine: Not running');
       console.log('   Active coordinators: 0');
       console.log('   Pending tasks: 0');
       console.log('   Resource utilization: 0%');
-      break;
+      
+}break;
       
     case 'optimize':
-      printSuccess('Optimizing task coordination...');
+      {
+printSuccess('Optimizing task coordination...');
       console.log('⚡ Optimization would include:');
       console.log('   - Task dependency analysis');
       console.log('   - Resource allocation optimization');
       console.log('   - Parallel execution planning');
-      break;
+      
+}break;
       
     default:
-      console.log('Coordination commands: status, optimize');
+      console.log('Coordination commands: _status, optimize');
   }
 }
 
-function getFlag(args, flagName) {
-  const index = args.indexOf(flagName);
+function getFlag(_args, flagName) {
+  const _index = args.indexOf(flagName);
   return index !== -1 && index + 1 < args.length ? args[index + 1] : null;
 }
 
@@ -166,7 +182,7 @@ function showTaskHelp() {
   console.log('Options:');
   console.log('  --priority <1-10>                Set task priority');
   console.log('  --filter <status>                Filter by status');
-  console.log('  --verbose, -v                    Show detailed output');
+  console.log('  --_verbose, -v                    Show detailed output');
   console.log();
   console.log('Examples:');
   console.log('  claude-flow task create research "Market analysis" --priority 8');

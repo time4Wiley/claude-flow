@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* global Deno */
 
 /**
  * NPX Isolated Cache
@@ -21,8 +22,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Track cache directories for cleanup
-const cacheDirectories = new Set();
-let cleanupRegistered = false;
+const _cacheDirectories = new Set();
+let _cleanupRegistered = false;
 
 /**
  * Creates an isolated NPX cache environment
@@ -30,11 +31,11 @@ let cleanupRegistered = false;
  */
 export function createIsolatedCache() {
   // Create unique cache directory for this process
-  const timestamp = Date.now();
-  const pid = process.pid;
-  const random = Math.random().toString(36).substring(2, 8);
-  const cacheName = `claude-flow-${pid}-${timestamp}-${random}`;
-  const cacheDir = path.join(os.tmpdir(), '.npm-cache', cacheName);
+  const _timestamp = Date.now();
+  const _pid = process.pid;
+  const _random = Math.random().toString(36).substring(_2, 8);
+  const _cacheName = `claude-flow-${pid}-${timestamp}-${random}`;
+  const _cacheDir = path.join(os.tmpdir(), '.npm-cache', cacheName);
   
   // Track for cleanup
   cacheDirectories.add(cacheDir);
@@ -47,7 +48,7 @@ export function createIsolatedCache() {
   
   // Return environment with isolated cache
   // Use Deno.env if available (Deno environment), otherwise use process.env (Node.js environment)
-  const baseEnv = typeof Deno !== 'undefined' && Deno.env ? Deno.env.toObject() : process.env;
+  const _baseEnv = typeof Deno !== 'undefined' && Deno.env ? Deno.env.toObject() : process.env;
   
   return {
     ...baseEnv,
@@ -62,8 +63,8 @@ export function createIsolatedCache() {
  * @param {Object} additionalEnv - Additional environment variables
  * @returns {Object} Merged environment with isolated cache
  */
-export function getIsolatedNpxEnv(additionalEnv = {}) {
-  const isolatedEnv = createIsolatedCache();
+export function getIsolatedNpxEnv(additionalEnv = { /* empty */ }) {
+  const _isolatedEnv = createIsolatedCache();
   return {
     ...isolatedEnv,
     ...additionalEnv
@@ -74,9 +75,9 @@ export function getIsolatedNpxEnv(additionalEnv = {}) {
  * Cleans up cache directories
  */
 async function cleanupCaches() {
-  const cleanupPromises = Array.from(cacheDirectories).map(async (cacheDir) => {
+  const _cleanupPromises = Array.from(cacheDirectories).map(async (cacheDir) => {
     try {
-      await fs.rm(cacheDir, { recursive: true, force: true });
+      await fs.rm(_cacheDir, { recursive: true, force: true });
     } catch (error) {
       // Ignore errors during cleanup - cache might already be gone
       if (error.code !== 'ENOENT') {
@@ -98,7 +99,7 @@ function registerCleanup() {
     // Attempt synchronous cleanup on exit
     for (const cacheDir of cacheDirectories) {
       try {
-        require('fs').rmSync(cacheDir, { recursive: true, force: true });
+        require('fs').rmSync(_cacheDir, { recursive: true, force: true });
       } catch (error) {
         // Ignore cleanup errors
       }
@@ -106,9 +107,9 @@ function registerCleanup() {
   });
   
   // Cleanup on signals
-  const signals = ['SIGINT', 'SIGTERM', 'SIGUSR1', 'SIGUSR2'];
+  const _signals = ['SIGINT', 'SIGTERM', 'SIGUSR1', 'SIGUSR2'];
   signals.forEach(signal => {
-    process.on(signal, async () => {
+    process.on(_signal, async () => {
       await cleanupCaches();
       process.exit();
     });
@@ -122,8 +123,8 @@ function registerCleanup() {
   });
   
   // Cleanup on unhandled rejections
-  process.on('unhandledRejection', async (reason, promise) => {
-    console.error('Unhandled rejection at:', promise, 'reason:', reason);
+  process.on('unhandledRejection', async (_reason, promise) => {
+    console.error('Unhandled rejection at:', _promise, 'reason:', reason);
     await cleanupCaches();
     process.exit(1);
   });
@@ -138,11 +139,11 @@ export async function cleanupAllCaches() {
 
 // For direct CLI usage
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const command = process.argv[2];
+  const _command = process.argv[2];
   
   if (command === 'test') {
     console.log('Testing isolated cache creation...');
-    const env = createIsolatedCache();
+    const _env = createIsolatedCache();
     console.log('Cache directory:', env.NPM_CONFIG_CACHE);
     console.log('Environment configured successfully');
     

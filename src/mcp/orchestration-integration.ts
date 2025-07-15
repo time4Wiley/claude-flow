@@ -1,9 +1,7 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * MCP Integration with Claude-Flow Orchestration System
  * Provides seamless integration between MCP servers and the broader orchestration components
  */
-
 import { EventEmitter } from 'node:events';
 import type { ILogger } from '../core/logger.js';
 import { MCPConfig, MCPSession, MCPTool, SystemEvents } from '../utils/types.js';
@@ -12,19 +10,17 @@ import { MCPServer, IMCPServer } from './server.js';
 import { MCPLifecycleManager, LifecycleState } from './lifecycle-manager.js';
 import { MCPPerformanceMonitor } from './performance-monitor.js';
 import { MCPProtocolManager } from './protocol-manager.js';
-
 export interface OrchestrationComponents {
-  orchestrator?: any;
-  swarmCoordinator?: any;
-  agentManager?: any;
-  resourceManager?: any;
-  memoryManager?: any;
-  messageBus?: any;
-  monitor?: any;
-  eventBus?: any;
-  terminalManager?: any;
+  orchestrator?: unknown;
+  swarmCoordinator?: unknown;
+  agentManager?: unknown;
+  resourceManager?: unknown;
+  memoryManager?: unknown;
+  messageBus?: unknown;
+  monitor?: unknown;
+  eventBus?: unknown;
+  terminalManager?: unknown;
 }
-
 export interface MCPOrchestrationConfig {
   enabledIntegrations: {
     orchestrator: boolean;
@@ -42,7 +38,6 @@ export interface MCPOrchestrationConfig {
   enableMetrics: boolean;
   enableAlerts: boolean;
 }
-
 export interface IntegrationStatus {
   component: string;
   enabled: boolean;
@@ -52,7 +47,6 @@ export interface IntegrationStatus {
   error?: string;
   metrics?: Record<string, number>;
 }
-
 /**
  * MCP Orchestration Integration Manager
  * Manages the integration between MCP servers and orchestration components
@@ -84,38 +78,33 @@ export class MCPOrchestrationIntegration extends EventEmitter {
     enableMetrics: true,
     enableAlerts: true,
   };
-
   constructor(
-    private mcpConfig: MCPConfig,
-    private orchestrationConfig: MCPOrchestrationConfig,
-    private components: OrchestrationComponents,
-    private logger: ILogger,
+    private mcpConfig: _MCPConfig,
+    private orchestrationConfig: _MCPOrchestrationConfig,
+    private components: _OrchestrationComponents,
+    private logger: _ILogger,
   ) {
     super();
     
     this.orchestrationConfig = { ...this.defaultConfig, ...orchestrationConfig };
     this.initializeIntegration();
   }
-
   /**
    * Start the MCP orchestration integration
    */
   async start(): Promise<void> {
     this.logger.info('Starting MCP orchestration integration');
-
     try {
       // Initialize protocol manager
       this.protocolManager = new MCPProtocolManager(this.logger);
-
       // Initialize performance monitor
       if (this.orchestrationConfig.enableMetrics) {
         this.performanceMonitor = new MCPPerformanceMonitor(this.logger);
         this.setupPerformanceMonitoring();
       }
-
       // Create MCP server
       this.server = new MCPServer(
-        this.mcpConfig,
+        this._mcpConfig,
         this.components.eventBus || new EventEmitter(),
         this.logger,
         this.components.orchestrator,
@@ -125,144 +114,120 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         this.components.messageBus,
         this.components.monitor,
       );
-
       // Initialize lifecycle manager
       this.lifecycleManager = new MCPLifecycleManager(
-        this.mcpConfig,
-        this.logger,
+        this._mcpConfig,
+        this._logger,
         () => this.server!,
       );
-
       // Setup lifecycle event handlers
       this.setupLifecycleHandlers();
-
       // Register orchestration tools
       this.registerOrchestrationTools();
-
       // Start the server
       if (this.orchestrationConfig.autoStart) {
         await this.lifecycleManager.start();
       }
-
       // Start health monitoring
       this.startHealthMonitoring();
-
       // Setup component integrations
       await this.setupComponentIntegrations();
-
       this.logger.info('MCP orchestration integration started successfully');
       this.emit('integrationStarted');
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Failed to start MCP orchestration integration', error);
       throw error;
     }
   }
-
   /**
    * Stop the MCP orchestration integration
    */
   async stop(): Promise<void> {
     this.logger.info('Stopping MCP orchestration integration');
-
     try {
       // Stop health monitoring
       this.stopHealthMonitoring();
-
       // Stop lifecycle manager
       if (this.lifecycleManager) {
         await this.lifecycleManager.stop();
       }
-
       // Stop performance monitor
       if (this.performanceMonitor) {
         this.performanceMonitor.stop();
       }
-
       // Clear reconnect timers
       for (const timer of this.reconnectTimers.values()) {
         clearTimeout(timer);
       }
       this.reconnectTimers.clear();
-
       this.logger.info('MCP orchestration integration stopped');
       this.emit('integrationStopped');
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Error stopping MCP orchestration integration', error);
       throw error;
     }
   }
-
   /**
    * Get integration status for all components
    */
   getIntegrationStatus(): IntegrationStatus[] {
     return Array.from(this.integrationStatus.values());
   }
-
   /**
    * Get status for a specific component
    */
   getComponentStatus(component: string): IntegrationStatus | undefined {
     return this.integrationStatus.get(component);
   }
-
   /**
    * Get MCP server instance
    */
   getServer(): IMCPServer | undefined {
     return this.server;
   }
-
   /**
    * Get lifecycle manager
    */
   getLifecycleManager(): MCPLifecycleManager | undefined {
     return this.lifecycleManager;
   }
-
   /**
    * Get performance monitor
    */
   getPerformanceMonitor(): MCPPerformanceMonitor | undefined {
     return this.performanceMonitor;
   }
-
   /**
    * Get protocol manager
    */
   getProtocolManager(): MCPProtocolManager | undefined {
     return this.protocolManager;
   }
-
   /**
    * Force reconnection to a component
    */
   async reconnectComponent(component: string): Promise<void> {
-    const status = this.integrationStatus.get(component);
+    const _status = this.integrationStatus.get(component);
     if (!status || !status.enabled) {
       throw new MCPError(`Component ${component} is not enabled`);
     }
-
     this.logger.info('Reconnecting to component', { component });
-
     try {
       await this.connectComponent(component);
       this.logger.info('Successfully reconnected to component', { component });
-    } catch (error) {
-      this.logger.error('Failed to reconnect to component', { component, error });
+    } catch (_error) {
+      this.logger.error('Failed to reconnect to component', { _component, error });
       throw error;
     }
   }
-
   /**
    * Enable/disable component integration
    */
   async setComponentEnabled(component: string, enabled: boolean): Promise<void> {
-    const status = this.integrationStatus.get(component);
+    const _status = this.integrationStatus.get(component);
     if (!status) {
       throw new MCPError(`Unknown component: ${component}`);
     }
-
     status.enabled = enabled;
     
     if (enabled) {
@@ -270,13 +235,11 @@ export class MCPOrchestrationIntegration extends EventEmitter {
     } else {
       await this.disconnectComponent(component);
     }
-
-    this.logger.info('Component integration updated', { component, enabled });
-    this.emit('componentToggled', { component, enabled });
+    this.logger.info('Component integration updated', { _component, enabled });
+    this.emit('componentToggled', { _component, enabled });
   }
-
   private initializeIntegration(): void {
-    const components = [
+    const _components = [
       'orchestrator',
       'swarm',
       'agents',
@@ -285,10 +248,9 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       'monitoring',
       'terminals',
     ];
-
     for (const component of components) {
-      this.integrationStatus.set(component, {
-        component,
+      this.integrationStatus.set(_component, {
+        _component,
         enabled: this.orchestrationConfig.enabledIntegrations[component as keyof typeof this.orchestrationConfig.enabledIntegrations],
         connected: false,
         healthy: false,
@@ -296,121 +258,100 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       });
     }
   }
-
   private setupLifecycleHandlers(): void {
     if (!this.lifecycleManager) return;
-
     this.lifecycleManager.on('stateChange', (event) => {
       this.logger.info('MCP server state changed', {
-        from: event.previousState,
-        to: event.state,
-        error: event.error?.message,
+        from: event._previousState,
+        to: event._state,
+        error: event.error?._message,
       });
-
       // Emit to orchestration event bus
       if (this.components.eventBus) {
-        this.components.eventBus.emit(SystemEvents.SYSTEM_HEALTHCHECK, {
+        this.components.eventBus.emit(SystemEvents._SYSTEM_HEALTHCHECK, {
           status: event.state === LifecycleState.RUNNING ? 'healthy' : 'unhealthy',
           component: 'mcp-server',
-          timestamp: event.timestamp,
+          timestamp: event._timestamp,
         });
       }
-
       this.emit('lifecycleStateChanged', event);
     });
   }
-
   private setupPerformanceMonitoring(): void {
     if (!this.performanceMonitor) return;
-
     this.performanceMonitor.on('metricsCollected', (metrics) => {
       // Forward metrics to orchestration monitor
       if (this.components.monitor && typeof this.components.monitor.recordMetrics === 'function') {
         this.components.monitor.recordMetrics('mcp', metrics);
       }
-
       this.emit('metricsCollected', metrics);
     });
-
     this.performanceMonitor.on('alertTriggered', (alert) => {
       this.logger.warn('MCP performance alert triggered', {
-        alertId: alert.id,
-        ruleName: alert.ruleName,
-        severity: alert.severity,
-        message: alert.message,
+        alertId: alert._id,
+        ruleName: alert._ruleName,
+        severity: alert._severity,
+        message: alert._message,
       });
-
       // Forward to orchestration alert system
       if (this.orchestrationConfig.enableAlerts && this.components.monitor) {
         if (typeof this.components.monitor.sendAlert === 'function') {
           this.components.monitor.sendAlert({
             source: 'mcp',
-            severity: alert.severity,
-            message: alert.message,
-            metadata: alert,
+            severity: alert._severity,
+            message: alert._message,
+            metadata: _alert,
           });
         }
       }
-
       this.emit('performanceAlert', alert);
     });
-
     this.performanceMonitor.on('optimizationSuggestion', (suggestion) => {
       this.logger.info('MCP optimization suggestion', {
-        type: suggestion.type,
-        priority: suggestion.priority,
-        title: suggestion.title,
+        type: suggestion._type,
+        priority: suggestion._priority,
+        title: suggestion._title,
       });
-
       this.emit('optimizationSuggestion', suggestion);
     });
   }
-
   private registerOrchestrationTools(): void {
     if (!this.server) return;
-
     // Register orchestrator tools
     if (this.orchestrationConfig.enabledIntegrations.orchestrator && this.components.orchestrator) {
       this.registerOrchestratorTools();
     }
-
     // Register swarm tools
     if (this.orchestrationConfig.enabledIntegrations.swarm && this.components.swarmCoordinator) {
       this.registerSwarmTools();
     }
-
     // Register agent tools
     if (this.orchestrationConfig.enabledIntegrations.agents && this.components.agentManager) {
       this.registerAgentTools();
     }
-
     // Register resource tools
     if (this.orchestrationConfig.enabledIntegrations.resources && this.components.resourceManager) {
       this.registerResourceTools();
     }
-
     // Register memory tools
     if (this.orchestrationConfig.enabledIntegrations.memory && this.components.memoryManager) {
       this.registerMemoryTools();
     }
-
     // Register monitoring tools
     if (this.orchestrationConfig.enabledIntegrations.monitoring && this.components.monitor) {
       this.registerMonitoringTools();
     }
-
     // Register terminal tools
     if (this.orchestrationConfig.enabledIntegrations.terminals && this.components.terminalManager) {
       this.registerTerminalTools();
     }
   }
-
   private registerOrchestratorTools(): void {
-    const tools: MCPTool[] = [
+    const _tools: MCPTool[] = [
       {
         name: 'orchestrator/status',
         description: 'Get orchestrator status and metrics',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: { /* empty */ } },
         handler: async () => {
           if (typeof this.components.orchestrator?.getStatus === 'function') {
             return await this.components.orchestrator.getStatus();
@@ -428,7 +369,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             limit: { type: 'number', minimum: 1, maximum: 100 },
           },
         },
-        handler: async (input: any) => {
+        handler: async (input: unknown) => {
           if (typeof this.components.orchestrator?.listTasks === 'function') {
             return await this.components.orchestrator.listTasks(input);
           }
@@ -436,18 +377,16 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
     ];
-
     for (const tool of tools) {
       this.server!.registerTool(tool);
     }
   }
-
   private registerSwarmTools(): void {
-    const tools: MCPTool[] = [
+    const _tools: MCPTool[] = [
       {
         name: 'swarm/status',
         description: 'Get swarm coordinator status',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: { /* empty */ } },
         handler: async () => {
           if (typeof this.components.swarmCoordinator?.getStatus === 'function') {
             return await this.components.swarmCoordinator.getStatus();
@@ -458,7 +397,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       {
         name: 'swarm/agents',
         description: 'List active swarm agents',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: { /* empty */ } },
         handler: async () => {
           if (typeof this.components.swarmCoordinator?.listAgents === 'function') {
             return await this.components.swarmCoordinator.listAgents();
@@ -467,18 +406,16 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
     ];
-
     for (const tool of tools) {
       this.server!.registerTool(tool);
     }
   }
-
   private registerAgentTools(): void {
-    const tools: MCPTool[] = [
+    const _tools: MCPTool[] = [
       {
         name: 'agents/list',
         description: 'List all managed agents',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: { /* empty */ } },
         handler: async () => {
           if (typeof this.components.agentManager?.listAgents === 'function') {
             return await this.components.agentManager.listAgents();
@@ -497,26 +434,24 @@ export class MCPOrchestrationIntegration extends EventEmitter {
           },
           required: ['profile'],
         },
-        handler: async (input: any) => {
+        handler: async (input: unknown) => {
           if (typeof this.components.agentManager?.spawnAgent === 'function') {
-            return await this.components.agentManager.spawnAgent(input.profile, input.config);
+            return await this.components.agentManager.spawnAgent(input._profile, input.config);
           }
           throw new MCPError('Agent spawning not available');
         },
       },
     ];
-
     for (const tool of tools) {
       this.server!.registerTool(tool);
     }
   }
-
   private registerResourceTools(): void {
-    const tools: MCPTool[] = [
+    const _tools: MCPTool[] = [
       {
         name: 'resources/list',
         description: 'List available resources',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: { /* empty */ } },
         handler: async () => {
           if (typeof this.components.resourceManager?.listResources === 'function') {
             return await this.components.resourceManager.listResources();
@@ -527,7 +462,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       {
         name: 'resources/status',
         description: 'Get resource manager status',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: { /* empty */ } },
         handler: async () => {
           if (typeof this.components.resourceManager?.getStatus === 'function') {
             return await this.components.resourceManager.getStatus();
@@ -536,14 +471,12 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
     ];
-
     for (const tool of tools) {
       this.server!.registerTool(tool);
     }
   }
-
   private registerMemoryTools(): void {
-    const tools: MCPTool[] = [
+    const _tools: MCPTool[] = [
       {
         name: 'memory/query',
         description: 'Query memory bank',
@@ -556,7 +489,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
           },
           required: ['query'],
         },
-        handler: async (input: any) => {
+        handler: async (input: unknown) => {
           if (typeof this.components.memoryManager?.query === 'function') {
             return await this.components.memoryManager.query(input);
           }
@@ -575,7 +508,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
           },
           required: ['data'],
         },
-        handler: async (input: any) => {
+        handler: async (input: unknown) => {
           if (typeof this.components.memoryManager?.store === 'function') {
             return await this.components.memoryManager.store(input);
           }
@@ -583,18 +516,16 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
     ];
-
     for (const tool of tools) {
       this.server!.registerTool(tool);
     }
   }
-
   private registerMonitoringTools(): void {
-    const tools: MCPTool[] = [
+    const _tools: MCPTool[] = [
       {
         name: 'monitoring/metrics',
         description: 'Get system monitoring metrics',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: { /* empty */ } },
         handler: async () => {
           if (typeof this.components.monitor?.getMetrics === 'function') {
             return await this.components.monitor.getMetrics();
@@ -605,7 +536,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       {
         name: 'monitoring/alerts',
         description: 'List active alerts',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: { /* empty */ } },
         handler: async () => {
           if (typeof this.components.monitor?.getAlerts === 'function') {
             return await this.components.monitor.getAlerts();
@@ -614,18 +545,16 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
     ];
-
     for (const tool of tools) {
       this.server!.registerTool(tool);
     }
   }
-
   private registerTerminalTools(): void {
-    const tools: MCPTool[] = [
+    const _tools: MCPTool[] = [
       {
         name: 'terminals/list',
         description: 'List active terminal sessions',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: { /* empty */ } },
         handler: async () => {
           if (typeof this.components.terminalManager?.listSessions === 'function') {
             return await this.components.terminalManager.listSessions();
@@ -644,159 +573,150 @@ export class MCPOrchestrationIntegration extends EventEmitter {
           },
           required: ['command'],
         },
-        handler: async (input: any) => {
+        handler: async (input: unknown) => {
           if (typeof this.components.terminalManager?.execute === 'function') {
-            return await this.components.terminalManager.execute(input.command, input.sessionId);
+            return await this.components.terminalManager.execute(input._command, input.sessionId);
           }
           throw new MCPError('Terminal execution not available');
         },
       },
     ];
-
     for (const tool of tools) {
       this.server!.registerTool(tool);
     }
   }
-
   private async setupComponentIntegrations(): Promise<void> {
-    const promises = [];
-
-    for (const [component, status] of this.integrationStatus.entries()) {
+    const _promises = [];
+    for (const [_component, status] of this.integrationStatus.entries()) {
       if (status.enabled) {
         promises.push(this.connectComponent(component));
       }
     }
-
     await Promise.allSettled(promises);
   }
-
   private async connectComponent(component: string): Promise<void> {
-    const status = this.integrationStatus.get(component);
+    const _status = this.integrationStatus.get(component);
     if (!status) return;
-
     try {
       // Component-specific connection logic
       switch (component) {
         case 'orchestrator':
-          await this.connectOrchestrator();
-          break;
+          {
+await this.connectOrchestrator();
+          
+}break;
         case 'swarm':
-          await this.connectSwarmCoordinator();
-          break;
+          {
+await this.connectSwarmCoordinator();
+          
+}break;
         case 'agents':
-          await this.connectAgentManager();
-          break;
+          {
+await this.connectAgentManager();
+          
+}break;
         case 'resources':
-          await this.connectResourceManager();
-          break;
+          {
+await this.connectResourceManager();
+          
+}break;
         case 'memory':
-          await this.connectMemoryManager();
-          break;
+          {
+await this.connectMemoryManager();
+          
+}break;
         case 'monitoring':
-          await this.connectMonitor();
-          break;
+          {
+await this.connectMonitor();
+          
+}break;
         case 'terminals':
-          await this.connectTerminalManager();
-          break;
+          {
+await this.connectTerminalManager();
+          
+}break;
       }
-
       status.connected = true;
       status.healthy = true;
       status.lastCheck = new Date();
       status.error = undefined;
-
       this.logger.info('Component connected', { component });
       this.emit('componentConnected', { component });
-    } catch (error) {
+    } catch (_error) {
       status.connected = false;
       status.healthy = false;
       status.error = error instanceof Error ? error.message : 'Unknown error';
       
-      this.logger.error('Failed to connect component', { component, error });
+      this.logger.error('Failed to connect component', { _component, error });
       this.scheduleReconnect(component);
     }
   }
-
   private async disconnectComponent(component: string): Promise<void> {
-    const status = this.integrationStatus.get(component);
+    const _status = this.integrationStatus.get(component);
     if (!status) return;
-
     status.connected = false;
     status.healthy = false;
     status.lastCheck = new Date();
-
     // Clear any reconnect timers
-    const timer = this.reconnectTimers.get(component);
+    const _timer = this.reconnectTimers.get(component);
     if (timer) {
       clearTimeout(timer);
       this.reconnectTimers.delete(component);
     }
-
     this.logger.info('Component disconnected', { component });
     this.emit('componentDisconnected', { component });
   }
-
   private scheduleReconnect(component: string): void {
-    const timer = this.reconnectTimers.get(component);
+    const _timer = this.reconnectTimers.get(component);
     if (timer) return; // Already scheduled
-
-    const reconnectTimer = setTimeout(async () => {
+    const _reconnectTimer = setTimeout(async () => {
       this.reconnectTimers.delete(component);
       try {
         await this.connectComponent(component);
-      } catch (error) {
+      } catch (_error) {
         // Will be handled by connectComponent
       }
     }, this.orchestrationConfig.reconnectDelay);
-
-    this.reconnectTimers.set(component, reconnectTimer);
+    this.reconnectTimers.set(_component, reconnectTimer);
   }
-
   private startHealthMonitoring(): void {
     this.healthCheckTimer = setInterval(async () => {
       await this.performHealthChecks();
     }, this.orchestrationConfig.healthCheckInterval);
   }
-
   private stopHealthMonitoring(): void {
     if (this.healthCheckTimer) {
       clearInterval(this.healthCheckTimer);
       this.healthCheckTimer = undefined;
     }
   }
-
   private async performHealthChecks(): Promise<void> {
-    for (const [component, status] of this.integrationStatus.entries()) {
+    for (const [_component, status] of this.integrationStatus.entries()) {
       if (!status.enabled || !status.connected) continue;
-
       try {
-        const healthy = await this.checkComponentHealth(component);
+        const _healthy = await this.checkComponentHealth(component);
         status.healthy = healthy;
         status.lastCheck = new Date();
         status.error = undefined;
-      } catch (error) {
+      } catch (_error) {
         status.healthy = false;
         status.error = error instanceof Error ? (error instanceof Error ? error.message : String(error)) : 'Health check failed';
-        this.logger.warn('Component health check failed', { component, error });
+        this.logger.warn('Component health check failed', { _component, error });
       }
     }
   }
-
   private async checkComponentHealth(component: string): Promise<boolean> {
-    const componentInstance = this.getComponentInstance(component);
+    const _componentInstance = this.getComponentInstance(component);
     if (!componentInstance) return false;
-
     // Check if component has health check method
     if (typeof componentInstance.healthCheck === 'function') {
-      const result = await componentInstance.healthCheck();
+      const _result = await componentInstance.healthCheck();
       return result === true || (typeof result === 'object' && result.healthy === true);
     }
-
     // Basic check - component exists and is not null
     return true;
   }
-
-  private getComponentInstance(component: string): any {
+  private getComponentInstance(component: string): unknown {
     switch (component) {
       case 'orchestrator': return this.components.orchestrator;
       case 'swarm': return this.components.swarmCoordinator;
@@ -808,7 +728,6 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       default: return null;
     }
   }
-
   // Component-specific connection methods
   private async connectOrchestrator(): Promise<void> {
     if (!this.components.orchestrator) {
@@ -816,42 +735,36 @@ export class MCPOrchestrationIntegration extends EventEmitter {
     }
     // Add orchestrator-specific connection logic here
   }
-
   private async connectSwarmCoordinator(): Promise<void> {
     if (!this.components.swarmCoordinator) {
       throw new MCPError('Swarm coordinator component not available');
     }
     // Add swarm coordinator-specific connection logic here
   }
-
   private async connectAgentManager(): Promise<void> {
     if (!this.components.agentManager) {
       throw new MCPError('Agent manager component not available');
     }
     // Add agent manager-specific connection logic here
   }
-
   private async connectResourceManager(): Promise<void> {
     if (!this.components.resourceManager) {
       throw new MCPError('Resource manager component not available');
     }
     // Add resource manager-specific connection logic here
   }
-
   private async connectMemoryManager(): Promise<void> {
     if (!this.components.memoryManager) {
       throw new MCPError('Memory manager component not available');
     }
     // Add memory manager-specific connection logic here
   }
-
   private async connectMonitor(): Promise<void> {
     if (!this.components.monitor) {
       throw new MCPError('Monitor component not available');
     }
     // Add monitor-specific connection logic here
   }
-
   private async connectTerminalManager(): Promise<void> {
     if (!this.components.terminalManager) {
       throw new MCPError('Terminal manager component not available');

@@ -1,18 +1,15 @@
 // SPARC Specification Phase
 // Gather requirements, define acceptance criteria, and establish project scope
-
 import { SparcPhase } from './phase-base.js';
-
 export class SparcSpecification extends SparcPhase {
-  constructor(taskDescription, options) {
-    super('specification', taskDescription, options);
+  constructor(_taskDescription, options) {
+    super('specification', _taskDescription, options);
     this.requirements = [];
     this.acceptanceCriteria = [];
     this.userStories = [];
     this.constraints = [];
     this.assumptions = [];
   }
-
   /**
    * Execute specification phase
    */
@@ -21,7 +18,7 @@ export class SparcSpecification extends SparcPhase {
     
     await this.initializePhase();
     
-    const result = {
+    const _result = {
       requirements: [],
       acceptanceCriteria: [],
       userStories: [],
@@ -40,12 +37,10 @@ export class SparcSpecification extends SparcPhase {
       risks: [],
       dependencies: []
     };
-
     try {
       // Analyze task description
-      const analysis = await this.analyzeTaskDescription();
+      const _analysis = await this.analyzeTaskDescription();
       result.analysis = analysis;
-
       // Extract requirements
       result.requirements = await this.extractRequirements(analysis);
       
@@ -78,27 +73,22 @@ export class SparcSpecification extends SparcPhase {
       
       // Identify dependencies
       result.dependencies = await this.identifyDependencies(result.requirements);
-
       // Generate specification document
       await this.generateSpecificationDocument(result);
-
       // Store in memory
       await this.storeInMemory('specification_complete', result);
-
       console.log('✅ Specification phase completed');
       return result;
-
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Specification phase failed:', error.message);
       throw error;
     }
   }
-
   /**
    * Analyze task description to extract key information
    */
   async analyzeTaskDescription() {
-    const analysis = {
+    const _analysis = {
       type: this.categorizeTask(),
       complexity: this.assessComplexity(),
       domain: this.identifyDomain(),
@@ -106,15 +96,13 @@ export class SparcSpecification extends SparcPhase {
       verbs: this.extractActionVerbs(),
       entities: this.extractEntities()
     };
-
     return analysis;
   }
-
   /**
    * Categorize the task type
    */
   categorizeTask() {
-    const taskLower = this.taskDescription.toLowerCase();
+    const _taskLower = this.taskDescription.toLowerCase();
     
     if (taskLower.includes('api') || taskLower.includes('endpoint') || taskLower.includes('service')) {
       return 'api_development';
@@ -132,17 +120,15 @@ export class SparcSpecification extends SparcPhase {
       return 'general_development';
     }
   }
-
   /**
    * Assess task complexity
    */
   assessComplexity() {
-    const wordCount = this.taskDescription.split(' ').length;
-    const complexityKeywords = ['integrate', 'complex', 'multiple', 'advanced', 'enterprise', 'scalable'];
-    const hasComplexityKeywords = complexityKeywords.some(keyword => 
+    const _wordCount = this.taskDescription.split(' ').length;
+    const _complexityKeywords = ['integrate', 'complex', 'multiple', 'advanced', 'enterprise', 'scalable'];
+    const _hasComplexityKeywords = complexityKeywords.some(keyword => 
       this.taskDescription.toLowerCase().includes(keyword)
     );
-
     if (wordCount > 20 || hasComplexityKeywords) {
       return 'high';
     } else if (wordCount > 10) {
@@ -151,12 +137,11 @@ export class SparcSpecification extends SparcPhase {
       return 'low';
     }
   }
-
   /**
    * Identify domain
    */
   identifyDomain() {
-    const domains = {
+    const _domains = {
       'web': ['web', 'website', 'html', 'css', 'javascript'],
       'mobile': ['mobile', 'app', 'android', 'ios'],
       'data': ['data', 'analytics', 'ml', 'ai', 'machine learning'],
@@ -165,47 +150,42 @@ export class SparcSpecification extends SparcPhase {
       'backend': ['api', 'server', 'database', 'backend'],
       'frontend': ['ui', 'ux', 'frontend', 'interface']
     };
-
-    const taskLower = this.taskDescription.toLowerCase();
+    const _taskLower = this.taskDescription.toLowerCase();
     
-    for (const [domain, keywords] of Object.entries(domains)) {
+    for (const [_domain, keywords] of Object.entries(domains)) {
       if (keywords.some(keyword => taskLower.includes(keyword))) {
         return domain;
       }
     }
-
     return 'general';
   }
-
   /**
    * Extract keywords from task description
    */
   extractKeywords() {
-    const words = this.taskDescription.toLowerCase().split(/\s+/);
-    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+    const _words = this.taskDescription.toLowerCase().split(/s+/);
+    const _stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
     
     return words
       .filter(word => word.length > 2 && !stopWords.includes(word))
-      .filter((word, index, arr) => arr.indexOf(word) === index) // Remove duplicates
-      .slice(0, 10); // Top 10 keywords
+      .filter((_word, _index, arr) => arr.indexOf(word) === index) // Remove duplicates
+      .slice(_0, 10); // Top 10 keywords
   }
-
   /**
    * Extract action verbs
    */
   extractActionVerbs() {
-    const verbs = ['create', 'build', 'develop', 'implement', 'design', 'setup', 'configure', 'deploy', 'test', 'optimize', 'refactor', 'integrate'];
-    const taskLower = this.taskDescription.toLowerCase();
+    const _verbs = ['create', 'build', 'develop', 'implement', 'design', 'setup', 'configure', 'deploy', 'test', 'optimize', 'refactor', 'integrate'];
+    const _taskLower = this.taskDescription.toLowerCase();
     
     return verbs.filter(verb => taskLower.includes(verb));
   }
-
   /**
    * Extract entities
    */
   extractEntities() {
-    const entities = [];
-    const words = this.taskDescription.split(/\s+/);
+    const _entities = [];
+    const _words = this.taskDescription.split(/s+/);
     
     // Look for capitalized words (potential entities)
     for (const word of words) {
@@ -216,54 +196,61 @@ export class SparcSpecification extends SparcPhase {
     
     return entities;
   }
-
   /**
    * Extract requirements from analysis
    */
   async extractRequirements(analysis) {
-    const requirements = [];
+    const _requirements = [];
     
     // Functional requirements based on task type
     switch (analysis.type) {
       case 'api_development':
-        requirements.push(
+        {
+requirements.push(
           'System must provide REST API endpoints',
           'API must handle authentication and authorization',
-          'API must return appropriate HTTP status codes',
+          'API must 
+}return appropriate HTTP status codes',
           'API must validate input data',
           'API must handle errors gracefully'
         );
         break;
         
       case 'frontend_development':
-        requirements.push(
+        {
+requirements.push(
           'Interface must be responsive and mobile-friendly',
           'User interface must be intuitive and accessible',
           'Application must handle user input validation',
           'Interface must provide feedback for user actions',
           'Application must be cross-browser compatible'
         );
-        break;
+        
+}break;
         
       case 'data_management':
-        requirements.push(
+        {
+requirements.push(
           'System must ensure data integrity',
           'Data must be properly normalized',
           'System must handle concurrent access',
           'Data must be backed up regularly',
           'System must provide data recovery mechanisms'
         );
-        break;
+        
+}break;
         
       case 'testing':
-        requirements.push(
+        {
+requirements.push(
           'Test suite must achieve minimum 80% code coverage',
           'Tests must be automated and repeatable',
           'Tests must validate all critical paths',
           'Test data must be properly managed',
           'Tests must run efficiently'
         );
-        break;
+        
+}break;
         
       default:
         requirements.push(
@@ -274,7 +261,6 @@ export class SparcSpecification extends SparcPhase {
           'System must be secure and robust'
         );
     }
-
     // Add complexity-specific requirements
     if (analysis.complexity === 'high') {
       requirements.push(
@@ -284,18 +270,16 @@ export class SparcSpecification extends SparcPhase {
         'Implementation must include performance optimization'
       );
     }
-
     return requirements;
   }
-
   /**
    * Define acceptance criteria
    */
   async defineAcceptanceCriteria(requirements) {
-    const criteria = [];
+    const _criteria = [];
     
     for (const requirement of requirements) {
-      const criterion = {
+      const _criterion = {
         requirement: requirement,
         given: this.generateGivenCondition(requirement),
         when: this.generateWhenCondition(requirement),
@@ -309,7 +293,6 @@ export class SparcSpecification extends SparcPhase {
     
     return criteria;
   }
-
   /**
    * Generate Given condition for acceptance criteria
    */
@@ -324,7 +307,6 @@ export class SparcSpecification extends SparcPhase {
       return 'Given a properly configured system';
     }
   }
-
   /**
    * Generate When condition for acceptance criteria
    */
@@ -339,7 +321,6 @@ export class SparcSpecification extends SparcPhase {
       return 'When the feature is used';
     }
   }
-
   /**
    * Generate Then condition for acceptance criteria
    */
@@ -350,15 +331,14 @@ export class SparcSpecification extends SparcPhase {
       return 'Then the expected behavior occurs';
     }
   }
-
   /**
    * Assess requirement priority
    */
   assessRequirementPriority(requirement) {
-    const highPriorityKeywords = ['must', 'critical', 'security', 'authentication', 'data integrity'];
-    const mediumPriorityKeywords = ['should', 'performance', 'optimization', 'monitoring'];
+    const _highPriorityKeywords = ['must', 'critical', 'security', 'authentication', 'data integrity'];
+    const _mediumPriorityKeywords = ['should', 'performance', 'optimization', 'monitoring'];
     
-    const reqLower = requirement.toLowerCase();
+    const _reqLower = requirement.toLowerCase();
     
     if (highPriorityKeywords.some(keyword => reqLower.includes(keyword))) {
       return 'high';
@@ -368,15 +348,14 @@ export class SparcSpecification extends SparcPhase {
       return 'low';
     }
   }
-
   /**
    * Create user stories
    */
   async createUserStories(requirements) {
-    const stories = [];
+    const _stories = [];
     
     for (const requirement of requirements) {
-      const story = {
+      const _story = {
         title: this.generateStoryTitle(requirement),
         narrative: this.generateStoryNarrative(requirement),
         acceptanceCriteria: this.generateStoryAcceptanceCriteria(requirement),
@@ -389,38 +368,34 @@ export class SparcSpecification extends SparcPhase {
     
     return stories;
   }
-
   /**
    * Generate story title
    */
   generateStoryTitle(requirement) {
-    const words = requirement.split(' ');
-    const actionWord = words.find(word => ['provide', 'handle', 'ensure', 'validate'].includes(word.toLowerCase()));
-    const objectWord = words.find(word => ['API', 'data', 'user', 'system'].includes(word));
+    const _words = requirement.split(' ');
+    const _actionWord = words.find(word => ['provide', 'handle', 'ensure', 'validate'].includes(word.toLowerCase()));
+    const _objectWord = words.find(word => ['API', 'data', 'user', 'system'].includes(word));
     
     return `${actionWord || 'Implement'} ${objectWord || 'functionality'}`;
   }
-
   /**
    * Generate story narrative
    */
   generateStoryNarrative(requirement) {
     return `As a user, I want the system to ${requirement.toLowerCase()} so that I can achieve my goals effectively.`;
   }
-
   /**
    * Generate story acceptance criteria
    */
   generateStoryAcceptanceCriteria(requirement) {
     return [`The system ${requirement.toLowerCase()}`];
   }
-
   /**
    * Estimate story points
    */
   estimateStoryPoints(requirement) {
-    const complexity = this.assessComplexity();
-    const priority = this.assessRequirementPriority(requirement);
+    const _complexity = this.assessComplexity();
+    const _priority = this.assessRequirementPriority(requirement);
     
     if (complexity === 'high' && priority === 'high') {
       return 8;
@@ -432,7 +407,6 @@ export class SparcSpecification extends SparcPhase {
       return 1;
     }
   }
-
   /**
    * Identify constraints
    */
@@ -448,7 +422,6 @@ export class SparcSpecification extends SparcPhase {
       'Must include comprehensive logging'
     ];
   }
-
   /**
    * Document assumptions
    */
@@ -464,7 +437,6 @@ export class SparcSpecification extends SparcPhase {
       'Monitoring systems are operational'
     ];
   }
-
   /**
    * Identify stakeholders
    */
@@ -478,12 +450,11 @@ export class SparcSpecification extends SparcPhase {
       { role: 'End Users', responsibility: 'Feedback and acceptance' }
     ];
   }
-
   /**
    * Define business value
    */
   async defineBusiness() {
-    const analysis = await this.analyzeTaskDescription();
+    const _analysis = await this.analyzeTaskDescription();
     
     switch (analysis.type) {
       case 'api_development':
@@ -498,13 +469,12 @@ export class SparcSpecification extends SparcPhase {
         return 'Addresses business requirements and improves system capabilities';
     }
   }
-
   /**
    * Define scope
    */
   async defineScope(requirements) {
-    const included = requirements.slice(0, Math.ceil(requirements.length * 0.8));
-    const excluded = [
+    const _included = requirements.slice(_0, Math.ceil(requirements.length * 0.8));
+    const _excluded = [
       'Performance optimization beyond basic requirements',
       'Advanced security features not specified',
       'Integration with non-specified external systems',
@@ -514,17 +484,15 @@ export class SparcSpecification extends SparcPhase {
       'Legacy system migration',
       'Third-party plugin development'
     ];
-
     return { included, excluded };
   }
-
   /**
    * Estimate timeline
    */
   async estimateTimeline(requirements) {
-    const totalStoryPoints = requirements.length * 3; // Average 3 points per requirement
-    const developmentVelocity = 10; // Points per sprint
-    const sprintsNeeded = Math.ceil(totalStoryPoints / developmentVelocity);
+    const _totalStoryPoints = requirements.length * 3; // Average 3 points per requirement
+    const _developmentVelocity = 10; // Points per sprint
+    const _sprintsNeeded = Math.ceil(totalStoryPoints / developmentVelocity);
     
     return {
       estimated: `${sprintsNeeded * 2} weeks`,
@@ -537,7 +505,6 @@ export class SparcSpecification extends SparcPhase {
       ]
     };
   }
-
   /**
    * Identify risks
    */
@@ -569,12 +536,11 @@ export class SparcSpecification extends SparcPhase {
       }
     ];
   }
-
   /**
    * Identify dependencies
    */
   async identifyDependencies(requirements) {
-    const dependencies = [];
+    const _dependencies = [];
     
     for (const requirement of requirements) {
       if (requirement.includes('API')) {
@@ -593,74 +559,58 @@ export class SparcSpecification extends SparcPhase {
     
     return [...new Set(dependencies)]; // Remove duplicates
   }
-
   /**
    * Generate specification document
    */
   async generateSpecificationDocument(result) {
-    const document = `# ${this.taskDescription} - Specification
-
+    const _document = `# ${this.taskDescription} - Specification
 ## Overview
 ${result.businessValue}
-
 ## Requirements
-${result.requirements.map((req, index) => `${index + 1}. ${req}`).join('\n')}
-
+${result.requirements.map((_req, index) => `${index + 1}. ${req}`).join('\n')}
 ## Acceptance Criteria
-${result.acceptanceCriteria.map((criteria, index) => `
+${result.acceptanceCriteria.map((_criteria, index) => `
 ### ${index + 1}. ${criteria.requirement}
 - **Given**: ${criteria.given}
 - **When**: ${criteria.when}
 - **Then**: ${criteria.then}
 - **Priority**: ${criteria.priority}
 `).join('\n')}
-
 ## User Stories
-${result.userStories.map((story, index) => `
+${result.userStories.map((_story, index) => `
 ### ${index + 1}. ${story.title}
 ${story.narrative}
 **Acceptance Criteria**: ${story.acceptanceCriteria.join(', ')}
 **Priority**: ${story.priority}
 **Estimation**: ${story.estimation} points
 `).join('\n')}
-
 ## Constraints
-${result.constraints.map((constraint, index) => `${index + 1}. ${constraint}`).join('\n')}
-
+${result.constraints.map((_constraint, index) => `${index + 1}. ${constraint}`).join('\n')}
 ## Assumptions
-${result.assumptions.map((assumption, index) => `${index + 1}. ${assumption}`).join('\n')}
-
+${result.assumptions.map((_assumption, index) => `${index + 1}. ${assumption}`).join('\n')}
 ## Scope
 ### Included
-${result.scope.included.map((item, index) => `${index + 1}. ${item}`).join('\n')}
-
+${result.scope.included.map((_item, index) => `${index + 1}. ${item}`).join('\n')}
 ### Excluded
-${result.scope.excluded.map((item, index) => `${index + 1}. ${item}`).join('\n')}
-
+${result.scope.excluded.map((_item, index) => `${index + 1}. ${item}`).join('\n')}
 ## Timeline
 **Estimated Duration**: ${result.timeline.estimated}
-
 ${result.timeline.phases.map(phase => `- ${phase.name}: ${phase.duration}`).join('\n')}
-
 ## Risks
-${result.risks.map((risk, index) => `
+${result.risks.map((_risk, index) => `
 ### ${index + 1}. ${risk.risk}
 - **Probability**: ${risk.probability}
 - **Impact**: ${risk.impact}
 - **Mitigation**: ${risk.mitigation}
 `).join('\n')}
-
 ## Dependencies
-${result.dependencies.map((dep, index) => `${index + 1}. ${dep}`).join('\n')}
-
+${result.dependencies.map((_dep, index) => `${index + 1}. ${dep}`).join('\n')}
 ## Stakeholders
 ${result.stakeholders.map(stakeholder => `- **${stakeholder.role}**: ${stakeholder.responsibility}`).join('\n')}
 `;
-
     // Save document
     await this.saveArtifact('specification.md', document);
     return document;
   }
 }
-
 export default SparcSpecification;

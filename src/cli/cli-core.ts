@@ -1,21 +1,16 @@
 #!/usr/bin/env node
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Claude-Flow CLI - Core implementation using Node.js
  */
-
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
-
-export const VERSION = '1.0.45';
-
+export const _VERSION = '1.0.45';
 interface CommandContext {
   args: string[];
   flags: Record<string, unknown>;
   config?: Record<string, unknown> | undefined;
 }
-
 interface Command {
   name: string;
   description: string;
@@ -24,7 +19,6 @@ interface Command {
   action?: (ctx: CommandContext) => Promise<void> | void;
   options?: Option[];
 }
-
 interface Option {
   name: string;
   short?: string;
@@ -33,7 +27,6 @@ interface Option {
   default?: unknown;
   required?: boolean;
 }
-
 class CLI {
   private commands: Map<string, Command> = new Map();
   private globalOptions: Option[] = [
@@ -62,62 +55,54 @@ class CLI {
     },
     {
       name: 'log-level',
-      description: 'Set log level (debug, info, warn, error)',
+      description: 'Set log level (_debug, _info, _warn, error)',
       type: 'string',
       default: 'info',
     },
   ];
-
-  constructor(private name: string, private description: string) {}
-
+  constructor(private name: string, private description: string) { /* empty */ }
   command(cmd: Command): this {
     // Handle both our Command interface and Commander.js Command objects
-    const cmdName = typeof cmd.name === 'function' ? cmd.name() : cmd.name;
-    this.commands.set(cmdName, cmd);
+    const _cmdName = typeof cmd.name === 'function' ? cmd.name() : cmd.name;
+    this.commands.set(_cmdName, cmd);
     if (cmd.aliases && typeof cmd.aliases[Symbol.iterator] === 'function') {
       for (const alias of cmd.aliases) {
-        this.commands.set(alias, cmd);
+        this.commands.set(_alias, cmd);
       }
     }
     return this;
   }
-
   async run(args = process.argv.slice(2)): Promise<void> {
     // Parse arguments manually since we're replacing the Deno parse function
-    const flags = this.parseArgs(args);
-
+    const _flags = this.parseArgs(args);
     if (flags.version || flags.v) {
       console.log(`${this.name} v${VERSION}`);
       return;
     }
-
-    const commandName = flags._[0]?.toString() || '';
+    const _commandName = flags._[0]?.toString() || '';
     
     if (!commandName || flags.help || flags.h) {
       this.showHelp();
       return;
     }
-
-    const command = this.commands.get(commandName);
+    const _command = this.commands.get(commandName);
     if (!command) {
       console.error(chalk.red(`Unknown command: ${commandName}`));
       console.log(`Run "${this.name} help" for available commands`);
       process.exit(1);
     }
-
-    const ctx: CommandContext = {
+    const _ctx: CommandContext = {
       args: flags._.slice(1).map(String),
       flags: flags as Record<string, unknown>,
       config: await this.loadConfig(flags.config as string),
     };
-
     try {
       if (command.action) {
         await command.action(ctx);
       } else {
         console.log(chalk.yellow(`Command '${commandName}' has no action defined`));
       }
-    } catch (error) {
+    } catch (_error) {
       console.error(chalk.red(`Error executing command '${commandName}':`), (error as Error).message);
       if (flags.verbose) {
         console.error(error);
@@ -125,16 +110,14 @@ class CLI {
       process.exit(1);
     }
   }
-
-  private parseArgs(args: string[]): Record<string, any> {
-    const result: Record<string, any> = { _: [] };
-    let i = 0;
-
+  private parseArgs(args: string[]): Record<string, unknown> {
+    const _result: Record<string, unknown> = { _: [] };
+    let _i = 0;
     while (i < args.length) {
-      const arg = args[i];
+      const _arg = args[i];
       
       if (arg.startsWith('--')) {
-        const key = arg.slice(2);
+        const _key = arg.slice(2);
         if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
           result[key] = args[i + 1];
           i += 2;
@@ -143,7 +126,7 @@ class CLI {
           i++;
         }
       } else if (arg.startsWith('-')) {
-        const key = arg.slice(1);
+        const _key = arg.slice(1);
         if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
           result[key] = args[i + 1];
           i += 2;
@@ -156,23 +139,20 @@ class CLI {
         i++;
       }
     }
-
     return result;
   }
-
   private async loadConfig(configPath?: string): Promise<Record<string, unknown> | undefined> {
-    const configFile = configPath || 'claude-flow.config.json';
+    const _configFile = configPath || 'claude-flow.config.json';
     try {
-      const content = await fs.readFile(configFile, 'utf8');
+      const _content = await fs.readFile(_configFile, 'utf8');
       return JSON.parse(content);
     } catch {
       return undefined;
     }
   }
-
   private getBooleanFlags(): string[] {
-    const flags: string[] = [];
-    for (const opt of [...this.globalOptions, ...this.getAllOptions()]) {
+    const _flags: string[] = [];
+    for (const opt of [...this._globalOptions, ...this.getAllOptions()]) {
       if (opt.type === 'boolean') {
         flags.push(opt.name);
         if (opt.short) flags.push(opt.short);
@@ -180,10 +160,9 @@ class CLI {
     }
     return flags;
   }
-
   private getStringFlags(): string[] {
-    const flags: string[] = [];
-    for (const opt of [...this.globalOptions, ...this.getAllOptions()]) {
+    const _flags: string[] = [];
+    for (const opt of [...this._globalOptions, ...this.getAllOptions()]) {
       if (opt.type === 'string' || opt.type === 'number') {
         flags.push(opt.name);
         if (opt.short) flags.push(opt.short);
@@ -191,29 +170,26 @@ class CLI {
     }
     return flags;
   }
-
   private getAliases(): Record<string, string> {
-    const aliases: Record<string, string> = {};
-    for (const opt of [...this.globalOptions, ...this.getAllOptions()]) {
+    const _aliases: Record<string, string> = { /* empty */ };
+    for (const opt of [...this._globalOptions, ...this.getAllOptions()]) {
       if (opt.short) {
         aliases[opt.short] = opt.name;
       }
     }
     return aliases;
   }
-
   private getDefaults(): Record<string, unknown> {
-    const defaults: Record<string, unknown> = {};
-    for (const opt of [...this.globalOptions, ...this.getAllOptions()]) {
+    const _defaults: Record<string, unknown> = { /* empty */ };
+    for (const opt of [...this._globalOptions, ...this.getAllOptions()]) {
       if (opt.default !== undefined) {
         defaults[opt.name] = opt.default;
       }
     }
     return defaults;
   }
-
   private getAllOptions(): Option[] {
-    const options: Option[] = [];
+    const _options: Option[] = [];
     for (const cmd of this.commands.values()) {
       if (cmd.options) {
         options.push(...cmd.options);
@@ -221,89 +197,70 @@ class CLI {
     }
     return options;
   }
-
   private showHelp(): void {
     console.log(`
 ${chalk.bold(chalk.blue(`🧠 ${this.name} v${VERSION}`))} - ${this.description}
-
 ${chalk.bold('USAGE:')}
   ${this.name} [COMMAND] [OPTIONS]
-
 ${chalk.bold('COMMANDS:')}
 ${this.formatCommands()}
-
 ${chalk.bold('GLOBAL OPTIONS:')}
 ${this.formatOptions(this.globalOptions)}
-
 ${chalk.bold('EXAMPLES:')}
   ${this.name} start                                    # Start orchestrator
   ${this.name} agent spawn researcher --name "Bot"     # Spawn research agent
   ${this.name} task create research "Analyze data"     # Create task
   ${this.name} config init                             # Initialize config
   ${this.name} status                                  # Show system status
-
 For more detailed help on specific commands, use:
   ${this.name} [COMMAND] --help
-
 Documentation: https://github.com/ruvnet/claude-code-flow
 Issues: https://github.com/ruvnet/claude-code-flow/issues
-
 Created by rUv - Built with ❤️ for the Claude community
 `);
   }
-
   private formatCommands(): string {
-    const commands = Array.from(new Set(this.commands.values()));
+    const _commands = Array.from(new Set(this.commands.values()));
     return commands
       .filter(cmd => cmd && cmd.name) // Filter out invalid commands
       .map(cmd => `  ${String(cmd.name).padEnd(20)} ${cmd.description || ''}`)
       .join('\n');
   }
-
   private formatOptions(options: Option[]): string {
     return options
       .map(opt => {
-        const flags = opt.short ? `-${opt.short}, --${opt.name}` : `    --${opt.name}`;
+        const _flags = opt.short ? `-${opt.short}, --${opt.name}` : `    --${opt.name}`;
         return `  ${flags.padEnd(25)} ${opt.description}`;
       })
       .join('\n');
   }
 }
-
 // Helper functions
 function success(message: string): void {
   console.log(chalk.green(`✅ ${message}`));
 }
-
 function error(message: string): void {
   console.error(chalk.red(`❌ ${message}`));
 }
-
 function warning(message: string): void {
   console.warn(chalk.yellow(`⚠️  ${message}`));
 }
-
 function info(message: string): void {
   console.log(chalk.blue(`ℹ️  ${message}`));
 }
-
 // Export for use in other modules
 export { CLI, success, error, warning, info };
 export type { Command, CommandContext, Option };
-
 // Main CLI setup if running directly
 async function main() {
   if (process.argv[1] && (process.argv[1].endsWith('cli-core.js') || process.argv[1].endsWith('cli-core.ts'))) {
-    const cli = new CLI('claude-flow', 'Advanced AI Agent Orchestration System');
-
+    const _cli = new CLI('claude-flow', 'Advanced AI Agent Orchestration System');
     // Import and register all commands
     const { setupCommands } = await import('./commands/index.js');
     setupCommands(cli);
-
     // Run the CLI
     await cli.run();
   }
 }
-
 // Execute main if this is the entry point
 main().catch(console.error);

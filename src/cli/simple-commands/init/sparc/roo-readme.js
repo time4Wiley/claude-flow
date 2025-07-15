@@ -3,11 +3,11 @@
 export function createRooReadme() {
   return `# .roo Directory - SPARC Development Environment
 
-This directory contains the SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) development environment configuration and templates.
+This directory contains the SPARC (_Specification, _Pseudocode, _Architecture, _Refinement, Completion) development environment configuration and templates.
 
 ## Directory Structure
 
-\`\`\`
+```
 .roo/
 ├── README.md           # This file
 ├── templates/          # Template files for common patterns
@@ -15,7 +15,7 @@ This directory contains the SPARC (Specification, Pseudocode, Architecture, Refi
 │   └── basic-tdd.json  # Basic TDD workflow
 ├── modes/              # Custom mode definitions (optional)
 └── configs/            # Configuration files
-\`\`\`
+```
 
 ## SPARC Methodology
 
@@ -31,7 +31,7 @@ SPARC is a systematic approach to software development:
 
 Use the claude-flow SPARC commands to leverage this environment:
 
-\`\`\`bash
+```bash
 # List available modes
 claude-flow sparc modes
 
@@ -43,18 +43,18 @@ claude-flow sparc tdd "payment processing system"
 
 # Use custom workflow
 claude-flow sparc workflow .roo/workflows/basic-tdd.json
-\`\`\`
+```
 
 ## Configuration
 
-The main configuration is in \`.roomodes\` at the project root. This directory provides additional templates and workflows to support the SPARC development process.
+The main configuration is in `.roomodes` at the project root. This directory provides additional templates and workflows to support the SPARC development process.
 
 ## Customization
 
 You can customize this environment by:
-- Adding new workflow templates to \`workflows/\`
-- Creating mode-specific templates in \`templates/\`
-- Adding project-specific configurations in \`configs/\`
+- Adding new workflow templates to `workflows/`
+- Creating mode-specific templates in `templates/`
+- Adding project-specific configurations in `configs/`
 
 For more information, see: https://github.com/ruvnet/claude-code-flow/docs/sparc.md
 `;

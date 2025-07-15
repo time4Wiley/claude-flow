@@ -11,7 +11,7 @@ import { StateManager } from './StateManager.js';
 import { ComponentLibrary } from '../components/ComponentLibrary.js';
 
 // View category definitions
-export const VIEW_CATEGORIES = {
+export const _VIEW_CATEGORIES = {
   OVERVIEW: 'overview',
   PROCESSES: 'processes',
   NEURAL: 'neural',
@@ -26,7 +26,7 @@ export const VIEW_CATEGORIES = {
 };
 
 // MCP Tool Categories mapping
-export const MCP_TOOL_CATEGORIES = {
+export const _MCP_TOOL_CATEGORIES = {
   NEURAL: [
     'neural_train', 'neural_predict', 'neural_status', 'neural_patterns',
     'model_load', 'model_save', 'pattern_recognize', 'cognitive_analyze',
@@ -118,7 +118,7 @@ export class UIManager {
    * Register all available views
    */
   async registerAllViews() {
-    const viewConfigs = [
+    const _viewConfigs = [
       {
         id: VIEW_CATEGORIES.OVERVIEW,
         name: 'Overview',
@@ -224,7 +224,7 @@ export class UIManager {
   /**
    * Navigate to a specific view
    */
-  async navigateToView(viewId, params = {}) {
+  async navigateToView(_viewId, params = { /* empty */ }) {
     if (!this.viewManager.hasView(viewId)) {
       throw new Error(`View not found: ${viewId}`);
     }
@@ -232,7 +232,7 @@ export class UIManager {
     // Store current view in history
     if (this.currentView && this.currentView !== viewId) {
       this.viewHistory.push({
-        viewId: this.currentView,
+        viewId: this._currentView,
         timestamp: Date.now(),
         params: this.stateManager.getViewState(this.currentView)
       });
@@ -242,18 +242,18 @@ export class UIManager {
     this.currentView = viewId;
     
     // Load view with parameters
-    await this.viewManager.loadView(viewId, params);
+    await this.viewManager.loadView(_viewId, params);
     
     // Update browser history if available
     if (typeof window !== 'undefined' && window.history) {
-      window.history.pushState({ viewId, params }, '', `#${viewId}`);
+      window.history.pushState({ _viewId, params }, '', `#${viewId}`);
     }
     
     // Update state
-    await this.stateManager.setViewState(viewId, params);
+    await this.stateManager.setViewState(_viewId, params);
     
     // Emit navigation event
-    this.eventBus.emit('ui:navigation', { viewId, params });
+    this.eventBus.emit('ui:navigation', { _viewId, params });
   }
 
   /**
@@ -262,31 +262,31 @@ export class UIManager {
   async goBack() {
     if (this.viewHistory.length === 0) return;
     
-    const previousView = this.viewHistory.pop();
-    await this.navigateToView(previousView.viewId, previousView.params);
+    const _previousView = this.viewHistory.pop();
+    await this.navigateToView(previousView._viewId, previousView.params);
   }
 
   /**
    * Execute MCP tool with UI integration
    */
-  async executeMCPTool(toolName, params = {}) {
+  async executeMCPTool(_toolName, params = { /* empty */ }) {
     try {
       // Show loading indicator
-      this.eventBus.emit('ui:loading', { tool: toolName, params });
+      this.eventBus.emit('ui:loading', { tool: _toolName, params });
       
       // Execute tool through MCP integration layer
-      const result = await this.mcpIntegration.executeTool(toolName, params);
+      const _result = await this.mcpIntegration.executeTool(_toolName, params);
       
       // Handle result based on tool type
-      await this.handleToolResult(toolName, result, params);
+      await this.handleToolResult(_toolName, _result, params);
       
       // Hide loading indicator
-      this.eventBus.emit('ui:loading:complete', { tool: toolName, result });
+      this.eventBus.emit('ui:loading:complete', { tool: _toolName, result });
       
       return result;
       
     } catch (error) {
-      this.eventBus.emit('ui:error', { tool: toolName, error, params });
+      this.eventBus.emit('ui:error', { tool: _toolName, _error, params });
       throw error;
     }
   }
@@ -294,26 +294,26 @@ export class UIManager {
   /**
    * Handle tool execution results
    */
-  async handleToolResult(toolName, result, originalParams) {
+  async handleToolResult(_toolName, _result, originalParams) {
     // Update relevant views with new data
-    const category = this.getToolCategory(toolName);
+    const _category = this.getToolCategory(toolName);
     
     if (category) {
       this.eventBus.emit(`view:${category}:update`, {
-        tool: toolName,
-        result,
+        tool: _toolName,
+        _result,
         params: originalParams
       });
     }
     
     // Store result in state for persistence
-    await this.stateManager.setToolResult(toolName, result);
+    await this.stateManager.setToolResult(_toolName, result);
     
     // Log execution
     this.eventBus.emit('ui:log', {
       level: 'info',
       message: `Executed ${toolName}`,
-      data: { result, params: originalParams }
+      data: { _result, params: originalParams }
     });
   }
 
@@ -321,7 +321,7 @@ export class UIManager {
    * Get tool category for a given tool name
    */
   getToolCategory(toolName) {
-    for (const [category, tools] of Object.entries(MCP_TOOL_CATEGORIES)) {
+    for (const [_category, tools] of Object.entries(MCP_TOOL_CATEGORIES)) {
       if (tools.includes(toolName)) {
         return category.toLowerCase();
       }
@@ -334,9 +334,9 @@ export class UIManager {
    */
   setupKeyboardShortcuts() {
     // View navigation shortcuts
-    Object.values(VIEW_CATEGORIES).forEach((viewId, index) => {
-      const key = (index + 1).toString();
-      this.shortcuts.set(key, () => this.navigateToView(viewId));
+    Object.values(VIEW_CATEGORIES).forEach((_viewId, index) => {
+      const _key = (index + 1).toString();
+      this.shortcuts.set(_key, () => this.navigateToView(viewId));
     });
 
     // Global shortcuts
@@ -352,8 +352,8 @@ export class UIManager {
     // Setup event listener for keyboard events
     if (typeof window !== 'undefined') {
       window.addEventListener('keydown', (event) => {
-        const key = this.getKeyString(event);
-        const handler = this.shortcuts.get(key);
+        const _key = this.getKeyString(event);
+        const _handler = this.shortcuts.get(key);
         if (handler) {
           event.preventDefault();
           handler();
@@ -366,7 +366,7 @@ export class UIManager {
    * Get key string from keyboard event
    */
   getKeyString(event) {
-    const parts = [];
+    const _parts = [];
     if (event.ctrlKey) parts.push('ctrl');
     if (event.shiftKey) parts.push('shift');
     if (event.altKey) parts.push('alt');
@@ -431,12 +431,12 @@ export class UIManager {
   initializeEventHandlers() {
     // Handle tool execution requests
     this.eventBus.on('tool:execute', async (data) => {
-      await this.executeMCPTool(data.tool, data.params);
+      await this.executeMCPTool(data._tool, data.params);
     });
     
     // Handle view navigation requests
     this.eventBus.on('view:navigate', async (data) => {
-      await this.navigateToView(data.viewId, data.params);
+      await this.navigateToView(data._viewId, data.params);
     });
     
     // Handle state persistence
@@ -455,7 +455,7 @@ export class UIManager {
    * Load user preferences
    */
   async loadUserPreferences() {
-    const preferences = await this.stateManager.getUserPreferences();
+    const _preferences = await this.stateManager.getUserPreferences();
     if (preferences) {
       this.theme = preferences.theme || 'dark';
       this.isResponsive = preferences.responsive !== false;
@@ -466,7 +466,7 @@ export class UIManager {
    * Get system status for overview
    */
   async getSystemStatus() {
-    const status = {
+    const _status = {
       uptime: await this.mcpIntegration.getSystemUptime(),
       activeTools: await this.mcpIntegration.getActiveTools(),
       memoryUsage: await this.mcpIntegration.getMemoryUsage(),

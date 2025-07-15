@@ -3,9 +3,7 @@
  * Memory & Persistence Tools Panel
  * Provides interface for memory management and persistence operations
  */
-
 import { EventEmitter } from './event-emitter.js';
-
 export class MemoryToolsPanel extends EventEmitter {
   constructor(wsClient) {
     super();
@@ -17,7 +15,7 @@ export class MemoryToolsPanel extends EventEmitter {
     this.cacheMetrics = null;
     
     // DOM elements
-    this.elements = {};
+    this.elements = { /* empty */ };
     
     // Memory tools configuration
     this.memoryTools = {
@@ -58,7 +56,6 @@ export class MemoryToolsPanel extends EventEmitter {
       security: { name: 'Security', color: '#ff8b94' }
     };
   }
-
   /**
    * Initialize the memory tools panel
    */
@@ -74,41 +71,40 @@ export class MemoryToolsPanel extends EventEmitter {
       this.isInitialized = true;
       this.emit('initialized');
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize memory tools panel:', error);
       this.emit('error', error);
     }
   }
-
   /**
    * Create the memory tools panel UI
    */
   async createPanelUI() {
     // Create main panel container
-    const panelContainer = document.createElement('div');
+    const _panelContainer = document.createElement('div');
     panelContainer.id = 'memoryToolsPanel';
     panelContainer.className = 'memory-panel hidden';
     
     // Create panel header
-    const header = this.createPanelHeader();
+    const _header = this.createPanelHeader();
     panelContainer.appendChild(header);
     
     // Create main content area
-    const content = document.createElement('div');
+    const _content = document.createElement('div');
     content.className = 'memory-content';
     
     // Create tabbed interface
-    const tabs = this.createTabs();
+    const _tabs = this.createTabs();
     content.appendChild(tabs);
     
     // Create tab content areas
-    const tabContents = this.createTabContents();
+    const _tabContents = this.createTabContents();
     content.appendChild(tabContents);
     
     panelContainer.appendChild(content);
     
     // Insert into DOM
-    const consoleMain = document.querySelector('.console-main');
+    const _consoleMain = document.querySelector('.console-main');
     if (consoleMain) {
       consoleMain.appendChild(panelContainer);
     }
@@ -130,12 +126,11 @@ export class MemoryToolsPanel extends EventEmitter {
     this.elements.cacheStats = panelContainer.querySelector('#cacheStats');
     this.elements.analyticsChart = panelContainer.querySelector('#analyticsChart');
   }
-
   /**
    * Create panel header
    */
   createPanelHeader() {
-    const header = document.createElement('div');
+    const _header = document.createElement('div');
     header.className = 'memory-header';
     
     header.innerHTML = `
@@ -166,22 +161,21 @@ export class MemoryToolsPanel extends EventEmitter {
     
     return header;
   }
-
   /**
    * Create tab navigation
    */
   createTabs() {
-    const tabs = document.createElement('div');
+    const _tabs = document.createElement('div');
     tabs.className = 'memory-tabs';
     
-    const tabItems = [
+    const _tabItems = [
       { id: 'tools', name: 'Tools', icon: '🛠️' },
       { id: 'analytics', name: 'Analytics', icon: '📊' },
       { id: 'management', name: 'Management', icon: '⚙️' }
     ];
     
-    tabItems.forEach((tab, index) => {
-      const tabElement = document.createElement('button');
+    tabItems.forEach((_tab, index) => {
+      const _tabElement = document.createElement('button');
       tabElement.className = `memory-tab ${index === 0 ? 'active' : ''}`;
       tabElement.setAttribute('data-tab', tab.id);
       tabElement.innerHTML = `
@@ -193,43 +187,41 @@ export class MemoryToolsPanel extends EventEmitter {
     
     return tabs;
   }
-
   /**
    * Create tab content areas
    */
   createTabContents() {
-    const tabContents = document.createElement('div');
+    const _tabContents = document.createElement('div');
     tabContents.className = 'memory-tab-contents';
     
     // Tools tab
-    const toolsTab = this.createToolsTab();
+    const _toolsTab = this.createToolsTab();
     tabContents.appendChild(toolsTab);
     
     // Analytics tab
-    const analyticsTab = this.createAnalyticsTab();
+    const _analyticsTab = this.createAnalyticsTab();
     tabContents.appendChild(analyticsTab);
     
     // Management tab
-    const managementTab = this.createManagementTab();
+    const _managementTab = this.createManagementTab();
     tabContents.appendChild(managementTab);
     
     return tabContents;
   }
-
   /**
    * Create tools tab content
    */
   createToolsTab() {
-    const toolsTab = document.createElement('div');
+    const _toolsTab = document.createElement('div');
     toolsTab.className = 'memory-tab-content active';
     toolsTab.setAttribute('data-tab', 'tools');
     
     // Create category sections
-    Object.entries(this.categories).forEach(([categoryId, category]) => {
-      const categorySection = document.createElement('div');
+    Object.entries(this.categories).forEach(([_categoryId, category]) => {
+      const _categorySection = document.createElement('div');
       categorySection.className = 'memory-category';
       
-      const categoryHeader = document.createElement('h3');
+      const _categoryHeader = document.createElement('h3');
       categoryHeader.className = 'memory-category-header';
       categoryHeader.style.borderLeftColor = category.color;
       categoryHeader.innerHTML = `
@@ -237,7 +229,7 @@ export class MemoryToolsPanel extends EventEmitter {
         <span class="category-count" id="categoryCount-${categoryId}">0</span>
       `;
       
-      const categoryGrid = document.createElement('div');
+      const _categoryGrid = document.createElement('div');
       categoryGrid.className = 'memory-tools-grid';
       categoryGrid.id = `categoryGrid-${categoryId}`;
       
@@ -246,21 +238,20 @@ export class MemoryToolsPanel extends EventEmitter {
       toolsTab.appendChild(categorySection);
       
       // Add tools to category
-      this.populateToolsGrid(categoryGrid, categoryId);
+      this.populateToolsGrid(_categoryGrid, categoryId);
     });
     
     return toolsTab;
   }
-
   /**
    * Populate tools grid for a category
    */
-  populateToolsGrid(grid, categoryId) {
-    const toolsInCategory = Object.entries(this.memoryTools)
+  populateToolsGrid(_grid, categoryId) {
+    const _toolsInCategory = Object.entries(this.memoryTools)
       .filter(([, tool]) => tool.category === categoryId);
     
-    toolsInCategory.forEach(([toolId, tool]) => {
-      const toolCard = document.createElement('div');
+    toolsInCategory.forEach(([_toolId, tool]) => {
+      const _toolCard = document.createElement('div');
       toolCard.className = 'memory-tool-card';
       toolCard.setAttribute('data-tool', toolId);
       
@@ -281,17 +272,16 @@ export class MemoryToolsPanel extends EventEmitter {
     });
     
     // Update category count
-    const countElement = document.getElementById(`categoryCount-${categoryId}`);
+    const _countElement = document.getElementById(`categoryCount-${categoryId}`);
     if (countElement) {
       countElement.textContent = toolsInCategory.length;
     }
   }
-
   /**
    * Create analytics tab content
    */
   createAnalyticsTab() {
-    const analyticsTab = document.createElement('div');
+    const _analyticsTab = document.createElement('div');
     analyticsTab.className = 'memory-tab-content';
     analyticsTab.setAttribute('data-tab', 'analytics');
     
@@ -349,12 +339,11 @@ export class MemoryToolsPanel extends EventEmitter {
     
     return analyticsTab;
   }
-
   /**
    * Create management tab content
    */
   createManagementTab() {
-    const managementTab = document.createElement('div');
+    const _managementTab = document.createElement('div');
     managementTab.className = 'memory-tab-content';
     managementTab.setAttribute('data-tab', 'management');
     
@@ -441,14 +430,13 @@ export class MemoryToolsPanel extends EventEmitter {
     
     return managementTab;
   }
-
   /**
    * Add toggle button to main header
    */
   addToggleButton() {
-    const headerRight = document.querySelector('.header-right');
+    const _headerRight = document.querySelector('.header-right');
     if (headerRight) {
-      const toggleButton = document.createElement('button');
+      const _toggleButton = document.createElement('button');
       toggleButton.className = 'header-button';
       toggleButton.id = 'memoryToggle';
       toggleButton.setAttribute('aria-label', 'Toggle Memory Tools');
@@ -458,21 +446,20 @@ export class MemoryToolsPanel extends EventEmitter {
       `;
       
       // Insert before settings button
-      const settingsButton = document.getElementById('settingsToggle');
+      const _settingsButton = document.getElementById('settingsToggle');
       if (settingsButton) {
-        headerRight.insertBefore(toggleButton, settingsButton);
+        headerRight.insertBefore(_toggleButton, settingsButton);
       } else {
         headerRight.appendChild(toggleButton);
       }
     }
   }
-
   /**
    * Setup event listeners
    */
   setupEventListeners() {
     // Panel toggle
-    const toggleButton = document.getElementById('memoryToggle');
+    const _toggleButton = document.getElementById('memoryToggle');
     if (toggleButton) {
       toggleButton.addEventListener('click', () => {
         this.togglePanel();
@@ -480,7 +467,7 @@ export class MemoryToolsPanel extends EventEmitter {
     }
     
     // Close panel
-    const closeButton = document.getElementById('closeMemoryPanel');
+    const _closeButton = document.getElementById('closeMemoryPanel');
     if (closeButton) {
       closeButton.addEventListener('click', () => {
         this.hidePanel();
@@ -488,21 +475,21 @@ export class MemoryToolsPanel extends EventEmitter {
     }
     
     // Refresh and export
-    const refreshBtn = document.getElementById('refreshMemoryData');
+    const _refreshBtn = document.getElementById('refreshMemoryData');
     if (refreshBtn) {
       refreshBtn.addEventListener('click', () => this.refreshData());
     }
     
-    const exportBtn = document.getElementById('exportMemoryData');
+    const _exportBtn = document.getElementById('exportMemoryData');
     if (exportBtn) {
       exportBtn.addEventListener('click', () => this.exportData());
     }
     
     // Tab navigation
-    const tabButtons = document.querySelectorAll('.memory-tab');
+    const _tabButtons = document.querySelectorAll('.memory-tab');
     tabButtons.forEach(button => {
       button.addEventListener('click', () => {
-        const tabId = button.getAttribute('data-tab');
+        const _tabId = button.getAttribute('data-tab');
         this.switchTab(tabId);
       });
     });
@@ -510,8 +497,8 @@ export class MemoryToolsPanel extends EventEmitter {
     // Tool execution
     this.elements.panel.addEventListener('click', (e) => {
       if (e.target.classList.contains('tool-action-btn')) {
-        const action = e.target.dataset.action;
-        const toolName = e.target.dataset.tool;
+        const _action = e.target.dataset.action;
+        const _toolName = e.target.dataset.tool;
         
         if (action === 'execute') {
           this.executeTool(toolName);
@@ -524,45 +511,43 @@ export class MemoryToolsPanel extends EventEmitter {
     // Management actions
     this.setupManagementActions();
   }
-
   /**
    * Setup management action listeners
    */
   setupManagementActions() {
     // Backup actions
-    const createBackupBtn = document.getElementById('createBackup');
+    const _createBackupBtn = document.getElementById('createBackup');
     if (createBackupBtn) {
       createBackupBtn.addEventListener('click', () => this.createBackup());
     }
     
-    const scheduleBackupBtn = document.getElementById('scheduleBackup');
+    const _scheduleBackupBtn = document.getElementById('scheduleBackup');
     if (scheduleBackupBtn) {
       scheduleBackupBtn.addEventListener('click', () => this.scheduleBackup());
     }
     
     // Cache actions
-    const clearCacheBtn = document.getElementById('clearCache');
+    const _clearCacheBtn = document.getElementById('clearCache');
     if (clearCacheBtn) {
       clearCacheBtn.addEventListener('click', () => this.clearCache());
     }
     
-    const optimizeCacheBtn = document.getElementById('optimizeCache');
+    const _optimizeCacheBtn = document.getElementById('optimizeCache');
     if (optimizeCacheBtn) {
       optimizeCacheBtn.addEventListener('click', () => this.optimizeCache());
     }
     
     // Namespace actions
-    const createNamespaceBtn = document.getElementById('createNamespace');
+    const _createNamespaceBtn = document.getElementById('createNamespace');
     if (createNamespaceBtn) {
       createNamespaceBtn.addEventListener('click', () => this.createNamespace());
     }
     
-    const cleanupNamespacesBtn = document.getElementById('cleanupNamespaces');
+    const _cleanupNamespacesBtn = document.getElementById('cleanupNamespaces');
     if (cleanupNamespacesBtn) {
       cleanupNamespacesBtn.addEventListener('click', () => this.cleanupNamespaces());
     }
   }
-
   /**
    * Setup WebSocket handlers
    */
@@ -585,7 +570,6 @@ export class MemoryToolsPanel extends EventEmitter {
       });
     }
   }
-
   /**
    * Load initial data
    */
@@ -603,17 +587,16 @@ export class MemoryToolsPanel extends EventEmitter {
       // Load cache statistics
       await this.loadCacheStats();
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to load initial memory data:', error);
     }
   }
-
   /**
    * Execute a memory tool
    */
   async executeTool(toolId) {
     try {
-      const tool = this.memoryTools[toolId];
+      const _tool = this.memoryTools[toolId];
       if (!tool) {
         console.error('Unknown tool:', toolId);
         return;
@@ -626,43 +609,41 @@ export class MemoryToolsPanel extends EventEmitter {
       await this.sendCoordinationNotification(`Starting ${tool.name}`);
       
       // Execute the tool
-      const result = await this.callMemoryTool(toolId);
-      this.handleToolResult(toolId, result);
+      const _result = await this.callMemoryTool(toolId);
+      this.handleToolResult(_toolId, result);
       
       // Notify completion
       await this.sendCoordinationNotification(`${tool.name} completed successfully`);
       
       this.emit('tool_executed', { toolId });
       
-    } catch (error) {
+    } catch (_error) {
       this.updateStatus('Tool execution failed', 'error');
-      this.emit('tool_error', { toolId, error });
+      this.emit('tool_error', { _toolId, error });
       console.error(`Memory tool execution failed (${toolId}):`, error);
     } finally {
       this.activeOperations.delete(toolId);
     }
   }
-
   /**
    * Configure a memory tool
    */
   configureTool(toolId) {
-    const tool = this.memoryTools[toolId];
+    const _tool = this.memoryTools[toolId];
     if (tool) {
       // Show configuration modal for the tool
       this.showToolConfiguration(toolId);
     }
   }
-
   /**
    * Show tool configuration dialog
    */
   showToolConfiguration(toolId) {
-    const tool = this.memoryTools[toolId];
+    const _tool = this.memoryTools[toolId];
     if (!tool) return;
     
     // Create configuration modal
-    const modal = document.createElement('div');
+    const _modal = document.createElement('div');
     modal.className = 'tool-config-modal';
     modal.innerHTML = `
       <div class="modal-overlay">
@@ -686,12 +667,11 @@ export class MemoryToolsPanel extends EventEmitter {
     
     document.body.appendChild(modal);
   }
-
   /**
    * Get configuration form for a tool
    */
   getToolConfigForm(toolId) {
-    const commonConfig = `
+    const _commonConfig = `
       <div class="config-row">
         <label>Priority:</label>
         <select>
@@ -706,7 +686,7 @@ export class MemoryToolsPanel extends EventEmitter {
       </div>
     `;
     
-    const toolSpecificConfig = {
+    const _toolSpecificConfig = {
       memory_backup: `
         <div class="config-row">
           <label>Backup Location:</label>
@@ -749,41 +729,39 @@ export class MemoryToolsPanel extends EventEmitter {
     
     return commonConfig + (toolSpecificConfig[toolId] || '');
   }
-
   /**
    * Call memory tool via WebSocket or MCP
    */
-  async callMemoryTool(toolId, params = {}) {
+  async callMemoryTool(_toolId, params = { /* empty */ }) {
     // Try WebSocket first, then MCP, then fallback to mock
     if (this.wsClient && this.wsClient.getStatus() === 'connected') {
       try {
-        const response = await this.wsClient.sendRequest({
+        const _response = await this.wsClient.sendRequest({
           type: 'tool_execute',
           tool: `mcp__ruv-swarm__${toolId}`,
           params: params
         });
         return response;
-      } catch (error) {
+      } catch (_error) {
         console.warn(`WebSocket failed for ${toolId}, trying MCP...`);
       }
     }
     
     // Try MCP tools
     try {
-      const mcpResponse = await this.callMCPTool(toolId, params);
+      const _mcpResponse = await this.callMCPTool(_toolId, params);
       return mcpResponse;
-    } catch (error) {
+    } catch (_error) {
       console.warn(`MCP failed for ${toolId}, using mock data:`, error);
-      return this.getMockResponse(toolId, params);
+      return this.getMockResponse(_toolId, params);
     }
   }
-
   /**
    * Call MCP tool for memory operations
    */
-  async callMCPTool(toolId, params = {}) {
+  async callMCPTool(_toolId, params = { /* empty */ }) {
     // Map memory tools to MCP functions
-    const mcpMapping = {
+    const _mcpMapping = {
       memory_backup: 'memory_usage',
       memory_restore: 'memory_usage',
       memory_sync: 'memory_usage',
@@ -792,20 +770,19 @@ export class MemoryToolsPanel extends EventEmitter {
       state_snapshot: 'memory_usage'
     };
     
-    const mcpFunction = mcpMapping[toolId];
+    const _mcpFunction = mcpMapping[toolId];
     if (!mcpFunction) {
       throw new Error(`No MCP mapping for ${toolId}`);
     }
     
     // This would be implemented when MCP tools are available
-    return { success: true, data: {}, mock: true };
+    return { success: true, data: { /* empty */ }, mock: true };
   }
-
   /**
    * Get mock response for testing
    */
-  getMockResponse(toolId, params) {
-    const timestamp = new Date().toISOString();
+  getMockResponse(_toolId, params) {
+    const _timestamp = new Date().toISOString();
     
     switch (toolId) {
       case 'memory_backup':
@@ -907,10 +884,9 @@ export class MemoryToolsPanel extends EventEmitter {
         };
       
       default:
-        return { success: true, data: {}, mock: true };
+        return { success: true, data: { /* empty */ }, mock: true };
     }
   }
-
   /**
    * Send coordination notification
    */
@@ -919,26 +895,25 @@ export class MemoryToolsPanel extends EventEmitter {
       if (this.wsClient) {
         await this.wsClient.sendRequest({
           type: 'coordination_notify',
-          message: message,
+          message: _message,
           timestamp: new Date().toISOString(),
           agent: 'memory-tools'
         });
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn('Failed to send coordination notification:', error);
     }
   }
-
   /**
    * Handle tool execution result
    */
-  handleToolResult(toolId, result) {
-    const tool = this.memoryTools[toolId];
+  handleToolResult(_toolId, result) {
+    const _tool = this.memoryTools[toolId];
     if (!tool) return;
     
     if (result && result.success) {
       this.updateStatus(`${tool.name} completed successfully`, 'success');
-      this.updateOperationHistory(toolId, result);
+      this.updateOperationHistory(_toolId, result);
       
       // Refresh relevant data
       this.refreshData();
@@ -946,12 +921,11 @@ export class MemoryToolsPanel extends EventEmitter {
       this.updateStatus(`${tool.name} failed`, 'error');
     }
   }
-
   /**
    * Update operation history
    */
-  updateOperationHistory(toolId, result) {
-    const operation = {
+  updateOperationHistory(_toolId, result) {
+    const _operation = {
       id: `op-${Date.now()}`,
       tool: toolId,
       toolName: this.memoryTools[toolId].name,
@@ -963,19 +937,18 @@ export class MemoryToolsPanel extends EventEmitter {
     // Add to timeline
     this.addToTimeline(operation);
   }
-
   /**
    * Add operation to timeline
    */
   addToTimeline(operation) {
-    const timeline = document.getElementById('operationsTimeline');
+    const _timeline = document.getElementById('operationsTimeline');
     if (!timeline) return;
     
     if (timeline.querySelector('.timeline-placeholder')) {
       timeline.innerHTML = '';
     }
     
-    const operationElement = document.createElement('div');
+    const _operationElement = document.createElement('div');
     operationElement.className = `timeline-item ${operation.success ? 'success' : 'error'}`;
     operationElement.innerHTML = `
       <div class="timeline-time">${new Date(operation.timestamp).toLocaleTimeString()}</div>
@@ -985,15 +958,14 @@ export class MemoryToolsPanel extends EventEmitter {
       </div>
     `;
     
-    timeline.insertBefore(operationElement, timeline.firstChild);
+    timeline.insertBefore(_operationElement, timeline.firstChild);
     
     // Keep only last 20 operations
-    const items = timeline.querySelectorAll('.timeline-item');
+    const _items = timeline.querySelectorAll('.timeline-item');
     if (items.length > 20) {
       items[items.length - 1].remove();
     }
   }
-
   /**
    * Format operation result for display
    */
@@ -1004,13 +976,12 @@ export class MemoryToolsPanel extends EventEmitter {
     if (result.spaceSaved) return `Space saved: ${result.spaceSaved}`;
     return 'Operation completed';
   }
-
   /**
    * Update status display
    */
-  updateStatus(text, type = 'info') {
-    const statusText = document.getElementById('memoryStatusText');
-    const statusIndicator = document.getElementById('memoryStatusIndicator');
+  updateStatus(_text, type = 'info') {
+    const _statusText = document.getElementById('memoryStatusText');
+    const _statusIndicator = document.getElementById('memoryStatusIndicator');
     
     if (statusText) {
       statusText.textContent = text;
@@ -1020,19 +991,17 @@ export class MemoryToolsPanel extends EventEmitter {
       statusIndicator.className = `status-indicator ${type}`;
     }
   }
-
   /**
    * Check memory status
    */
   async checkMemoryStatus() {
     try {
-      const result = await this.callMemoryTool('memory_analytics');
+      const _result = await this.callMemoryTool('memory_analytics');
       this.handleMemoryStatus(result);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to check memory status:', error);
     }
   }
-
   /**
    * Handle memory status response
    */
@@ -1046,29 +1015,27 @@ export class MemoryToolsPanel extends EventEmitter {
       this.updateStatus('Memory system error', 'error');
     }
   }
-
   /**
    * Load memory metrics
    */
   async loadMemoryMetrics() {
     try {
-      const result = await this.callMemoryTool('memory_analytics');
+      const _result = await this.callMemoryTool('memory_analytics');
       if (result && result.success && result.analytics) {
         this.updateMemoryMetrics(result.analytics);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to load memory metrics:', error);
     }
   }
-
   /**
    * Update memory metrics display
    */
   updateMemoryMetrics(metrics) {
-    const totalMemoryElement = document.getElementById('totalMemory');
-    const activeMemoryElement = document.getElementById('activeMemory');
-    const efficiencyElement = document.getElementById('memoryEfficiency');
-    const hitRateElement = document.getElementById('cacheHitRate');
+    const _totalMemoryElement = document.getElementById('totalMemory');
+    const _activeMemoryElement = document.getElementById('activeMemory');
+    const _efficiencyElement = document.getElementById('memoryEfficiency');
+    const _hitRateElement = document.getElementById('cacheHitRate');
     
     if (totalMemoryElement) {
       totalMemoryElement.textContent = `${metrics.totalMemory.toFixed(1)} MB`;
@@ -1087,7 +1054,7 @@ export class MemoryToolsPanel extends EventEmitter {
     }
     
     // Update insights
-    const insightsContainer = document.getElementById('performanceInsights');
+    const _insightsContainer = document.getElementById('performanceInsights');
     if (insightsContainer && metrics.insights) {
       insightsContainer.innerHTML = `
         <div class="insights-list">
@@ -1101,30 +1068,28 @@ export class MemoryToolsPanel extends EventEmitter {
       `;
     }
   }
-
   /**
    * Load backup list
    */
   async loadBackupList() {
     try {
       // Mock backup data
-      const backups = [
+      const _backups = [
         { id: 'backup-1', name: 'Daily Backup', size: '45.2 MB', date: new Date(Date.now() - 86400000).toISOString() },
         { id: 'backup-2', name: 'Weekly Backup', size: '98.7 MB', date: new Date(Date.now() - 604800000).toISOString() },
         { id: 'backup-3', name: 'Manual Backup', size: '23.1 MB', date: new Date(Date.now() - 3600000).toISOString() }
       ];
       
       this.renderBackupList(backups);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to load backup list:', error);
     }
   }
-
   /**
    * Render backup list
    */
   renderBackupList(backups) {
-    const backupList = document.getElementById('backupList');
+    const _backupList = document.getElementById('backupList');
     if (!backupList) return;
     
     if (backups.length === 0) {
@@ -1158,60 +1123,63 @@ export class MemoryToolsPanel extends EventEmitter {
     // Add event listeners for backup actions
     backupList.querySelectorAll('.backup-action-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const action = e.currentTarget.dataset.action;
-        const backupId = e.currentTarget.dataset.backup;
-        this.handleBackupAction(action, backupId);
+        const _action = e.currentTarget.dataset.action;
+        const _backupId = e.currentTarget.dataset.backup;
+        this.handleBackupAction(_action, backupId);
       });
     });
   }
-
   /**
    * Handle backup action
    */
-  async handleBackupAction(action, backupId) {
+  async handleBackupAction(_action, backupId) {
     try {
       switch (action) {
         case 'restore':
-          await this.restoreBackup(backupId);
-          break;
+          {
+await this.restoreBackup(backupId);
+          
+}break;
         case 'download':
-          await this.downloadBackup(backupId);
-          break;
+          {
+await this.downloadBackup(backupId);
+          
+}break;
         case 'delete':
-          await this.deleteBackup(backupId);
-          break;
+          {
+await this.deleteBackup(backupId);
+          
+}break;
       }
-    } catch (error) {
+    } catch (_error) {
       console.error(`Failed to ${action} backup:`, error);
       this.updateStatus(`Backup ${action} failed`, 'error');
     }
   }
-
   /**
    * Load cache statistics
    */
   async loadCacheStats() {
     try {
-      const result = await this.callMemoryTool('cache_manage');
+      const _result = await this.callMemoryTool('cache_manage');
       if (result && result.success) {
         this.updateCacheStats({
           size: '24.7 MB',
-          hitRate: 0.94,
+          hitRate: 0._94,
           entries: 1523
         });
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to load cache stats:', error);
     }
   }
-
   /**
    * Update cache statistics display
    */
   updateCacheStats(stats) {
-    const cacheSizeElement = document.getElementById('cacheSize');
-    const hitRateElement = document.getElementById('cacheHitRate2');
-    const entriesElement = document.getElementById('cacheEntries');
+    const _cacheSizeElement = document.getElementById('cacheSize');
+    const _hitRateElement = document.getElementById('cacheHitRate2');
+    const _entriesElement = document.getElementById('cacheEntries');
     
     if (cacheSizeElement) {
       cacheSizeElement.textContent = stats.size;
@@ -1225,7 +1193,6 @@ export class MemoryToolsPanel extends EventEmitter {
       entriesElement.textContent = stats.entries;
     }
   }
-
   /**
    * Management actions
    */
@@ -1233,106 +1200,99 @@ export class MemoryToolsPanel extends EventEmitter {
     this.updateStatus('Creating backup...', 'processing');
     
     try {
-      const result = await this.callMemoryTool('memory_backup');
+      const _result = await this.callMemoryTool('memory_backup');
       if (result && result.success) {
         this.updateStatus('Backup created successfully', 'success');
         await this.loadBackupList();
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to create backup:', error);
       this.updateStatus('Backup creation failed', 'error');
     }
   }
-
   async scheduleBackup() {
     // Mock implementation
-    const schedule = prompt('Enter backup schedule (e.g., "daily at 2:00 AM"):');
+    const _schedule = prompt('Enter backup schedule (e.g., "daily at 2:00 AM"):');
     if (schedule) {
       this.updateStatus(`Backup scheduled: ${schedule}`, 'success');
     }
   }
-
   async clearCache() {
     if (confirm('Are you sure you want to clear the cache?')) {
       this.updateStatus('Clearing cache...', 'processing');
       
       try {
-        const result = await this.callMemoryTool('cache_manage', { action: 'clear' });
+        const _result = await this.callMemoryTool('cache_manage', { action: 'clear' });
         if (result && result.success) {
           this.updateStatus('Cache cleared successfully', 'success');
           await this.loadCacheStats();
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to clear cache:', error);
         this.updateStatus('Cache clear failed', 'error');
       }
     }
   }
-
   async optimizeCache() {
     this.updateStatus('Optimizing cache...', 'processing');
     
     try {
-      const result = await this.callMemoryTool('cache_manage', { action: 'optimize' });
+      const _result = await this.callMemoryTool('cache_manage', { action: 'optimize' });
       if (result && result.success) {
         this.updateStatus('Cache optimized successfully', 'success');
         await this.loadCacheStats();
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to optimize cache:', error);
       this.updateStatus('Cache optimization failed', 'error');
     }
   }
-
   async createNamespace() {
-    const name = prompt('Enter namespace name:');
+    const _name = prompt('Enter namespace name:');
     if (name) {
       this.updateStatus(`Creating namespace: ${name}`, 'processing');
       
       try {
-        const result = await this.callMemoryTool('memory_namespace', { action: 'create', name });
+        const _result = await this.callMemoryTool('memory_namespace', { action: 'create', name });
         if (result && result.success) {
           this.updateStatus(`Namespace ${name} created`, 'success');
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to create namespace:', error);
         this.updateStatus('Namespace creation failed', 'error');
       }
     }
   }
-
   async cleanupNamespaces() {
     if (confirm('Clean up unused namespaces?')) {
       this.updateStatus('Cleaning up namespaces...', 'processing');
       
       try {
-        const result = await this.callMemoryTool('memory_namespace', { action: 'cleanup' });
+        const _result = await this.callMemoryTool('memory_namespace', { action: 'cleanup' });
         if (result && result.success) {
           this.updateStatus('Namespaces cleaned up', 'success');
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to cleanup namespaces:', error);
         this.updateStatus('Namespace cleanup failed', 'error');
       }
     }
   }
-
   async restoreBackup(backupId) {
     if (confirm('Are you sure you want to restore this backup?')) {
       this.updateStatus('Restoring backup...', 'processing');
       
       try {
-        const result = await this.callMemoryTool('memory_restore', { backupId });
+        const _result = await this.callMemoryTool('memory_restore', { backupId });
         if (result && result.success) {
           this.updateStatus('Backup restored successfully', 'success');
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to restore backup:', error);
         this.updateStatus('Backup restore failed', 'error');
       }
     }
   }
-
   async downloadBackup(backupId) {
     // Mock download
     this.updateStatus('Downloading backup...', 'processing');
@@ -1340,7 +1300,6 @@ export class MemoryToolsPanel extends EventEmitter {
       this.updateStatus('Backup downloaded', 'success');
     }, 1000);
   }
-
   async deleteBackup(backupId) {
     if (confirm('Are you sure you want to delete this backup?')) {
       this.updateStatus('Deleting backup...', 'processing');
@@ -1350,12 +1309,11 @@ export class MemoryToolsPanel extends EventEmitter {
       }, 500);
     }
   }
-
   /**
    * Panel management
    */
   togglePanel() {
-    const panel = this.elements.panel;
+    const _panel = this.elements.panel;
     if (panel) {
       panel.classList.toggle('hidden');
       
@@ -1364,34 +1322,31 @@ export class MemoryToolsPanel extends EventEmitter {
       }
     }
   }
-
   showPanel() {
-    const panel = this.elements.panel;
+    const _panel = this.elements.panel;
     if (panel) {
       panel.classList.remove('hidden');
       this.refreshData();
     }
   }
-
   hidePanel() {
-    const panel = this.elements.panel;
+    const _panel = this.elements.panel;
     if (panel) {
       panel.classList.add('hidden');
     }
   }
-
   /**
    * Switch to specific tab
    */
   switchTab(tabId) {
     // Update tab buttons
-    const tabButtons = document.querySelectorAll('.memory-tab');
+    const _tabButtons = document.querySelectorAll('.memory-tab');
     tabButtons.forEach(button => {
       button.classList.toggle('active', button.getAttribute('data-tab') === tabId);
     });
     
     // Update tab contents
-    const tabContents = document.querySelectorAll('.memory-tab-content');
+    const _tabContents = document.querySelectorAll('.memory-tab-content');
     tabContents.forEach(content => {
       content.classList.toggle('active', content.getAttribute('data-tab') === tabId);
     });
@@ -1399,35 +1354,36 @@ export class MemoryToolsPanel extends EventEmitter {
     // Load tab-specific data
     this.loadTabData(tabId);
   }
-
   /**
    * Load tab-specific data
    */
   async loadTabData(tabId) {
     switch (tabId) {
       case 'analytics':
-        await this.loadMemoryMetrics();
-        break;
+        {
+await this.loadMemoryMetrics();
+        
+}break;
       case 'management':
-        await this.loadBackupList();
+        {
+await this.loadBackupList();
         await this.loadCacheStats();
-        break;
+        
+}break;
     }
   }
-
   /**
    * Refresh all data
    */
   async refreshData() {
     await this.loadInitialData();
   }
-
   /**
    * Export memory data
    */
   async exportData() {
     try {
-      const data = {
+      const _data = {
         timestamp: new Date().toISOString(),
         memoryMetrics: this.memoryStats,
         backupHistory: Array.from(this.backupProgress.entries()),
@@ -1437,9 +1393,9 @@ export class MemoryToolsPanel extends EventEmitter {
       };
       
       // Create download
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const _blob = new Blob([JSON.stringify(_data, _null, 2)], { type: 'application/json' });
+      const _url = URL.createObjectURL(blob);
+      const _a = document.createElement('a');
       a.href = url;
       a.download = `memory-data-${Date.now()}.json`;
       document.body.appendChild(a);
@@ -1448,12 +1404,11 @@ export class MemoryToolsPanel extends EventEmitter {
       URL.revokeObjectURL(url);
       
       this.updateStatus('Data exported successfully', 'success');
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to export data:', error);
       this.updateStatus('Export failed', 'error');
     }
   }
-
   /**
    * Get panel statistics
    */
@@ -1466,7 +1421,6 @@ export class MemoryToolsPanel extends EventEmitter {
       memoryMetrics: this.memoryStats.size
     };
   }
-
   /**
    * Cleanup resources
    */
@@ -1475,7 +1429,7 @@ export class MemoryToolsPanel extends EventEmitter {
       this.elements.panel.remove();
     }
     
-    const toggleButton = document.getElementById('memoryToggle');
+    const _toggleButton = document.getElementById('memoryToggle');
     if (toggleButton) {
       toggleButton.remove();
     }
@@ -1486,6 +1440,5 @@ export class MemoryToolsPanel extends EventEmitter {
     this.isInitialized = false;
   }
 }
-
 // Export for module usage
 export default MemoryToolsPanel;

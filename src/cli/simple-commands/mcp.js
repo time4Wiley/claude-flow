@@ -1,41 +1,51 @@
 /* eslint-env node */
 // mcp.js - MCP server management commands
 import { printSuccess, printError, printWarning } from '../utils.js';
-
-export async function mcpCommand(subArgs, flags) {
-  const mcpCmd = subArgs[0];
+export async function mcpCommand(_subArgs, flags) {
+  const _mcpCmd = subArgs[0];
   
   switch (mcpCmd) {
     case 'status':
-      await showMcpStatus(subArgs, flags);
-      break;
+      {
+await showMcpStatus(_subArgs, flags);
+      
+}break;
       
     case 'start':
-      await startMcpServer(subArgs, flags);
-      break;
+      {
+await startMcpServer(_subArgs, flags);
+      
+}break;
       
     case 'stop':
-      await stopMcpServer(subArgs, flags);
-      break;
+      {
+await stopMcpServer(_subArgs, flags);
+      
+}break;
       
     case 'tools':
-      await listMcpTools(subArgs, flags);
-      break;
+      {
+await listMcpTools(_subArgs, flags);
+      
+}break;
       
     case 'auth':
-      await manageMcpAuth(subArgs, flags);
-      break;
+      {
+await manageMcpAuth(_subArgs, flags);
+      
+}break;
       
     case 'config':
-      await showMcpConfig(subArgs, flags);
-      break;
+      {
+await showMcpConfig(_subArgs, flags);
+      
+}break;
       
     default:
       showMcpHelp();
   }
 }
-
-async function showMcpStatus(subArgs, flags) {
+async function showMcpStatus(_subArgs, flags) {
   printSuccess('MCP Server Status:');
   console.log('🌐 Status: Stopped (orchestrator not running)');
   console.log('🔧 Configuration: Default settings');
@@ -43,11 +53,10 @@ async function showMcpStatus(subArgs, flags) {
   console.log('📡 Tools: Ready to load');
   console.log('🔐 Authentication: Not configured');
 }
-
-async function startMcpServer(subArgs, flags) {
-  const autoOrchestrator = subArgs.includes('--auto-orchestrator') || flags.autoOrchestrator;
-  const daemon = subArgs.includes('--daemon') || flags.daemon;
-  const stdio = subArgs.includes('--stdio') || flags.stdio || true; // Default to stdio mode
+async function startMcpServer(_subArgs, flags) {
+  const _autoOrchestrator = subArgs.includes('--auto-orchestrator') || flags.autoOrchestrator;
+  const _daemon = subArgs.includes('--daemon') || flags.daemon;
+  const _stdio = subArgs.includes('--stdio') || flags.stdio || true; // Default to stdio mode
   
   if (stdio) {
     // Start MCP server in stdio mode (like ruv-swarm)
@@ -64,18 +73,18 @@ async function startMcpServer(subArgs, flags) {
     // Import and start the MCP server
     try {
       const { fileURLToPath } = await import('url');
-      const path = await import('path');
+      const _path = await import('path');
       const { spawn } = await import('child_process');
       
       const __filename = fileURLToPath(import.meta.url);
       const __dirname = path.dirname(__filename);
-      const mcpServerPath = path.join(__dirname, '../../mcp/mcp-server.js');
+      const _mcpServerPath = path.join(__dirname, '../../mcp/mcp-server.js');
       
       // Start the MCP server process
-      const serverProcess = spawn('node', [mcpServerPath], {
+      const _serverProcess = spawn('node', [mcpServerPath], {
         stdio: 'inherit',
         env: {
-          ...process.env,
+          ...process._env,
           CLAUDE_FLOW_AUTO_ORCHESTRATOR: autoOrchestrator ? 'true' : 'false',
           CLAUDE_FLOW_NEURAL_ENABLED: 'true',
           CLAUDE_FLOW_WASM_ENABLED: 'true'
@@ -89,9 +98,9 @@ async function startMcpServer(subArgs, flags) {
       });
       
       // Keep the process alive
-      await new Promise(() => {}); // Never resolves, keeps server running
+      await new Promise(() => { /* empty */ }); // Never resolves, keeps server running
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to start MCP server:', error.message);
       
       // Fallback to status display
@@ -103,24 +112,22 @@ async function startMcpServer(subArgs, flags) {
     }
   } else {
     // HTTP mode (for future implementation)
-    const port = getFlag(subArgs, '--port') || flags.port || 3000;
-    const host = getFlag(subArgs, '--host') || flags.host || 'localhost';
+    const _port = getFlag(_subArgs, '--port') || flags.port || 3000;
+    const _host = getFlag(_subArgs, '--host') || flags.host || 'localhost';
     
     printSuccess(`Starting Claude Flow MCP server on ${host}:${port}...`);
-    console.log('🚀 HTTP mode not yet implemented, use --stdio for full functionality');
+    console.log('🚀 HTTP mode not yet _implemented, use --stdio for full functionality');
   }
 }
-
-async function stopMcpServer(subArgs, flags) {
+async function stopMcpServer(_subArgs, flags) {
   printSuccess('Stopping MCP server...');
   console.log('🛑 Server would be gracefully shut down');
   console.log('📝 Active connections would be closed');
   console.log('💾 State would be persisted');
 }
-
-async function listMcpTools(subArgs, flags) {
-  const verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
-  const category = getFlag(subArgs, '--category') || flags.category;
+async function listMcpTools(_subArgs, flags) {
+  const _verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
+  const _category = getFlag(_subArgs, '--category') || flags.category;
   
   printSuccess('Claude-Flow MCP Tools & Resources (87 total):');
   
@@ -246,10 +253,10 @@ async function listMcpTools(subArgs, flags) {
   if (verbose) {
     console.log('\n📋 DETAILED TOOL INFORMATION:');
     console.log('  🔥 HIGH-PRIORITY TOOLS:');
-    console.log('    swarm_init: Initialize coordination with 4 topologies (hierarchical, mesh, ring, star)');
-    console.log('    agent_spawn: 8 agent types (researcher, coder, analyst, architect, tester, coordinator, reviewer, optimizer)');
+    console.log('    swarm_init: Initialize coordination with 4 topologies (_hierarchical, _mesh, _ring, star)');
+    console.log('    agent_spawn: 8 agent types (_researcher, _coder, _analyst, _architect, _tester, _coordinator, _reviewer, optimizer)');
     console.log('    neural_train: Train 27 neural models with WASM SIMD acceleration');
-    console.log('    memory_usage: 5 operations (store, retrieve, list, delete, search) with TTL & namespacing');
+    console.log('    memory_usage: 5 operations (_store, _retrieve, _list, _delete, search) with TTL & namespacing');
     console.log('    performance_report: Real-time metrics with 24h/7d/30d timeframes');
     
     console.log('\n  ⚡ PERFORMANCE FEATURES:');
@@ -268,45 +275,49 @@ async function listMcpTools(subArgs, flags) {
   }
   
   console.log('\n📡 Status: 87 tools & resources available when server is running');
-  console.log('🎯 Categories: swarm, neural, memory, analysis, workflow, github, daa, system');
+  console.log('🎯 Categories: _swarm, _neural, _memory, _analysis, _workflow, _github, _daa, system');
   console.log('🔗 Compatibility: ruv-swarm + DAA + Claude-Flow unified platform');
   console.log('\n💡 Usage: claude-flow mcp tools --category=<category> --verbose');
 }
-
-async function manageMcpAuth(subArgs, flags) {
-  const authCmd = subArgs[1];
+async function manageMcpAuth(_subArgs, flags) {
+  const _authCmd = subArgs[1];
   
   switch (authCmd) {
     case 'setup':
-      printSuccess('Setting up MCP authentication...');
+      {
+printSuccess('Setting up MCP authentication...');
       console.log('🔐 Authentication configuration:');
       console.log('   Type: API Key based');
       console.log('   Scope: Claude-Flow tools');
       console.log('   Security: TLS encrypted');
-      break;
+      
+}break;
       
     case 'status':
-      printSuccess('MCP Authentication Status:');
+      {
+printSuccess('MCP Authentication Status:');
       console.log('🔐 Status: Not configured');
       console.log('🔑 API Keys: 0 active');
       console.log('🛡️  Security: Default settings');
-      break;
+      
+}break;
       
     case 'rotate':
-      printSuccess('Rotating MCP authentication keys...');
+      {
+printSuccess('Rotating MCP authentication keys...');
       console.log('🔄 New API keys would be generated');
       console.log('♻️  Old keys would be deprecated gracefully');
-      break;
+      
+}break;
       
     default:
-      console.log('Auth commands: setup, status, rotate');
+      console.log('Auth commands: _setup, _status, rotate');
       console.log('Examples:');
       console.log('  claude-flow mcp auth setup');
       console.log('  claude-flow mcp auth status');
   }
 }
-
-async function showMcpConfig(subArgs, flags) {
+async function showMcpConfig(_subArgs, flags) {
   printSuccess('Claude-Flow MCP Server Configuration:');
   console.log('\n📋 Server Settings:');
   console.log('   Host: localhost');
@@ -317,7 +328,7 @@ async function showMcpConfig(subArgs, flags) {
   
   console.log('\n🔧 Tool Configuration:');
   console.log('   Available Tools: 87 total');
-  console.log('   Categories: 8 (swarm, neural, memory, analysis, workflow, github, daa, system)');
+  console.log('   Categories: 8 (_swarm, _neural, _memory, _analysis, _workflow, _github, _daa, system)');
   console.log('   Authentication: API Key + OAuth');
   console.log('   Rate Limiting: 1000 req/min');
   console.log('   WASM Support: Enabled with SIMD');
@@ -330,7 +341,7 @@ async function showMcpConfig(subArgs, flags) {
   
   console.log('\n🐝 Swarm Configuration:');
   console.log('   Max Agents: 10 per swarm');
-  console.log('   Topologies: hierarchical, mesh, ring, star');
+  console.log('   Topologies: _hierarchical, _mesh, _ring, star');
   console.log('   Coordination: Real-time with hooks');
   console.log('   Memory: Cross-session persistence');
   
@@ -352,12 +363,10 @@ async function showMcpConfig(subArgs, flags) {
   console.log('   Memory Store: ./memory/');
   console.log('   Logs: ./logs/mcp/');
 }
-
-function getFlag(args, flagName) {
-  const index = args.indexOf(flagName);
+function getFlag(_args, flagName) {
+  const _index = args.indexOf(flagName);
   return index !== -1 && index + 1 < args.length ? args[index + 1] : null;
 }
-
 function showMcpHelp() {
   console.log('🔧 Claude-Flow MCP Server Commands:');
   console.log();
@@ -378,8 +387,8 @@ function showMcpHelp() {
   console.log('  --enable-wasm                    Enable WASM SIMD optimization');
   console.log();
   console.log('TOOLS OPTIONS:');
-  console.log('  --category <cat>                 Filter by category (swarm, neural, memory, etc.)');
-  console.log('  --verbose, -v                    Show detailed tool information');
+  console.log('  --category <cat>                 Filter by category (_swarm, _neural, _memory, etc.)');
+  console.log('  --_verbose, -v                    Show detailed tool information');
   console.log('  --examples                       Show usage examples');
   console.log();
   console.log('CATEGORIES:');

@@ -1,18 +1,15 @@
 // SPARC Pseudocode Phase
 // Generate pseudocode and flow diagrams based on specifications
-
 import { SparcPhase } from './phase-base.js';
-
 export class SparcPseudocode extends SparcPhase {
-  constructor(taskDescription, options) {
-    super('pseudocode', taskDescription, options);
+  constructor(_taskDescription, options) {
+    super('pseudocode', _taskDescription, options);
     this.flowDiagram = null;
     this.pseudocode = [];
     this.algorithms = [];
     this.dataStructures = [];
     this.interfaces = [];
   }
-
   /**
    * Execute pseudocode phase
    */
@@ -21,7 +18,7 @@ export class SparcPseudocode extends SparcPhase {
     
     await this.initializePhase();
     
-    const result = {
+    const _result = {
       flowDiagram: null,
       pseudocode: [],
       algorithms: [],
@@ -29,17 +26,15 @@ export class SparcPseudocode extends SparcPhase {
       interfaces: [],
       logicFlow: [],
       edgeCases: [],
-      complexityAnalysis: {},
+      complexityAnalysis: { /* empty */ },
       dependencies: []
     };
-
     try {
       // Load specification from previous phase
-      const specification = await this.retrieveFromMemory('specification_complete');
+      const _specification = await this.retrieveFromMemory('specification_complete');
       if (!specification) {
         throw new Error('Specification phase must be completed first');
       }
-
       // Generate flow diagram
       result.flowDiagram = await this.generateFlowDiagram(specification);
       
@@ -66,27 +61,22 @@ export class SparcPseudocode extends SparcPhase {
       
       // Identify dependencies
       result.dependencies = await this.identifyDependencies(specification);
-
       // Generate pseudocode document
       await this.generatePseudocodeDocument(result);
-
       // Store in memory
       await this.storeInMemory('pseudocode_complete', result);
-
       console.log('✅ Pseudocode phase completed');
       return result;
-
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Pseudocode phase failed:', error.message);
       throw error;
     }
   }
-
   /**
    * Generate flow diagram
    */
   async generateFlowDiagram(specification) {
-    const flowDiagram = {
+    const _flowDiagram = {
       title: `Flow Diagram: ${this.taskDescription}`,
       nodes: [],
       edges: [],
@@ -94,13 +84,11 @@ export class SparcPseudocode extends SparcPhase {
       exit: 'end',
       type: 'sequential'
     };
-
     // Determine flow type based on requirements
-    const requirements = specification.requirements || [];
-    const hasApiRequirements = requirements.some(req => req.toLowerCase().includes('api'));
-    const hasUiRequirements = requirements.some(req => req.toLowerCase().includes('ui') || req.toLowerCase().includes('interface'));
-    const hasDataRequirements = requirements.some(req => req.toLowerCase().includes('data'));
-
+    const _requirements = specification.requirements || [];
+    const _hasApiRequirements = requirements.some(req => req.toLowerCase().includes('api'));
+    const _hasUiRequirements = requirements.some(req => req.toLowerCase().includes('ui') || req.toLowerCase().includes('interface'));
+    const _hasDataRequirements = requirements.some(req => req.toLowerCase().includes('data'));
     if (hasApiRequirements) {
       flowDiagram.type = 'api';
       flowDiagram.nodes = this.generateApiFlowNodes(requirements);
@@ -114,13 +102,10 @@ export class SparcPseudocode extends SparcPhase {
       flowDiagram.type = 'general';
       flowDiagram.nodes = this.generateGeneralFlowNodes(requirements);
     }
-
     // Generate edges between nodes
     flowDiagram.edges = this.generateFlowEdges(flowDiagram.nodes);
-
     return flowDiagram;
   }
-
   /**
    * Generate API flow nodes
    */
@@ -140,7 +125,6 @@ export class SparcPseudocode extends SparcPhase {
       { id: 'end', type: 'end', label: 'End' }
     ];
   }
-
   /**
    * Generate UI flow nodes
    */
@@ -161,7 +145,6 @@ export class SparcPseudocode extends SparcPhase {
       { id: 'end', type: 'end', label: 'End' }
     ];
   }
-
   /**
    * Generate data flow nodes
    */
@@ -181,7 +164,6 @@ export class SparcPseudocode extends SparcPhase {
       { id: 'end', type: 'end', label: 'End' }
     ];
   }
-
   /**
    * Generate general flow nodes
    */
@@ -197,40 +179,39 @@ export class SparcPseudocode extends SparcPhase {
       { id: 'end', type: 'end', label: 'End' }
     ];
   }
-
   /**
    * Generate flow edges
    */
   generateFlowEdges(nodes) {
-    const edges = [];
+    const _edges = [];
     
-    for (let i = 0; i < nodes.length - 1; i++) {
-      const current = nodes[i];
-      const next = nodes[i + 1];
+    for (let _i = 0; i < nodes.length - 1; i++) {
+      const _current = nodes[i];
+      const _next = nodes[i + 1];
       
       if (current.type === 'decision') {
         // Decision nodes have multiple paths
         edges.push({
-          from: current.id,
-          to: next.id,
+          from: current._id,
+          to: next._id,
           label: 'Yes',
           condition: true
         });
         
         // Find alternative path (usually error handling)
-        const errorNode = nodes.find(n => n.id.includes('error') || n.id.includes('handle'));
+        const _errorNode = nodes.find(n => n.id.includes('error') || n.id.includes('handle'));
         if (errorNode) {
           edges.push({
-            from: current.id,
-            to: errorNode.id,
+            from: current._id,
+            to: errorNode._id,
             label: 'No',
             condition: false
           });
         }
       } else {
         edges.push({
-          from: current.id,
-          to: next.id,
+          from: current._id,
+          to: next._id,
           label: ''
         });
       }
@@ -238,13 +219,12 @@ export class SparcPseudocode extends SparcPhase {
     
     return edges;
   }
-
   /**
    * Generate pseudocode
    */
   async generatePseudocode(specification) {
-    const pseudocode = [];
-    const requirements = specification.requirements || [];
+    const _pseudocode = [];
+    const _requirements = specification.requirements || [];
     
     // Main function
     pseudocode.push({
@@ -261,47 +241,43 @@ export class SparcPseudocode extends SparcPhase {
         'END main'
       ]
     });
-
     // Generate pseudocode for each requirement
-    for (const [index, requirement] of requirements.entries()) {
-      const functionName = this.generateFunctionName(requirement);
-      const steps = this.generatePseudocodeSteps(requirement);
+    for (const [_index, requirement] of requirements.entries()) {
+      const _functionName = this.generateFunctionName(requirement);
+      const _steps = this.generatePseudocodeSteps(requirement);
       
       pseudocode.push({
-        function: functionName,
-        description: requirement,
-        steps: steps,
+        function: _functionName,
+        description: _requirement,
+        steps: _steps,
         complexity: this.estimateComplexity(steps)
       });
     }
-
     return pseudocode;
   }
-
   /**
    * Generate function name from requirement
    */
   generateFunctionName(requirement) {
-    const words = requirement.toLowerCase().split(' ');
-    const actionWords = words.filter(word => 
+    const _words = requirement.toLowerCase().split(' ');
+    const _actionWords = words.filter(word => 
       ['provide', 'handle', 'ensure', 'validate', 'process', 'manage', 'create', 'update', 'delete'].includes(word)
     );
-    const objectWords = words.filter(word =>
+    const _objectWords = words.filter(word =>
       ['api', 'data', 'user', 'system', 'request', 'response', 'authentication', 'authorization'].includes(word)
     );
     
-    const action = actionWords[0] || 'execute';
-    const object = objectWords[0] || 'operation';
+    const _action = actionWords[0] || 'execute';
+    const _object = objectWords[0] || 'operation';
     
     return `${action}_${object}`;
   }
-
   /**
    * Generate pseudocode steps
    */
   generatePseudocodeSteps(requirement) {
-    const steps = [];
-    const reqLower = requirement.toLowerCase();
+    const _steps = [];
+    const _reqLower = requirement.toLowerCase();
     
     // Common patterns
     steps.push(`BEGIN ${this.generateFunctionName(requirement)}`);
@@ -351,13 +327,12 @@ export class SparcPseudocode extends SparcPhase {
     
     return steps;
   }
-
   /**
    * Estimate complexity
    */
   estimateComplexity(steps) {
-    const decisionSteps = steps.filter(step => step.includes('IF') || step.includes('WHILE') || step.includes('FOR'));
-    const operationSteps = steps.filter(step => step.includes('EXECUTE') || step.includes('CALL'));
+    const _decisionSteps = steps.filter(step => step.includes('IF') || step.includes('WHILE') || step.includes('FOR'));
+    const _operationSteps = steps.filter(step => step.includes('EXECUTE') || step.includes('CALL'));
     
     return {
       cyclomatic: decisionSteps.length + 1,
@@ -366,17 +341,16 @@ export class SparcPseudocode extends SparcPhase {
       level: decisionSteps.length > 5 ? 'high' : decisionSteps.length > 2 ? 'medium' : 'low'
     };
   }
-
   /**
    * Define algorithms
    */
   async defineAlgorithms(specification) {
-    const algorithms = [];
-    const requirements = specification.requirements || [];
+    const _algorithms = [];
+    const _requirements = specification.requirements || [];
     
     // Search for algorithmic requirements
     for (const requirement of requirements) {
-      const reqLower = requirement.toLowerCase();
+      const _reqLower = requirement.toLowerCase();
       
       if (reqLower.includes('sort') || reqLower.includes('search') || reqLower.includes('optimize')) {
         algorithms.push({
@@ -418,17 +392,16 @@ export class SparcPseudocode extends SparcPhase {
     
     return algorithms;
   }
-
   /**
    * Define data structures
    */
   async defineDataStructures(specification) {
-    const dataStructures = [];
-    const requirements = specification.requirements || [];
+    const _dataStructures = [];
+    const _requirements = specification.requirements || [];
     
     // Analyze requirements for data structure needs
     for (const requirement of requirements) {
-      const reqLower = requirement.toLowerCase();
+      const _reqLower = requirement.toLowerCase();
       
       if (reqLower.includes('list') || reqLower.includes('array') || reqLower.includes('collection')) {
         dataStructures.push({
@@ -479,13 +452,12 @@ export class SparcPseudocode extends SparcPhase {
     
     return dataStructures;
   }
-
   /**
    * Define interfaces
    */
   async defineInterfaces(specification) {
-    const interfaces = [];
-    const requirements = specification.requirements || [];
+    const _interfaces = [];
+    const _requirements = specification.requirements || [];
     
     // API interfaces
     if (requirements.some(req => req.toLowerCase().includes('api'))) {
@@ -529,13 +501,12 @@ export class SparcPseudocode extends SparcPhase {
     
     return interfaces;
   }
-
   /**
    * Map logic flow
    */
   async mapLogicFlow(specification) {
-    const logicFlow = [];
-    const requirements = specification.requirements || [];
+    const _logicFlow = [];
+    const _requirements = specification.requirements || [];
     
     // Main flow
     logicFlow.push({
@@ -548,9 +519,9 @@ export class SparcPseudocode extends SparcPhase {
     });
     
     // Process each requirement as a flow step
-    for (const [index, requirement] of requirements.entries()) {
+    for (const [_index, requirement] of requirements.entries()) {
       logicFlow.push({
-        step: index + 2,
+        step: index + _2,
         name: this.generateFunctionName(requirement),
         description: requirement,
         inputs: this.identifyInputs(requirement),
@@ -561,7 +532,7 @@ export class SparcPseudocode extends SparcPhase {
     
     // Final step
     logicFlow.push({
-      step: requirements.length + 2,
+      step: requirements.length + _2,
       name: 'Finalization',
       description: 'Cleanup and result reporting',
       inputs: ['execution results'],
@@ -571,13 +542,12 @@ export class SparcPseudocode extends SparcPhase {
     
     return logicFlow;
   }
-
   /**
    * Identify inputs for requirement
    */
   identifyInputs(requirement) {
-    const inputs = [];
-    const reqLower = requirement.toLowerCase();
+    const _inputs = [];
+    const _reqLower = requirement.toLowerCase();
     
     if (reqLower.includes('api')) inputs.push('HTTP request', 'request parameters');
     if (reqLower.includes('data')) inputs.push('data payload', 'database connection');
@@ -587,13 +557,12 @@ export class SparcPseudocode extends SparcPhase {
     
     return inputs.length > 0 ? inputs : ['system input'];
   }
-
   /**
    * Identify outputs for requirement
    */
   identifyOutputs(requirement) {
-    const outputs = [];
-    const reqLower = requirement.toLowerCase();
+    const _outputs = [];
+    const _reqLower = requirement.toLowerCase();
     
     if (reqLower.includes('api')) outputs.push('HTTP response', 'status code');
     if (reqLower.includes('data')) outputs.push('processed data', 'transaction result');
@@ -602,13 +571,12 @@ export class SparcPseudocode extends SparcPhase {
     
     return outputs.length > 0 ? outputs : ['operation result'];
   }
-
   /**
    * Identify conditions for requirement
    */
   identifyConditions(requirement) {
-    const conditions = [];
-    const reqLower = requirement.toLowerCase();
+    const _conditions = [];
+    const _reqLower = requirement.toLowerCase();
     
     if (reqLower.includes('validate')) conditions.push('data is valid', 'rules are satisfied');
     if (reqLower.includes('authenticate')) conditions.push('credentials are valid', 'user exists');
@@ -617,13 +585,12 @@ export class SparcPseudocode extends SparcPhase {
     
     return conditions.length > 0 ? conditions : ['preconditions met'];
   }
-
   /**
    * Identify edge cases
    */
   async identifyEdgeCases(specification) {
-    const edgeCases = [];
-    const requirements = specification.requirements || [];
+    const _edgeCases = [];
+    const _requirements = specification.requirements || [];
     
     // Common edge cases
     edgeCases.push({
@@ -656,7 +623,7 @@ export class SparcPseudocode extends SparcPhase {
     
     // Requirement-specific edge cases
     for (const requirement of requirements) {
-      const reqLower = requirement.toLowerCase();
+      const _reqLower = requirement.toLowerCase();
       
       if (reqLower.includes('api')) {
         edgeCases.push({
@@ -688,19 +655,18 @@ export class SparcPseudocode extends SparcPhase {
     
     return edgeCases;
   }
-
   /**
    * Analyze complexity
    */
   async analyzeComplexity(pseudocode) {
-    const analysis = {
+    const _analysis = {
       overall: 'medium',
-      functions: {},
+      functions: { /* empty */ },
       recommendations: []
     };
     
-    let totalComplexity = 0;
-    let functionCount = 0;
+    let _totalComplexity = 0;
+    let _functionCount = 0;
     
     for (const func of pseudocode) {
       if (func.complexity) {
@@ -710,7 +676,7 @@ export class SparcPseudocode extends SparcPhase {
       }
     }
     
-    const averageComplexity = functionCount > 0 ? totalComplexity / functionCount : 1;
+    const _averageComplexity = functionCount > 0 ? totalComplexity / functionCount : 1;
     
     if (averageComplexity > 10) {
       analysis.overall = 'high';
@@ -725,17 +691,16 @@ export class SparcPseudocode extends SparcPhase {
     
     return analysis;
   }
-
   /**
    * Identify dependencies
    */
   async identifyDependencies(specification) {
-    const dependencies = [];
-    const requirements = specification.requirements || [];
+    const _dependencies = [];
+    const _requirements = specification.requirements || [];
     
     // Analyze requirements for dependencies
     for (const requirement of requirements) {
-      const reqLower = requirement.toLowerCase();
+      const _reqLower = requirement.toLowerCase();
       
       if (reqLower.includes('api')) {
         dependencies.push('HTTP client library');
@@ -763,60 +728,46 @@ export class SparcPseudocode extends SparcPhase {
     // Remove duplicates
     return [...new Set(dependencies)];
   }
-
   /**
    * Generate pseudocode document
    */
   async generatePseudocodeDocument(result) {
-    const document = `# ${this.taskDescription} - Pseudocode
-
+    const _document = `# ${this.taskDescription} - Pseudocode
 ## Flow Diagram
 **Type**: ${result.flowDiagram.type}
 **Entry**: ${result.flowDiagram.entry}
 **Exit**: ${result.flowDiagram.exit}
-
 ### Nodes
 ${result.flowDiagram.nodes.map(node => `- **${node.id}** (${node.type}): ${node.label}`).join('\n')}
-
 ### Edges
 ${result.flowDiagram.edges.map(edge => `- ${edge.from} → ${edge.to} ${edge.label ? `(${edge.label})` : ''}`).join('\n')}
-
 ## Pseudocode
-
-${result.pseudocode.map((func, index) => `
+${result.pseudocode.map((_func, index) => `
 ### ${index + 1}. ${func.function}
 **Description**: ${func.description}
 **Complexity**: ${func.complexity ? `Cyclomatic: ${func.complexity.cyclomatic}, Lines: ${func.complexity.lines}` : 'N/A'}
-
-\`\`\`
+```
 ${func.steps.join('\n')}
-\`\`\`
+```
 `).join('\n')}
-
 ## Algorithms
-
-${result.algorithms.map((algo, index) => `
+${result.algorithms.map((_algo, index) => `
 ### ${index + 1}. ${algo.name}
 **Purpose**: ${algo.purpose}
 **Complexity**: ${algo.complexity}
 **Approach**: ${algo.approach}
 `).join('\n')}
-
 ## Data Structures
-
-${result.dataStructures.map((ds, index) => `
+${result.dataStructures.map((_ds, index) => `
 ### ${index + 1}. ${ds.name}
 **Purpose**: ${ds.purpose}
 **Operations**: ${ds.operations.join(', ')}
 **Complexity**: Access: ${ds.complexity.access}, Insertion: ${ds.complexity.insertion}, Deletion: ${ds.complexity.deletion}
 `).join('\n')}
-
 ## Interfaces
-
-${result.interfaces.map((iface, index) => `
+${result.interfaces.map((_iface, index) => `
 ### ${index + 1}. ${iface.name}
 **Type**: ${iface.type}
-
 ${iface.methods.map(method => `
 #### ${method.name}
 - **Purpose**: ${method.purpose}
@@ -824,9 +775,7 @@ ${iface.methods.map(method => `
 - **Returns**: ${method.returns}
 `).join('\n')}
 `).join('\n')}
-
 ## Logic Flow
-
 ${result.logicFlow.map(step => `
 ### Step ${step.step}: ${step.name}
 **Description**: ${step.description}
@@ -834,35 +783,27 @@ ${result.logicFlow.map(step => `
 **Outputs**: ${step.outputs.join(', ')}
 **Conditions**: ${step.conditions.join(', ')}
 `).join('\n')}
-
 ## Edge Cases
-
-${result.edgeCases.map((edge, index) => `
+${result.edgeCases.map((_edge, index) => `
 ### ${index + 1}. ${edge.case}
 **Description**: ${edge.description}
 **Handling**: ${edge.handling}
 **Severity**: ${edge.severity}
 `).join('\n')}
-
 ## Complexity Analysis
 **Overall Complexity**: ${result.complexityAnalysis.overall}
-
 ### Function Complexity
-${Object.entries(result.complexityAnalysis.functions || {}).map(([func, complexity]) => `
+${Object.entries(result.complexityAnalysis.functions || { /* empty */ }).map(([_func, complexity]) => `
 - **${func}**: Cyclomatic: ${complexity.cyclomatic}, Lines: ${complexity.lines}, Level: ${complexity.level}
 `).join('\n')}
-
 ### Recommendations
 ${result.complexityAnalysis.recommendations.map(rec => `- ${rec}`).join('\n')}
-
 ## Dependencies
-${result.dependencies.map((dep, index) => `${index + 1}. ${dep}`).join('\n')}
+${result.dependencies.map((_dep, index) => `${index + 1}. ${dep}`).join('\n')}
 `;
-
     // Save document
     await this.saveArtifact('pseudocode.md', document);
     return document;
   }
 }
-
 export default SparcPseudocode;

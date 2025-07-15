@@ -2,12 +2,12 @@ import { printSuccess, printError, printWarning, callRuvSwarmMCP, spawnSwarmAgen
 
 // Simple ID generator
 function generateId(prefix = 'id') {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
 }
 
-export async function coordinationAction(subArgs, flags) {
-    const subcommand = subArgs[0];
-    const options = flags;
+export async function coordinationAction(_subArgs, flags) {
+    const _subcommand = subArgs[0];
+    const _options = flags;
 
     if (options.help || options.h || !subcommand) {
         showCoordinationHelp();
@@ -17,14 +17,20 @@ export async function coordinationAction(subArgs, flags) {
     try {
         switch (subcommand) {
             case 'swarm-init':
-                await swarmInitCommand(subArgs, flags);
-                break;
+                {
+await swarmInitCommand(_subArgs, flags);
+                
+}break;
             case 'agent-spawn':
-                await agentSpawnCommand(subArgs, flags);
-                break;
+                {
+await agentSpawnCommand(_subArgs, flags);
+                
+}break;
             case 'task-orchestrate':
-                await taskOrchestrateCommand(subArgs, flags);
-                break;
+                {
+await taskOrchestrateCommand(_subArgs, flags);
+                
+}break;
             default:
                 printError(`Unknown coordination command: ${subcommand}`);
                 showCoordinationHelp();
@@ -34,12 +40,12 @@ export async function coordinationAction(subArgs, flags) {
     }
 }
 
-async function swarmInitCommand(subArgs, flags) {
-    const options = flags;
-    const swarmId = options['swarm-id'] || options.swarmId || generateId('swarm');
-    const topology = options.topology || 'hierarchical';
-    const maxAgents = parseInt(options['max-agents'] || options.maxAgents || '5');
-    const strategy = options.strategy || 'balanced';
+async function swarmInitCommand(_subArgs, flags) {
+    const _options = flags;
+    const _swarmId = options['swarm-id'] || options.swarmId || generateId('swarm');
+    const _topology = options.topology || 'hierarchical';
+    const _maxAgents = parseInt(options['max-agents'] || options.maxAgents || '5');
+    const _strategy = options.strategy || 'balanced';
 
     console.log('🐝 Initializing swarm coordination...');
     console.log(`🆔 Swarm ID: ${swarmId}`);
@@ -47,7 +53,7 @@ async function swarmInitCommand(subArgs, flags) {
     console.log(`🤖 Max agents: ${maxAgents}`);
 
     // Check if ruv-swarm is available
-    const isAvailable = await checkRuvSwarmAvailable();
+    const _isAvailable = await checkRuvSwarmAvailable();
     if (!isAvailable) {
         printError('ruv-swarm is not available. Please install it with: npm install -g ruv-swarm');
         return;
@@ -57,11 +63,11 @@ async function swarmInitCommand(subArgs, flags) {
         console.log('\n🔄 Initializing real swarm with ruv-swarm...');
         
         // Use real ruv-swarm initialization
-        const swarmResult = await callRuvSwarmMCP('swarm_init', {
-            swarmId: swarmId,
-            topology: topology,
-            maxAgents: maxAgents,
-            strategy: strategy,
+        const _swarmResult = await callRuvSwarmMCP('swarm_init', {
+            swarmId: _swarmId,
+            topology: _topology,
+            maxAgents: _maxAgents,
+            strategy: _strategy,
             timestamp: Date.now()
         });
         
@@ -89,12 +95,12 @@ async function swarmInitCommand(subArgs, flags) {
     }
 }
 
-async function agentSpawnCommand(subArgs, flags) {
-    const options = flags;
-    const agentType = options.type || subArgs[1] || 'general';
-    const agentName = options.name || `${agentType}-${generateId('agent')}`;
-    const swarmId = options['swarm-id'] || options.swarmId;
-    const capabilities = options.capabilities || null;
+async function agentSpawnCommand(_subArgs, flags) {
+    const _options = flags;
+    const _agentType = options.type || subArgs[1] || 'general';
+    const _agentName = options.name || `${agentType}-${generateId('agent')}`;
+    const _swarmId = options['swarm-id'] || options.swarmId;
+    const _capabilities = options.capabilities || null;
 
     console.log('🤖 Spawning coordinated agent...');
     console.log(`🏷️  Agent type: ${agentType}`);
@@ -102,23 +108,23 @@ async function agentSpawnCommand(subArgs, flags) {
     if (swarmId) console.log(`🐝 Target swarm: ${swarmId}`);
 
     // Validate agent type
-    const validTypes = ['coordinator', 'coder', 'researcher', 'analyst', 'tester', 'general'];
+    const _validTypes = ['coordinator', 'coder', 'researcher', 'analyst', 'tester', 'general'];
     if (!validTypes.includes(agentType)) {
         printWarning(`⚠️  Unknown agent type '${agentType}'. Using 'general' instead.`);
     }
 
     // Simulate agent spawning process
     console.log('\n🔄 Initializing agent coordination protocols...');
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(_resolve, 800));
 
     console.log('🧠 Loading agent capabilities and neural patterns...');
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise(resolve => setTimeout(_resolve, 600));
 
     console.log('🔗 Establishing swarm communication links...');
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(_resolve, 500));
 
     console.log('💾 Registering agent in coordination memory...');
-    await new Promise(resolve => setTimeout(resolve, 400));
+    await new Promise(resolve => setTimeout(_resolve, 400));
 
     printSuccess('✅ Agent spawned and coordinated successfully');
     
@@ -136,12 +142,12 @@ async function agentSpawnCommand(subArgs, flags) {
     }
 }
 
-async function taskOrchestrateCommand(subArgs, flags) {
-    const options = flags;
-    const task = options.task || subArgs.slice(1).join(' ');
-    const swarmId = options['swarm-id'] || options.swarmId;
-    const strategy = options.strategy || 'adaptive';
-    const shareResults = options['share-results'] || false;
+async function taskOrchestrateCommand(_subArgs, flags) {
+    const _options = flags;
+    const _task = options.task || subArgs.slice(1).join(' ');
+    const _swarmId = options['swarm-id'] || options.swarmId;
+    const _strategy = options.strategy || 'adaptive';
+    const _shareResults = options['share-results'] || false;
 
     if (!task) {
         printError('Task description is required');
@@ -155,19 +161,19 @@ async function taskOrchestrateCommand(subArgs, flags) {
 
     // Simulate task orchestration
     console.log('\n🔄 Analyzing task requirements...');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(_resolve, 1000));
 
     console.log('🤖 Selecting optimal agents for task execution...');
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(_resolve, 800));
 
     console.log(`📊 Configuring coordination strategy: ${strategy}...`);
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise(resolve => setTimeout(_resolve, 600));
 
     console.log('🔗 Establishing task communication channels...');
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(_resolve, 500));
 
     console.log('💾 Setting up shared task memory...');
-    await new Promise(resolve => setTimeout(resolve, 400));
+    await new Promise(resolve => setTimeout(_resolve, 400));
 
     printSuccess('✅ Task orchestration configured successfully');
     
@@ -175,7 +181,7 @@ async function taskOrchestrateCommand(subArgs, flags) {
     console.log(`  📋 Task: ${task}`);
     console.log(`  🆔 Task ID: ${generateId('task')}`);
     console.log(`  📊 Strategy: ${strategy}`);
-    console.log('  🤖 Assigned agents: 3 (coordinator, developer, researcher)');
+    console.log('  🤖 Assigned agents: 3 (_coordinator, _developer, researcher)');
     console.log('  🔗 Coordination: Active');
     console.log('  💾 Shared memory: Configured');
     console.log('  📈 Progress tracking: Enabled');
@@ -193,7 +199,7 @@ async function taskOrchestrateCommand(subArgs, flags) {
 }
 
 function getAgentCapabilities(type) {
-    const capabilities = {
+    const _capabilities = {
         coordinator: 'Task orchestration, agent management, workflow coordination',
         developer: 'Code implementation, debugging, technical development',
         researcher: 'Information gathering, analysis, documentation',

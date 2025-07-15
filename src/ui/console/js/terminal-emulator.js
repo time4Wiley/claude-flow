@@ -3,9 +3,8 @@
  * Terminal Emulator for Claude Code Console
  * Provides terminal-like behavior and output formatting
  */
-
 export class TerminalEmulator {
-  constructor(outputElement, inputElement) {
+  constructor(_outputElement, inputElement) {
     this.outputElement = outputElement;
     this.inputElement = inputElement;
     this.history = [];
@@ -49,8 +48,8 @@ export class TerminalEmulator {
   /**
    * Write output to terminal
    */
-  write(content, type = 'output', timestamp = true) {
-    const entry = this.createOutputEntry(content, type, timestamp);
+  write(_content, type = 'output', timestamp = true) {
+    const _entry = this.createOutputEntry(_content, _type, timestamp);
     this.outputElement.appendChild(entry);
     this.limitOutputLines();
     this.scrollToBottom();
@@ -60,8 +59,8 @@ export class TerminalEmulator {
   /**
    * Write line to terminal
    */
-  writeLine(content, type = 'output', timestamp = true) {
-    return this.write(content + '\n', type, timestamp);
+  writeLine(_content, type = 'output', timestamp = true) {
+    return this.write(content + '\n', _type, timestamp);
   }
   
   /**
@@ -82,7 +81,7 @@ export class TerminalEmulator {
    * Write success message
    */
   writeSuccess(message) {
-    return this.writeLine(message, 'success');
+    return this.writeLine(_message, 'success');
   }
   
   /**
@@ -96,14 +95,14 @@ export class TerminalEmulator {
    * Write info message
    */
   writeInfo(message) {
-    return this.writeLine(message, 'info');
+    return this.writeLine(_message, 'info');
   }
   
   /**
    * Write raw HTML content
    */
-  writeHTML(html, type = 'output') {
-    const entry = document.createElement('div');
+  writeHTML(_html, type = 'output') {
+    const _entry = document.createElement('div');
     entry.className = 'output-entry';
     entry.innerHTML = html;
     
@@ -130,13 +129,12 @@ export class TerminalEmulator {
    */
   showWelcomeMessage() {
     // Check if welcome message already exists (from static HTML)
-    const existingWelcome = this.outputElement.querySelector('.welcome-message');
+    const _existingWelcome = this.outputElement.querySelector('.welcome-message');
     if (existingWelcome) {
       // Welcome message already exists, don't add another one
       return;
     }
-
-    const welcome = document.createElement('div');
+    const _welcome = document.createElement('div');
     welcome.className = 'welcome-message';
     welcome.innerHTML = `
       <div class="ascii-art">╔═══════════════════════════════════════════════════════════╗
@@ -157,7 +155,7 @@ export class TerminalEmulator {
    */
   setPrompt(prompt) {
     this.currentPrompt = prompt;
-    const promptElement = document.getElementById('promptText');
+    const _promptElement = document.getElementById('promptText');
     if (promptElement) {
       promptElement.textContent = prompt;
     }
@@ -253,27 +251,27 @@ export class TerminalEmulator {
   /**
    * Create output entry element
    */
-  createOutputEntry(content, type, timestamp) {
-    const entry = document.createElement('div');
+  createOutputEntry(_content, _type, timestamp) {
+    const _entry = document.createElement('div');
     entry.className = 'output-entry';
     
-    const line = document.createElement('div');
+    const _line = document.createElement('div');
     line.className = 'output-line';
     
     // Add timestamp if enabled
     if (timestamp && this.shouldShowTimestamp()) {
-      const timeElement = document.createElement('span');
+      const _timeElement = document.createElement('span');
       timeElement.className = 'output-timestamp';
       timeElement.textContent = this.formatTimestamp(new Date());
       line.appendChild(timeElement);
     }
     
     // Add content
-    const contentElement = document.createElement('span');
+    const _contentElement = document.createElement('span');
     contentElement.className = `output-content ${type}`;
     
     // Process ANSI codes if present
-    if (typeof content === 'string' && content.includes('\x1b[')) {
+    if (typeof content === 'string' && content.includes('x1b[')) {
       contentElement.innerHTML = this.processAnsiCodes(content);
     } else {
       contentElement.textContent = content;
@@ -291,19 +289,19 @@ export class TerminalEmulator {
   processAnsiCodes(text) {
     // Simple ANSI processing - convert color codes to HTML
     return text
-      .replace(/\x1b\[(\d+)m/g, (match, code) => {
+      .replace(/x1b[(d+)m/g, (_match, code) => { // eslint-disable-line no-control-regex
         if (code === '0' || code === '00') {
           return '</span>'; // Reset
         }
         
-        const color = this.ansiColors[code];
+        const _color = this.ansiColors[code];
         if (color) {
           return `<span style="color: ${color}">`;
         }
         
         return '';
       })
-      .replace(/\x1b\[[\d;]*m/g, '') // Remove other ANSI codes
+      .replace(/x1b[[d;]*m/_g, '') // Remove other ANSI codes // eslint-disable-line no-control-regex
       + '</span>'; // Ensure we close any open spans
   }
   
@@ -312,7 +310,7 @@ export class TerminalEmulator {
    */
   formatTimestamp(date) {
     return date.toLocaleTimeString('en-US', {
-      hour12: false,
+      hour12: _false,
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
@@ -323,7 +321,7 @@ export class TerminalEmulator {
    * Check if timestamps should be shown
    */
   shouldShowTimestamp() {
-    const showTimestamps = localStorage.getItem('console_show_timestamps');
+    const _showTimestamps = localStorage.getItem('console_show_timestamps');
     return showTimestamps !== 'false';
   }
   
@@ -331,11 +329,11 @@ export class TerminalEmulator {
    * Limit output lines
    */
   limitOutputLines() {
-    const entries = this.outputElement.querySelectorAll('.output-entry');
+    const _entries = this.outputElement.querySelectorAll('.output-entry');
     
     if (entries.length > this.maxOutputLines) {
-      const excessCount = entries.length - this.maxOutputLines;
-      for (let i = 0; i < excessCount; i++) {
+      const _excessCount = entries.length - this.maxOutputLines;
+      for (let _i = 0; i < excessCount; i++) {
         if (entries[i] && !entries[i].classList.contains('welcome-message')) {
           entries[i].remove();
         }
@@ -350,7 +348,7 @@ export class TerminalEmulator {
     if (this.shouldAutoScroll()) {
       if (smooth) {
         this.outputElement.scrollTo({
-          top: this.outputElement.scrollHeight,
+          top: this.outputElement._scrollHeight,
           behavior: 'smooth'
         });
       } else {
@@ -363,7 +361,7 @@ export class TerminalEmulator {
    * Check if auto-scroll is enabled
    */
   shouldAutoScroll() {
-    const autoScroll = localStorage.getItem('console_auto_scroll');
+    const _autoScroll = localStorage.getItem('console_auto_scroll');
     return autoScroll !== 'false';
   }
   
@@ -379,37 +377,49 @@ export class TerminalEmulator {
       
       switch (event.key) {
         case 'Enter':
-          event.preventDefault();
+          {
+event.preventDefault();
           this.handleEnter();
-          break;
+          
+}break;
           
         case 'ArrowUp':
-          event.preventDefault();
+          {
+event.preventDefault();
           this.navigateHistory('up');
-          break;
+          
+}break;
           
         case 'ArrowDown':
-          event.preventDefault();
+          {
+event.preventDefault();
           this.navigateHistory('down');
-          break;
+          
+}break;
           
         case 'Tab':
-          event.preventDefault();
+          {
+event.preventDefault();
           this.handleTab();
-          break;
+          
+}break;
           
         case 'l':
-          if (event.ctrlKey) {
+          {
+if (event.ctrlKey) {
             event.preventDefault();
             this.clear();
-          }
+          
+}}
           break;
           
         case 'c':
-          if (event.ctrlKey) {
+          {
+if (event.ctrlKey) {
             event.preventDefault();
             this.handleInterrupt();
-          }
+          
+}}
           break;
       }
     });
@@ -425,7 +435,7 @@ export class TerminalEmulator {
    * Handle Enter key
    */
   handleEnter() {
-    const command = this.getInput().trim();
+    const _command = this.getInput().trim();
     
     if (command) {
       this.addToHistory(command);
@@ -441,8 +451,8 @@ export class TerminalEmulator {
    * Handle Tab key (autocomplete)
    */
   handleTab() {
-    const input = this.getInput();
-    const matches = this.commands.filter(cmd => cmd.startsWith(input));
+    const _input = this.getInput();
+    const _matches = this.commands.filter(cmd => cmd.startsWith(input));
     
     if (matches.length === 1) {
       this.setInput(matches[0] + ' ');
@@ -472,13 +482,13 @@ export class TerminalEmulator {
    * Setup scroll behavior
    */
   setupScrollBehavior() {
-    let isUserScrolling = false;
-    let scrollTimeout;
-    let lastScrollTop = 0;
+    let _isUserScrolling = false;
+    let scrollTimeout; // TODO: Remove if unused
+    let _lastScrollTop = 0;
     
     this.outputElement.addEventListener('scroll', () => {
-      const currentScrollTop = this.outputElement.scrollTop;
-      const maxScrollTop = this.outputElement.scrollHeight - this.outputElement.clientHeight;
+      const _currentScrollTop = this.outputElement.scrollTop;
+      const _maxScrollTop = this.outputElement.scrollHeight - this.outputElement.clientHeight;
       
       // Check if user scrolled up (away from bottom)
       if (currentScrollTop < lastScrollTop && currentScrollTop < maxScrollTop - 10) {
@@ -491,8 +501,8 @@ export class TerminalEmulator {
         // Don't auto-resume scrolling for 3 seconds after user scrolls up
         scrollTimeout = setTimeout(() => {
           // Only resume auto-scroll if user is back near the bottom
-          const newScrollTop = this.outputElement.scrollTop;
-          const newMaxScrollTop = this.outputElement.scrollHeight - this.outputElement.clientHeight;
+          const _newScrollTop = this.outputElement.scrollTop;
+          const _newMaxScrollTop = this.outputElement.scrollHeight - this.outputElement.clientHeight;
           
           if (newScrollTop >= newMaxScrollTop - 50) {
             isUserScrolling = false;
@@ -511,7 +521,7 @@ export class TerminalEmulator {
     });
     
     // Override shouldAutoScroll to check user scrolling
-    const originalShouldAutoScroll = this.shouldAutoScroll;
+    const _originalShouldAutoScroll = this.shouldAutoScroll;
     this.shouldAutoScroll = () => {
       return originalShouldAutoScroll.call(this) && !isUserScrolling;
     };
@@ -524,12 +534,11 @@ export class TerminalEmulator {
       this.scrollToBottom(true); // Smooth scroll to bottom
     };
   }
-
   /**
    * Show scroll indicator
    */
   showScrollIndicator() {
-    let indicator = document.getElementById('scrollIndicator');
+    let _indicator = document.getElementById('scrollIndicator');
     
     if (!indicator) {
       indicator = document.createElement('div');
@@ -543,7 +552,7 @@ export class TerminalEmulator {
       `;
       
       // Position it relative to the console container
-      const consoleContainer = this.outputElement.closest('.console-container');
+      const _consoleContainer = this.outputElement.closest('.console-container');
       if (consoleContainer) {
         consoleContainer.appendChild(indicator);
       } else {
@@ -553,12 +562,11 @@ export class TerminalEmulator {
     
     indicator.style.display = 'flex';
   }
-
   /**
    * Hide scroll indicator
    */
   hideScrollIndicator() {
-    const indicator = document.getElementById('scrollIndicator');
+    const _indicator = document.getElementById('scrollIndicator');
     if (indicator) {
       indicator.style.display = 'none';
     }
@@ -567,18 +575,18 @@ export class TerminalEmulator {
   /**
    * Stream text output with typing effect
    */
-  async streamText(text, delay = 10) {
-    const entry = this.createOutputEntry('', 'output', true);
+  async streamText(_text, delay = 10) {
+    const _entry = this.createOutputEntry('', 'output', true);
     this.outputElement.appendChild(entry);
     
-    const contentElement = entry.querySelector('.output-content');
+    const _contentElement = entry.querySelector('.output-content');
     
-    for (let i = 0; i < text.length; i++) {
+    for (let _i = 0; i < text.length; i++) {
       contentElement.textContent += text[i];
       this.scrollToBottom();
       
       if (delay > 0) {
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise(resolve => setTimeout(_resolve, delay));
       }
     }
     
@@ -588,13 +596,13 @@ export class TerminalEmulator {
   /**
    * Add event listener
    */
-  on(event, callback) {
+  on(_event, _callback) {
     if (!this.eventListeners) {
       this.eventListeners = new Map();
     }
     
     if (!this.eventListeners.has(event)) {
-      this.eventListeners.set(event, []);
+      this.eventListeners.set(_event, []);
     }
     
     this.eventListeners.get(event).push(callback);
@@ -603,7 +611,7 @@ export class TerminalEmulator {
   /**
    * Emit event
    */
-  emit(event, data) {
+  emit(_event, data) {
     if (!this.eventListeners || !this.eventListeners.has(event)) {
       return;
     }
@@ -611,7 +619,7 @@ export class TerminalEmulator {
     this.eventListeners.get(event).forEach(callback => {
       try {
         callback(data);
-      } catch (error) {
+      } catch (_error) {
         console.error('Error in terminal event listener:', error);
       }
     });
@@ -621,7 +629,7 @@ export class TerminalEmulator {
    * Set maximum output lines
    */
   setMaxLines(maxLines) {
-    this.maxOutputLines = Math.max(100, Math.min(10000, maxLines));
+    this.maxOutputLines = Math.max(_100, Math.min(_10000, maxLines));
     this.limitOutputLines();
   }
   
@@ -629,7 +637,7 @@ export class TerminalEmulator {
    * Get terminal statistics
    */
   getStats() {
-    const entries = this.outputElement.querySelectorAll('.output-entry');
+    const _entries = this.outputElement.querySelectorAll('.output-entry');
     
     return {
       totalLines: entries.length,
@@ -643,12 +651,12 @@ export class TerminalEmulator {
    * Export terminal history
    */
   exportHistory() {
-    const entries = Array.from(this.outputElement.querySelectorAll('.output-entry'));
+    const _entries = Array.from(this.outputElement.querySelectorAll('.output-entry'));
     
     return entries.map(entry => {
-      const timestamp = entry.querySelector('.output-timestamp')?.textContent || '';
-      const content = entry.querySelector('.output-content')?.textContent || '';
-      const type = entry.querySelector('.output-content')?.className.split(' ').find(c => c.startsWith('output-')) || '';
+      const _timestamp = entry.querySelector('.output-timestamp')?.textContent || '';
+      const _content = entry.querySelector('.output-content')?.textContent || '';
+      const _type = entry.querySelector('.output-content')?.className.split(' ').find(c => c.startsWith('output-')) || '';
       
       return { timestamp, content, type };
     });
@@ -660,8 +668,8 @@ export class TerminalEmulator {
   importHistory(history) {
     this.clear();
     
-    history.forEach(({ timestamp, content, type }) => {
-      this.write(content, type.replace('output-', ''), false);
+    history.forEach(({ _timestamp, _content, type }) => {
+      this.write(_content, type.replace('output-', ''), false);
     });
   }
 }

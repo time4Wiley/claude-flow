@@ -1,13 +1,11 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 // init/claude-config.ts - Claude configuration creation
 import type { InitOptions } from './index.js';
-
 export async function createClaudeConfig(options: InitOptions): Promise<void> {
-  const fs = await import('fs/promises');
-  const path = await import('path');
+  const _fs = await import('fs/promises');
+  const _path = await import('path');
   
   // Create base configuration
-  const claudeConfig = {
+  const _claudeConfig = {
     version: '1.0.71',
     project: {
       name: path.basename(process.cwd()),
@@ -49,7 +47,7 @@ export async function createClaudeConfig(options: InitOptions): Promise<void> {
     }
   };
   
-  await fs.writeFile('.claude/config.json', JSON.stringify(claudeConfig, null, 2));
+  await fs.writeFile('.claude/config.json', JSON.stringify(_claudeConfig, null, 2));
   console.log('  ✅ Created .claude/config.json with batch tools configuration');
   
   // Create additional configuration files
@@ -57,11 +55,10 @@ export async function createClaudeConfig(options: InitOptions): Promise<void> {
   await createSwarmConfig();
   await createCoordinationConfig();
 }
-
 async function createBatchToolsConfig(): Promise<void> {
-  const fs = await import('fs/promises');
+  const _fs = await import('fs/promises');
   
-  const batchConfig = {
+  const _batchConfig = {
     version: '1.0.71',
     description: 'Batch tools configuration for Claude Code orchestration',
     tools: {
@@ -135,14 +132,13 @@ async function createBatchToolsConfig(): Promise<void> {
     }
   };
   
-  await fs.writeFile('.claude/configs/batch-tools.json', JSON.stringify(batchConfig, null, 2));
+  await fs.writeFile('.claude/configs/batch-tools.json', JSON.stringify(_batchConfig, null, 2));
   console.log('  ✅ Created batch tools configuration');
 }
-
 async function createSwarmConfig(): Promise<void> {
-  const fs = await import('fs/promises');
+  const _fs = await import('fs/promises');
   
-  const swarmConfig = {
+  const _swarmConfig = {
     version: '1.0.71',
     description: 'Swarm orchestration configuration for Claude-Flow',
     strategies: {
@@ -229,14 +225,13 @@ async function createSwarmConfig(): Promise<void> {
     }
   };
   
-  await fs.writeFile('.claude/configs/swarm.json', JSON.stringify(swarmConfig, null, 2));
+  await fs.writeFile('.claude/configs/swarm.json', JSON.stringify(_swarmConfig, null, 2));
   console.log('  ✅ Created swarm orchestration configuration');
 }
-
 async function createCoordinationConfig(): Promise<void> {
-  const fs = await import('fs/promises');
+  const _fs = await import('fs/promises');
   
-  const coordinationConfig = {
+  const _coordinationConfig = {
     version: '1.0.71',
     description: 'Agent coordination and orchestration configuration',
     coordination: {
@@ -299,6 +294,6 @@ async function createCoordinationConfig(): Promise<void> {
     }
   };
   
-  await fs.writeFile('.claude/configs/coordination.json', JSON.stringify(coordinationConfig, null, 2));
+  await fs.writeFile('.claude/configs/coordination.json', JSON.stringify(_coordinationConfig, null, 2));
   console.log('  ✅ Created coordination configuration');
 }

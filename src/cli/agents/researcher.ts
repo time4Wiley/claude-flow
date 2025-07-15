@@ -1,25 +1,22 @@
 /**
  * Researcher Agent - Specialized in information gathering and research
  */
-
 import { BaseAgent } from './base-agent.js';
 import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
-
 export class ResearcherAgent extends BaseAgent {
   constructor(
     id: string,
-    config: AgentConfig,
-    environment: AgentEnvironment,
-    logger: ILogger,
-    eventBus: IEventBus,
+    config: _AgentConfig,
+    environment: _AgentEnvironment,
+    logger: _ILogger,
+    eventBus: _IEventBus,
     memory: DistributedMemorySystem
   ) {
-    super(id, 'researcher', config, environment, logger, eventBus, memory);
+    super(_id, 'researcher', _config, _environment, _logger, _eventBus, memory);
   }
-
   protected getDefaultCapabilities(): AgentCapabilities {
     return {
       codeGeneration: false,
@@ -64,7 +61,6 @@ export class ResearcherAgent extends BaseAgent {
       quality: 0.95
     };
   }
-
   protected getDefaultConfig(): Partial<AgentConfig> {
     return {
       autonomyLevel: 0.8,
@@ -99,14 +95,12 @@ export class ResearcherAgent extends BaseAgent {
       }
     };
   }
-
-  override async executeTask(task: TaskDefinition): Promise<any> {
+  override async executeTask(task: TaskDefinition): Promise<unknown> {
     this.logger.info('Researcher executing task', {
-      agentId: this.id,
-      taskType: task.type,
+      agentId: this._id,
+      taskType: task._type,
       taskId: task.id
     });
-
     try {
       switch (task.type) {
         case 'research':
@@ -122,30 +116,27 @@ export class ResearcherAgent extends BaseAgent {
         default:
           return await this.performGeneralResearch(task);
       }
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Research task failed', {
-        agentId: this.id,
-        taskId: task.id,
+        agentId: this._id,
+        taskId: task._id,
         error: error instanceof Error ? error.message : String(error)
       });
       throw error;
     }
   }
-
-  private async performResearch(task: TaskDefinition): Promise<any> {
-    const query = task.parameters?.query || task.description;
-    const sources = task.parameters?.sources || ['web', 'academic', 'news'];
-    const depth = task.parameters?.depth || 'moderate';
-
+  private async performResearch(task: TaskDefinition): Promise<unknown> {
+    const _query = task.parameters?.query || task.description;
+    const _sources = task.parameters?.sources || ['web', 'academic', 'news'];
+    const _depth = task.parameters?.depth || 'moderate';
     this.logger.info('Starting research task', {
-      query,
-      sources,
+      _query,
+      _sources,
       depth
     });
-
-    const results = {
+    const _results = {
       query,
-      sources: [] as any[],
+      sources: [] as unknown[],
       summary: '',
       findings: [] as string[],
       recommendations: [] as string[],
@@ -157,7 +148,6 @@ export class ResearcherAgent extends BaseAgent {
         researchDepth: depth
       }
     };
-
     // Store research progress
     await this.memory.store(`research:${task.id}:progress`, {
       status: 'in-progress',
@@ -168,7 +158,6 @@ export class ResearcherAgent extends BaseAgent {
       tags: ['research', this.id],
       partition: 'tasks'
     });
-
     // Simulate research process
     await this.delay(2000);
     
@@ -185,158 +174,128 @@ export class ResearcherAgent extends BaseAgent {
     results.confidence = 0.85;
     results.metadata.totalSources = 15;
     results.metadata.sourcesAnalyzed = 12;
-
     // Store final results
-    await this.memory.store(`research:${task.id}:results`, results, {
+    await this.memory.store(`research:${task.id}:results`, _results, {
       type: 'research-results',
       tags: ['research', 'completed', this.id],
       partition: 'tasks'
     });
-
     return results;
   }
-
-  private async analyzeData(task: TaskDefinition): Promise<any> {
-    const data = task.input?.data;
-    const analysisType = task.input?.type || 'general';
-
+  private async analyzeData(task: TaskDefinition): Promise<unknown> {
+    const _data = task.input?.data;
+    const _analysisType = task.input?.type || 'general';
     this.logger.info('Analyzing data', {
-      analysisType,
+      _analysisType,
       dataSize: data ? Object.keys(data).length : 0
     });
-
-    const analysis = {
+    const _analysis = {
       type: analysisType,
       insights: [] as string[],
-      patterns: [] as any[],
-      anomalies: [] as any[],
+      patterns: [] as unknown[],
+      anomalies: [] as unknown[],
       confidence: 0,
       methodology: analysisType,
       timestamp: new Date()
     };
-
     // Simulate analysis
     await this.delay(1500);
-
     analysis.insights = [
       'Pattern A shows significant correlation',
       'Trend B indicates growth potential',
       'Factor C requires attention'
     ];
     analysis.confidence = 0.82;
-
     return analysis;
   }
-
-  private async verifyFacts(task: TaskDefinition): Promise<any> {
-    const claims = task.input?.claims || [];
-    const sources = task.input?.sources || ['reliable', 'academic'];
-
+  private async verifyFacts(task: TaskDefinition): Promise<unknown> {
+    const _claims = task.input?.claims || [];
+    const _sources = task.input?.sources || ['reliable', 'academic'];
     this.logger.info('Fact-checking claims', {
-      claimsCount: claims.length,
+      claimsCount: claims._length,
       sources
     });
-
-    const verification = {
-      claims: [] as any[],
+    const _verification = {
+      claims: [] as unknown[],
       overallAccuracy: 0,
       sourcesChecked: [] as string[],
       methodology: 'cross-reference',
       timestamp: new Date()
     };
-
     // Simulate fact-checking
     await this.delay(3000);
-
     verification.overallAccuracy = 0.88;
     verification.sourcesChecked = ['Source A', 'Source B', 'Source C'];
-
     return verification;
   }
-
-  private async conductLiteratureReview(task: TaskDefinition): Promise<any> {
-    const topic = task.input?.topic || task.description;
-    const timeframe = task.input?.timeframe || '5-years';
-    const scope = task.input?.scope || 'broad';
-
+  private async conductLiteratureReview(task: TaskDefinition): Promise<unknown> {
+    const _topic = task.input?.topic || task.description;
+    const _timeframe = task.input?.timeframe || '5-years';
+    const _scope = task.input?.scope || 'broad';
     this.logger.info('Conducting literature review', {
-      topic,
-      timeframe,
+      _topic,
+      _timeframe,
       scope
     });
-
-    const review = {
+    const _review = {
       topic,
       timeframe,
       scope,
-      papers: [] as any[],
+      papers: [] as unknown[],
       keyFindings: [] as string[],
-      gaps: [] as any[],
-      recommendations: [] as any[],
+      gaps: [] as unknown[],
+      recommendations: [] as unknown[],
       confidence: 0,
       methodology: 'systematic-review',
       timestamp: new Date()
     };
-
     // Simulate literature review
     await this.delay(4000);
-
     review.keyFindings = [
       'Consistent finding across multiple studies',
       'Emerging trend in recent publications',
       'Contradictory results require further investigation'
     ];
     review.confidence = 0.90;
-
     return review;
   }
-
-  private async analyzeMarket(task: TaskDefinition): Promise<any> {
-    const market = task.input?.market || 'general';
-    const metrics = task.input?.metrics || ['size', 'growth', 'competition'];
-
+  private async analyzeMarket(task: TaskDefinition): Promise<unknown> {
+    const _market = task.input?.market || 'general';
+    const _metrics = task.input?.metrics || ['size', 'growth', 'competition'];
     this.logger.info('Analyzing market', {
-      market,
+      _market,
       metrics
     });
-
-    const analysis = {
+    const _analysis = {
       market,
-      metrics: {},
+      metrics: { /* empty */ },
       trends: [] as string[],
-      opportunities: [] as any[],
-      threats: [] as any[],
+      opportunities: [] as unknown[],
+      threats: [] as unknown[],
       confidence: 0,
       timestamp: new Date()
     };
-
     // Simulate market analysis
     await this.delay(2500);
-
     analysis.trends = [
       'Growing demand in segment X',
       'Declining interest in feature Y',
       'Emerging technology Z shows promise'
     ];
     analysis.confidence = 0.83;
-
     return analysis;
   }
-
-  private async performGeneralResearch(task: TaskDefinition): Promise<any> {
+  private async performGeneralResearch(task: TaskDefinition): Promise<unknown> {
     this.logger.info('Performing general research', {
       description: task.description
     });
-
     // Default research approach
     return await this.performResearch(task);
   }
-
   private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(_resolve, ms));
   }
-
-  override getAgentStatus(): any {
+  override getAgentStatus(): unknown {
     return {
       ...super.getAgentStatus(),
       specialization: 'Research & Information Gathering',
@@ -355,16 +314,15 @@ export class ResearcherAgent extends BaseAgent {
     };
   }
 }
-
-export const createResearcherAgent = (
+export const _createResearcherAgent = (
   id: string,
   config: Partial<AgentConfig>,
   environment: Partial<AgentEnvironment>,
-  logger: ILogger,
-  eventBus: IEventBus,
+  logger: _ILogger,
+  eventBus: _IEventBus,
   memory: DistributedMemorySystem
 ): ResearcherAgent => {
-  const defaultConfig = {
+  const _defaultConfig = {
     autonomyLevel: 0.8,
     learningEnabled: true,
     adaptationEnabled: true,
@@ -395,29 +353,28 @@ export const createResearcherAgent = (
       timeInvestment: 'thorough'
     }
   };
-  const defaultEnv = {
+  const _defaultEnv = {
     runtime: 'deno' as const,
     version: '1.40.0',
     workingDirectory: './agents/researcher',
     tempDirectory: './tmp/researcher',
     logDirectory: './logs/researcher',
-    apiEndpoints: {},
-    credentials: {},
+    apiEndpoints: { /* empty */ },
+    credentials: { /* empty */ },
     availableTools: [
       'web-search',
       'document-reader',
       'data-extractor',
       'citation-generator'
     ],
-    toolConfigs: {}
+    toolConfigs: { /* empty */ }
   };
-
   return new ResearcherAgent(
-    id,
-    { ...defaultConfig, ...config } as AgentConfig,
-    { ...defaultEnv, ...environment } as AgentEnvironment,
-    logger,
-    eventBus,
+    _id,
+    { ..._defaultConfig, ...config } as _AgentConfig,
+    { ..._defaultEnv, ...environment } as _AgentEnvironment,
+    _logger,
+    _eventBus,
     memory
   );
 };

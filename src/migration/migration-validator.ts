@@ -1,15 +1,12 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Migration Validator - Validates successful migration
  */
-
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import type { ValidationResult, ValidationCheck } from './types.js';
 import { logger } from './logger.js';
 import * as chalk from 'chalk';
 import { glob } from 'glob';
-
 export class MigrationValidator {
   private requiredFiles = [
     '.claude/commands/sparc.md',
@@ -18,7 +15,6 @@ export class MigrationValidator {
     '.claude/BATCHTOOLS_GUIDE.md',
     '.claude/BATCHTOOLS_BEST_PRACTICES.md'
   ];
-
   private requiredCommands = [
     'sparc',
     'sparc-architect',
@@ -28,108 +24,96 @@ export class MigrationValidator {
     'claude-flow-memory',
     'claude-flow-swarm'
   ];
-
   async validate(projectPath: string): Promise<ValidationResult> {
-    const result: ValidationResult = {
+    const _result: ValidationResult = {
       valid: true,
       checks: [],
       errors: [],
       warnings: []
     };
-
     // Check file structure
-    await this.validateFileStructure(projectPath, result);
+    await this.validateFileStructure(_projectPath, result);
     
     // Check command files
-    await this.validateCommandFiles(projectPath, result);
+    await this.validateCommandFiles(_projectPath, result);
     
     // Check configuration files
-    await this.validateConfiguration(projectPath, result);
+    await this.validateConfiguration(_projectPath, result);
     
     // Check file integrity
-    await this.validateFileIntegrity(projectPath, result);
+    await this.validateFileIntegrity(_projectPath, result);
     
     // Check functionality
-    await this.validateFunctionality(projectPath, result);
+    await this.validateFunctionality(_projectPath, result);
     
     // Overall validation
     result.valid = result.errors.length === 0;
-
     return result;
   }
-
   private async validateFileStructure(projectPath: string, result: ValidationResult): Promise<void> {
-    const check: ValidationCheck = {
+    const _check: ValidationCheck = {
       name: 'File Structure',
       passed: true
     };
-
     // Check .claude directory exists
-    const claudePath = path.join(projectPath, '.claude');
+    const _claudePath = path.join(_projectPath, '.claude');
     if (!await fs.pathExists(claudePath)) {
       check.passed = false;
       result.errors.push('.claude directory not found');
     }
-
     // Check commands directory
-    const commandsPath = path.join(claudePath, 'commands');
+    const _commandsPath = path.join(_claudePath, 'commands');
     if (!await fs.pathExists(commandsPath)) {
       check.passed = false;
       result.errors.push('.claude/commands directory not found');
     }
-
     // Check required files
     for (const file of this.requiredFiles) {
-      const filePath = path.join(projectPath, file);
+      const _filePath = path.join(_projectPath, file);
       if (!await fs.pathExists(filePath)) {
         check.passed = false;
         result.errors.push(`Required file missing: ${file}`);
       }
     }
-
     result.checks.push(check);
   }
-
   private async validateCommandFiles(projectPath: string, result: ValidationResult): Promise<void> {
-    const check: ValidationCheck = {
+    const _check: ValidationCheck = {
       name: 'Command Files',
       passed: true
     };
-
-    const commandsPath = path.join(projectPath, '.claude/commands');
+    const _commandsPath = path.join(_projectPath, '.claude/commands');
     
     if (await fs.pathExists(commandsPath)) {
       for (const command of this.requiredCommands) {
-        const commandFile = path.join(commandsPath, `${command}.md`);
-        const sparcCommandFile = path.join(commandsPath, 'sparc', `${command.replace('sparc-', '')}.md`);
+        const _commandFile = path.join(_commandsPath, `${command}.md`);
+        const _sparcCommandFile = path.join(_commandsPath, 'sparc', `${command.replace('sparc-', '')}.md`);
         
-        const hasMainFile = await fs.pathExists(commandFile);
-        const hasSparcFile = await fs.pathExists(sparcCommandFile);
+        const _hasMainFile = await fs.pathExists(commandFile);
+        const _hasSparcFile = await fs.pathExists(sparcCommandFile);
         
         if (!hasMainFile && !hasSparcFile) {
           check.passed = false;
           result.errors.push(`Command file missing: ${command}.md`);
         } else {
           // Validate file content
-          const filePath = hasMainFile ? commandFile : sparcCommandFile;
-          await this.validateCommandFileContent(filePath, command, result);
+          const _filePath = hasMainFile ? commandFile : sparcCommandFile;
+          await this.validateCommandFileContent(_filePath, _command, result);
         }
       }
     } else {
       check.passed = false;
       result.errors.push('Commands directory not found');
     }
-
     result.checks.push(check);
   }
-
   private async validateCommandFileContent(filePath: string, command: string, result: ValidationResult): Promise<void> {
     try {
-      const content = await fs.readFile(filePath, 'utf-8');
+      const _content = await fs.readFile(_filePath, 'utf-8');
       
       // Check for minimum content requirements
-      const hasDescription = content.includes('description') || content.includes('Description');
-      const hasInstructions = content.length > 100; // Minimum content length
+      const _hasDescription = content.includes('description') || content.includes('Description');
+      const _hasInstructions = content.length > 100; // Minimum content length
       
       if (!hasDescription) {
         result.warnings.push(`Command ${command} may be missing description`);
@@ -140,7 +124,7 @@ export class MigrationValidator {
       }
       
       // Check for optimization indicators
-      const hasOptimizedContent = content.includes('optimization') || 
+      const _hasOptimizedContent = content.includes('optimization') || 
                                   content.includes('performance') ||
                                   content.includes('efficient');
       
@@ -148,21 +132,19 @@ export class MigrationValidator {
         result.warnings.push(`SPARC command ${command} may not be optimized`);
       }
       
-    } catch (error) {
+    } catch (_error) {
       result.errors.push(`Failed to validate ${command}: ${(error instanceof Error ? error.message : String(error))}`);
     }
   }
-
   private async validateConfiguration(projectPath: string, result: ValidationResult): Promise<void> {
-    const check: ValidationCheck = {
+    const _check: ValidationCheck = {
       name: 'Configuration Files',
       passed: true
     };
-
     // Check CLAUDE.md
-    const claudeMdPath = path.join(projectPath, 'CLAUDE.md');
+    const _claudeMdPath = path.join(_projectPath, 'CLAUDE.md');
     if (await fs.pathExists(claudeMdPath)) {
-      const content = await fs.readFile(claudeMdPath, 'utf-8');
+      const _content = await fs.readFile(_claudeMdPath, 'utf-8');
       
       // Check for SPARC configuration
       if (!content.includes('SPARC')) {
@@ -170,7 +152,7 @@ export class MigrationValidator {
       }
       
       // Check for key sections
-      const requiredSections = [
+      const _requiredSections = [
         'Project Overview',
         'SPARC Development',
         'Memory Integration'
@@ -184,42 +166,38 @@ export class MigrationValidator {
     } else {
       result.warnings.push('CLAUDE.md not found');
     }
-
     // Check .roomodes
-    const roomodesPath = path.join(projectPath, '.roomodes');
+    const _roomodesPath = path.join(_projectPath, '.roomodes');
     if (await fs.pathExists(roomodesPath)) {
       try {
-        const roomodes = await fs.readJson(roomodesPath);
-        const requiredModes = ['architect', 'code', 'tdd', 'debug'];
+        const _roomodes = await fs.readJson(roomodesPath);
+        const _requiredModes = ['architect', 'code', 'tdd', 'debug'];
         
         for (const mode of requiredModes) {
           if (!roomodes[mode]) {
             result.warnings.push(`Missing SPARC mode: ${mode}`);
           }
         }
-      } catch (error) {
+      } catch (_error) {
         result.errors.push(`Invalid .roomodes file: ${(error instanceof Error ? error.message : String(error))}`);
         check.passed = false;
       }
     }
-
     result.checks.push(check);
   }
-
   private async validateFileIntegrity(projectPath: string, result: ValidationResult): Promise<void> {
-    const check: ValidationCheck = {
+    const _check: ValidationCheck = {
       name: 'File Integrity',
       passed: true
     };
-
     // Check for corrupted files
-    const claudePath = path.join(projectPath, '.claude');
+    const _claudePath = path.join(_projectPath, '.claude');
     if (await fs.pathExists(claudePath)) {
-      const files = await glob('**/*.md', { cwd: claudePath });
+      const _files = await glob('**/*.md', { cwd: claudePath });
       
       for (const file of files) {
         try {
-          const content = await fs.readFile(path.join(claudePath, file), 'utf-8');
+          const _content = await fs.readFile(path.join(_claudePath, file), 'utf-8');
           
           // Basic integrity checks
           if (content.length === 0) {
@@ -233,44 +211,40 @@ export class MigrationValidator {
             check.passed = false;
           }
           
-        } catch (error) {
+        } catch (_error) {
           result.errors.push(`Cannot read file ${file}: ${(error instanceof Error ? error.message : String(error))}`);
           check.passed = false;
         }
       }
     }
-
     result.checks.push(check);
   }
-
   private async validateFunctionality(projectPath: string, result: ValidationResult): Promise<void> {
-    const check: ValidationCheck = {
+    const _check: ValidationCheck = {
       name: 'Functionality',
       passed: true
     };
-
     // Check directory permissions
-    const claudePath = path.join(projectPath, '.claude');
+    const _claudePath = path.join(_projectPath, '.claude');
     if (await fs.pathExists(claudePath)) {
       try {
         // Test write permissions
-        const testFile = path.join(claudePath, '.test-write');
-        await fs.writeFile(testFile, 'test');
+        const _testFile = path.join(_claudePath, '.test-write');
+        await fs.writeFile(_testFile, 'test');
         await fs.remove(testFile);
-      } catch (error) {
+      } catch (_error) {
         result.warnings.push('.claude directory may not be writable');
       }
     }
-
     // Check for potential conflicts
-    const packageJsonPath = path.join(projectPath, 'package.json');
+    const _packageJsonPath = path.join(_projectPath, 'package.json');
     if (await fs.pathExists(packageJsonPath)) {
       try {
-        const packageJson = await fs.readJson(packageJsonPath);
+        const _packageJson = await fs.readJson(packageJsonPath);
         
         // Check for script conflicts
-        const scripts = packageJson.scripts || {};
-        const conflictingScripts = Object.keys(scripts).filter(script => 
+        const _scripts = packageJson.scripts || { /* empty */ };
+        const _conflictingScripts = Object.keys(scripts).filter(script => 
           script.startsWith('claude-flow') || script.startsWith('sparc')
         );
         
@@ -278,14 +252,12 @@ export class MigrationValidator {
           result.warnings.push(`Potential script conflicts: ${conflictingScripts.join(', ')}`);
         }
         
-      } catch (error) {
+      } catch (_error) {
         result.warnings.push('Could not validate package.json');
       }
     }
-
     result.checks.push(check);
   }
-
   printValidation(validation: ValidationResult): void {
     console.log(chalk.bold('\n✅ Migration Validation Report'));
     console.log(chalk.gray('─'.repeat(50)));
@@ -295,7 +267,7 @@ export class MigrationValidator {
     // Show checks
     console.log(chalk.bold('\n📋 Validation Checks:'));
     validation.checks.forEach(check => {
-      const status = check.passed ? chalk.green('✓') : chalk.red('✗');
+      const _status = check.passed ? chalk.green('✓') : chalk.red('✗');
       console.log(`  ${status} ${check.name}`);
       if (check.message) {
         console.log(`     ${chalk.gray(check.message)}`);

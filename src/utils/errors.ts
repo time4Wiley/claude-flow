@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/error-handler.js';
+// import { getErrorMessage } from '../utils/error-handler.js'; // Currently unused
 /**
  * Custom error types for Claude-Flow
  */
@@ -10,11 +10,11 @@ export class ClaudeFlowError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly details?: unknown,
+    public readonly details?: _unknown,
   ) {
     super(message);
     this.name = 'ClaudeFlowError';
-    Error.captureStackTrace(this, this.constructor);
+    Error.captureStackTrace(_this, this.constructor);
   }
 
   toJSON() {
@@ -33,7 +33,7 @@ export class ClaudeFlowError extends Error {
  */
 export class TerminalError extends ClaudeFlowError {
   constructor(message: string, details?: unknown) {
-    super(message, 'TERMINAL_ERROR', details);
+    super(_message, 'TERMINAL_ERROR', details);
     this.name = 'TerminalError';
   }
 }
@@ -42,7 +42,7 @@ export class TerminalSpawnError extends TerminalError {
   override readonly code = 'TERMINAL_SPAWN_ERROR';
   
   constructor(message: string, details?: unknown) {
-    super(message, details);
+    super(_message, details);
   }
 }
 
@@ -50,7 +50,7 @@ export class TerminalCommandError extends TerminalError {
   override readonly code = 'TERMINAL_COMMAND_ERROR';
   
   constructor(message: string, details?: unknown) {
-    super(message, details);
+    super(_message, details);
   }
 }
 
@@ -59,7 +59,7 @@ export class TerminalCommandError extends TerminalError {
  */
 export class MemoryError extends ClaudeFlowError {
   constructor(message: string, details?: unknown) {
-    super(message, 'MEMORY_ERROR', details);
+    super(_message, 'MEMORY_ERROR', details);
     this.name = 'MemoryError';
   }
 }
@@ -68,7 +68,7 @@ export class MemoryBackendError extends MemoryError {
   override readonly code = 'MEMORY_BACKEND_ERROR';
   
   constructor(message: string, details?: unknown) {
-    super(message, details);
+    super(_message, details);
   }
 }
 
@@ -76,7 +76,7 @@ export class MemoryConflictError extends MemoryError {
   override readonly code = 'MEMORY_CONFLICT_ERROR';
   
   constructor(message: string, details?: unknown) {
-    super(message, details);
+    super(_message, details);
   }
 }
 
@@ -85,7 +85,7 @@ export class MemoryConflictError extends MemoryError {
  */
 export class CoordinationError extends ClaudeFlowError {
   constructor(message: string, details?: unknown) {
-    super(message, 'COORDINATION_ERROR', details);
+    super(_message, 'COORDINATION_ERROR', details);
     this.name = 'CoordinationError';
   }
 }
@@ -98,7 +98,7 @@ export class DeadlockError extends CoordinationError {
     public readonly agents: string[],
     public readonly resources: string[],
   ) {
-    super(message, { agents, resources });
+    super(_message, { _agents, resources });
   }
 }
 
@@ -106,7 +106,7 @@ export class ResourceLockError extends CoordinationError {
   override readonly code = 'RESOURCE_LOCK_ERROR';
   
   constructor(message: string, details?: unknown) {
-    super(message, details);
+    super(_message, details);
   }
 }
 
@@ -115,7 +115,7 @@ export class ResourceLockError extends CoordinationError {
  */
 export class MCPError extends ClaudeFlowError {
   constructor(message: string, details?: unknown) {
-    super(message, 'MCP_ERROR', details);
+    super(_message, 'MCP_ERROR', details);
     this.name = 'MCPError';
   }
 }
@@ -124,7 +124,7 @@ export class MCPTransportError extends MCPError {
   override readonly code = 'MCP_TRANSPORT_ERROR';
   
   constructor(message: string, details?: unknown) {
-    super(message, details);
+    super(_message, details);
   }
 }
 
@@ -141,7 +141,7 @@ export class MCPMethodNotFoundError extends MCPError {
  */
 export class ConfigError extends ClaudeFlowError {
   constructor(message: string, details?: unknown) {
-    super(message, 'CONFIG_ERROR', details);
+    super(_message, 'CONFIG_ERROR', details);
     this.name = 'ConfigError';
   }
 }
@@ -150,7 +150,7 @@ export class ValidationError extends ConfigError {
   override readonly code = 'VALIDATION_ERROR';
   
   constructor(message: string, details?: unknown) {
-    super(message, details);
+    super(_message, details);
   }
 }
 
@@ -159,7 +159,7 @@ export class ValidationError extends ConfigError {
  */
 export class TaskError extends ClaudeFlowError {
   constructor(message: string, details?: unknown) {
-    super(message, 'TASK_ERROR', details);
+    super(_message, 'TASK_ERROR', details);
     this.name = 'TaskError';
   }
 }
@@ -168,7 +168,7 @@ export class TaskTimeoutError extends TaskError {
   override readonly code = 'TASK_TIMEOUT_ERROR';
   
   constructor(taskId: string, timeout: number) {
-    super(`Task ${taskId} timed out after ${timeout}ms`, { taskId, timeout });
+    super(`Task ${taskId} timed out after ${timeout}ms`, { _taskId, timeout });
   }
 }
 
@@ -176,7 +176,7 @@ export class TaskDependencyError extends TaskError {
   override readonly code = 'TASK_DEPENDENCY_ERROR';
   
   constructor(taskId: string, dependencies: string[]) {
-    super(`Task ${taskId} has unmet dependencies`, { taskId, dependencies });
+    super(`Task ${taskId} has unmet dependencies`, { _taskId, dependencies });
   }
 }
 
@@ -185,7 +185,7 @@ export class TaskDependencyError extends TaskError {
  */
 export class SystemError extends ClaudeFlowError {
   constructor(message: string, details?: unknown) {
-    super(message, 'SYSTEM_ERROR', details);
+    super(_message, 'SYSTEM_ERROR', details);
     this.name = 'SystemError';
   }
 }
@@ -195,10 +195,10 @@ export class InitializationError extends SystemError {
   
   constructor(componentOrMessage: string, details?: unknown) {
     // If the message already contains the word "initialize", use it as-is
-    const message = componentOrMessage.includes('initialize') 
+    const _message = componentOrMessage.includes('initialize') 
       ? componentOrMessage 
       : `Failed to initialize ${componentOrMessage}`;
-    super(message, details ? { component: componentOrMessage, ...details } : { component: componentOrMessage });
+    super(_message, details ? { component: _componentOrMessage, ...details } : { component: componentOrMessage });
   }
 }
 
@@ -206,7 +206,7 @@ export class ShutdownError extends SystemError {
   override readonly code = 'SHUTDOWN_ERROR';
   
   constructor(message: string, details?: unknown) {
-    super(message, details);
+    super(_message, details);
   }
 }
 

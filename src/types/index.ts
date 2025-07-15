@@ -10,8 +10,8 @@ export * from '../swarm/types.js';
 export interface MemoryEntry {
   id: string;
   key: string;
-  value: any;
-  data?: any; // For backward compatibility
+  value: unknown;
+  data?: unknown; // For backward compatibility
   metadata?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;

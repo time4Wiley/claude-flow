@@ -32,8 +32,8 @@ export interface EnvironmentOptions {
 /**
  * Detects the current execution environment
  */
-export function detectExecutionEnvironment(options: EnvironmentOptions = {}): ExecutionEnvironment {
-  const env: ExecutionEnvironment = {
+export function detectExecutionEnvironment(options: EnvironmentOptions = { /* empty */ }): ExecutionEnvironment {
+  const _env: ExecutionEnvironment = {
     isInteractive: false,
     isVSCode: false,
     isVSCodeInsiders: false,
@@ -55,7 +55,7 @@ export function detectExecutionEnvironment(options: EnvironmentOptions = {}): Ex
   env.isInteractive = Boolean(process.stdin.isTTY && process.stdout.isTTY);
   
   // Terminal program detection
-  const termProgram = process.env.TERM_PROGRAM?.toLowerCase() || '';
+  const _termProgram = process.env.TERM_PROGRAM?.toLowerCase() || '';
   env.isVSCode = termProgram === 'vscode';
   env.isVSCodeInsiders = termProgram === 'vscode-insiders';
   env.terminalType = termProgram || process.env.TERM || 'unknown';
@@ -127,7 +127,7 @@ function checkRawModeSupport(): boolean {
     if (typeof process.stdin.setRawMode !== 'function') return false;
     
     // Try to set raw mode and immediately restore
-    const originalRawMode = process.stdin.isRaw;
+    const _originalRawMode = process.stdin.isRaw;
     process.stdin.setRawMode(true);
     process.stdin.setRawMode(originalRawMode);
     
@@ -177,7 +177,7 @@ function generateRecommendations(env: ExecutionEnvironment): void {
   // WSL specific recommendations
   if (env.isWSL) {
     env.recommendedFlags.push('--no-interactive');
-    env.warnings.push('WSL detected - raw mode may cause hangs, using non-interactive mode');
+    env.warnings.push('WSL detected - raw mode may cause _hangs, using non-interactive mode');
     if (!env.supportsRawMode) {
       env.warnings.push('WSL subprocess context detected - interactive features disabled');
     }
@@ -218,13 +218,13 @@ function showEnvironmentWarnings(env: ExecutionEnvironment): void {
 /**
  * Applies smart defaults based on environment
  */
-export function applySmartDefaults<T extends Record<string, any>>(
-  options: T,
+export function applySmartDefaults<T extends Record<string, unknown>>(
+  options: _T,
   env?: ExecutionEnvironment
 ): T & { appliedDefaults: string[] } {
-  const environment = env || detectExecutionEnvironment({ skipWarnings: true });
-  const appliedDefaults: string[] = [];
-  const enhanced = { ...options, appliedDefaults };
+  const _environment = env || detectExecutionEnvironment({ skipWarnings: true });
+  const _appliedDefaults: string[] = [];
+  const _enhanced = { ...options, appliedDefaults };
   
   // Apply defaults based on environment
   if ((environment.isVSCode || environment.isCI || !environment.supportsRawMode) && 
@@ -262,8 +262,8 @@ export function applySmartDefaults<T extends Record<string, any>>(
  * Gets a human-readable environment description
  */
 export function getEnvironmentDescription(env?: ExecutionEnvironment): string {
-  const environment = env || detectExecutionEnvironment({ skipWarnings: true });
-  const parts: string[] = [];
+  const _environment = env || detectExecutionEnvironment({ skipWarnings: true });
+  const _parts: string[] = [];
   
   if (environment.isVSCode) parts.push('VS Code');
   if (environment.isCI) parts.push('CI');
@@ -278,7 +278,7 @@ export function getEnvironmentDescription(env?: ExecutionEnvironment): string {
     parts.push(environment.terminalType);
   }
   
-  const features: string[] = [];
+  const _features: string[] = [];
   if (environment.isInteractive) features.push('interactive');
   if (environment.supportsRawMode) features.push('raw mode');
   if (environment.supportsColor) features.push('color');
@@ -292,7 +292,7 @@ export function getEnvironmentDescription(env?: ExecutionEnvironment): string {
 export function shouldUseNonInteractiveMode(options?: { force?: boolean }): boolean {
   if (options?.force) return true;
   
-  const env = detectExecutionEnvironment({ skipWarnings: true });
+  const _env = detectExecutionEnvironment({ skipWarnings: true });
   return !env.isInteractive || 
          env.isCI || 
          env.isVSCode || 
@@ -313,7 +313,7 @@ function existsSync(path: string): boolean {
 
 function readFileSync(path: string, encoding: string): string {
   try {
-    return require('fs').readFileSync(path, encoding);
+    return require('fs').readFileSync(_path, encoding);
   } catch {
     return '';
   }

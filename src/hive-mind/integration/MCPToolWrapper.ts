@@ -5,20 +5,15 @@
  * providing a unified interface for swarm coordination, neural processing,
  * and memory management.
  */
-
 import { EventEmitter } from 'events';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { getErrorMessage } from '../../utils/type-guards.js';
-
-const execAsync = promisify(exec);
-
+const _execAsync = promisify(exec);
 interface MCPToolResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
 }
-
 // Type definitions for tool responses
 interface SwarmInitResponse {
   swarmId: string;
@@ -26,47 +21,39 @@ interface SwarmInitResponse {
   maxAgents: number;
   status: string;
 }
-
 interface AgentSpawnResponse {
   agentId: string;
   type: string;
   name: string;
   swarmId: string;
 }
-
 interface TaskResponse {
   taskId: string;
   status: string;
   result?: unknown;
 }
-
 interface MemoryResponse {
   key: string;
   value: unknown;
   namespace?: string;
 }
-
 interface PerformanceReport {
   metrics: Record<string, number>;
   timeframe: string;
   summary: string;
 }
-
 interface NeuralResponse {
   modelId?: string;
   status: string;
   accuracy?: number;
   predictions?: unknown[];
 }
-
 export class MCPToolWrapper extends EventEmitter {
   private toolPrefix = 'mcp__ruv-swarm__';
   private isInitialized = false;
-
   constructor() {
     super();
   }
-
   /**
    * Initialize MCP tools
    */
@@ -76,12 +63,11 @@ export class MCPToolWrapper extends EventEmitter {
       await this.checkToolAvailability();
       this.isInitialized = true;
       this.emit('initialized');
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Check if MCP tools are available
    */
@@ -91,33 +77,30 @@ export class MCPToolWrapper extends EventEmitter {
       if (!stdout) {
         throw new Error('ruv-swarm MCP tools not found');
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error('MCP tools not available. Please ensure ruv-swarm is installed.');
     }
   }
-
   /**
    * Execute MCP tool via CLI
    */
   private async executeTool<T = unknown>(toolName: string, params: Record<string, unknown>): Promise<MCPToolResponse<T>> {
     try {
-      const command = `npx ruv-swarm mcp-execute ${toolName} '${JSON.stringify(params)}'`;
+      const _command = `npx ruv-swarm mcp-execute ${toolName} '${JSON.stringify(params)}'`;
       const { stdout, stderr } = await execAsync(command);
       
       if (stderr) {
         return { success: false, error: stderr };
       }
       
-      const result = JSON.parse(stdout);
+      const _result = JSON.parse(stdout);
       return { success: true, data: result };
       
-    } catch (error) {
+    } catch (_error) {
       return { success: false, error: getErrorMessage(error) };
     }
   }
-
   // Swarm coordination tools
-
   async initSwarm(params: {
     topology: string;
     maxAgents?: number;
@@ -125,7 +108,6 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<SwarmInitResponse> {
     return this.executeTool('swarm_init', params);
   }
-
   async spawnAgent(params: {
     type: string;
     name?: string;
@@ -134,7 +116,6 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<AgentSpawnResponse> {
     return this.executeTool('agent_spawn', params);
   }
-
   async orchestrateTask(params: {
     task: string;
     priority?: string;
@@ -143,20 +124,16 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<TaskResponse> {
     return this.executeTool('task_orchestrate', params);
   }
-
   async getSwarmStatus(swarmId?: string): Promise<Record<string, unknown>> {
     return this.executeTool('swarm_status', { swarmId });
   }
-
   async monitorSwarm(params: {
     swarmId?: string;
     interval?: number;
   }): Promise<Record<string, unknown>> {
     return this.executeTool('swarm_monitor', params);
   }
-
   // Neural and pattern tools
-
   async analyzePattern(params: {
     action: string;
     operation?: string;
@@ -164,7 +141,6 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<NeuralResponse> {
     return this.executeTool('neural_patterns', params);
   }
-
   async trainNeural(params: {
     pattern_type: string;
     training_data: string;
@@ -172,20 +148,16 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<NeuralResponse> {
     return this.executeTool('neural_train', params);
   }
-
   async predict(params: {
     modelId: string;
     input: string;
   }): Promise<NeuralResponse> {
     return this.executeTool('neural_predict', params);
   }
-
   async getNeuralStatus(modelId?: string): Promise<NeuralResponse> {
     return this.executeTool('neural_status', { modelId });
   }
-
   // Memory management tools
-
   async storeMemory(params: {
     action: 'store';
     key: string;
@@ -195,16 +167,14 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<MemoryResponse> {
     return this.executeTool('memory_usage', params);
   }
-
   async retrieveMemory(params: {
     action: 'retrieve';
     key: string;
     namespace?: string;
   }): Promise<unknown | null> {
-    const result = await this.executeTool<MemoryResponse>('memory_usage', params);
+    const _result = await this.executeTool<MemoryResponse>('memory_usage', params);
     return result.success ? result.data : null;
   }
-
   async searchMemory(params: {
     pattern: string;
     namespace?: string;
@@ -212,7 +182,6 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<MemoryResponse[]> {
     return this.executeTool('memory_search', params);
   }
-
   async deleteMemory(params: {
     action: 'delete';
     key: string;
@@ -220,83 +189,65 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<MemoryResponse> {
     return this.executeTool('memory_usage', params);
   }
-
   async listMemory(params: {
     action: 'list';
     namespace?: string;
   }): Promise<MemoryResponse[]> {
     return this.executeTool('memory_usage', params);
   }
-
   // Performance and monitoring tools
-
   async getPerformanceReport(params?: {
     format?: string;
     timeframe?: string;
   }): Promise<PerformanceReport> {
-    return this.executeTool('performance_report', params || {});
+    return this.executeTool('performance_report', params || { /* empty */ });
   }
-
   async analyzeBottlenecks(params?: {
     component?: string;
     metrics?: string[];
   }): Promise<Record<string, unknown>> {
-    return this.executeTool('bottleneck_analyze', params || {});
+    return this.executeTool('bottleneck_analyze', params || { /* empty */ });
   }
-
   async getTokenUsage(params?: {
     operation?: string;
     timeframe?: string;
   }): Promise<Record<string, number>> {
-    return this.executeTool('token_usage', params || {});
+    return this.executeTool('token_usage', params || { /* empty */ });
   }
-
   // Agent management tools
-
   async listAgents(swarmId?: string): Promise<AgentSpawnResponse[]> {
     return this.executeTool('agent_list', { swarmId });
   }
-
   async getAgentMetrics(agentId: string): Promise<Record<string, unknown>> {
     return this.executeTool('agent_metrics', { agentId });
   }
-
   // Task management tools
-
   async getTaskStatus(taskId: string): Promise<TaskResponse> {
     return this.executeTool('task_status', { taskId });
   }
-
   async getTaskResults(taskId: string): Promise<TaskResponse> {
     return this.executeTool('task_results', { taskId });
   }
-
   // Advanced coordination tools
-
   async optimizeTopology(swarmId?: string): Promise<Record<string, unknown>> {
     return this.executeTool('topology_optimize', { swarmId });
   }
-
   async loadBalance(params: {
     swarmId?: string;
     tasks: unknown[];
   }): Promise<Record<string, unknown>> {
     return this.executeTool('load_balance', params);
   }
-
   async syncCoordination(swarmId?: string): Promise<Record<string, unknown>> {
     return this.executeTool('coordination_sync', { swarmId });
   }
-
   async scaleSwarm(params: {
     swarmId?: string;
     targetSize: number;
   }): Promise<Record<string, unknown>> {
     return this.executeTool('swarm_scale', params);
   }
-
   // SPARC mode integration
-
   async runSparcMode(params: {
     mode: string;
     task_description: string;
@@ -304,9 +255,7 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<Record<string, unknown>> {
     return this.executeTool('sparc_mode', params);
   }
-
   // Workflow tools
-
   async createWorkflow(params: {
     name: string;
     steps: unknown[];
@@ -314,33 +263,27 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<Record<string, unknown>> {
     return this.executeTool('workflow_create', params);
   }
-
   async executeWorkflow(params: {
     workflowId: string;
     params?: Record<string, unknown>;
   }): Promise<Record<string, unknown>> {
     return this.executeTool('workflow_execute', params);
   }
-
   // GitHub integration tools
-
   async analyzeRepository(params: {
     repo: string;
     analysis_type?: string;
   }): Promise<Record<string, unknown>> {
     return this.executeTool('github_repo_analyze', params);
   }
-
   async manageGitHubPR(params: {
     repo: string;
     action: string;
-    pr_number?: number;
+    prnumber?: number;
   }): Promise<Record<string, unknown>> {
     return this.executeTool('github_pr_manage', params);
   }
-
   // Dynamic Agent Architecture tools
-
   async createDynamicAgent(params: {
     agent_type: string;
     capabilities?: string[];
@@ -348,66 +291,53 @@ export class MCPToolWrapper extends EventEmitter {
   }): Promise<AgentSpawnResponse> {
     return this.executeTool('daa_agent_create', params);
   }
-
   async matchCapabilities(params: {
     task_requirements: string[];
     available_agents?: unknown[];
   }): Promise<Record<string, unknown>> {
     return this.executeTool('daa_capability_match', params);
   }
-
   // System tools
-
   async runBenchmark(suite?: string): Promise<PerformanceReport> {
     return this.executeTool('benchmark_run', { suite });
   }
-
   async collectMetrics(components?: string[]): Promise<Record<string, unknown>> {
     return this.executeTool('metrics_collect', { components });
   }
-
   async analyzeTrends(params: {
     metric: string;
     period?: string;
   }): Promise<Record<string, unknown>> {
     return this.executeTool('trend_analysis', params);
   }
-
   async analyzeCost(timeframe?: string): Promise<Record<string, unknown>> {
     return this.executeTool('cost_analysis', { timeframe });
   }
-
   async assessQuality(params: {
     target: string;
     criteria?: string[];
   }): Promise<Record<string, unknown>> {
     return this.executeTool('quality_assess', params);
   }
-
   async healthCheck(components?: string[]): Promise<Record<string, unknown>> {
     return this.executeTool('health_check', { components });
   }
-
   // Batch operations
-
   async batchProcess(params: {
     items: unknown[];
     operation: string;
   }): Promise<Record<string, unknown>> {
     return this.executeTool('batch_process', params);
   }
-
   async parallelExecute(tasks: unknown[]): Promise<Record<string, unknown>> {
     return this.executeTool('parallel_execute', { tasks });
   }
-
   /**
    * Generic tool execution for custom tools
    */
   async executeMCPTool(toolName: string, params: Record<string, unknown>): Promise<unknown> {
-    return this.executeTool(toolName, params);
+    return this.executeTool(_toolName, params);
   }
-
   /**
    * Helper to format tool responses
    */

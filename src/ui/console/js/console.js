@@ -3,12 +3,10 @@
  * Main Console Application
  * Coordinates all components of the Claude Code Console
  */
-
 import { WebSocketClient } from './websocket-client.js';
 import { TerminalEmulator } from './terminal-emulator.js';
 import { CommandHandler } from './command-handler.js';
 import { SettingsManager } from './settings.js';
-
 class ClaudeCodeConsole {
   constructor() {
     // Initialize components
@@ -24,7 +22,7 @@ class ClaudeCodeConsole {
     this.activeAgents = 0;
     
     // DOM elements
-    this.elements = {};
+    this.elements = { /* empty */ };
     
     // Status update intervals
     this.statusInterval = null;
@@ -48,12 +46,12 @@ class ClaudeCodeConsole {
       
       // Initialize terminal emulator
       this.terminal = new TerminalEmulator(
-        this.elements.consoleOutput,
+        this.elements._consoleOutput,
         this.elements.consoleInput
       );
       
       // Initialize command handler
-      this.commandHandler = new CommandHandler(this.terminal, this.wsClient);
+      this.commandHandler = new CommandHandler(this._terminal, this.wsClient);
       
       // Initialize settings
       this.settings.init();
@@ -84,7 +82,7 @@ class ClaudeCodeConsole {
       this.isInitialized = true;
       console.log('Claude Code Console initialized successfully');
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to initialize console:', error);
       this.showError('Failed to initialize console: ' + error.message);
     }
@@ -113,7 +111,7 @@ class ClaudeCodeConsole {
     };
     
     // Validate required elements
-    const required = ['consoleOutput', 'consoleInput', 'loadingOverlay'];
+    const _required = ['consoleOutput', 'consoleInput', 'loadingOverlay'];
     for (const elementId of required) {
       if (!this.elements[elementId]) {
         throw new Error(`Required element not found: ${elementId}`);
@@ -136,13 +134,13 @@ class ClaudeCodeConsole {
     
     // WebSocket -> Terminal
     this.wsClient.on('connected', () => {
-      this.updateConnectionStatus(true, false);
+      this.updateConnectionStatus(_true, false);
       this.terminal.writeSuccess('Connected to Claude Code server');
       this.terminal.setPrompt('claude-flow>');
     });
     
     this.wsClient.on('disconnected', (info) => {
-      this.updateConnectionStatus(false, false);
+      this.updateConnectionStatus(_false, false);
       this.terminal.writeWarning('Disconnected from server');
       this.terminal.setPrompt('offline>');
       
@@ -152,7 +150,7 @@ class ClaudeCodeConsole {
     });
     
     this.wsClient.on('reconnecting', (info) => {
-      this.updateConnectionStatus(false, true);
+      this.updateConnectionStatus(_false, true);
       this.terminal.writeInfo(`Reconnecting... (${info.attempt}/${this.wsClient.maxReconnectAttempts})`);
     });
     
@@ -171,7 +169,7 @@ class ClaudeCodeConsole {
     
     // Settings -> Application
     this.settings.on('connect_requested', async (config) => {
-      await this.connect(config.url, config.token);
+      await this.connect(config._url, config.token);
     });
     
     this.settings.on('disconnect_requested', () => {
@@ -182,8 +180,8 @@ class ClaudeCodeConsole {
       this.terminal.setMaxLines(maxLines);
     });
     
-    this.settings.on('setting_changed', ({ key, value }) => {
-      this.handleSettingChange(key, value);
+    this.settings.on('setting_changed', ({ _key, value }) => {
+      this.handleSettingChange(_key, value);
     });
   }
   
@@ -234,7 +232,7 @@ class ClaudeCodeConsole {
    * Apply initial settings
    */
   applyInitialSettings() {
-    const maxLines = this.settings.get('maxLines');
+    const _maxLines = this.settings.get('maxLines');
     if (maxLines) {
       this.terminal.setMaxLines(maxLines);
     }
@@ -250,7 +248,7 @@ class ClaudeCodeConsole {
     this.terminal.showWelcomeMessage();
     this.terminal.writeInfo('Console ready. Type "help" for available commands.');
     
-    const config = this.settings.getConnectionConfig();
+    const _config = this.settings.getConnectionConfig();
     if (config.url && !config.autoConnect) {
       this.terminal.writeInfo(`Use "connect" to connect to ${config.url}`);
     }
@@ -260,21 +258,21 @@ class ClaudeCodeConsole {
    * Auto-connect to server
    */
   async autoConnect() {
-    const config = this.settings.getConnectionConfig();
+    const _config = this.settings.getConnectionConfig();
     
     if (config.url) {
       this.terminal.writeInfo(`Auto-connecting to ${config.url}...`);
-      await this.connect(config.url, config.token);
+      await this.connect(config._url, config.token);
     }
   }
   
   /**
    * Connect to server
    */
-  async connect(url, token = '') {
+  async connect(_url, token = '') {
     try {
-      this.updateConnectionStatus(false, true);
-      await this.wsClient.connect(url, token);
+      this.updateConnectionStatus(_false, true);
+      await this.wsClient.connect(_url, token);
       await this.wsClient.initializeSession();
       
       // Update settings with successful connection
@@ -283,8 +281,8 @@ class ClaudeCodeConsole {
         this.settings.set('authToken', token);
       }
       
-    } catch (error) {
-      this.updateConnectionStatus(false, false);
+    } catch (_error) {
+      this.updateConnectionStatus(_false, false);
       this.terminal.writeError(`Connection failed: ${error.message}`);
     }
   }
@@ -294,14 +292,14 @@ class ClaudeCodeConsole {
    */
   disconnect() {
     this.wsClient.disconnect();
-    this.updateConnectionStatus(false, false);
+    this.updateConnectionStatus(_false, false);
   }
   
   /**
    * Update connection status in UI
    */
-  updateConnectionStatus(connected, connecting) {
-    const status = this.wsClient.getStatus();
+  updateConnectionStatus(_connected, connecting) {
+    const _status = this.wsClient.getStatus();
     
     // Update status indicator
     if (this.elements.statusIndicator) {
@@ -343,27 +341,37 @@ class ClaudeCodeConsole {
     
     switch (method) {
       case 'agent/status':
-        this.handleAgentStatus(params);
-        break;
+        {
+this.handleAgentStatus(params);
+        
+}break;
         
       case 'swarm/update':
-        this.handleSwarmUpdate(params);
-        break;
+        {
+this.handleSwarmUpdate(params);
+        
+}break;
         
       case 'memory/update':
-        this.handleMemoryUpdate(params);
-        break;
+        {
+this.handleMemoryUpdate(params);
+        
+}break;
         
       case 'log/message':
-        this.handleLogMessage(params);
-        break;
+        {
+this.handleLogMessage(params);
+        
+}break;
         
       case 'connection/established':
-        this.handleConnectionEstablished(params);
-        break;
+        {
+this.handleConnectionEstablished(params);
+        
+}break;
         
       default:
-        console.log('Unhandled notification:', method, params);
+        console.log('Unhandled notification:', _method, params);
     }
   }
   
@@ -372,13 +380,13 @@ class ClaudeCodeConsole {
    */
   handleStreamingOutput(params) {
     if (params && params.content) {
-      const type = params.type || 'output';
+      const _type = params.type || 'output';
       
       if (params.streaming) {
         // Use streaming text effect for long outputs
-        this.terminal.streamText(params.content, 10);
+        this.terminal.streamText(params._content, 10);
       } else {
-        this.terminal.write(params.content, type);
+        this.terminal.write(params._content, type);
       }
     }
   }
@@ -391,15 +399,21 @@ class ClaudeCodeConsole {
     
     switch (method) {
       case 'claude-flow/started':
-        this.terminal.writeSuccess(`Claude Flow started in ${params.mode} mode`);
+        {
+this.terminal.writeSuccess(`Claude Flow started in ${params.mode
+}} mode`);
         break;
         
       case 'claude-flow/stopped':
-        this.terminal.writeInfo('Claude Flow stopped');
-        break;
+        {
+this.terminal.writeInfo('Claude Flow stopped');
+        
+}break;
         
       case 'claude-flow/error':
-        this.terminal.writeError(`Claude Flow error: ${params.message}`);
+        {
+this.terminal.writeError(`Claude Flow error: ${params.message
+}}`);
         break;
         
       default:
@@ -443,12 +457,11 @@ class ClaudeCodeConsole {
    */
   handleLogMessage(params) {
     if (params.level && params.message) {
-      const type = params.level === 'error' ? 'error' : 
+      const _type = params.level === 'error' ? 'error' : 
                   params.level === 'warn' ? 'warning' : 'info';
       this.terminal.write(`[${params.level.toUpperCase()}] ${params.message}`, type);
     }
   }
-
   /**
    * Handle connection established notification
    */
@@ -470,19 +483,25 @@ class ClaudeCodeConsole {
   /**
    * Handle setting changes
    */
-  handleSettingChange(key, value) {
+  handleSettingChange(_key, value) {
     switch (key) {
       case 'theme':
-        document.documentElement.setAttribute('data-theme', value);
-        break;
+        {
+document.documentElement.setAttribute('data-theme', value);
+        
+}break;
         
       case 'fontSize':
-        document.documentElement.style.setProperty('--font-size-base', `${value}px`);
+        {
+document.documentElement.style.setProperty('--font-size-base', `${value
+}}px`);
         break;
         
       case 'lineHeight':
-        document.documentElement.style.setProperty('--line-height', value);
-        break;
+        {
+document.documentElement.style.setProperty('--line-height', value);
+        
+}break;
     }
   }
   
@@ -523,7 +542,7 @@ class ClaudeCodeConsole {
     
     // Update memory usage (if available)
     if (this.elements.memoryUsage && performance.memory) {
-      const used = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+      const _used = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
       this.elements.memoryUsage.textContent = `Memory: ${used}MB`;
     }
   }
@@ -533,13 +552,13 @@ class ClaudeCodeConsole {
    */
   updateUptime() {
     if (this.elements.uptime) {
-      const uptime = Date.now() - this.startTime;
-      const hours = Math.floor(uptime / (1000 * 60 * 60));
-      const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
+      const _uptime = Date.now() - this.startTime;
+      const _hours = Math.floor(uptime / (1000 * 60 * 60));
+      const _minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+      const _seconds = Math.floor((uptime % (1000 * 60)) / 1000);
       
       this.elements.uptime.textContent = 
-        `Uptime: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        `Uptime: ${hours.toString().padStart(_2, '0')}:${minutes.toString().padStart(_2, '0')}:${seconds.toString().padStart(_2, '0')}`;
     }
   }
   
@@ -570,7 +589,7 @@ class ClaudeCodeConsole {
    */
   showLoading(message = 'Loading...') {
     if (this.elements.loadingOverlay) {
-      const loadingText = this.elements.loadingOverlay.querySelector('.loading-text');
+      const _loadingText = this.elements.loadingOverlay.querySelector('.loading-text');
       if (loadingText) {
         loadingText.textContent = message;
       }
@@ -656,10 +675,9 @@ class ClaudeCodeConsole {
     };
   }
 }
-
 // Initialize the console when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
-  const console = new ClaudeCodeConsole();
+  const _console = new ClaudeCodeConsole();
   
   // Make console globally available for debugging
   window.claudeConsole = console;
@@ -667,6 +685,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initialize the application
   await console.init();
 });
-
 // Export for module usage
 export { ClaudeCodeConsole };

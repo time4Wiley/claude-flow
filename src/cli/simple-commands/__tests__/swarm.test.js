@@ -1,29 +1,24 @@
 /* eslint-env jest */
-
 /**
  * Tests for swarm command
  */
-
 import { jest } from '@jest/globals';
 import { swarmCommand } from '../swarm.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { spawn } from 'child_process';
 import ora from 'ora';
-
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('ora');
-
 describe('Swarm Command', () => {
-  let consoleLogSpy;
-  let consoleErrorSpy;
-  let mockSpinner;
-  let mockSpawnProcess;
-
+  let consoleLogSpy; // TODO: Remove if unused
+  let consoleErrorSpy; // TODO: Remove if unused
+  let mockSpinner; // TODO: Remove if unused
+  let mockSpawnProcess; // TODO: Remove if unused
   beforeEach(() => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleLogSpy = jest.spyOn(_console, 'log').mockImplementation();
+    consoleErrorSpy = jest.spyOn(_console, 'error').mockImplementation();
     
     mockSpinner = {
       start: jest.fn().mockReturnThis(),
@@ -44,32 +39,29 @@ describe('Swarm Command', () => {
     
     jest.clearAllMocks();
   });
-
   afterEach(() => {
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
-
   describe('main swarm command', () => {
     test('should initialize swarm with objective', async () => {
-      const swarmDir = path.join(process.cwd(), '.claude', 'swarm');
+      const _swarmDir = path.join(process.cwd(), '.claude', 'swarm');
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
       
       // Mock spawn process events
-      mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') {
+      mockSpawnProcess.on.mockImplementation((_event, _callback) => {
+        if (_event === 'close') {
           setTimeout(() => callback(0), 100);
         }
       });
-
-      await swarmCommand(['Build a REST API'], {});
+      await swarmCommand(['Build a REST API'], { /* empty */ });
       
       expect(mockSpinner.start).toHaveBeenCalledWith('Initializing swarm...');
       expect(fs.ensureDir).toHaveBeenCalledWith(swarmDir);
       
-      const writeJsonCall = fs.writeJson.mock.calls[0];
-      expect(writeJsonCall[0]).toBe(path.join(swarmDir, 'swarm.json'));
+      const _writeJsonCall = fs.writeJson.mock.calls[0];
+      expect(writeJsonCall[0]).toBe(path.join(_swarmDir, 'swarm.json'));
       expect(writeJsonCall[1]).toMatchObject({
         objective: 'Build a REST API',
         status: 'initializing',
@@ -77,71 +69,61 @@ describe('Swarm Command', () => {
         strategy: 'adaptive'
       });
     });
-
     test('should handle custom strategy', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
       
-      mockSpawnProcess.on.mockImplementation((event, callback) => {
+      mockSpawnProcess.on.mockImplementation((_event, _callback) => {
         if (event === 'close') callback(0);
       });
-
       await swarmCommand(['Research task'], { strategy: 'research' });
       
-      const writeJsonCall = fs.writeJson.mock.calls[0];
+      const _writeJsonCall = fs.writeJson.mock.calls[0];
       expect(writeJsonCall[1].strategy).toBe('research');
     });
-
     test('should handle custom topology mode', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
       
-      mockSpawnProcess.on.mockImplementation((event, callback) => {
+      mockSpawnProcess.on.mockImplementation((_event, _callback) => {
         if (event === 'close') callback(0);
       });
-
       await swarmCommand(['Task'], { mode: 'mesh' });
       
-      const writeJsonCall = fs.writeJson.mock.calls[0];
+      const _writeJsonCall = fs.writeJson.mock.calls[0];
       expect(writeJsonCall[1].topology).toBe('mesh');
     });
-
     test('should set max agents', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
       
-      mockSpawnProcess.on.mockImplementation((event, callback) => {
+      mockSpawnProcess.on.mockImplementation((_event, _callback) => {
         if (event === 'close') callback(0);
       });
-
       await swarmCommand(['Task'], { 'max-agents': '10' });
       
-      const writeJsonCall = fs.writeJson.mock.calls[0];
+      const _writeJsonCall = fs.writeJson.mock.calls[0];
       expect(writeJsonCall[1].maxAgents).toBe(10);
     });
-
     test('should enable parallel execution', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
       
-      mockSpawnProcess.on.mockImplementation((event, callback) => {
+      mockSpawnProcess.on.mockImplementation((_event, _callback) => {
         if (event === 'close') callback(0);
       });
-
       await swarmCommand(['Task'], { parallel: true });
       
-      const writeJsonCall = fs.writeJson.mock.calls[0];
+      const _writeJsonCall = fs.writeJson.mock.calls[0];
       expect(writeJsonCall[1].parallel).toBe(true);
     });
-
     test('should enable monitoring', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
       
-      mockSpawnProcess.on.mockImplementation((event, callback) => {
+      mockSpawnProcess.on.mockImplementation((_event, _callback) => {
         if (event === 'close') callback(0);
       });
-
       await swarmCommand(['Task'], { monitor: true });
       
       expect(spawn).toHaveBeenCalledWith(
@@ -151,10 +133,9 @@ describe('Swarm Command', () => {
       );
     });
   });
-
   describe('swarm status', () => {
     test('should show swarm status', async () => {
-      const mockSwarmData = {
+      const _mockSwarmData = {
         id: 'swarm-123',
         objective: 'Build API',
         status: 'active',
@@ -170,13 +151,11 @@ describe('Swarm Command', () => {
           tasksPending: 7
         }
       };
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockSwarmData);
-
-      await swarmCommand(['status'], {});
+      await swarmCommand(['status'], { /* empty */ });
       
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Swarm Status');
       expect(output).toContain('Build API');
       expect(output).toContain('active');
@@ -184,194 +163,164 @@ describe('Swarm Command', () => {
       expect(output).toContain('2 agents');
       expect(output).toContain('15 completed');
     });
-
     test('should show no active swarm message', async () => {
       fs.pathExists.mockResolvedValue(false);
-
-      await swarmCommand(['status'], {});
+      await swarmCommand(['status'], { /* empty */ });
       
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('No active swarm found')
       );
     });
   });
-
   describe('swarm stop', () => {
     test('should stop active swarm', async () => {
-      const mockSwarmData = {
+      const _mockSwarmData = {
         id: 'swarm-123',
         status: 'active',
         agents: [{ id: 'agent-1' }, { id: 'agent-2' }]
       };
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockSwarmData);
       fs.writeJson.mockResolvedValue(undefined);
       fs.remove.mockResolvedValue(undefined);
-
-      await swarmCommand(['stop'], {});
+      await swarmCommand(['stop'], { /* empty */ });
       
       expect(mockSpinner.succeed).toHaveBeenCalledWith('Swarm stopped successfully');
       expect(fs.remove).toHaveBeenCalledWith(
         path.join(process.cwd(), '.claude', 'swarm', 'swarm.json')
       );
     });
-
     test('should handle stop with force flag', async () => {
       fs.pathExists.mockResolvedValue(true);
       fs.remove.mockResolvedValue(undefined);
-
       await swarmCommand(['stop'], { force: true });
       
       expect(fs.remove).toHaveBeenCalled();
       expect(mockSpinner.warn).toHaveBeenCalledWith('Swarm forcefully terminated');
     });
   });
-
   describe('swarm pause/resume', () => {
     test('should pause active swarm', async () => {
-      const mockSwarmData = {
+      const _mockSwarmData = {
         id: 'swarm-123',
         status: 'active'
       };
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockSwarmData);
       fs.writeJson.mockResolvedValue(undefined);
-
-      await swarmCommand(['pause'], {});
+      await swarmCommand(['pause'], { /* empty */ });
       
-      const writeCall = fs.writeJson.mock.calls[0];
+      const _writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].status).toBe('paused');
       expect(mockSpinner.succeed).toHaveBeenCalledWith('Swarm paused');
     });
-
     test('should resume paused swarm', async () => {
-      const mockSwarmData = {
+      const _mockSwarmData = {
         id: 'swarm-123',
         status: 'paused'
       };
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockSwarmData);
       fs.writeJson.mockResolvedValue(undefined);
-
-      await swarmCommand(['resume'], {});
+      await swarmCommand(['resume'], { /* empty */ });
       
-      const writeCall = fs.writeJson.mock.calls[0];
+      const _writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].status).toBe('active');
       expect(mockSpinner.succeed).toHaveBeenCalledWith('Swarm resumed');
     });
   });
-
   describe('swarm logs', () => {
     test('should display swarm logs', async () => {
-      const mockLogs = [
+      const _mockLogs = [
         { timestamp: new Date().toISOString(), level: 'info', message: 'Swarm initialized' },
         { timestamp: new Date().toISOString(), level: 'info', message: 'Agent spawned' },
         { timestamp: new Date().toISOString(), level: 'error', message: 'Task failed' }
       ];
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue({ logs: mockLogs });
-
-      await swarmCommand(['logs'], {});
+      await swarmCommand(['logs'], { /* empty */ });
       
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Swarm Logs');
       expect(output).toContain('Swarm initialized');
       expect(output).toContain('Agent spawned');
       expect(output).toContain('Task failed');
     });
-
     test('should filter logs by level', async () => {
-      const mockLogs = [
+      const _mockLogs = [
         { timestamp: new Date().toISOString(), level: 'info', message: 'Info message' },
         { timestamp: new Date().toISOString(), level: 'error', message: 'Error message' },
         { timestamp: new Date().toISOString(), level: 'debug', message: 'Debug message' }
       ];
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue({ logs: mockLogs });
-
       await swarmCommand(['logs'], { level: 'error' });
       
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Error message');
       expect(output).not.toContain('Info message');
       expect(output).not.toContain('Debug message');
     });
-
     test('should tail logs', async () => {
-      const mockLogs = Array.from({ length: 50 }, (_, i) => ({
+      const _mockLogs = Array.from({ length: 50 }, (_, i) => ({
         timestamp: new Date().toISOString(),
         level: 'info',
         message: `Log entry ${i + 1}`
       }));
-
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue({ logs: mockLogs });
-
       await swarmCommand(['logs'], { tail: '10' });
       
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Log entry 50');
       expect(output).toContain('Log entry 41');
       expect(output).not.toContain('Log entry 40');
     });
   });
-
   describe('error handling', () => {
     test('should handle missing objective', async () => {
-      await swarmCommand([], {});
+      await swarmCommand([], { /* empty */ });
       
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('objective is required')
       );
     });
-
     test('should handle invalid strategy', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
-
       await swarmCommand(['Task'], { strategy: 'invalid-strategy' });
       
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Invalid strategy')
       );
     });
-
     test('should handle spawn process errors', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
       
-      mockSpawnProcess.on.mockImplementation((event, callback) => {
+      mockSpawnProcess.on.mockImplementation((_event, _callback) => {
         if (event === 'error') callback(new Error('Spawn failed'));
       });
-
-      await swarmCommand(['Task'], {});
+      await swarmCommand(['Task'], { /* empty */ });
       
       expect(mockSpinner.fail).toHaveBeenCalledWith(
         expect.stringContaining('Failed to initialize swarm')
       );
     });
-
     test('should handle file system errors', async () => {
       fs.ensureDir.mockRejectedValue(new Error('Permission denied'));
-
-      await swarmCommand(['Task'], {});
+      await swarmCommand(['Task'], { /* empty */ });
       
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error:')
       );
     });
   });
-
   describe('help', () => {
     test('should show help for invalid subcommand', async () => {
-      await swarmCommand(['invalid'], {});
+      await swarmCommand(['invalid'], { /* empty */ });
       
-      const output = consoleLogSpy.mock.calls.flat().join('\n');
+      const _output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Swarm Orchestration');
       expect(output).toContain('USAGE:');
     });

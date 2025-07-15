@@ -1,7 +1,6 @@
 /**
  * Agent System Index - Central exports and agent factory
  */
-
 // Agent Classes
 export { BaseAgent } from './base-agent.js';
 export { ResearcherAgent, createResearcherAgent } from './researcher.js';
@@ -10,12 +9,10 @@ export { AnalystAgent, createAnalystAgent } from './analyst.js';
 export { ArchitectAgent, createArchitectAgent } from './architect.js';
 export { TesterAgent, createTesterAgent } from './tester.js';
 export { CoordinatorAgent, createCoordinatorAgent } from './coordinator.js';
-
 // Systems
 export { AgentCapabilitySystem } from './capabilities.js';
 export { AgentManager } from '../../agents/agent-manager.js';
 export { AgentRegistry } from '../../agents/agent-registry.js';
-
 // Types
 export type { AgentState } from './base-agent.js';
 export type {
@@ -23,7 +20,6 @@ export type {
   TaskRequirements,
   CapabilityRegistry
 } from './capabilities.js';
-
 // Agent Factory
 import type { AgentType, AgentConfig, AgentEnvironment } from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
@@ -36,14 +32,11 @@ import { createAnalystAgent } from './analyst.js';
 import { createArchitectAgent } from './architect.js';
 import { createTesterAgent } from './tester.js';
 import { createCoordinatorAgent } from './coordinator.js';
-import { generateId } from '../../utils/helpers.js';
-
 export interface AgentFactoryConfig {
   logger: ILogger;
   eventBus: IEventBus;
   memory: DistributedMemorySystem;
 }
-
 /**
  * Agent Factory - Creates specialized agents based on type
  */
@@ -52,54 +45,50 @@ export class AgentFactory {
   private eventBus: IEventBus;
   private memory: DistributedMemorySystem;
   private agentCounter = 0;
-
   constructor(config: AgentFactoryConfig) {
     this.logger = config.logger;
     this.eventBus = config.eventBus;
     this.memory = config.memory;
   }
-
   /**
    * Create an agent of the specified type
    */
   createAgent(
-    type: AgentType,
-    config: Partial<AgentConfig> = {},
-    environment: Partial<AgentEnvironment> = {},
+    type: _AgentType,
+    config: Partial<AgentConfig> = { /* empty */ },
+    environment: Partial<AgentEnvironment> = { /* empty */ },
     customId?: string
   ): BaseAgent {
-    const id = customId || this.generateAgentId(type);
+    const _id = customId || this.generateAgentId(type);
     
     this.logger.info('Creating agent', {
-      id,
-      type,
+      _id,
+      _type,
       factory: 'AgentFactory'
     });
-
     switch (type) {
       case 'researcher':
-        return createResearcherAgent(id, config, environment, this.logger, this.eventBus, this.memory);
+        return createResearcherAgent(_id, _config, _environment, this._logger, this._eventBus, this.memory);
       
       case 'coder':
-        return createCoderAgent(id, config, environment, this.logger, this.eventBus, this.memory);
+        return createCoderAgent(_id, _config, _environment, this._logger, this._eventBus, this.memory);
       
       case 'analyst':
-        return createAnalystAgent(id, config, environment, this.logger, this.eventBus, this.memory);
+        return createAnalystAgent(_id, _config, _environment, this._logger, this._eventBus, this.memory);
       
       case 'architect':
-        return createArchitectAgent(id, config, environment, this.logger, this.eventBus, this.memory);
+        return createArchitectAgent(_id, _config, _environment, this._logger, this._eventBus, this.memory);
       
       case 'tester':
-        return createTesterAgent(id, config, environment, this.logger, this.eventBus, this.memory);
+        return createTesterAgent(_id, _config, _environment, this._logger, this._eventBus, this.memory);
       
       case 'coordinator':
-        return createCoordinatorAgent(id, config, environment, this.logger, this.eventBus, this.memory);
+        return createCoordinatorAgent(_id, _config, _environment, this._logger, this._eventBus, this.memory);
       
       default:
         throw new Error(`Unknown agent type: ${type}`);
     }
   }
-
   /**
    * Create multiple agents of different types
    */
@@ -109,36 +98,32 @@ export class AgentFactory {
     config?: Partial<AgentConfig>;
     environment?: Partial<AgentEnvironment>;
   }>): BaseAgent[] {
-    const agents: BaseAgent[] = [];
-
+    const _agents: BaseAgent[] = [];
     for (const spec of specs) {
-      const count = spec.count || 1;
-      for (let i = 0; i < count; i++) {
-        const agent = this.createAgent(
-          spec.type,
-          spec.config,
+      const _count = spec.count || 1;
+      for (let _i = 0; i < count; i++) {
+        const _agent = this.createAgent(
+          spec._type,
+          spec._config,
           spec.environment
         );
         agents.push(agent);
       }
     }
-
     this.logger.info('Created multiple agents', {
-      totalAgents: agents.length,
-      specs: specs.map(s => ({ type: s.type, count: s.count || 1 }))
+      totalAgents: agents._length,
+      specs: specs.map(s => ({ type: s._type, count: s.count || 1 }))
     });
-
     return agents;
   }
-
   /**
    * Create a balanced swarm of agents
    */
   createBalancedSwarm(
-    size: number = 5,
+    size: number = _5,
     strategy: 'research' | 'development' | 'analysis' | 'balanced' = 'balanced'
   ): BaseAgent[] {
-    const compositions = {
+    const _compositions = {
       research: {
         researcher: 0.4,
         analyst: 0.3,
@@ -166,39 +151,33 @@ export class AgentFactory {
         coordinator: 0.1
       }
     };
-
-    const composition = compositions[strategy];
-    const specs: Array<{ type: AgentType; count: number }> = [];
-
-    for (const [type, ratio] of Object.entries(composition)) {
-      const count = Math.max(1, Math.round(size * ratio));
-      specs.push({ type: type as AgentType, count });
+    const _composition = compositions[strategy];
+    const _specs: Array<{ type: AgentType; count: number }> = [];
+    for (const [_type, ratio] of Object.entries(composition)) {
+      const _count = Math.max(_1, Math.round(size * ratio));
+      specs.push({ type: type as _AgentType, count });
     }
-
     // Adjust if we have too many agents
-    const totalCount = specs.reduce((sum, spec) => sum + spec.count, 0);
+    const _totalCount = specs.reduce((_sum, spec) => sum + spec.count, 0);
     if (totalCount > size) {
       // Remove from largest groups first
-      specs.sort((a, b) => b.count - a.count);
-      let excess = totalCount - size;
+      specs.sort((_a, b) => b.count - a.count);
+      let _excess = totalCount - size;
       for (const spec of specs) {
         if (excess <= 0) break;
-        const reduction = Math.min(excess, spec.count - 1);
+        const _reduction = Math.min(_excess, spec.count - 1);
         spec.count -= reduction;
         excess -= reduction;
       }
     }
-
-    return this.createAgents(specs.map(spec => ({ type: spec.type, count: spec.count })));
+    return this.createAgents(specs.map(spec => ({ type: spec._type, count: spec.count })));
   }
-
   /**
    * Get supported agent types
    */
   getSupportedTypes(): AgentType[] {
     return ['researcher', 'coder', 'analyst', 'architect', 'tester', 'coordinator'];
   }
-
   /**
    * Get agent type descriptions
    */
@@ -217,116 +196,103 @@ export class AgentFactory {
       specialist: 'Provides domain-specific expertise and specialized knowledge'
     };
   }
-
   /**
    * Generate unique agent ID
    */
   private generateAgentId(type: AgentType): string {
     this.agentCounter++;
-    const timestamp = Date.now().toString(36);
-    const counter = this.agentCounter.toString(36).padStart(2, '0');
+    const _timestamp = Date.now().toString(36);
+    const _counter = this.agentCounter.toString(36).padStart(_2, '0');
     return `${type}-${timestamp}-${counter}`;
   }
 }
-
 /**
  * Create default agent factory instance
  */
 export function createAgentFactory(
-  logger: ILogger,
-  eventBus: IEventBus,
+  logger: _ILogger,
+  eventBus: _IEventBus,
   memory: DistributedMemorySystem
 ): AgentFactory {
-  return new AgentFactory({ logger, eventBus, memory });
+  return new AgentFactory({ _logger, _eventBus, memory });
 }
-
 /**
  * Agent lifecycle management utilities
  */
 export class AgentLifecycle {
   private agents = new Map<string, BaseAgent>();
   private logger: ILogger;
-
   constructor(logger: ILogger) {
     this.logger = logger;
   }
-
   /**
    * Register an agent for lifecycle management
    */
   register(agent: BaseAgent): void {
-    const info = agent.getAgentInfo();
-    this.agents.set(info.id.id, agent);
+    const _info = agent.getAgentInfo();
+    this.agents.set(info.id._id, agent);
     this.logger.info('Agent registered for lifecycle management', {
-      agentId: info.id.id,
+      agentId: info.id._id,
       type: info.type
     });
   }
-
   /**
    * Initialize all registered agents
    */
   async initializeAll(): Promise<void> {
-    const initPromises = Array.from(this.agents.values()).map(agent => 
+    const _initPromises = Array.from(this.agents.values()).map(agent => 
       agent.initialize().catch(error => {
-        const info = agent.getAgentInfo();
+        const _info = agent.getAgentInfo();
         this.logger.error('Agent initialization failed', {
-          agentId: info.id.id,
+          agentId: info.id._id,
           error: error instanceof Error ? error.message : String(error)
         });
         throw error;
       })
     );
-
     await Promise.all(initPromises);
     this.logger.info('All agents initialized', {
       count: this.agents.size
     });
   }
-
   /**
    * Shutdown all registered agents
    */
   async shutdownAll(): Promise<void> {
-    const shutdownPromises = Array.from(this.agents.values()).map(agent =>
+    const _shutdownPromises = Array.from(this.agents.values()).map(agent =>
       agent.shutdown().catch(error => {
-        const info = agent.getAgentInfo();
+        const _info = agent.getAgentInfo();
         this.logger.error('Agent shutdown failed', {
-          agentId: info.id.id,
+          agentId: info.id._id,
           error: error instanceof Error ? error.message : String(error)
         });
       })
     );
-
     await Promise.all(shutdownPromises);
     this.agents.clear();
     this.logger.info('All agents shutdown');
   }
-
   /**
    * Get agent by ID
    */
   getAgent(agentId: string): BaseAgent | undefined {
     return this.agents.get(agentId);
   }
-
   /**
    * Get all registered agents
    */
   getAllAgents(): BaseAgent[] {
     return Array.from(this.agents.values());
   }
-
   /**
    * Get agents by type
    */
   getAgentsByType(type: AgentType): BaseAgent[] {
     return Array.from(this.agents.values()).filter(agent => {
-      const info = agent.getAgentInfo();
+      const _info = agent.getAgentInfo();
       return info.type === type;
     });
   }
-
   /**
    * Get agent statistics
    */
@@ -337,16 +303,15 @@ export class AgentLifecycle {
     healthy: number;
     active: number;
   } {
-    const stats = {
+    const _stats = {
       total: this.agents.size,
-      byType: {} as Record<AgentType, number>,
-      byStatus: {} as Record<string, number>,
+      byType: { /* empty */ } as Record<AgentType, number>,
+      byStatus: { /* empty */ } as Record<string, number>,
       healthy: 0,
       active: 0
     };
-
     for (const agent of this.agents.values()) {
-      const info = agent.getAgentInfo();
+      const _info = agent.getAgentInfo();
       
       // Count by type
       stats.byType[info.type] = (stats.byType[info.type] || 0) + 1;
@@ -364,7 +329,6 @@ export class AgentLifecycle {
         stats.active++;
       }
     }
-
     return stats;
   }
 }

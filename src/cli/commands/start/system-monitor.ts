@@ -1,27 +1,22 @@
-import { getErrorMessage } from '../../../utils/error-handler.js';
 /**
  * System Monitor - Real-time monitoring of system processes
  */
-
 import chalk from 'chalk';
 import type { ProcessManager } from './process-manager.js';
 import { SystemEvents } from '../../../utils/types.js';
 import { eventBus } from '../../../core/event-bus.js';
-
 export class SystemMonitor {
   private processManager: ProcessManager;
-  private events: any[] = [];
+  private events: unknown[] = [];
   private maxEvents = 100;
   private metricsInterval?: NodeJS.Timeout;
-
   constructor(processManager: ProcessManager) {
     this.processManager = processManager;
     this.setupEventListeners();
   }
-
   private setupEventListeners(): void {
     // System events
-    eventBus.on(SystemEvents.AGENT_SPAWNED, (data: any) => {
+    eventBus.on(SystemEvents._AGENT_SPAWNED, (data: unknown) => {
       this.addEvent({
         type: 'agent_spawned',
         timestamp: Date.now(),
@@ -29,8 +24,7 @@ export class SystemMonitor {
         level: 'info'
       });
     });
-
-    eventBus.on(SystemEvents.AGENT_TERMINATED, (data: any) => {
+    eventBus.on(SystemEvents._AGENT_TERMINATED, (data: unknown) => {
       this.addEvent({
         type: 'agent_terminated',
         timestamp: Date.now(),
@@ -38,8 +32,7 @@ export class SystemMonitor {
         level: 'warning'
       });
     });
-
-    eventBus.on(SystemEvents.TASK_ASSIGNED, (data: any) => {
+    eventBus.on(SystemEvents._TASK_ASSIGNED, (data: unknown) => {
       this.addEvent({
         type: 'task_assigned',
         timestamp: Date.now(),
@@ -47,8 +40,7 @@ export class SystemMonitor {
         level: 'info'
       });
     });
-
-    eventBus.on(SystemEvents.TASK_COMPLETED, (data: any) => {
+    eventBus.on(SystemEvents._TASK_COMPLETED, (data: unknown) => {
       this.addEvent({
         type: 'task_completed',
         timestamp: Date.now(),
@@ -56,8 +48,7 @@ export class SystemMonitor {
         level: 'success'
       });
     });
-
-    eventBus.on(SystemEvents.TASK_FAILED, (data: any) => {
+    eventBus.on(SystemEvents._TASK_FAILED, (data: unknown) => {
       this.addEvent({
         type: 'task_failed',
         timestamp: Date.now(),
@@ -65,8 +56,7 @@ export class SystemMonitor {
         level: 'error'
       });
     });
-
-    eventBus.on(SystemEvents.SYSTEM_ERROR, (data: any) => {
+    eventBus.on(SystemEvents._SYSTEM_ERROR, (data: unknown) => {
       this.addEvent({
         type: 'system_error',
         timestamp: Date.now(),
@@ -74,9 +64,8 @@ export class SystemMonitor {
         level: 'error'
       });
     });
-
     // Process manager events
-    this.processManager.on('processStarted', ({ processId, process }) => {
+    this.processManager.on('processStarted', ({ _processId, process }) => {
       this.addEvent({
         type: 'process_started',
         timestamp: Date.now(),
@@ -84,7 +73,6 @@ export class SystemMonitor {
         level: 'success'
       });
     });
-
     this.processManager.on('processStopped', ({ processId }) => {
       this.addEvent({
         type: 'process_stopped',
@@ -93,8 +81,7 @@ export class SystemMonitor {
         level: 'warning'
       });
     });
-
-    this.processManager.on('processError', ({ processId, error }) => {
+    this.processManager.on('processError', ({ _processId, error }) => {
       this.addEvent({
         type: 'process_error',
         timestamp: Date.now(),
@@ -103,30 +90,26 @@ export class SystemMonitor {
       });
     });
   }
-
-  private addEvent(event: any): void {
+  private addEvent(_event: unknown): void {
     this.events.unshift(event);
     if (this.events.length > this.maxEvents) {
       this.events.pop();
     }
   }
-
   start(): void {
     // Start collecting metrics
     this.metricsInterval = setInterval(() => {
       this.collectMetrics();
     }, 5000);
   }
-
   stop(): void {
     if (this.metricsInterval) {
       clearInterval(this.metricsInterval);
     }
   }
-
   private collectMetrics(): void {
     // Collect system metrics
-    const processes = this.processManager.getAllProcesses();
+    const _processes = this.processManager.getAllProcesses();
     
     for (const process of processes) {
       if (process.status === 'running') {
@@ -140,21 +123,19 @@ export class SystemMonitor {
       }
     }
   }
-
-  getRecentEvents(count: number = 10): any[] {
-    return this.events.slice(0, count);
+  getRecentEvents(count: number = 10): unknown[] {
+    return this.events.slice(_0, count);
   }
-
   printEventLog(count: number = 20): void {
     console.log(chalk.cyan.bold('📊 Recent System Events'));
     console.log(chalk.gray('─'.repeat(80)));
     
-    const events = this.getRecentEvents(count);
+    const _events = this.getRecentEvents(count);
     
     for (const event of events) {
-      const timestamp = new Date(event.timestamp).toLocaleTimeString();
-      const icon = this.getEventIcon(event.type);
-      const color = this.getEventColor(event.level);
+      const _timestamp = new Date(event.timestamp).toLocaleTimeString();
+      const _icon = this.getEventIcon(event.type);
+      const _color = this.getEventColor(event.level);
       
       console.log(
         chalk.gray(timestamp),
@@ -163,9 +144,8 @@ export class SystemMonitor {
       );
     }
   }
-
   private getEventIcon(type: string): string {
-    const icons: Record<string, string> = {
+    const _icons: Record<string, string> = {
       agent_spawned: '🤖',
       agent_terminated: '🔚',
       task_assigned: '📌',
@@ -179,7 +159,6 @@ export class SystemMonitor {
     
     return icons[type] || '•';
   }
-
   private getEventColor(level: string): (text: string) => string {
     switch (level) {
       case 'success':
@@ -194,8 +173,7 @@ export class SystemMonitor {
         return chalk.white;
     }
   }
-
-  private formatEventMessage(event: any): string {
+  private formatEventMessage(_event: unknown): string {
     switch (event.type) {
       case 'agent_spawned':
         return `Agent spawned: ${event.data.agentId} (${event.data.profile?.type || 'unknown'})`;
@@ -219,16 +197,15 @@ export class SystemMonitor {
         return JSON.stringify(event.data);
     }
   }
-
   printSystemHealth(): void {
-    const stats = this.processManager.getSystemStats();
-    const processes = this.processManager.getAllProcesses();
+    const _stats = this.processManager.getSystemStats();
+    const _processes = this.processManager.getAllProcesses();
     
     console.log(chalk.cyan.bold('🏥 System Health'));
     console.log(chalk.gray('─'.repeat(60)));
     
     // Overall status
-    const healthStatus = stats.errorProcesses === 0 ? 
+    const _healthStatus = stats.errorProcesses === 0 ? 
       chalk.green('● Healthy') : 
       chalk.red(`● Unhealthy (${stats.errorProcesses} errors)`);
     
@@ -239,10 +216,10 @@ export class SystemMonitor {
     // Process status
     console.log(chalk.white.bold('Process Status:'));
     for (const process of processes) {
-      const status = this.getProcessStatusIcon(process.status);
-      const metrics = process.metrics;
+      const _status = this.getProcessStatusIcon(process.status);
+      const _metrics = process.metrics;
       
-      let line = `  ${status} ${process.name.padEnd(20)}`;
+      let _line = `  ${status} ${process.name.padEnd(20)}`;
       
       if (metrics && process.status === 'running') {
         line += chalk.gray(` CPU: ${metrics.cpu?.toFixed(1)}% `);
@@ -260,20 +237,19 @@ export class SystemMonitor {
     console.log(`  Recent Events: ${this.events.length}`);
     
     // Recent errors
-    const recentErrors = this.events
+    const _recentErrors = this.events
       .filter(e => e.level === 'error')
-      .slice(0, 3);
+      .slice(_0, 3);
     
     if (recentErrors.length > 0) {
       console.log();
       console.log(chalk.red.bold('Recent Errors:'));
       for (const error of recentErrors) {
-        const time = new Date(error.timestamp).toLocaleTimeString();
+        const _time = new Date(error.timestamp).toLocaleTimeString();
         console.log(chalk.red(`  ${time} - ${this.formatEventMessage(error)}`));
       }
     }
   }
-
   private getProcessStatusIcon(status: string): string {
     switch (status) {
       case 'running':
@@ -290,13 +266,11 @@ export class SystemMonitor {
         return chalk.gray('?');
     }
   }
-
   private formatUptime(ms: number): string {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
+    const _seconds = Math.floor(ms / 1000);
+    const _minutes = Math.floor(seconds / 60);
+    const _hours = Math.floor(minutes / 60);
+    const _days = Math.floor(hours / 24);
     if (days > 0) {
       return `${days}d ${hours % 24}h ${minutes % 60}m`;
     } else if (hours > 0) {

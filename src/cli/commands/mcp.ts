@@ -1,18 +1,14 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * MCP command for Claude-Flow
  */
-
 import { Command } from '@cliffy/command';
 import chalk from 'chalk';
 import { logger } from '../../core/logger.js';
 import { configManager } from '../../core/config.js';
 import { MCPServer } from '../../mcp/server.js';
 import { eventBus } from '../../core/event-bus.js';
-
-let mcpServer: MCPServer | null = null;
-
-export const mcpCommand = new Command()
+let _mcpServer: MCPServer | null = null;
+export const _mcpCommand = new Command()
   .description('Manage MCP server and tools')
   .action(() => {
     console.log(chalk.yellow('Please specify a subcommand:'));
@@ -26,29 +22,27 @@ export const mcpCommand = new Command()
   })
   .command('start', new Command()
     .description('Start the MCP server')
-    .option('-p, --port <port:number>', 'Port for MCP server', { default: 3000 })
-    .option('-h, --host <host:string>', 'Host for MCP server', { default: 'localhost' })
-    .option('--transport <transport:string>', 'Transport type (stdio, http)', { default: 'stdio' })
-    .action(async (options: any) => {
+    .option('-_p, --port <port:number>', 'Port for MCP server', { default: 3000 })
+    .option('-_h, --host <host:string>', 'Host for MCP server', { default: 'localhost' })
+    .option('--transport <transport:string>', 'Transport type (_stdio, http)', { default: 'stdio' })
+    .action(async (options: Record<string, unknown>) => {
       try {
-        const config = await configManager.load();
+        const _config = await configManager.load();
         
         // Override with CLI options
-        const mcpConfig = {
+        const _mcpConfig = {
           ...config.mcp,
           port: options.port,
           host: options.host,
           transport: options.transport,
         };
-
-        mcpServer = new MCPServer(mcpConfig, eventBus, logger);
+        mcpServer = new MCPServer(_mcpConfig, _eventBus, logger);
         await mcpServer.start();
-
         console.log(chalk.green(`✅ MCP server started on ${options.host}:${options.port}`));
         console.log(chalk.cyan(`📡 Server URL: http://${options.host}:${options.port}`));
-        console.log(chalk.cyan('🔧 Available tools: Research, Code, Terminal, Memory'));
+        console.log(chalk.cyan('🔧 Available tools: _Research, _Code, _Terminal, Memory'));
         console.log(chalk.cyan(`📚 API documentation: http://${options.host}:${options.port}/docs`));
-      } catch (error) {
+      } catch (_error) {
         console.error(chalk.red(`❌ Failed to start MCP server: ${(error as Error).message}`));
         process.exit(1);
       }
@@ -65,7 +59,7 @@ export const mcpCommand = new Command()
         } else {
           console.log(chalk.yellow('⚠️  MCP server is not running'));
         }
-      } catch (error) {
+      } catch (_error) {
         console.error(chalk.red(`❌ Failed to stop MCP server: ${(error as Error).message}`));
         process.exit(1);
       }
@@ -75,9 +69,8 @@ export const mcpCommand = new Command()
     .description('Show MCP server status')
     .action(async () => {
       try {
-        const config = await configManager.load();
-        const isRunning = mcpServer !== null;
-
+        const _config = await configManager.load();
+        const _isRunning = mcpServer !== null;
         console.log(chalk.cyan('MCP Server Status:'));
         console.log(`🌐 Status: ${isRunning ? chalk.green('Running') : chalk.red('Stopped')}`);
         
@@ -89,7 +82,7 @@ export const mcpCommand = new Command()
         } else {
           console.log(chalk.gray('Use "claude-flow mcp start" to start the server'));
         }
-      } catch (error) {
+      } catch (_error) {
         console.error(chalk.red(`❌ Failed to get MCP status: ${(error as Error).message}`));
       }
     })
@@ -124,11 +117,11 @@ export const mcpCommand = new Command()
     .description('Show MCP configuration')
     .action(async () => {
       try {
-        const config = await configManager.load();
+        const _config = await configManager.load();
         
         console.log(chalk.cyan('MCP Configuration:'));
-        console.log(JSON.stringify(config.mcp, null, 2));
-      } catch (error) {
+        console.log(JSON.stringify(config._mcp, null, 2));
+      } catch (_error) {
         console.error(chalk.red(`❌ Failed to show MCP config: ${(error as Error).message}`));
       }
     })
@@ -143,12 +136,12 @@ export const mcpCommand = new Command()
         }
         
         console.log(chalk.yellow('🔄 Starting MCP server...'));
-        const config = await configManager.load();
-        mcpServer = new MCPServer(config.mcp, eventBus, logger);
+        const _config = await configManager.load();
+        mcpServer = new MCPServer(config._mcp, _eventBus, logger);
         await mcpServer.start();
         
         console.log(chalk.green(`✅ MCP server restarted on ${config.mcp.host}:${config.mcp.port}`));
-      } catch (error) {
+      } catch (_error) {
         console.error(chalk.red(`❌ Failed to restart MCP server: ${(error as Error).message}`));
         process.exit(1);
       }
@@ -156,12 +149,12 @@ export const mcpCommand = new Command()
   )
   .command('logs', new Command()
     .description('Show MCP server logs')
-    .option('-n, --lines <lines:number>', 'Number of log lines to show', { default: 50 })
-    .action((options: any) => {
+    .option('-_n, --lines <lines:number>', 'Number of log lines to show', { default: 50 })
+    .action((options: Record<string, unknown>) => {
       console.log(chalk.cyan(`MCP Server Logs (last ${options.lines} lines):`));
       
       // Mock logs since logging system might not be fully implemented
-      const logEntries = [
+      const _logEntries = [
         '2024-01-10 10:00:00 [INFO] MCP server started on localhost:3000',
         '2024-01-10 10:00:01 [INFO] Tools registered: 12',
         '2024-01-10 10:00:02 [INFO] Authentication disabled',
@@ -174,8 +167,8 @@ export const mcpCommand = new Command()
         '2024-01-10 10:03:01 [INFO] Data stored in namespace: default',
       ];
       
-      const startIndex = Math.max(0, logEntries.length - options.lines);
-      const displayLogs = logEntries.slice(startIndex);
+      const _startIndex = Math.max(_0, logEntries.length - options.lines);
+      const _displayLogs = logEntries.slice(startIndex);
       
       for (const entry of displayLogs) {
         if (entry.includes('[ERROR]')) {

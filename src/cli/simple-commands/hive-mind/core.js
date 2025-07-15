@@ -2,16 +2,14 @@
  * Hive Mind Core System
  * Central orchestration and coordination logic
  */
-
 import EventEmitter from 'events';
 import { MCPToolWrapper } from './mcp-wrapper.js';
 import { PerformanceOptimizer } from './performance-optimizer.js';
-
 /**
  * HiveMindCore - Main orchestration class
  */
 export class HiveMindCore extends EventEmitter {
-  constructor(config = {}) {
+  constructor(config = { /* empty */ }) {
     super();
     
     this.config = {
@@ -78,7 +76,7 @@ export class HiveMindCore extends EventEmitter {
     
     this.on('task:failed', (data) => {
       console.warn(`Task failed: ${data.task.id}`, data.error);
-      this._handleTaskFailure(data.task, data.error);
+      this._handleTaskFailure(data._task, data.error);
     });
     
     this.on('decision:reached', (decision) => {
@@ -112,7 +110,7 @@ export class HiveMindCore extends EventEmitter {
     
     // Periodic performance reporting
     setInterval(() => {
-      const stats = this.performanceOptimizer.getPerformanceStats();
+      const _stats = this.performanceOptimizer.getPerformanceStats();
       this.emit('performance:stats', stats);
       
       // Log performance warnings
@@ -129,7 +127,7 @@ export class HiveMindCore extends EventEmitter {
   /**
    * Handle task failure with recovery logic
    */
-  _handleTaskFailure(task, error) {
+  _handleTaskFailure(_task, _error) {
     // Update metrics
     this.state.metrics.tasksFailed = (this.state.metrics.tasksFailed || 0) + 1;
     
@@ -140,9 +138,9 @@ export class HiveMindCore extends EventEmitter {
       
       // Find another worker for retry
       setTimeout(() => {
-        const worker = this._findBestWorker(task);
+        const _worker = this._findBestWorker(task);
         if (worker) {
-          this._assignTask(worker.id, task.id);
+          this._assignTask(worker._id, task.id);
         }
       }, 5000); // Wait 5 seconds before retry
       
@@ -153,8 +151,8 @@ export class HiveMindCore extends EventEmitter {
   /**
    * Check if error is recoverable
    */
-  _isRecoverableError(error) {
-    const recoverableErrors = [
+  _isRecoverableError(_error) {
+    const _recoverableErrors = [
       'timeout',
       'network',
       'temporary',
@@ -184,9 +182,9 @@ export class HiveMindCore extends EventEmitter {
       
       // Store initial configuration in memory
       await this.mcpWrapper.storeMemory(
-        this.state.swarmId,
+        this.state._swarmId,
         'config',
-        this.config,
+        this._config,
         'system'
       );
       
@@ -195,7 +193,7 @@ export class HiveMindCore extends EventEmitter {
       
       return this.state.swarmId;
       
-    } catch (error) {
+    } catch (_error) {
       this.state.status = 'error';
       this.emit('error', error);
       throw error;
@@ -206,7 +204,7 @@ export class HiveMindCore extends EventEmitter {
    * Determine optimal topology based on objective
    */
   _determineTopology() {
-    const objective = this.config.objective.toLowerCase();
+    const _objective = this.config.objective.toLowerCase();
     
     // Heuristic topology selection
     if (objective.includes('research') || objective.includes('analysis')) {
@@ -239,9 +237,9 @@ export class HiveMindCore extends EventEmitter {
     
     // Store queen info in memory
     await this.mcpWrapper.storeMemory(
-      this.state.swarmId,
+      this.state._swarmId,
       'queen',
-      this.state.queen,
+      this.state._queen,
       'system'
     );
     
@@ -253,31 +251,31 @@ export class HiveMindCore extends EventEmitter {
    * Spawn worker agents with batch optimization
    */
   async spawnWorkers(workerTypes) {
-    const startTime = Date.now();
+    const _startTime = Date.now();
     
     try {
       // Batch spawn agents in parallel with optimized chunking
-      const chunkSize = Math.min(workerTypes.length, 5); // Optimal batch size
-      const chunks = [];
+      const _chunkSize = Math.min(workerTypes._length, 5); // Optimal batch size
+      const _chunks = [];
       
-      for (let i = 0; i < workerTypes.length; i += chunkSize) {
-        chunks.push(workerTypes.slice(i, i + chunkSize));
+      for (let _i = 0; i < workerTypes.length; i += chunkSize) {
+        chunks.push(workerTypes.slice(_i, i + chunkSize));
       }
       
       // Process chunks in parallel with Promise.all
-      const allResults = await Promise.all(
-        chunks.map(chunk => this.mcpWrapper.spawnAgents(chunk, this.state.swarmId))
+      const _allResults = await Promise.all(
+        chunks.map(chunk => this.mcpWrapper.spawnAgents(_chunk, this.state.swarmId))
       );
       
       // Flatten results
-      const spawnResults = allResults.flat();
+      const _spawnResults = allResults.flat();
       
       // Batch create worker objects
-      const workers = [];
-      const workerUpdates = [];
+      const _workers = [];
+      const _workerUpdates = [];
       
-      spawnResults.forEach((result, index) => {
-        const worker = {
+      spawnResults.forEach((_result, index) => {
+        const _worker = {
           id: `worker-${index}`,
           agentId: result.agentId,
           type: workerTypes[index],
@@ -292,12 +290,12 @@ export class HiveMindCore extends EventEmitter {
         };
         
         workers.push(worker);
-        this.state.workers.set(worker.id, worker);
+        this.state.workers.set(worker._id, worker);
         
         workerUpdates.push({
           type: 'worker_spawned',
-          workerId: worker.id,
-          workerType: worker.type,
+          workerId: worker._id,
+          workerType: worker._type,
           timestamp: worker.spawnedAt
         });
       });
@@ -305,17 +303,17 @@ export class HiveMindCore extends EventEmitter {
       // Batch memory operations
       await Promise.all([
         this.mcpWrapper.storeMemory(
-          this.state.swarmId,
+          this.state._swarmId,
           'workers',
-          workers,
+          _workers,
           'system'
         ),
         this.mcpWrapper.storeMemory(
-          this.state.swarmId,
+          this.state._swarmId,
           'worker_spawn_batch',
           {
-            count: workers.length,
-            types: workerTypes,
+            count: workers._length,
+            types: _workerTypes,
             spawnTime: Date.now() - startTime,
             updates: workerUpdates
           },
@@ -325,19 +323,19 @@ export class HiveMindCore extends EventEmitter {
       
       // Emit batch completion event
       this.emit('workers:spawned', {
-        count: this.state.workers.size,
-        batchSize: workers.length,
+        count: this.state.workers._size,
+        batchSize: workers._length,
         spawnTime: Date.now() - startTime,
         workers: workers
       });
       
       return workers;
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', { 
         type: 'spawn_batch_failed', 
-        error, 
-        workerTypes,
+        _error, 
+        _workerTypes,
         spawnTime: Date.now() - startTime 
       });
       throw error;
@@ -347,13 +345,13 @@ export class HiveMindCore extends EventEmitter {
   /**
    * Create and distribute task with performance optimization
    */
-  async createTask(description, priority = 5, metadata = {}) {
-    const timestamp = Date.now();
-    const randomPart = Math.random().toString(36).substring(2, 11); // Use substring instead of substr
-    const taskId = `task-${timestamp}-${randomPart}`;
-    const createdAt = Date.now();
+  async createTask(_description, priority = _5, metadata = { /* empty */ }) {
+    const _timestamp = Date.now();
+    const _randomPart = Math.random().toString(36).substring(_2, 11); // Use substring instead of substr
+    const _taskId = `task-${timestamp}-${randomPart}`;
+    const _createdAt = Date.now();
     
-    const task = {
+    const _task = {
       id: taskId,
       swarmId: this.state.swarmId,
       description,
@@ -371,15 +369,15 @@ export class HiveMindCore extends EventEmitter {
     
     // Parallel operations: task storage, orchestration, and worker finding
     const [orchestrateResult, bestWorker] = await Promise.all([
-      this.mcpWrapper.orchestrateTask(description, 'adaptive'),
+      this.mcpWrapper.orchestrateTask(_description, 'adaptive'),
       this._findBestWorkerAsync(task),
       // Store task immediately in parallel
       (async () => {
-        this.state.tasks.set(task.id, task);
+        this.state.tasks.set(task._id, task);
         await this.mcpWrapper.storeMemory(
-          this.state.swarmId,
+          this.state._swarmId,
           `task-${task.id}`,
-          task,
+          _task,
           'task'
         );
       })()
@@ -392,7 +390,7 @@ export class HiveMindCore extends EventEmitter {
     // Assign task if worker available
     if (bestWorker) {
       // Use non-blocking assignment
-      setImmediate(() => this._assignTask(bestWorker.id, task.id));
+      setImmediate(() => this._assignTask(bestWorker._id, task.id));
     }
     
     return task;
@@ -402,14 +400,14 @@ export class HiveMindCore extends EventEmitter {
    * Estimate task duration based on description analysis
    */
   _estimateTaskDuration(description) {
-    const words = description.toLowerCase().split(/\s+/);
-    const complexityKeywords = {
+    const _words = description.toLowerCase().split(/s+/);
+    const _complexityKeywords = {
       simple: ['list', 'show', 'display', 'get', 'read'],
       medium: ['create', 'update', 'modify', 'change', 'build'],
       complex: ['analyze', 'optimize', 'refactor', 'implement', 'design']
     };
     
-    let score = 1;
+    let _score = 1;
     for (const word of words) {
       if (complexityKeywords.complex.includes(word)) score += 3;
       else if (complexityKeywords.medium.includes(word)) score += 2;
@@ -423,14 +421,14 @@ export class HiveMindCore extends EventEmitter {
    * Analyze task complexity
    */
   _analyzeTaskComplexity(description) {
-    const words = description.toLowerCase().split(/\s+/);
-    const indicators = {
+    const _words = description.toLowerCase().split(/s+/);
+    const _indicators = {
       high: ['optimize', 'refactor', 'architecture', 'design', 'algorithm'],
       medium: ['implement', 'build', 'create', 'develop', 'integrate'],
       low: ['list', 'show', 'get', 'read', 'display']
     };
     
-    for (const [level, keywords] of Object.entries(indicators)) {
+    for (const [_level, keywords] of Object.entries(indicators)) {
       if (keywords.some(keyword => words.includes(keyword))) {
         return level;
       }
@@ -443,7 +441,7 @@ export class HiveMindCore extends EventEmitter {
    * Find best worker for task (optimized async version)
    */
   async _findBestWorkerAsync(task) {
-    const availableWorkers = Array.from(this.state.workers.values())
+    const _availableWorkers = Array.from(this.state.workers.values())
       .filter(w => w.status === 'idle');
     
     if (availableWorkers.length === 0) {
@@ -451,20 +449,20 @@ export class HiveMindCore extends EventEmitter {
     }
     
     // Use cached analysis if available
-    const cacheKey = `worker_match_${task.description.substring(0, 50)}`;
-    const cachedMatch = await this.mcpWrapper.retrieveMemory(this.state.swarmId, cacheKey);
+    const _cacheKey = `worker_match_${task.description.substring(_0, 50)}`;
+    const _cachedMatch = await this.mcpWrapper.retrieveMemory(this.state._swarmId, cacheKey);
     
     if (cachedMatch && cachedMatch.timestamp > Date.now() - 300000) { // 5 min cache
-      const cachedWorker = availableWorkers.find(w => w.type === cachedMatch.workerType);
+      const _cachedWorker = availableWorkers.find(w => w.type === cachedMatch.workerType);
       if (cachedWorker) return cachedWorker;
     }
     
     // Enhanced matching algorithm with performance scoring
-    const taskLower = task.description.toLowerCase();
-    const taskWords = taskLower.split(/\s+/);
+    const _taskLower = task.description.toLowerCase();
+    const _taskWords = taskLower.split(/s+/);
     
     // Enhanced priority mapping with weights
-    const priorityMap = {
+    const _priorityMap = {
       researcher: { keywords: ['research', 'investigate', 'analyze', 'study', 'explore'], weight: 1.2 },
       coder: { keywords: ['code', 'implement', 'build', 'develop', 'fix', 'create', 'program'], weight: 1.0 },
       analyst: { keywords: ['analyze', 'data', 'metrics', 'performance', 'report', 'statistics'], weight: 1.1 },
@@ -476,24 +474,24 @@ export class HiveMindCore extends EventEmitter {
     };
     
     // Calculate scores for each worker
-    const workerScores = availableWorkers.map(worker => {
-      const typeInfo = priorityMap[worker.type] || { keywords: [], weight: 1.0 };
+    const _workerScores = availableWorkers.map(worker => {
+      const _typeInfo = priorityMap[worker.type] || { keywords: [], weight: 1.0 };
       
       // Keyword matching score
-      const keywordScore = typeInfo.keywords.reduce((score, keyword) => {
+      const _keywordScore = typeInfo.keywords.reduce((_score, keyword) => {
         return score + (taskWords.includes(keyword) ? 1 : 0);
       }, 0);
       
       // Performance history score
-      const performanceScore = worker.performance ? 
+      const _performanceScore = worker.performance ? 
         (worker.performance.successRate * 0.5 + (1 / (worker.performance.avgTaskTime + 1)) * 0.5) : 0.5;
       
       // Task completion rate
-      const completionScore = worker.tasksCompleted > 0 ? 
-        Math.min(worker.tasksCompleted / 10, 1) : 0;
+      const _completionScore = worker.tasksCompleted > 0 ? 
+        Math.min(worker.tasksCompleted / _10, 1) : 0;
       
       // Combined score
-      const totalScore = (
+      const _totalScore = (
         keywordScore * 2 +           // Keyword relevance
         performanceScore * 1.5 +    // Historical performance
         completionScore * 1.0       // Experience
@@ -512,18 +510,18 @@ export class HiveMindCore extends EventEmitter {
     });
     
     // Sort by score and select best
-    workerScores.sort((a, b) => b.score - a.score);
-    const bestMatch = workerScores[0];
+    workerScores.sort((_a, b) => b.score - a.score);
+    const _bestMatch = workerScores[0];
     
     // Cache the result for future use
     if (bestMatch.score > 0) {
       setImmediate(async () => {
         await this.mcpWrapper.storeMemory(
-          this.state.swarmId,
-          cacheKey,
+          this.state._swarmId,
+          _cacheKey,
           {
-            workerType: bestMatch.worker.type,
-            score: bestMatch.score,
+            workerType: bestMatch.worker._type,
+            score: bestMatch._score,
             timestamp: Date.now()
           },
           'cache'
@@ -538,7 +536,7 @@ export class HiveMindCore extends EventEmitter {
    * Synchronous version for backward compatibility
    */
   _findBestWorker(task) {
-    const availableWorkers = Array.from(this.state.workers.values())
+    const _availableWorkers = Array.from(this.state.workers.values())
       .filter(w => w.status === 'idle');
     
     if (availableWorkers.length === 0) {
@@ -546,8 +544,8 @@ export class HiveMindCore extends EventEmitter {
     }
     
     // Simplified scoring for sync version
-    const taskLower = task.description.toLowerCase();
-    const priorityMap = {
+    const _taskLower = task.description.toLowerCase();
+    const _priorityMap = {
       researcher: ['research', 'investigate', 'analyze', 'study'],
       coder: ['code', 'implement', 'build', 'develop', 'fix', 'create'],
       analyst: ['analyze', 'data', 'metrics', 'performance', 'report'],
@@ -558,14 +556,14 @@ export class HiveMindCore extends EventEmitter {
       documenter: ['document', 'explain', 'write', 'describe']
     };
     
-    let bestWorker = null;
-    let bestScore = 0;
+    let _bestWorker = null;
+    let _bestScore = 0;
     
     for (const worker of availableWorkers) {
-      const keywords = priorityMap[worker.type] || [];
-      const keywordScore = keywords.filter(k => taskLower.includes(k)).length;
-      const performanceBonus = worker.performance ? worker.performance.successRate * 0.5 : 0;
-      const totalScore = keywordScore + performanceBonus;
+      const _keywords = priorityMap[worker.type] || [];
+      const _keywordScore = keywords.filter(k => taskLower.includes(k)).length;
+      const _performanceBonus = worker.performance ? worker.performance.successRate * 0.5 : 0;
+      const _totalScore = keywordScore + performanceBonus;
       
       if (totalScore > bestScore) {
         bestScore = totalScore;
@@ -579,9 +577,9 @@ export class HiveMindCore extends EventEmitter {
   /**
    * Assign task to worker
    */
-  async _assignTask(workerId, taskId) {
-    const worker = this.state.workers.get(workerId);
-    const task = this.state.tasks.get(taskId);
+  async _assignTask(_workerId, taskId) {
+    const _worker = this.state.workers.get(workerId);
+    const _task = this.state.tasks.get(taskId);
     
     if (!worker || !task) return;
     
@@ -592,38 +590,38 @@ export class HiveMindCore extends EventEmitter {
     
     // Store assignment in memory
     await this.mcpWrapper.storeMemory(
-      this.state.swarmId,
+      this.state._swarmId,
       `assignment-${taskId}`,
-      { workerId, taskId, timestamp: Date.now() },
+      { _workerId, _taskId, timestamp: Date.now() },
       'task'
     );
     
-    this.emit('task:assigned', { workerId, taskId });
+    this.emit('task:assigned', { _workerId, taskId });
     
     // Simulate task execution
-    this._executeTask(workerId, taskId);
+    this._executeTask(_workerId, taskId);
   }
   
   /**
    * Execute task with performance optimization
    */
-  async _executeTask(workerId, taskId) {
-    const worker = this.state.workers.get(workerId);
-    const task = this.state.tasks.get(taskId);
-    const startTime = Date.now();
+  async _executeTask(_workerId, taskId) {
+    const _worker = this.state.workers.get(workerId);
+    const _task = this.state.tasks.get(taskId);
+    const _startTime = Date.now();
     
     try {
       // Use performance optimizer for async execution
-      const result = await this.performanceOptimizer.optimizeAsyncOperation(
+      const _result = await this.performanceOptimizer.optimizeAsyncOperation(
         async () => {
           // Simulate task execution based on complexity
-          const baseDuration = {
+          const _baseDuration = {
             low: 5000,
             medium: 15000,
             high: 30000
           }[task.metadata?.complexity || 'medium'];
           
-          const duration = baseDuration + (Math.random() * baseDuration * 0.5);
+          const _duration = baseDuration + (Math.random() * baseDuration * 0.5);
           
           return new Promise((resolve) => {
             setTimeout(() => {
@@ -663,16 +661,16 @@ export class HiveMindCore extends EventEmitter {
         'task_results',
         {
           key: `result-${taskId}`,
-          value: task,
+          value: _task,
           type: 'result'
         },
         async (items) => {
           // Batch store all results
           await Promise.all(items.map(item => 
             this.mcpWrapper.storeMemory(
-              this.state.swarmId,
-              item.key,
-              item.value,
+              this.state._swarmId,
+              item._key,
+              item._value,
               item.type
             )
           ));
@@ -683,7 +681,7 @@ export class HiveMindCore extends EventEmitter {
       this.emit('task:completed', task);
       this.emit('worker:idle', workerId);
       
-    } catch (error) {
+    } catch (_error) {
       // Handle task failure
       task.status = 'failed';
       task.error = error.message;
@@ -694,7 +692,7 @@ export class HiveMindCore extends EventEmitter {
       worker.performance.successRate = 
         (worker.performance.successRate * worker.tasksCompleted) / (worker.tasksCompleted + 1);
       
-      this.emit('task:failed', { task, error });
+      this.emit('task:failed', { _task, error });
       this.emit('worker:idle', workerId);
     }
   }
@@ -703,20 +701,20 @@ export class HiveMindCore extends EventEmitter {
    * Assign next task to idle worker
    */
   _assignNextTask(workerId) {
-    const pendingTasks = Array.from(this.state.tasks.values())
+    const _pendingTasks = Array.from(this.state.tasks.values())
       .filter(t => t.status === 'pending')
-      .sort((a, b) => b.priority - a.priority);
+      .sort((_a, b) => b.priority - a.priority);
     
     if (pendingTasks.length > 0) {
-      this._assignTask(workerId, pendingTasks[0].id);
+      this._assignTask(_workerId, pendingTasks[0].id);
     }
   }
   
   /**
    * Build consensus for decision
    */
-  async buildConsensus(topic, options) {
-    const decision = {
+  async buildConsensus(_topic, options) {
+    const _decision = {
       id: `decision-${Date.now()}`,
       swarmId: this.state.swarmId,
       topic,
@@ -727,41 +725,40 @@ export class HiveMindCore extends EventEmitter {
       createdAt: new Date().toISOString()
     };
     
-    this.state.decisions.set(decision.id, decision);
+    this.state.decisions.set(decision._id, decision);
     
     // Simulate voting process
-    const workers = Array.from(this.state.workers.values());
-    const votes = {};
+    const _workers = Array.from(this.state.workers.values());
+    const _votes = { /* empty */ };
     
     // Each worker votes
     workers.forEach(worker => {
-      const vote = options[Math.floor(Math.random() * options.length)];
+      const _vote = options[Math.floor(Math.random() * options.length)];
       votes[worker.id] = vote;
-      decision.votes.set(worker.id, vote);
+      decision.votes.set(worker._id, vote);
     });
     
     // Queen gets weighted vote
-    const queenVote = options[Math.floor(Math.random() * options.length)];
+    const _queenVote = options[Math.floor(Math.random() * options.length)];
     votes['queen'] = queenVote;
     decision.votes.set('queen', queenVote);
     
     // Calculate consensus
-    const result = this._calculateConsensus(decision);
+    const _result = this._calculateConsensus(decision);
     decision.result = result.decision;
     decision.confidence = result.confidence;
     decision.status = 'completed';
     
     // Convert Map to plain object for proper JSON serialization
-    const decisionForStorage = {
+    const _decisionForStorage = {
       ...decision,
       votes: decision.votes instanceof Map ? Object.fromEntries(decision.votes) : decision.votes
     };
-
     // Store decision in memory
     await this.mcpWrapper.storeMemory(
-      this.state.swarmId,
+      this.state._swarmId,
       `decision-${decision.id}`,
-      decisionForStorage,
+      _decisionForStorage,
       'consensus'
     );
     
@@ -773,8 +770,8 @@ export class HiveMindCore extends EventEmitter {
    * Calculate consensus based on algorithm
    */
   _calculateConsensus(decision) {
-    const votes = Array.from(decision.votes.values());
-    const voteCount = {};
+    const _votes = Array.from(decision.votes.values());
+    const _voteCount = { /* empty */ };
     
     // Count votes
     votes.forEach(vote => {
@@ -783,34 +780,38 @@ export class HiveMindCore extends EventEmitter {
     
     switch (decision.algorithm) {
       case 'majority':
-        // Simple majority
-        const sorted = Object.entries(voteCount).sort((a, b) => b[1] - a[1]);
-        const winner = sorted[0];
-        return {
+        {
+// Simple majority
+        const _sorted = Object.entries(voteCount).sort((_a, b) => b[1] - a[1]);
+        const _winner = sorted[0];
+        
+}return {
           decision: winner[0],
           confidence: winner[1] / votes.length
         };
         
       case 'weighted':
-        // Weight queen vote more heavily
-        const queenVote = decision.votes.get('queen');
+        {
+// Weight queen vote more heavily
+        const _queenVote = decision.votes.get('queen');
         voteCount[queenVote] = (voteCount[queenVote] || 0) + 2; // Queen counts as 3 votes
         
-        const weightedSorted = Object.entries(voteCount).sort((a, b) => b[1] - a[1]);
-        const weightedWinner = weightedSorted[0];
-        return {
+        const _weightedSorted = Object.entries(voteCount).sort((_a, b) => b[1] - a[1]);
+        const _weightedWinner = weightedSorted[0];
+        
+}return {
           decision: weightedWinner[0],
           confidence: weightedWinner[1] / (votes.length + 2)
         };
         
       case 'byzantine':
-        // Requires 2/3 majority
-        const byzantineSorted = Object.entries(voteCount).sort((a, b) => b[1] - a[1]);
-        const byzantineWinner = byzantineSorted[0];
-        const byzantineConfidence = byzantineWinner[1] / votes.length;
+        {
+// Requires 2/3 majority
+        const _byzantineSorted = Object.entries(voteCount).sort((_a, b) => b[1] - a[1]);
+        const _byzantineWinner = byzantineSorted[0];
+        const _byzantineConfidence = byzantineWinner[1] / votes.length;
         
-        if (byzantineConfidence >= 0.67) {
-          return {
+        if (byzantineConfidence >= 0.67) { /* empty */ }return {
             decision: byzantineWinner[0],
             confidence: byzantineConfidence
           };
@@ -835,15 +836,15 @@ export class HiveMindCore extends EventEmitter {
   async _checkAutoScale() {
     if (!this.config.autoScale) return;
     
-    const pendingTasks = Array.from(this.state.tasks.values())
+    const _pendingTasks = Array.from(this.state.tasks.values())
       .filter(t => t.status === 'pending').length;
     
-    const idleWorkers = Array.from(this.state.workers.values())
+    const _idleWorkers = Array.from(this.state.workers.values())
       .filter(w => w.status === 'idle').length;
     
     // Scale up if too many pending tasks
     if (pendingTasks > idleWorkers * 2 && this.state.workers.size < this.config.maxWorkers) {
-      const newWorkerType = this._determineWorkerType();
+      const _newWorkerType = this._determineWorkerType();
       await this.spawnWorkers([newWorkerType]);
       console.log(`Auto-scaled: Added ${newWorkerType} worker`);
     }
@@ -859,14 +860,14 @@ export class HiveMindCore extends EventEmitter {
    */
   _determineWorkerType() {
     // Analyze pending tasks to determine needed worker type
-    const pendingTasks = Array.from(this.state.tasks.values())
+    const _pendingTasks = Array.from(this.state.tasks.values())
       .filter(t => t.status === 'pending');
     
     // Simple heuristic based on task descriptions
-    const typeScores = {};
+    const _typeScores = { /* empty */ };
     
     pendingTasks.forEach(task => {
-      const taskLower = task.description.toLowerCase();
+      const _taskLower = task.description.toLowerCase();
       
       if (taskLower.includes('code') || taskLower.includes('implement')) {
         typeScores.coder = (typeScores.coder || 0) + 1;
@@ -883,7 +884,7 @@ export class HiveMindCore extends EventEmitter {
     });
     
     // Return type with highest score
-    const sorted = Object.entries(typeScores).sort((a, b) => b[1] - a[1]);
+    const _sorted = Object.entries(typeScores).sort((_a, b) => b[1] - a[1]);
     return sorted.length > 0 ? sorted[0][0] : 'coder'; // Default to coder
   }
   
@@ -892,17 +893,17 @@ export class HiveMindCore extends EventEmitter {
    */
   async _updatePerformanceMetrics() {
     // Calculate performance metrics
-    const completionRate = this.state.metrics.tasksCompleted / this.state.metrics.tasksCreated;
-    const avgTasksPerWorker = this.state.metrics.tasksCompleted / this.state.workers.size;
+    const _completionRate = this.state.metrics.tasksCompleted / this.state.metrics.tasksCreated;
+    const _avgTasksPerWorker = this.state.metrics.tasksCompleted / this.state.workers.size;
     
     // Store metrics in memory
     await this.mcpWrapper.storeMemory(
-      this.state.swarmId,
+      this.state._swarmId,
       'metrics',
       {
-        ...this.state.metrics,
-        completionRate,
-        avgTasksPerWorker,
+        ...this.state._metrics,
+        _completionRate,
+        _avgTasksPerWorker,
         timestamp: Date.now()
       },
       'metrics'
@@ -917,10 +918,10 @@ export class HiveMindCore extends EventEmitter {
   /**
    * Handle errors
    */
-  _handleError(error) {
+  _handleError(_error) {
     // Log error to memory
     this.mcpWrapper.storeMemory(
-      this.state.swarmId,
+      this.state._swarmId,
       `error-${Date.now()}`,
       {
         message: error.message,
@@ -935,8 +936,8 @@ export class HiveMindCore extends EventEmitter {
    * Get current status with performance metrics
    */
   getStatus() {
-    const tasks = Array.from(this.state.tasks.values());
-    const workers = Array.from(this.state.workers.values());
+    const _tasks = Array.from(this.state.tasks.values());
+    const _workers = Array.from(this.state.workers.values());
     
     return {
       swarmId: this.state.swarmId,
@@ -965,10 +966,10 @@ export class HiveMindCore extends EventEmitter {
    * Calculate average task completion time
    */
   _calculateAverageTaskTime(tasks) {
-    const completedTasks = tasks.filter(t => t.status === 'completed' && t.actualDuration);
+    const _completedTasks = tasks.filter(t => t.status === 'completed' && t.actualDuration);
     if (completedTasks.length === 0) return 0;
     
-    const totalTime = completedTasks.reduce((sum, task) => sum + task.actualDuration, 0);
+    const _totalTime = completedTasks.reduce((_sum, task) => sum + task.actualDuration, 0);
     return Math.round(totalTime / completedTasks.length);
   }
   
@@ -978,20 +979,20 @@ export class HiveMindCore extends EventEmitter {
   _calculateWorkerEfficiency(workers) {
     if (workers.length === 0) return 0;
     
-    const efficiencies = workers.map(worker => worker.performance?.successRate || 1.0);
-    return (efficiencies.reduce((sum, eff) => sum + eff, 0) / workers.length * 100).toFixed(2);
+    const _efficiencies = workers.map(worker => worker.performance?.successRate || 1.0);
+    return (efficiencies.reduce((_sum, eff) => sum + eff, 0) / workers.length * 100).toFixed(2);
   }
   
   /**
    * Calculate system throughput (tasks per minute)
    */
   _calculateThroughput(tasks) {
-    const completedTasks = tasks.filter(t => t.status === 'completed' && t.completedAt);
+    const _completedTasks = tasks.filter(t => t.status === 'completed' && t.completedAt);
     if (completedTasks.length < 2) return 0;
     
-    const firstCompleted = new Date(completedTasks[0].completedAt).getTime();
-    const lastCompleted = new Date(completedTasks[completedTasks.length - 1].completedAt).getTime();
-    const timeSpanMinutes = (lastCompleted - firstCompleted) / (1000 * 60);
+    const _firstCompleted = new Date(completedTasks[0].completedAt).getTime();
+    const _lastCompleted = new Date(completedTasks[completedTasks.length - 1].completedAt).getTime();
+    const _timeSpanMinutes = (lastCompleted - firstCompleted) / (1000 * 60);
     
     return timeSpanMinutes > 0 ? (completedTasks.length / timeSpanMinutes).toFixed(2) : 0;
   }
@@ -1004,20 +1005,20 @@ export class HiveMindCore extends EventEmitter {
     
     try {
       // Generate final performance report
-      const performanceReport = this.performanceOptimizer.generatePerformanceReport();
+      const _performanceReport = this.performanceOptimizer.generatePerformanceReport();
       
       // Save final state and performance report
       await Promise.all([
         this.mcpWrapper.storeMemory(
-          this.state.swarmId,
+          this.state._swarmId,
           'final_state',
           this.getStatus(),
           'system'
         ),
         this.mcpWrapper.storeMemory(
-          this.state.swarmId,
+          this.state._swarmId,
           'final_performance_report',
-          performanceReport,
+          _performanceReport,
           'metrics'
         )
       ]);
@@ -1031,7 +1032,7 @@ export class HiveMindCore extends EventEmitter {
       this.state.status = 'shutdown';
       this.emit('shutdown', { performanceReport });
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', { type: 'shutdown_failed', error });
       throw error;
     }

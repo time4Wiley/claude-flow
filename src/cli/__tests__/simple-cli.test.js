@@ -1,12 +1,9 @@
 /* eslint-env jest */
-
 /**
  * Tests for simple-cli.js
  */
-
 import { jest } from '@jest/globals';
 import { parseFlags } from '../utils.js';
-
 // Mock the command registry
 jest.mock('../command-registry.js', () => ({
   executeCommand: jest.fn(),
@@ -17,36 +14,31 @@ jest.mock('../command-registry.js', () => ({
   commandRegistry: new Map(),
   registerCoreCommands: jest.fn(),
 }));
-
 // Mock node-compat
 jest.mock('../node-compat.js', () => ({
   args: () => process.argv.slice(2),
   cwd: () => process.cwd(),
   isMainModule: () => true,
 }));
-
 describe('Claude-Flow CLI', () => {
-  let originalArgv;
-  let originalExit;
-  let consoleLogSpy;
-  let consoleErrorSpy;
-
+  let originalArgv; // TODO: Remove if unused
+  let originalExit; // TODO: Remove if unused
+  let consoleLogSpy; // TODO: Remove if unused
+  let consoleErrorSpy; // TODO: Remove if unused
   beforeEach(() => {
     originalArgv = process.argv;
     originalExit = process.exit;
     process.exit = jest.fn();
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleLogSpy = jest.spyOn(_console, 'log').mockImplementation();
+    consoleErrorSpy = jest.spyOn(_console, 'error').mockImplementation();
     jest.clearAllMocks();
   });
-
   afterEach(() => {
     process.argv = originalArgv;
     process.exit = originalExit;
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
-
   describe('Help output', () => {
     test('should show help when no arguments provided', async () => {
       process.argv = ['node', 'claude-flow'];
@@ -58,12 +50,11 @@ describe('Claude-Flow CLI', () => {
       await import('../simple-cli.js');
       
       expect(consoleLogSpy).toHaveBeenCalled();
-      const output = consoleLogSpy.mock.calls.join('\n');
+      const _output = consoleLogSpy.mock.calls.join('\n');
       expect(output).toContain('Claude-Flow v2.0.0');
       expect(output).toContain('USAGE:');
       expect(output).toContain('claude-flow <command> [options]');
     });
-
     test('should show help for --help flag', async () => {
       process.argv = ['node', 'claude-flow', '--help'];
       
@@ -73,10 +64,9 @@ describe('Claude-Flow CLI', () => {
       await import('../simple-cli.js');
       
       expect(consoleLogSpy).toHaveBeenCalled();
-      const output = consoleLogSpy.mock.calls.join('\n');
+      const _output = consoleLogSpy.mock.calls.join('\n');
       expect(output).toContain('Claude-Flow v2.0.0');
     });
-
     test('should show version for --version flag', async () => {
       process.argv = ['node', 'claude-flow', '--version'];
       
@@ -86,7 +76,6 @@ describe('Claude-Flow CLI', () => {
       expect(process.exit).toHaveBeenCalledWith(0);
     });
   });
-
   describe('Command execution', () => {
     test('should execute valid command', async () => {
       process.argv = ['node', 'claude-flow', 'init', '--sparc'];
@@ -98,9 +87,8 @@ describe('Claude-Flow CLI', () => {
       await import('../simple-cli.js');
       
       expect(hasCommand).toHaveBeenCalledWith('init');
-      expect(executeCommand).toHaveBeenCalledWith('init', ['--sparc'], {});
+      expect(executeCommand).toHaveBeenCalledWith('init', ['--sparc'], { /* empty */ });
     });
-
     test('should handle command with multiple arguments', async () => {
       process.argv = ['node', 'claude-flow', 'swarm', 'Build a REST API', '--strategy', 'development'];
       
@@ -117,7 +105,6 @@ describe('Claude-Flow CLI', () => {
         { strategy: 'development' }
       );
     });
-
     test('should show error for unknown command', async () => {
       process.argv = ['node', 'claude-flow', 'invalid-command'];
       
@@ -134,29 +121,24 @@ describe('Claude-Flow CLI', () => {
       );
     });
   });
-
   describe('Flag parsing', () => {
     test('should parse boolean flags correctly', () => {
-      const flags = parseFlags(['--force', '--verbose']);
+      const _flags = parseFlags(['--force', '--verbose']);
       expect(flags).toEqual({ force: true, verbose: true });
     });
-
     test('should parse value flags correctly', () => {
-      const flags = parseFlags(['--port', '8080', '--name', 'test']);
+      const _flags = parseFlags(['--port', '8080', '--name', 'test']);
       expect(flags).toEqual({ port: '8080', name: 'test' });
     });
-
     test('should handle mixed flags and arguments', () => {
-      const flags = parseFlags(['arg1', '--flag', 'value', 'arg2', '--bool']);
+      const _flags = parseFlags(['arg1', '--flag', 'value', 'arg2', '--bool']);
       expect(flags).toEqual({ flag: 'value', bool: true });
     });
-
     test('should handle flags with equals sign', () => {
-      const flags = parseFlags(['--port=8080', '--name=test']);
+      const _flags = parseFlags(['--port=8080', '--name=test']);
       expect(flags).toEqual({ port: '8080', name: 'test' });
     });
   });
-
   describe('Error handling', () => {
     test('should handle command execution errors gracefully', async () => {
       process.argv = ['node', 'claude-flow', 'init'];
@@ -172,7 +154,6 @@ describe('Claude-Flow CLI', () => {
       );
       expect(process.exit).toHaveBeenCalledWith(1);
     });
-
     test('should handle missing required arguments', async () => {
       process.argv = ['node', 'claude-flow', 'agent'];
       

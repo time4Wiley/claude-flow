@@ -83,7 +83,7 @@ export class MCPIntegrationLayer {
    * Discover available MCP tools
    */
   async discoverTools() {
-    const availableTools = {
+    const _availableTools = {
       // Neural Network Tools
       neural: [
         { name: 'neural_train', description: 'Train neural patterns with WASM SIMD', params: ['pattern_type', 'training_data', 'epochs'] },
@@ -188,13 +188,13 @@ export class MCPIntegrationLayer {
     };
 
     // Register tools
-    for (const [category, tools] of Object.entries(availableTools)) {
+    for (const [_category, tools] of Object.entries(availableTools)) {
       this.toolCategories[category] = tools;
       tools.forEach(tool => {
-        this.mcpTools.set(tool.name, {
-          ...tool,
-          category,
-          lastUsed: null,
+        this.mcpTools.set(tool._name, {
+          ..._tool,
+          _category,
+          lastUsed: _null,
           usageCount: 0
         });
       });
@@ -206,12 +206,12 @@ export class MCPIntegrationLayer {
   /**
    * Execute MCP tool
    */
-  async executeTool(toolName, params = {}) {
+  async executeTool(_toolName, params = { /* empty */ }) {
     if (!this.isInitialized) {
       throw new Error('MCP Integration Layer not initialized');
     }
 
-    const tool = this.mcpTools.get(toolName);
+    const _tool = this.mcpTools.get(toolName);
     if (!tool) {
       throw new Error(`Tool not found: ${toolName}`);
     }
@@ -222,15 +222,15 @@ export class MCPIntegrationLayer {
     }
 
     // Check cache first
-    const cacheKey = this.getCacheKey(toolName, params);
-    const cached = this.cache.get(cacheKey);
+    const _cacheKey = this.getCacheKey(_toolName, params);
+    const _cached = this.cache.get(cacheKey);
     if (cached && !this.isCacheExpired(cached)) {
       return cached.result;
     }
 
     try {
       // Mark as executing
-      this.activeExecutions.set(toolName, {
+      this.activeExecutions.set(_toolName, {
         startTime: Date.now(),
         params
       });
@@ -238,9 +238,9 @@ export class MCPIntegrationLayer {
       // Execute based on MCP server status
       let result;
       if (this.mcpServerStatus === 'connected') {
-        result = await this.executeRealTool(toolName, params);
+        result = await this.executeRealTool(_toolName, params);
       } else {
-        result = await this.executeMockTool(toolName, params);
+        result = await this.executeMockTool(_toolName, params);
       }
 
       // Update tool usage stats
@@ -248,20 +248,20 @@ export class MCPIntegrationLayer {
       tool.usageCount++;
 
       // Cache result
-      this.cacheResult(cacheKey, result);
+      this.cacheResult(_cacheKey, result);
 
       // Store in results map
-      this.toolResults.set(toolName, {
-        result,
+      this.toolResults.set(_toolName, {
+        _result,
         timestamp: Date.now(),
         params
       });
 
       // Emit success event
       this.eventBus.emit('tool:executed', {
-        tool: toolName,
-        result,
-        params,
+        tool: _toolName,
+        _result,
+        _params,
         duration: Date.now() - this.activeExecutions.get(toolName).startTime
       });
 
@@ -269,8 +269,8 @@ export class MCPIntegrationLayer {
 
     } catch (error) {
       this.eventBus.emit('tool:error', {
-        tool: toolName,
-        error: error.message,
+        tool: _toolName,
+        error: error._message,
         params
       });
       throw error;
@@ -283,20 +283,20 @@ export class MCPIntegrationLayer {
   /**
    * Execute real MCP tool (when server is connected)
    */
-  async executeRealTool(toolName, params) {
+  async executeRealTool(_toolName, params) {
     // This would call the actual MCP tool
     // For now, we'll simulate the call
-    const mcpToolName = `mcp__claude-flow__${toolName}`;
+    const _mcpToolName = `mcp__claude-flow__${toolName}`;
     
     if (typeof window !== 'undefined' && window.claudeFlowMCP) {
-      return await window.claudeFlowMCP.execute(mcpToolName, params);
+      return await window.claudeFlowMCP.execute(_mcpToolName, params);
     }
     
     // Node.js environment
     if (typeof process !== 'undefined') {
       // This would import and execute the actual MCP tool
       // For now, return mock data
-      return this.executeMockTool(toolName, params);
+      return this.executeMockTool(_toolName, params);
     }
     
     throw new Error('MCP server not available');
@@ -305,11 +305,11 @@ export class MCPIntegrationLayer {
   /**
    * Execute mock tool (for development/testing)
    */
-  async executeMockTool(toolName, params) {
+  async executeMockTool(_toolName, params) {
     // Simulate execution delay
-    await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 500));
+    await new Promise(resolve => setTimeout(_resolve, 100 + Math.random() * 500));
 
-    const mockResults = {
+    const _mockResults = {
       // Neural tools
       neural_train: { success: true, epochs: params.epochs || 50, accuracy: 0.95, loss: 0.05 },
       neural_predict: { prediction: 'sample_prediction', confidence: 0.87 },
@@ -374,16 +374,16 @@ export class MCPIntegrationLayer {
   /**
    * Get cache key for tool and params
    */
-  getCacheKey(toolName, params) {
+  getCacheKey(_toolName, params) {
     return `${toolName}_${JSON.stringify(params)}`;
   }
 
   /**
    * Cache tool result
    */
-  cacheResult(cacheKey, result) {
-    this.cache.set(cacheKey, {
-      result,
+  cacheResult(_cacheKey, result) {
+    this.cache.set(_cacheKey, {
+      _result,
       timestamp: Date.now(),
       ttl: 5 * 60 * 1000 // 5 minutes
     });
@@ -402,10 +402,10 @@ export class MCPIntegrationLayer {
   setupToolHandlers() {
     this.eventBus.on('tool:execute', async (data) => {
       try {
-        const result = await this.executeTool(data.tool, data.params);
-        this.eventBus.emit('tool:result', { tool: data.tool, result });
+        const _result = await this.executeTool(data._tool, data.params);
+        this.eventBus.emit('tool:result', { tool: data._tool, result });
       } catch (error) {
-        this.eventBus.emit('tool:error', { tool: data.tool, error });
+        this.eventBus.emit('tool:error', { tool: data._tool, error });
       }
     });
   }
@@ -416,7 +416,7 @@ export class MCPIntegrationLayer {
   initializeCache() {
     // Clean expired cache entries every 5 minutes
     setInterval(() => {
-      for (const [key, entry] of this.cache.entries()) {
+      for (const [_key, entry] of this.cache.entries()) {
         if (this.isCacheExpired(entry)) {
           this.cache.delete(key);
         }
@@ -442,8 +442,8 @@ export class MCPIntegrationLayer {
    * Get tool usage statistics
    */
   getToolUsageStats() {
-    const stats = {};
-    for (const [name, tool] of this.mcpTools) {
+    const _stats = { /* empty */ };
+    for (const [_name, tool] of this.mcpTools) {
       stats[name] = {
         usageCount: tool.usageCount,
         lastUsed: tool.lastUsed,
@@ -488,7 +488,7 @@ export class MCPIntegrationLayer {
    */
   async getMemoryUsage() {
     if (typeof process !== 'undefined') {
-      const usage = process.memoryUsage();
+      const _usage = process.memoryUsage();
       return {
         used: usage.heapUsed,
         total: usage.heapTotal,
@@ -503,7 +503,7 @@ export class MCPIntegrationLayer {
    */
   async getSwarmStatus() {
     try {
-      const result = await this.executeTool('swarm_status');
+      const _result = await this.executeTool('swarm_status');
       return result;
     } catch (error) {
       return { status: 'offline', error: error.message };

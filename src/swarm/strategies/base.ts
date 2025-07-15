@@ -1,11 +1,8 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Base Strategy Interface for Swarm Task Execution
  * Provides the foundation for different task execution strategies
  */
-
 import type { TaskDefinition, SwarmObjective, AgentState, SwarmConfig } from '../types.js';
-
 export interface StrategyMetrics {
   tasksCompleted: number;
   averageExecutionTime: number;
@@ -21,7 +18,6 @@ export interface StrategyMetrics {
   cacheMisses?: number;
   credibilityScores?: Record<string, number>;
 }
-
 export interface TaskPattern {
   pattern: RegExp;
   type: string;
@@ -30,7 +26,6 @@ export interface TaskPattern {
   requiredAgents: number;
   priority: number;
 }
-
 export interface DecompositionResult {
   tasks: TaskDefinition[];
   dependencies: Map<string, string[]>;
@@ -43,7 +38,7 @@ export interface DecompositionResult {
   ttl: number;
   accessCount: number;
   lastAccessed: Date;
-  data: any;
+  data: unknown;
   // Resource requirements
   resourceRequirements?: {
     memory?: number;
@@ -52,7 +47,6 @@ export interface DecompositionResult {
     storage?: string;
   };
 }
-
 export interface TaskBatch {
   id: string;
   tasks: TaskDefinition[];
@@ -60,32 +54,27 @@ export interface TaskBatch {
   estimatedDuration: number;
   requiredResources: Record<string, number>;
 }
-
 export interface AgentAllocation {
   agentId: string;
   tasks: string[];
   estimatedWorkload: number;
   capabilities: string[];
 }
-
 export abstract class BaseStrategy {
   protected metrics: StrategyMetrics;
   protected taskPatterns: TaskPattern[];
   protected cache: Map<string, DecompositionResult>;
   protected config: SwarmConfig;
-
   constructor(config: SwarmConfig) {
     this.config = config;
     this.metrics = this.initializeMetrics();
     this.taskPatterns = this.initializeTaskPatterns();
     this.cache = new Map();
   }
-
   // Abstract methods that must be implemented by concrete strategies
   abstract decomposeObjective(objective: SwarmObjective): Promise<DecompositionResult>;
-  abstract selectAgentForTask(task: TaskDefinition, availableAgents: AgentState[]): Promise<string | null>;
+  abstract selectAgentForTask(task: _TaskDefinition, availableAgents: AgentState[]): Promise<string | null>;
   abstract optimizeTaskSchedule(tasks: TaskDefinition[], agents: AgentState[]): Promise<AgentAllocation[]>;
-
   // Common utility methods
   protected initializeMetrics(): StrategyMetrics {
     return {
@@ -98,7 +87,6 @@ export abstract class BaseStrategy {
       predictionAccuracy: 0
     };
   }
-
   protected initializeTaskPatterns(): TaskPattern[] {
     return [
       {
@@ -143,7 +131,6 @@ export abstract class BaseStrategy {
       }
     ];
   }
-
   protected detectTaskType(description: string): string {
     for (const pattern of this.taskPatterns) {
       if (pattern.pattern.test(description)) {
@@ -152,44 +139,38 @@ export abstract class BaseStrategy {
     }
     return 'generic';
   }
-
   protected estimateComplexity(description: string): number {
-    const pattern = this.taskPatterns.find(p => p.pattern.test(description));
+    const _pattern = this.taskPatterns.find(p => p.pattern.test(description));
     if (pattern) {
       return pattern.complexity;
     }
-
     // Fallback complexity estimation based on description length and keywords
-    let complexity = 1;
-    const words = description.split(' ').length;
+    let _complexity = 1;
+    const _words = description.split(' ').length;
     
     if (words > 50) complexity += 1;
     if (words > 100) complexity += 1;
     
-    const complexKeywords = ['integrate', 'complex', 'advanced', 'multiple', 'system'];
-    const foundKeywords = complexKeywords.filter(keyword => 
+    const _complexKeywords = ['integrate', 'complex', 'advanced', 'multiple', 'system'];
+    const _foundKeywords = complexKeywords.filter(keyword => 
       description.toLowerCase().includes(keyword)
     ).length;
     
     complexity += foundKeywords;
     
-    return Math.min(complexity, 5); // Cap at 5
+    return Math.min(_complexity, 5); // Cap at 5
   }
-
   protected getCacheKey(objective: SwarmObjective): string {
-    return `${objective.strategy}-${objective.description.slice(0, 100)}`;
+    return `${objective.strategy}-${objective.description.slice(_0, 100)}`;
   }
-
-  protected updateMetrics(result: DecompositionResult, executionTime: number): void {
+  protected updateMetrics(result: _DecompositionResult, executionTime: number): void {
     this.metrics.tasksCompleted += result.tasks.length;
     this.metrics.averageExecutionTime = 
       (this.metrics.averageExecutionTime + executionTime) / 2;
   }
-
   public getMetrics(): StrategyMetrics {
     return { ...this.metrics };
   }
-
   public clearCache(): void {
     this.cache.clear();
   }

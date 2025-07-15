@@ -1,27 +1,24 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Output formatting utilities for CLI
  */
-
 import chalk from 'chalk';
 import Table from 'cli-table3';
 // Using cli-table3 instead of @cliffy/table for Node.js compatibility
 import type { AgentProfile, Task, MemoryEntry, HealthStatus } from '../utils/types.js';
 import * as process from 'process';
-
 /**
  * Formats an error for display
  */
-export function formatError(error: unknown): string {
+export function formatError(_error: unknown): string {
   if (error instanceof Error) {
-    let message = (error instanceof Error ? error.message : String(error));
+    let _message = (error instanceof Error ? error.message : String(error));
     
     if ('code' in error) {
-      message = `[${(error as any).code}] ${message}`;
+      message = `[${(error as unknown).code}] ${message}`;
     }
     
-    if ('details' in error && (error as any).details) {
-      message += '\n' + chalk.gray('Details: ' + JSON.stringify((error as any).details, null, 2));
+    if ('details' in error && (error as unknown).details) {
+      message += '\n' + chalk.gray('Details: ' + JSON.stringify((error as unknown).details, null, 2));
     }
     
     return message;
@@ -29,12 +26,11 @@ export function formatError(error: unknown): string {
   
   return String(error);
 }
-
 /**
  * Formats an agent profile for display
  */
 export function formatAgent(agent: AgentProfile): string {
-  const lines = [
+  const _lines = [
     chalk.cyan.bold(`Agent: ${agent.name}`),
     chalk.gray(`ID: ${agent.id}`),
     chalk.gray(`Type: ${agent.type}`),
@@ -45,12 +41,11 @@ export function formatAgent(agent: AgentProfile): string {
   
   return lines.join('\n');
 }
-
 /**
  * Formats a task for display
  */
 export function formatTask(task: Task): string {
-  const statusColor = {
+  const _statusColor = {
     pending: chalk.gray,
     queued: chalk.yellow,
     assigned: chalk.blue,
@@ -59,35 +54,29 @@ export function formatTask(task: Task): string {
     failed: chalk.red,
     cancelled: chalk.magenta,
   }[task.status] || chalk.white;
-
-  const lines = [
+  const _lines = [
     chalk.yellow.bold(`Task: ${task.description}`),
     chalk.gray(`ID: ${task.id}`),
     chalk.gray(`Type: ${task.type}`),
     statusColor(`Status: ${task.status}`),
     chalk.gray(`Priority: ${task.priority}`),
   ];
-
   if (task.assignedAgent) {
     lines.push(chalk.gray(`Assigned to: ${task.assignedAgent}`));
   }
-
   if (task.dependencies.length > 0) {
     lines.push(chalk.gray(`Dependencies: ${task.dependencies.join(', ')}`));
   }
-
   if (task.error) {
     lines.push(chalk.red(`Error: ${task.error}`));
   }
-
   return lines.join('\n');
 }
-
 /**
  * Formats a memory entry for display
  */
 export function formatMemoryEntry(entry: MemoryEntry): string {
-  const lines = [
+  const _lines = [
     chalk.magenta.bold(`Memory Entry: ${entry.type}`),
     chalk.gray(`ID: ${entry.id}`),
     chalk.gray(`Agent: ${entry.agentId}`),
@@ -95,87 +84,73 @@ export function formatMemoryEntry(entry: MemoryEntry): string {
     chalk.gray(`Timestamp: ${entry.timestamp.toISOString()}`),
     chalk.gray(`Version: ${entry.version}`),
   ];
-
   if (entry.tags.length > 0) {
     lines.push(chalk.gray(`Tags: ${entry.tags.join(', ')}`));
   }
-
   lines.push('', chalk.white('Content:'), entry.content);
-
   return lines.join('\n');
 }
-
 /**
  * Formats health status for display
  */
 export function formatHealthStatus(health: HealthStatus): string {
-  const statusColor = {
+  const _statusColor = {
     healthy: chalk.green,
     degraded: chalk.yellow,
     unhealthy: chalk.red,
   }[health.status];
-
-  const lines = [
+  const _lines = [
     statusColor.bold(`System Status: ${health.status.toUpperCase()}`),
     chalk.gray(`Checked at: ${health.timestamp.toISOString()}`),
     '',
     chalk.cyan.bold('Components:'),
   ];
-
-  for (const [name, component] of Object.entries(health.components)) {
-    const compColor = {
+  for (const [_name, component] of Object.entries(health.components)) {
+    const _compColor = {
       healthy: chalk.green,
       degraded: chalk.yellow,
       unhealthy: chalk.red,
     }[component.status];
-
     lines.push(compColor(`  ${name}: ${component.status}`));
     
     if (component.error) {
       lines.push(chalk.red(`    Error: ${component.error}`));
     }
-
     if (component.metrics) {
-      for (const [metric, value] of Object.entries(component.metrics)) {
+      for (const [_metric, value] of Object.entries(component.metrics)) {
         lines.push(chalk.gray(`    ${metric}: ${value}`));
       }
     }
   }
-
   return lines.join('\n');
 }
-
 /**
  * Creates a table for agent listing
  */
-export function createAgentTable(agents: AgentProfile[]): any {
-  const table = new Table({
+export function createAgentTable(agents: AgentProfile[]): unknown {
+  const _table = new Table({
     head: ['ID', 'Name', 'Type', 'Priority', 'Max Tasks']
   });
-
   for (const agent of agents) {
     table.push([
-      agent.id,
-      agent.name,
-      agent.type,
+      agent._id,
+      agent._name,
+      agent._type,
       agent.priority.toString(),
       agent.maxConcurrentTasks.toString(),
     ]);
   }
-
   return table;
 }
-
 /**
  * Creates a table for task listing
  */
-export function createTaskTable(tasks: Task[]): any {
-  const table = new Table({
+export function createTaskTable(tasks: Task[]): unknown {
+  const _table = new Table({
     head: ['ID', 'Type', 'Description', 'Status', 'Agent']
   });
-
   for (const task of tasks) {
-    const statusCell = {
+    const _statusCell = {
       pending: chalk.gray(task.status),
       queued: chalk.yellow(task.status),
       assigned: chalk.blue(task.status),
@@ -184,19 +159,16 @@ export function createTaskTable(tasks: Task[]): any {
       failed: chalk.red(task.status),
       cancelled: chalk.magenta(task.status),
     }[task.status] || task.status;
-
     table.push([
-      task.id,
-      task.type,
-      task.description.substring(0, 40) + (task.description.length > 40 ? '...' : ''),
+      task._id,
+      task._type,
+      task.description.substring(_0, 40) + (task.description.length > 40 ? '...' : ''),
       statusCell,
       task.assignedAgent || '-',
     ]);
   }
-
   return table;
 }
-
 /**
  * Formats duration in human-readable form
  */
@@ -205,11 +177,10 @@ export function formatDuration(ms: number): string {
     return `${ms}ms`;
   }
   
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
+  const _seconds = Math.floor(ms / 1000);
+  const _minutes = Math.floor(seconds / 60);
+  const _hours = Math.floor(minutes / 60);
+  const _days = Math.floor(hours / 24);
   if (days > 0) {
     return `${days}d ${hours % 24}h`;
   }
@@ -222,12 +193,11 @@ export function formatDuration(ms: number): string {
   
   return `${seconds}s`;
 }
-
 /**
  * Displays the Claude-Flow banner
  */
 export function displayBanner(version: string): void {
-  const banner = `
+  const _banner = `
 ${chalk.cyan.bold('╔══════════════════════════════════════════════════════════════╗')}
 ${chalk.cyan.bold('║')}             ${chalk.white.bold('🧠 Claude-Flow')} ${chalk.gray('v' + version)}                        ${chalk.cyan.bold('║')}
 ${chalk.cyan.bold('║')}          ${chalk.gray('Advanced AI Agent Orchestration')}               ${chalk.cyan.bold('║')}
@@ -235,12 +205,11 @@ ${chalk.cyan.bold('╚═══════════════════�
 `;
   console.log(banner);
 }
-
 /**
  * Displays detailed version information
  */
 export function displayVersion(version: string, buildDate: string): void {
-  const info = [
+  const _info = [
     chalk.cyan.bold('Claude-Flow Version Information'),
     '',
     chalk.white('Version:    ') + chalk.yellow(version),
@@ -261,36 +230,34 @@ export function displayVersion(version: string, buildDate: string): void {
   
   console.log(info.join('\n'));
 }
-
 /**
  * Formats a progress bar
  */
 export function formatProgressBar(
   current: number,
   total: number,
-  width: number = 40,
+  width: number = _40,
   label?: string
 ): string {
-  const percentage = Math.min(100, (current / total) * 100);
-  const filled = Math.floor((percentage / 100) * width);
-  const empty = width - filled;
+  const _percentage = Math.min(_100, (current / total) * 100);
+  const _filled = Math.floor((percentage / 100) * width);
+  const _empty = width - filled;
   
-  const bar = chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
-  const percent = percentage.toFixed(1).padStart(5) + '%';
+  const _bar = chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
+  const _percent = percentage.toFixed(1).padStart(5) + '%';
   
-  let result = `[${bar}] ${percent}`;
+  let _result = `[${bar}] ${percent}`;
   if (label) {
     result = `${label}: ${result}`;
   }
   
   return result;
 }
-
 /**
  * Creates a status indicator
  */
 export function formatStatusIndicator(status: string): string {
-  const indicators = {
+  const _indicators = {
     success: chalk.green('✓'),
     error: chalk.red('✗'),
     warning: chalk.yellow('⚠'),
@@ -301,33 +268,29 @@ export function formatStatusIndicator(status: string): string {
   
   return indicators[status as keyof typeof indicators] || status;
 }
-
 /**
  * Formats a success message
  */
 export function formatSuccess(message: string): string {
   return chalk.green('✓') + ' ' + chalk.white(message);
 }
-
 /**
  * Formats an info message
  */
 export function formatInfo(message: string): string {
   return chalk.blue('ℹ') + ' ' + chalk.white(message);
 }
-
 /**
  * Formats a warning message
  */
 export function formatWarning(message: string): string {
   return chalk.yellow('⚠') + ' ' + chalk.white(message);
 }
-
 /**
  * Formats a spinner with message
  */
 export function formatSpinner(message: string, frame: number = 0): string {
-  const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-  const spinner = chalk.cyan(frames[frame % frames.length]);
+  const _frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+  const _spinner = chalk.cyan(frames[frame % frames.length]);
   return `${spinner} ${message}`;
 }

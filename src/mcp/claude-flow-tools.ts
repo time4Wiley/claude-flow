@@ -1,16 +1,12 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Claude-Flow specific MCP tools
  */
-
 import type { MCPTool, MCPContext, AgentProfile, Task, MemoryEntry } from '../utils/types.js';
 import type { ILogger } from '../core/logger.js';
 import type { Permissions } from './auth.js';
-
 export interface ClaudeFlowToolContext extends MCPContext {
-  orchestrator?: any; // Reference to orchestrator instance
+  orchestrator?: unknown; // Reference to orchestrator instance
 }
-
 /**
  * Create all Claude-Flow specific MCP tools
  */
@@ -21,43 +17,36 @@ export function createClaudeFlowTools(logger: ILogger): MCPTool[] {
     createListAgentsTool(logger),
     createTerminateAgentTool(logger),
     createGetAgentInfoTool(logger),
-
     // Task management tools
     createCreateTaskTool(logger),
     createListTasksTool(logger),
     createGetTaskStatusTool(logger),
     createCancelTaskTool(logger),
     createAssignTaskTool(logger),
-
     // Memory management tools
     createQueryMemoryTool(logger),
     createStoreMemoryTool(logger),
     createDeleteMemoryTool(logger),
     createExportMemoryTool(logger),
     createImportMemoryTool(logger),
-
     // System monitoring tools
     createGetSystemStatusTool(logger),
     createGetMetricsTool(logger),
     createHealthCheckTool(logger),
-
     // Configuration tools
     createGetConfigTool(logger),
     createUpdateConfigTool(logger),
     createValidateConfigTool(logger),
-
     // Workflow tools
     createExecuteWorkflowTool(logger),
     createCreateWorkflowTool(logger),
     createListWorkflowsTool(logger),
-
     // Terminal management tools
     createExecuteCommandTool(logger),
     createListTerminalsTool(logger),
     createCreateTerminalTool(logger),
   ];
 }
-
 function createSpawnAgentTool(logger: ILogger): MCPTool {
   return {
     name: 'agents/spawn',
@@ -104,15 +93,13 @@ function createSpawnAgentTool(logger: ILogger): MCPTool {
       },
       required: ['type', 'name'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Spawning agent', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Spawning agent', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const profile: AgentProfile = {
-        id: `agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      const _profile: AgentProfile = {
+        id: `agent_${Date.now()}_${Math.random().toString(36).substr(_2, 9)}`,
         name: input.name,
         type: input.type,
         capabilities: input.capabilities || [],
@@ -122,9 +109,7 @@ function createSpawnAgentTool(logger: ILogger): MCPTool {
         environment: input.environment,
         workingDirectory: input.workingDirectory,
       };
-
-      const sessionId = await context.orchestrator.spawnAgent(profile);
-
+      const _sessionId = await context.orchestrator.spawnAgent(profile);
       return {
         agentId: profile.id,
         sessionId,
@@ -135,7 +120,6 @@ function createSpawnAgentTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createListAgentsTool(logger: ILogger): MCPTool {
   return {
     name: 'agents/list',
@@ -155,25 +139,22 @@ function createListAgentsTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Listing agents', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Listing agents', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const agents = await context.orchestrator.listAgents();
+      const _agents = await context.orchestrator.listAgents();
       
-      let filteredAgents = agents;
+      let _filteredAgents = agents;
       
       if (!input.includeTerminated) {
-        filteredAgents = filteredAgents.filter((agent: any) => agent.status !== 'terminated');
+        filteredAgents = filteredAgents.filter((agent: unknown) => agent.status !== 'terminated');
       }
       
       if (input.filterByType) {
-        filteredAgents = filteredAgents.filter((agent: any) => agent.type === input.filterByType);
+        filteredAgents = filteredAgents.filter((agent: unknown) => agent.type === input.filterByType);
       }
-
       return {
         agents: filteredAgents,
         count: filteredAgents.length,
@@ -182,7 +163,6 @@ function createListAgentsTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createTerminateAgentTool(logger: ILogger): MCPTool {
   return {
     name: 'agents/terminate',
@@ -206,18 +186,15 @@ function createTerminateAgentTool(logger: ILogger): MCPTool {
       },
       required: ['agentId'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Terminating agent', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Terminating agent', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      await context.orchestrator.terminateAgent(input.agentId, {
+      await context.orchestrator.terminateAgent(input._agentId, {
         reason: input.reason || 'Manual termination',
-        graceful: input.graceful !== false,
+        graceful: input.graceful !== _false,
       });
-
       return {
         agentId: input.agentId,
         status: 'terminated',
@@ -227,7 +204,6 @@ function createTerminateAgentTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createGetAgentInfoTool(logger: ILogger): MCPTool {
   return {
     name: 'agents/info',
@@ -242,19 +218,15 @@ function createGetAgentInfoTool(logger: ILogger): MCPTool {
       },
       required: ['agentId'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Getting agent info', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Getting agent info', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const agentInfo = await context.orchestrator.getAgentInfo(input.agentId);
-
+      const _agentInfo = await context.orchestrator.getAgentInfo(input.agentId);
       if (!agentInfo) {
         throw new Error(`Agent not found: ${input.agentId}`);
       }
-
       return {
         agent: agentInfo,
         timestamp: new Date().toISOString(),
@@ -262,7 +234,6 @@ function createGetAgentInfoTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createCreateTaskTool(logger: ILogger): MCPTool {
   return {
     name: 'tasks/create',
@@ -308,32 +279,27 @@ function createCreateTaskTool(logger: ILogger): MCPTool {
       },
       required: ['type', 'description'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Creating task', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Creating task', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const task: Partial<Task> = {
+      const _task: Partial<Task> = {
         type: input.type,
         description: input.description,
         priority: input.priority || 5,
         dependencies: input.dependencies || [],
-        input: input.input || {},
+        input: input.input || { /* empty */ },
         status: 'pending',
         createdAt: new Date(),
       };
-
-      const taskId = await context.orchestrator.createTask(task);
-
+      const _taskId = await context.orchestrator.createTask(task);
       // Handle assignment
       if (input.assignToAgent) {
-        await context.orchestrator.assignTask(taskId, input.assignToAgent);
+        await context.orchestrator.assignTask(_taskId, input.assignToAgent);
       } else if (input.assignToAgentType) {
-        await context.orchestrator.assignTaskToType(taskId, input.assignToAgentType);
+        await context.orchestrator.assignTaskToType(_taskId, input.assignToAgentType);
       }
-
       return {
         taskId,
         task: { ...task, id: taskId },
@@ -342,7 +308,6 @@ function createCreateTaskTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createListTasksTool(logger: ILogger): MCPTool {
   return {
     name: 'tasks/list',
@@ -375,21 +340,18 @@ function createListTasksTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Listing tasks', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Listing tasks', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const tasks = await context.orchestrator.listTasks({
-        status: input.status,
-        agentId: input.agentId,
-        type: input.type,
-        limit: input.limit || 50,
-        offset: input.offset || 0,
+      const _tasks = await context.orchestrator.listTasks({
+        status: input._status,
+        agentId: input._agentId,
+        type: input._type,
+        limit: input.limit || _50,
+        offset: input.offset || _0,
       });
-
       return {
         tasks,
         count: tasks.length,
@@ -398,7 +360,6 @@ function createListTasksTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createGetTaskStatusTool(logger: ILogger): MCPTool {
   return {
     name: 'tasks/status',
@@ -413,19 +374,15 @@ function createGetTaskStatusTool(logger: ILogger): MCPTool {
       },
       required: ['taskId'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Getting task status', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Getting task status', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const task = await context.orchestrator.getTask(input.taskId);
-
+      const _task = await context.orchestrator.getTask(input.taskId);
       if (!task) {
         throw new Error(`Task not found: ${input.taskId}`);
       }
-
       return {
         task,
         timestamp: new Date().toISOString(),
@@ -433,7 +390,6 @@ function createGetTaskStatusTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createCancelTaskTool(logger: ILogger): MCPTool {
   return {
     name: 'tasks/cancel',
@@ -452,15 +408,12 @@ function createCancelTaskTool(logger: ILogger): MCPTool {
       },
       required: ['taskId'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Cancelling task', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Cancelling task', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      await context.orchestrator.cancelTask(input.taskId, input.reason || 'Manual cancellation');
-
+      await context.orchestrator.cancelTask(input._taskId, input.reason || 'Manual cancellation');
       return {
         taskId: input.taskId,
         status: 'cancelled',
@@ -470,7 +423,6 @@ function createCancelTaskTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createAssignTaskTool(logger: ILogger): MCPTool {
   return {
     name: 'tasks/assign',
@@ -489,15 +441,12 @@ function createAssignTaskTool(logger: ILogger): MCPTool {
       },
       required: ['taskId', 'agentId'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Assigning task', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Assigning task', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      await context.orchestrator.assignTask(input.taskId, input.agentId);
-
+      await context.orchestrator.assignTask(input._taskId, input.agentId);
       return {
         taskId: input.taskId,
         agentId: input.agentId,
@@ -507,7 +456,6 @@ function createAssignTaskTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createQueryMemoryTool(logger: ILogger): MCPTool {
   return {
     name: 'memory/query',
@@ -559,14 +507,12 @@ function createQueryMemoryTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Querying memory', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Querying memory', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const query = {
+      const _query = {
         agentId: input.agentId,
         sessionId: input.sessionId,
         type: input.type,
@@ -577,9 +523,7 @@ function createQueryMemoryTool(logger: ILogger): MCPTool {
         limit: input.limit || 50,
         offset: input.offset || 0,
       };
-
-      const entries = await context.orchestrator.queryMemory(query);
-
+      const _entries = await context.orchestrator.queryMemory(query);
       return {
         entries,
         count: entries.length,
@@ -589,7 +533,6 @@ function createQueryMemoryTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createStoreMemoryTool(logger: ILogger): MCPTool {
   return {
     name: 'memory/store',
@@ -630,27 +573,23 @@ function createStoreMemoryTool(logger: ILogger): MCPTool {
       },
       required: ['agentId', 'sessionId', 'type', 'content'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Storing memory', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Storing memory', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const entry: Partial<MemoryEntry> = {
+      const _entry: Partial<MemoryEntry> = {
         agentId: input.agentId,
         sessionId: input.sessionId,
         type: input.type,
         content: input.content,
-        context: input.context || {},
+        context: input.context || { /* empty */ },
         tags: input.tags || [],
         parentId: input.parentId,
         timestamp: new Date(),
         version: 1,
       };
-
-      const entryId = await context.orchestrator.storeMemory(entry);
-
+      const _entryId = await context.orchestrator.storeMemory(entry);
       return {
         entryId,
         entry: { ...entry, id: entryId },
@@ -659,7 +598,6 @@ function createStoreMemoryTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createDeleteMemoryTool(logger: ILogger): MCPTool {
   return {
     name: 'memory/delete',
@@ -674,15 +612,12 @@ function createDeleteMemoryTool(logger: ILogger): MCPTool {
       },
       required: ['entryId'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Deleting memory', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Deleting memory', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
       await context.orchestrator.deleteMemory(input.entryId);
-
       return {
         entryId: input.entryId,
         status: 'deleted',
@@ -691,7 +626,6 @@ function createDeleteMemoryTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createExportMemoryTool(logger: ILogger): MCPTool {
   return {
     name: 'memory/export',
@@ -725,21 +659,18 @@ function createExportMemoryTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Exporting memory', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Exporting memory', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const exportResult = await context.orchestrator.exportMemory({
+      const _exportResult = await context.orchestrator.exportMemory({
         format: input.format || 'json',
-        agentId: input.agentId,
-        sessionId: input.sessionId,
+        agentId: input._agentId,
+        sessionId: input._sessionId,
         startTime: input.startTime ? new Date(input.startTime) : undefined,
         endTime: input.endTime ? new Date(input.endTime) : undefined,
       });
-
       return {
         ...exportResult,
         timestamp: new Date().toISOString(),
@@ -747,7 +678,6 @@ function createExportMemoryTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createImportMemoryTool(logger: ILogger): MCPTool {
   return {
     name: 'memory/import',
@@ -774,19 +704,16 @@ function createImportMemoryTool(logger: ILogger): MCPTool {
       },
       required: ['filePath'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Importing memory', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Importing memory', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const importResult = await context.orchestrator.importMemory({
-        filePath: input.filePath,
+      const _importResult = await context.orchestrator.importMemory({
+        filePath: input._filePath,
         format: input.format || 'json',
         mergeStrategy: input.mergeStrategy || 'skip',
       });
-
       return {
         ...importResult,
         timestamp: new Date().toISOString(),
@@ -794,24 +721,20 @@ function createImportMemoryTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createGetSystemStatusTool(logger: ILogger): MCPTool {
   return {
     name: 'system/status',
     description: 'Get comprehensive system status information',
     inputSchema: {
       type: 'object',
-      properties: {},
+      properties: { /* empty */ },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
       logger.info('Getting system status', { sessionId: context?.sessionId });
-
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const status = await context.orchestrator.getSystemStatus();
-
+      const _status = await context.orchestrator.getSystemStatus();
       return {
         ...status,
         timestamp: new Date().toISOString(),
@@ -819,7 +742,6 @@ function createGetSystemStatusTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createGetMetricsTool(logger: ILogger): MCPTool {
   return {
     name: 'system/metrics',
@@ -835,15 +757,12 @@ function createGetMetricsTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Getting system metrics', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Getting system metrics', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const metrics = await context.orchestrator.getMetrics(input.timeRange || '1h');
-
+      const _metrics = await context.orchestrator.getMetrics(input.timeRange || '1h');
       return {
         metrics,
         timeRange: input.timeRange || '1h',
@@ -852,7 +771,6 @@ function createGetMetricsTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createHealthCheckTool(logger: ILogger): MCPTool {
   return {
     name: 'system/health',
@@ -867,15 +785,12 @@ function createHealthCheckTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Performing health check', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Performing health check', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const healthCheck = await context.orchestrator.performHealthCheck(input.deep || false);
-
+      const _healthCheck = await context.orchestrator.performHealthCheck(input.deep || false);
       return {
         ...healthCheck,
         timestamp: new Date().toISOString(),
@@ -883,7 +798,6 @@ function createHealthCheckTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createGetConfigTool(logger: ILogger): MCPTool {
   return {
     name: 'config/get',
@@ -898,15 +812,12 @@ function createGetConfigTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Getting configuration', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Getting configuration', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const config = await context.orchestrator.getConfig(input.section);
-
+      const _config = await context.orchestrator.getConfig(input.section);
       return {
         config,
         section: input.section,
@@ -915,7 +826,6 @@ function createGetConfigTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createUpdateConfigTool(logger: ILogger): MCPTool {
   return {
     name: 'config/update',
@@ -940,19 +850,16 @@ function createUpdateConfigTool(logger: ILogger): MCPTool {
       },
       required: ['section', 'config'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Updating configuration', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Updating configuration', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const result = await context.orchestrator.updateConfig(
-        input.section,
-        input.config,
+      const _result = await context.orchestrator.updateConfig(
+        input._section,
+        input._config,
         input.restart || false
       );
-
       return {
         ...result,
         timestamp: new Date().toISOString(),
@@ -960,7 +867,6 @@ function createUpdateConfigTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createValidateConfigTool(logger: ILogger): MCPTool {
   return {
     name: 'config/validate',
@@ -975,15 +881,12 @@ function createValidateConfigTool(logger: ILogger): MCPTool {
       },
       required: ['config'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Validating configuration', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Validating configuration', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const validation = await context.orchestrator.validateConfig(input.config);
-
+      const _validation = await context.orchestrator.validateConfig(input.config);
       return {
         ...validation,
         timestamp: new Date().toISOString(),
@@ -991,7 +894,6 @@ function createValidateConfigTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createExecuteWorkflowTool(logger: ILogger): MCPTool {
   return {
     name: 'workflow/execute',
@@ -1013,23 +915,19 @@ function createExecuteWorkflowTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Executing workflow', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Executing workflow', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
       if (!input.filePath && !input.workflow) {
         throw new Error('Either filePath or workflow must be provided');
       }
-
-      const result = await context.orchestrator.executeWorkflow({
-        filePath: input.filePath,
-        workflow: input.workflow,
-        parameters: input.parameters || {},
+      const _result = await context.orchestrator.executeWorkflow({
+        filePath: input._filePath,
+        workflow: input._workflow,
+        parameters: input.parameters || { /* empty */ },
       });
-
       return {
         ...result,
         timestamp: new Date().toISOString(),
@@ -1037,7 +935,6 @@ function createExecuteWorkflowTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createCreateWorkflowTool(logger: ILogger): MCPTool {
   return {
     name: 'workflow/create',
@@ -1078,22 +975,18 @@ function createCreateWorkflowTool(logger: ILogger): MCPTool {
       },
       required: ['name', 'tasks'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Creating workflow', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Creating workflow', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const workflow = {
+      const _workflow = {
         name: input.name,
         description: input.description,
         tasks: input.tasks,
         created: new Date().toISOString(),
       };
-
-      const result = await context.orchestrator.createWorkflow(workflow, input.savePath);
-
+      const _result = await context.orchestrator.createWorkflow(_workflow, input.savePath);
       return {
         ...result,
         workflow,
@@ -1102,7 +995,6 @@ function createCreateWorkflowTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createListWorkflowsTool(logger: ILogger): MCPTool {
   return {
     name: 'workflow/list',
@@ -1116,15 +1008,12 @@ function createListWorkflowsTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Listing workflows', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Listing workflows', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const workflows = await context.orchestrator.listWorkflows(input.directory);
-
+      const _workflows = await context.orchestrator.listWorkflows(input.directory);
       return {
         workflows,
         count: workflows.length,
@@ -1133,7 +1022,6 @@ function createListWorkflowsTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createExecuteCommandTool(logger: ILogger): MCPTool {
   return {
     name: 'terminal/execute',
@@ -1170,22 +1058,19 @@ function createExecuteCommandTool(logger: ILogger): MCPTool {
       },
       required: ['command'],
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Executing command', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Executing command', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const result = await context.orchestrator.executeCommand({
-        command: input.command,
-        args: input.args,
-        cwd: input.cwd,
-        env: input.env,
-        timeout: input.timeout || 30000,
-        terminalId: input.terminalId,
+      const _result = await context.orchestrator.executeCommand({
+        command: input._command,
+        args: input._args,
+        cwd: input._cwd,
+        env: input._env,
+        timeout: input.timeout || _30000,
+        terminalId: input._terminalId,
       });
-
       return {
         ...result,
         timestamp: new Date().toISOString(),
@@ -1193,7 +1078,6 @@ function createExecuteCommandTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createListTerminalsTool(logger: ILogger): MCPTool {
   return {
     name: 'terminal/list',
@@ -1208,15 +1092,12 @@ function createListTerminalsTool(logger: ILogger): MCPTool {
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Listing terminals', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Listing terminals', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const terminals = await context.orchestrator.listTerminals(input.includeIdle !== false);
-
+      const _terminals = await context.orchestrator.listTerminals(input.includeIdle !== false);
       return {
         terminals,
         count: terminals.length,
@@ -1225,7 +1106,6 @@ function createListTerminalsTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function createCreateTerminalTool(logger: ILogger): MCPTool {
   return {
     name: 'terminal/create',
@@ -1243,23 +1123,20 @@ function createCreateTerminalTool(logger: ILogger): MCPTool {
         },
         shell: {
           type: 'string',
-          description: 'Shell to use (bash, zsh, etc.)',
+          description: 'Shell to use (_bash, _zsh, etc.)',
         },
       },
     },
-    handler: async (input: any, context?: ClaudeFlowToolContext) => {
-      logger.info('Creating terminal', { input, sessionId: context?.sessionId });
-
+    handler: async (input: _unknown, context?: ClaudeFlowToolContext) => {
+      logger.info('Creating terminal', { _input, sessionId: context?.sessionId });
       if (!context?.orchestrator) {
         throw new Error('Orchestrator not available');
       }
-
-      const terminal = await context.orchestrator.createTerminal({
-        cwd: input.cwd,
-        env: input.env,
-        shell: input.shell,
+      const _terminal = await context.orchestrator.createTerminal({
+        cwd: input._cwd,
+        env: input._env,
+        shell: input._shell,
       });
-
       return {
         terminal,
         timestamp: new Date().toISOString(),
@@ -1267,15 +1144,13 @@ function createCreateTerminalTool(logger: ILogger): MCPTool {
     },
   };
 }
-
 function getDefaultSystemPrompt(type: string): string {
-  const prompts = {
+  const _prompts = {
     coordinator: 'You are a coordinator agent responsible for planning, delegating, and orchestrating tasks across multiple agents.',
     researcher: 'You are a research agent specialized in gathering, analyzing, and synthesizing information from various sources.',
     implementer: 'You are an implementation agent focused on writing code, creating solutions, and executing technical tasks.',
     analyst: 'You are an analysis agent that identifies patterns, generates insights, and provides data-driven recommendations.',
     custom: 'You are a specialized agent with custom capabilities defined by your configuration.',
   };
-
   return prompts[type as keyof typeof prompts] || prompts.custom;
 }

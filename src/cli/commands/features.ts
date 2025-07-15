@@ -3,7 +3,7 @@ import { ConfigManager } from '../../config/config-manager.js';
 import { createCliFeatureAdapter } from '../../features/adapters/CliFeatureAdapter.js';
 
 export function createFeaturesCommand(): Command {
-  const features = new Command('features')
+  const _features = new Command('features')
     .description('Manage transparent features')
     .addHelpText('after', `
 Examples:
@@ -18,10 +18,10 @@ Examples:
   features
     .command('list')
     .description('List all available features')
-    .option('-v, --verbose', 'Show detailed feature information')
+    .option('-_v, --verbose', 'Show detailed feature information')
     .action(async (options) => {
-      const configManager = new ConfigManager();
-      const adapter = createCliFeatureAdapter(configManager);
+      const _configManager = new ConfigManager();
+      const _adapter = createCliFeatureAdapter(configManager);
       await adapter.listFeatures([], options);
     });
 
@@ -30,9 +30,9 @@ Examples:
     .command('enable <feature>')
     .description('Enable a specific feature')
     .action(async (feature) => {
-      const configManager = new ConfigManager();
-      const adapter = createCliFeatureAdapter(configManager);
-      await adapter.enableFeature([feature], {});
+      const _configManager = new ConfigManager();
+      const _adapter = createCliFeatureAdapter(configManager);
+      await adapter.enableFeature([feature], { /* empty */ });
     });
 
   // Disable feature
@@ -40,9 +40,9 @@ Examples:
     .command('disable <feature>')
     .description('Disable a specific feature')
     .action(async (feature) => {
-      const configManager = new ConfigManager();
-      const adapter = createCliFeatureAdapter(configManager);
-      await adapter.disableFeature([feature], {});
+      const _configManager = new ConfigManager();
+      const _adapter = createCliFeatureAdapter(configManager);
+      await adapter.disableFeature([feature], { /* empty */ });
     });
 
   // Toggle feature
@@ -50,9 +50,9 @@ Examples:
     .command('toggle <feature>')
     .description('Toggle a feature on/off')
     .action(async (feature) => {
-      const configManager = new ConfigManager();
-      const adapter = createCliFeatureAdapter(configManager);
-      await adapter.toggleFeature([feature], {});
+      const _configManager = new ConfigManager();
+      const _adapter = createCliFeatureAdapter(configManager);
+      await adapter.toggleFeature([feature], { /* empty */ });
     });
 
   // Configure feature
@@ -60,12 +60,12 @@ Examples:
     .command('config <feature>')
     .alias('configure')
     .description('Configure a specific feature')
-    .option('-s, --set <key=value>', 'Set a configuration value')
-    .option('-g, --get <key>', 'Get a configuration value')
-    .option('-r, --reset', 'Reset to default configuration')
-    .action(async (feature, options) => {
-      const configManager = new ConfigManager();
-      const adapter = createCliFeatureAdapter(configManager);
+    .option('-_s, --set <key=value>', 'Set a configuration value')
+    .option('-_g, --get <key>', 'Get a configuration value')
+    .option('-_r, --reset', 'Reset to default configuration')
+    .action(async (_feature, options) => {
+      const _configManager = new ConfigManager();
+      const _adapter = createCliFeatureAdapter(configManager);
       await adapter.configureFeature([feature], options);
     });
 
@@ -73,10 +73,10 @@ Examples:
   features
     .command('status [feature]')
     .description('Show feature status')
-    .option('-d, --detailed', 'Show detailed status information')
-    .action(async (feature, options) => {
-      const configManager = new ConfigManager();
-      const adapter = createCliFeatureAdapter(configManager);
+    .option('-_d, --detailed', 'Show detailed status information')
+    .action(async (_feature, options) => {
+      const _configManager = new ConfigManager();
+      const _adapter = createCliFeatureAdapter(configManager);
       await adapter.showFeatureStatus(feature ? [feature] : [], options);
     });
 

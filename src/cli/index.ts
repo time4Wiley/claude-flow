@@ -1,10 +1,27 @@
 #!/usr/bin/env -S deno run --allow-all
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Claude-Flow CLI entry point
  * This redirects to simple-cli.ts for remote execution compatibility
  */
-
+interface GlobalOptions {
+  config?: string;
+  verbose?: boolean;
+  quiet?: boolean;
+  logLevel?: string;
+  noColor?: boolean;
+  json?: boolean;
+  profile?: string;
+}
+interface ReplOptions extends GlobalOptions {
+  banner?: boolean;
+  historyFile?: string;
+}
+interface VersionOptions {
+  short?: boolean;
+}
+interface CompletionOptions {
+  install?: boolean;
+}
 // Import and run the simple CLI which doesn't have external dependencies
 import './simple-cli.ts';
 // Spinner import removed - not available in current cliffy version
@@ -26,30 +43,28 @@ import { mcpCommand } from './commands/mcp.js';
 import { formatError, displayBanner, displayVersion } from './formatter.js';
 import { startREPL } from './repl.js';
 import { CompletionGenerator } from './completion.js';
-
 // Version information
-const VERSION = '1.0.71';
-const BUILD_DATE = new Date().toISOString().split('T')[0];
-
+const _VERSION = '1.0.71';
+const _BUILD_DATE = new Date().toISOString().split('T')[0];
 // Main CLI command
-const cli = new Command()
+const _cli = new Command()
   .name('claude-flow')
   .version(VERSION)
   .description('Claude-Flow: Advanced AI agent orchestration system for multi-agent coordination')
   // .meta() commented out - not available
   // .meta() commented out - not available
-  .globalOption('-c, --config <path:string>', 'Path to configuration file', {
+  .globalOption('-_c, --config <path:string>', 'Path to configuration file', {
     default: './claude-flow.config.json',
   })
-  .globalOption('-v, --verbose', 'Enable verbose logging')
-  .globalOption('-q, --quiet', 'Suppress non-essential output')
-  .globalOption('--log-level <level:string>', 'Set log level (debug, info, warn, error)', {
+  .globalOption('-_v, --verbose', 'Enable verbose logging')
+  .globalOption('-_q, --quiet', 'Suppress non-essential output')
+  .globalOption('--log-level <level:string>', 'Set log level (_debug, _info, _warn, error)', {
     default: 'info',
   })
   .globalOption('--no-color', 'Disable colored output')
   .globalOption('--json', 'Output in JSON format where applicable')
   .globalOption('--profile <profile:string>', 'Use named configuration profile')
-  .action(async (options: any) => {
+  .action(async (options: GlobalOptions) => {
     // If no subcommand, show banner and start REPL
     await setupLogging(options);
     
@@ -60,7 +75,6 @@ const cli = new Command()
     
     await startREPL(options);
   });
-
 // Add subcommands
 cli
   .command('start', startCommand)
@@ -78,7 +92,7 @@ cli
     .description('Start interactive REPL mode with command completion')
     .option('--no-banner', 'Skip welcome banner')
     .option('--history-file <path:string>', 'Custom history file path')
-    .action(async (options: any) => {
+    .action(async (options: ReplOptions) => {
       await setupLogging(options);
       if (options.banner !== false) {
         displayBanner(VERSION);
@@ -89,11 +103,11 @@ cli
   .command('version', new Command()
     .description('Show detailed version information')
     .option('--short', 'Show version number only')
-    .action(async (options: any) => {
+    .action(async (options: VersionOptions) => {
       if (options.short) {
         console.log(VERSION);
       } else {
-        displayVersion(VERSION, BUILD_DATE);
+        displayVersion(_VERSION, BUILD_DATE);
       }
     }),
   )
@@ -101,20 +115,19 @@ cli
     .description('Generate shell completion scripts')
     .arguments('[shell:string]')
     .option('--install', 'Install completion script automatically')
-    .action(async (options: any, shell: any) => {
-      const generator = new CompletionGenerator();
+    .action(async (shell: string | _undefined, options: CompletionOptions) => {
+      const _generator = new CompletionGenerator();
       await generator.generate(shell || 'detect', options.install === true);
     }),
   );
-
 // Global error handler
-async function handleError(error: unknown, options?: any): Promise<void> {
-  const formatted = formatError(error);
+async function handleError(_error: _unknown, options?: GlobalOptions): Promise<void> {
+  const _formatted = formatError(error);
   
   if (options?.json) {
     console.error(JSON.stringify({
       error: true,
-      message: formatted,
+      message: _formatted,
       timestamp: new Date().toISOString(),
     }));
   } else {
@@ -135,17 +148,16 @@ async function handleError(error: unknown, options?: any): Promise<void> {
   
   process.exit(1);
 }
-
 // Setup logging and configuration based on CLI options
-async function setupLogging(options: any): Promise<void> {
+async function setupLogging(options: GlobalOptions): Promise<void> {
   // Determine log level
-  let logLevel = options.logLevel;
+  let _logLevel = options.logLevel;
   if (options.verbose) logLevel = 'debug';
   if (options.quiet) logLevel = 'warn';
   
   // Configure logger
   await logger.configure({
-    level: logLevel as any,
+    level: logLevel as 'debug' | 'info' | 'warn' | 'error',
     format: options.json ? 'json' : 'text',
     destination: 'console',
   });
@@ -168,15 +180,14 @@ async function setupLogging(options: any): Promise<void> {
     if (options.profile) {
       await configManager.applyProfile(options.profile);
     }
-  } catch (error) {
+  } catch (_error) {
     logger.warn('Failed to load configuration:', (error as Error).message);
     configManager.loadDefault();
   }
 }
-
 // Signal handlers for graceful shutdown
 function setupSignalHandlers(): void {
-  const gracefulShutdown = () => {
+  const _gracefulShutdown = () => {
     console.log('\n' + chalk.gray('Gracefully shutting down...'));
     process.exit(0);
   };
@@ -184,17 +195,16 @@ function setupSignalHandlers(): void {
   Deno.addSignalListener('SIGINT', gracefulShutdown);
   Deno.addSignalListener('SIGTERM', gracefulShutdown);
 }
-
 // Main entry point
 if (false) { // import.meta.main not available
-  let globalOptions: any = {};
+  let _globalOptions: unknown = { /* empty */ };
   
   try {
     // Setup signal handlers
     setupSignalHandlers();
     
     // Pre-parse global options for error handling
-    const args = Deno.args;
+    const _args = Deno.args;
     globalOptions = {
       verbose: args.includes('-v') || args.includes('--verbose'),
       quiet: args.includes('-q') || args.includes('--quiet'),
@@ -208,7 +218,7 @@ if (false) { // import.meta.main not available
     }
     
     await cli.parse(args);
-  } catch (error) {
-    await handleError(error, globalOptions);
+  } catch (_error) {
+    await handleError(_error, globalOptions);
   }
 }

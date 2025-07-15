@@ -1,13 +1,11 @@
 /**
  * Coordinator Agent - Specialized in task orchestration and management
  */
-
 import { BaseAgent } from './base-agent.js';
 import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
-
 // Type definitions for coordinator activities
 interface ResourceAssignment {
   resource: string;
@@ -15,25 +13,22 @@ interface ResourceAssignment {
   utilization: number;
   duration: string;
 }
-
 interface TaskProgressItem {
   name: string;
   status: string;
   duration: string;
 }
-
 export class CoordinatorAgent extends BaseAgent {
   constructor(
     id: string,
-    config: AgentConfig,
-    environment: AgentEnvironment,
-    logger: ILogger,
-    eventBus: IEventBus,
+    config: _AgentConfig,
+    environment: _AgentEnvironment,
+    logger: _ILogger,
+    eventBus: _IEventBus,
     memory: DistributedMemorySystem
   ) {
-    super(id, 'coordinator', config, environment, logger, eventBus, memory);
+    super(_id, 'coordinator', _config, _environment, _logger, _eventBus, memory);
   }
-
   protected getDefaultCapabilities(): AgentCapabilities {
     return {
       codeGeneration: false,
@@ -75,7 +70,6 @@ export class CoordinatorAgent extends BaseAgent {
       quality: 0.88
     };
   }
-
   protected getDefaultConfig(): Partial<AgentConfig> {
     return {
       autonomyLevel: 0.9,
@@ -109,14 +103,12 @@ export class CoordinatorAgent extends BaseAgent {
       }
     };
   }
-
-  override async executeTask(task: TaskDefinition): Promise<any> {
+  override async executeTask(task: TaskDefinition): Promise<unknown> {
     this.logger.info('Coordinator executing task', {
-      agentId: this.id,
-      taskType: task.type,
+      agentId: this._id,
+      taskType: task._type,
       taskId: task.id
     });
-
     try {
       switch (task.type) {
         case 'task-orchestration':
@@ -134,28 +126,25 @@ export class CoordinatorAgent extends BaseAgent {
         default:
           return await this.performGeneralCoordination(task);
       }
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Coordination task failed', {
-        agentId: this.id,
-        taskId: task.id,
+        agentId: this._id,
+        taskId: task._id,
         error: error instanceof Error ? error.message : String(error)
       });
       throw error;
     }
   }
-
-  private async orchestrateTasks(task: TaskDefinition): Promise<any> {
-    const tasks = task.parameters?.tasks || [];
-    const strategy = task.parameters?.strategy || 'sequential';
-    const priority = task.parameters?.priority || 'balanced';
-
+  private async orchestrateTasks(task: TaskDefinition): Promise<unknown> {
+    const _tasks = task.parameters?.tasks || [];
+    const _strategy = task.parameters?.strategy || 'sequential';
+    const _priority = task.parameters?.priority || 'balanced';
     this.logger.info('Orchestrating tasks', {
-      taskCount: tasks.length,
-      strategy,
+      taskCount: tasks._length,
+      _strategy,
       priority
     });
-
-    const orchestration = {
+    const _orchestration = {
       strategy,
       priority,
       tasks: [],
@@ -165,7 +154,7 @@ export class CoordinatorAgent extends BaseAgent {
         critical_path: [],
         milestones: []
       },
-      resource_allocation: {},
+      resource_allocation: { /* empty */ },
       monitoring: {
         checkpoints: [],
         alerts: [],
@@ -177,34 +166,28 @@ export class CoordinatorAgent extends BaseAgent {
       },
       timestamp: new Date()
     };
-
     // Simulate task orchestration
     await this.delay(2000);
-
-    orchestration.tasks = tasks.map((t: any, index: number) => ({
+    orchestration.tasks = tasks.map((t: _any, index: number) => ({
       id: t.id || `task-${index + 1}`,
       name: t.name || `Task ${index + 1}`,
       status: 'pending',
       assignee: null,
-      estimated_duration: t.duration || 30,
+      estimated_duration: t.duration || _30,
       dependencies: t.dependencies || []
     }));
-
     return orchestration;
   }
-
-  private async trackProgress(task: TaskDefinition): Promise<any> {
-    const project = task.parameters?.project;
-    const timeframe = task.parameters?.timeframe || 'weekly';
-    const metrics = task.parameters?.metrics || ['completion', 'velocity', 'quality'];
-
+  private async trackProgress(task: TaskDefinition): Promise<unknown> {
+    const _project = task.parameters?.project;
+    const _timeframe = task.parameters?.timeframe || 'weekly';
+    const _metrics = task.parameters?.metrics || ['completion', 'velocity', 'quality'];
     this.logger.info('Tracking progress', {
-      project,
-      timeframe,
+      _project,
+      _timeframe,
       metrics
     });
-
-    const progress = {
+    const _progress = {
       project,
       timeframe,
       metrics,
@@ -233,10 +216,8 @@ export class CoordinatorAgent extends BaseAgent {
       recommendations: [],
       timestamp: new Date()
     };
-
     // Simulate progress tracking
     await this.delay(1500);
-
     progress.summary = {
       overall_progress: 68,
       tasks_completed: 15,
@@ -244,37 +225,31 @@ export class CoordinatorAgent extends BaseAgent {
       tasks_pending: 4,
       blockers: 1
     };
-
     return progress;
   }
-
-  private async allocateResources(task: TaskDefinition): Promise<any> {
-    const resources = task.input?.resources || [];
-    const requirements = task.input?.requirements || [];
-    const constraints = task.input?.constraints || [];
-
+  private async allocateResources(task: TaskDefinition): Promise<unknown> {
+    const _resources = task.input?.resources || [];
+    const _requirements = task.input?.requirements || [];
+    const _constraints = task.input?.constraints || [];
     this.logger.info('Allocating resources', {
-      resources: resources.length,
-      requirements: requirements.length,
+      resources: resources._length,
+      requirements: requirements._length,
       constraints: constraints.length
     });
-
-    const allocation = {
+    const _allocation = {
       resources,
       requirements,
       constraints,
       assignments: [] as ResourceAssignment[],
-      utilization: {},
-      conflicts: [] as any[],
-      optimizations: [] as any[],
-      recommendations: [] as any[],
+      utilization: { /* empty */ },
+      conflicts: [] as unknown[],
+      optimizations: [] as unknown[],
+      recommendations: [] as unknown[],
       efficiency: 0,
       timestamp: new Date()
     };
-
     // Simulate resource allocation
     await this.delay(2500);
-
     allocation.assignments = [
       {
         resource: 'Agent-001',
@@ -291,30 +266,26 @@ export class CoordinatorAgent extends BaseAgent {
     ];
     
     allocation.efficiency = 0.85;
-
     return allocation;
   }
-
-  private async manageWorkflow(task: TaskDefinition): Promise<any> {
-    const workflow = task.input?.workflow;
-    const stage = task.input?.stage || 'planning';
-    const automation = task.input?.automation || false;
-
+  private async manageWorkflow(task: TaskDefinition): Promise<unknown> {
+    const _workflow = task.input?.workflow;
+    const _stage = task.input?.stage || 'planning';
+    const _automation = task.input?.automation || false;
     this.logger.info('Managing workflow', {
-      workflow,
-      stage,
+      _workflow,
+      _stage,
       automation
     });
-
-    const management = {
+    const _management = {
       workflow,
       stage,
       automation,
       stages: [] as TaskProgressItem[],
-      transitions: [] as any[],
-      approvals: [] as any[],
-      bottlenecks: [] as any[],
-      optimizations: [] as any[],
+      transitions: [] as unknown[],
+      approvals: [] as unknown[],
+      bottlenecks: [] as unknown[],
+      optimizations: [] as unknown[],
       sla_compliance: {
         on_time: 0,
         quality: 0,
@@ -322,32 +293,26 @@ export class CoordinatorAgent extends BaseAgent {
       },
       timestamp: new Date()
     };
-
     // Simulate workflow management
     await this.delay(2000);
-
     management.stages = [
       { name: 'Planning', status: 'completed', duration: '2 days' },
       { name: 'Development', status: 'in_progress', duration: '5 days' },
       { name: 'Testing', status: 'pending', duration: '2 days' },
       { name: 'Deployment', status: 'pending', duration: '1 day' }
     ];
-
     return management;
   }
-
-  private async coordinateTeam(task: TaskDefinition): Promise<any> {
-    const team = task.parameters?.team || [];
-    const objectives = task.parameters?.objectives || [];
-    const communication = task.parameters?.communication || 'daily';
-
+  private async coordinateTeam(task: TaskDefinition): Promise<unknown> {
+    const _team = task.parameters?.team || [];
+    const _objectives = task.parameters?.objectives || [];
+    const _communication = task.parameters?.communication || 'daily';
     this.logger.info('Coordinating team', {
-      teamSize: team.length,
-      objectives: objectives.length,
+      teamSize: team._length,
+      objectives: objectives._length,
       communication
     });
-
-    const coordination = {
+    const _coordination = {
       team,
       objectives,
       communication,
@@ -359,7 +324,7 @@ export class CoordinatorAgent extends BaseAgent {
         frequency: communication
       },
       performance: {
-        individual: {},
+        individual: { /* empty */ },
         team: {
           productivity: 0,
           satisfaction: 0,
@@ -370,55 +335,47 @@ export class CoordinatorAgent extends BaseAgent {
       improvements: [],
       timestamp: new Date()
     };
-
     // Simulate team coordination
     await this.delay(1800);
-
     coordination.performance.team = {
       productivity: 0.82,
       satisfaction: 0.88,
       collaboration_score: 0.85
     };
-
     return coordination;
   }
-
-  private async generateStatusReport(task: TaskDefinition): Promise<any> {
-    const scope = task.input?.scope || 'project';
-    const period = task.input?.period || 'weekly';
-    const audience = task.input?.audience || 'stakeholders';
-    const format = task.input?.format || 'summary';
-
+  private async generateStatusReport(task: TaskDefinition): Promise<unknown> {
+    const _scope = task.input?.scope || 'project';
+    const _period = task.input?.period || 'weekly';
+    const _audience = task.input?.audience || 'stakeholders';
+    const _format = task.input?.format || 'summary';
     this.logger.info('Generating status report', {
-      scope,
-      period,
-      audience,
+      _scope,
+      _period,
+      _audience,
       format
     });
-
-    const report = {
+    const _report = {
       scope,
       period,
       audience,
       format,
       executive_summary: '',
-      key_metrics: {},
+      key_metrics: { /* empty */ },
       achievements: [] as string[],
-      challenges: [] as any[],
-      next_steps: [] as any[],
-      risks: [] as any[],
-      recommendations: [] as any[],
+      challenges: [] as unknown[],
+      next_steps: [] as unknown[],
+      risks: [] as unknown[],
+      recommendations: [] as unknown[],
       appendix: {
-        detailed_metrics: {},
-        charts: [] as any[],
-        raw_data: {}
+        detailed_metrics: { /* empty */ },
+        charts: [] as unknown[],
+        raw_data: { /* empty */ }
       },
       timestamp: new Date()
     };
-
     // Simulate report generation
     await this.delay(3000);
-
     report.executive_summary = 'Project is 68% complete and on track for delivery. Team productivity is high with minor blockers identified.';
     
     report.key_metrics = {
@@ -433,24 +390,19 @@ export class CoordinatorAgent extends BaseAgent {
       'Achieved 85% test coverage',
       'Resolved 3 critical bugs'
     ];
-
     return report;
   }
-
-  private async performGeneralCoordination(task: TaskDefinition): Promise<any> {
+  private async performGeneralCoordination(task: TaskDefinition): Promise<unknown> {
     this.logger.info('Performing general coordination', {
       description: task.description
     });
-
     // Default to task orchestration
     return await this.orchestrateTasks(task);
   }
-
   private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(_resolve, ms));
   }
-
-  override getAgentStatus(): any {
+  override getAgentStatus(): unknown {
     return {
       ...super.getAgentStatus(),
       specialization: 'Task Orchestration & Project Management',
@@ -470,16 +422,15 @@ export class CoordinatorAgent extends BaseAgent {
     };
   }
 }
-
-export const createCoordinatorAgent = (
+export const _createCoordinatorAgent = (
   id: string,
   config: Partial<AgentConfig>,
   environment: Partial<AgentEnvironment>,
-  logger: ILogger,
-  eventBus: IEventBus,
+  logger: _ILogger,
+  eventBus: _IEventBus,
   memory: DistributedMemorySystem
 ): CoordinatorAgent => {
-  const defaultConfig = {
+  const _defaultConfig = {
     autonomyLevel: 0.9,
     learningEnabled: true,
     adaptationEnabled: true,
@@ -511,14 +462,14 @@ export const createCoordinatorAgent = (
       teamSize: 'medium'
     }
   };
-  const defaultEnv = {
+  const _defaultEnv = {
     runtime: 'deno' as const,
     version: '1.40.0',
     workingDirectory: './agents/coordinator',
     tempDirectory: './tmp/coordinator',
     logDirectory: './logs/coordinator',
-    apiEndpoints: {},
-    credentials: {},
+    apiEndpoints: { /* empty */ },
+    credentials: { /* empty */ },
     availableTools: [
       'task-manager',
       'workflow-orchestrator',
@@ -530,13 +481,12 @@ export const createCoordinatorAgent = (
       communication: { frequency: 'regular', style: 'clear' }
     }
   };
-
   return new CoordinatorAgent(
-    id,
-    { ...defaultConfig, ...config } as AgentConfig,
-    { ...defaultEnv, ...environment } as AgentEnvironment,
-    logger,
-    eventBus,
+    _id,
+    { ..._defaultConfig, ...config } as _AgentConfig,
+    { ..._defaultEnv, ...environment } as _AgentEnvironment,
+    _logger,
+    _eventBus,
     memory
   );
 };

@@ -1,12 +1,11 @@
 #!/usr/bin/env node
+/* global Deno */
 /**
  * GitHub command wrapper for simple CLI
  * Provides GitHub workflow automation capabilities
  */
-
 import { printSuccess, printError, printWarning } from '../utils.js';
-
-const GITHUB_MODES = {
+const _GITHUB_MODES = {
   'gh-coordinator': {
     description: 'GitHub workflow orchestration and coordination',
     examples: [
@@ -50,21 +49,16 @@ const GITHUB_MODES = {
     ]
   }
 };
-
 function showGitHubHelp() {
   console.log(`
 🐙 Claude Flow GitHub Workflow Automation
-
 USAGE:
   claude-flow github <mode> <objective> [options]
-
 GITHUB AUTOMATION MODES:
 `);
-
-  for (const [mode, info] of Object.entries(GITHUB_MODES)) {
+  for (const [_mode, info] of Object.entries(GITHUB_MODES)) {
     console.log(`  ${mode.padEnd(18)} ${info.description}`);
   }
-
   console.log(`
 EXAMPLES:
   claude-flow github pr-manager "create feature PR with automated testing"
@@ -73,7 +67,6 @@ EXAMPLES:
   claude-flow github repo-architect "optimize repository structure"
   claude-flow github issue-tracker "analyze project roadmap issues"
   claude-flow github sync-coordinator "sync package versions across repos"
-
 OPTIONS:
   --auto-approve             Auto-approve Claude permissions
   --verbose                  Enable detailed logging
@@ -81,7 +74,6 @@ OPTIONS:
   --repo <name>              Target specific repository
   --branch <name>            Target specific branch
   --template <name>          Use specific workflow template
-
 ADVANCED FEATURES:
   • Multi-reviewer coordination with automated scheduling
   • Intelligent issue categorization and assignment
@@ -89,21 +81,17 @@ ADVANCED FEATURES:
   • Release pipeline orchestration with rollback capabilities
   • Repository structure analysis and optimization recommendations
   • Cross-repository dependency management and synchronization
-
 For complete documentation:
 https://github.com/ruvnet/claude-code-flow/docs/github.md
 `);
 }
-
-export async function githubCommand(args, flags) {
+export async function githubCommand(_args, flags) {
   if (!args || args.length === 0) {
     showGitHubHelp();
     return;
   }
-
-  const mode = args[0];
-  const objective = args.slice(1).join(' ').trim();
-
+  const _mode = args[0];
+  const _objective = args.slice(1).join(' ').trim();
   if (!objective) {
     printError(`❌ Usage: github ${mode} <objective>`);
     
@@ -114,22 +102,20 @@ export async function githubCommand(args, flags) {
       }
     } else {
       console.log('\nAvailable modes:');
-      for (const [modeName, info] of Object.entries(GITHUB_MODES)) {
+      for (const [_modeName, info] of Object.entries(GITHUB_MODES)) {
         console.log(`  ${modeName} - ${info.description}`);
       }
     }
     return;
   }
-
   if (!GITHUB_MODES[mode]) {
     printError(`❌ Unknown GitHub mode: ${mode}`);
     console.log('\nAvailable modes:');
-    for (const [modeName, info] of Object.entries(GITHUB_MODES)) {
+    for (const [_modeName, info] of Object.entries(GITHUB_MODES)) {
       console.log(`  ${modeName} - ${info.description}`);
     }
     return;
   }
-
   printSuccess(`🐙 GitHub ${mode} mode activated`);
   console.log(`📋 Objective: ${objective}`);
   
@@ -144,7 +130,6 @@ export async function githubCommand(args, flags) {
     console.log('\n⚠️  DRY RUN - GitHub workflow configuration preview');
     return;
   }
-
   try {
     // Check if Claude is available
     const { execSync } = await import('child_process');
@@ -154,71 +139,58 @@ export async function githubCommand(args, flags) {
     } catch (e) {
       printWarning('⚠️  Claude CLI not found. GitHub automation requires Claude.');
       console.log('Install Claude: https://claude.ai/code');
-      console.log('\nAlternatively, this would execute:');
+      console.log('_nAlternatively, this would execute:');
       console.log(`1. Initialize ${mode} workflow for: ${objective}`);
       console.log('2. Set up GitHub integration and permissions');
       console.log('3. Configure automation rules and triggers');
       console.log('4. Execute workflow with monitoring and reporting');
       return;
     }
-
     // Build the prompt for Claude using GitHub workflow methodology
-    const githubPrompt = `Execute GitHub workflow automation using ${mode} mode:
-
+    const _githubPrompt = `Execute GitHub workflow automation using ${mode} mode:
 OBJECTIVE: ${objective}
-
 GITHUB MODE: ${mode}
 DESCRIPTION: ${GITHUB_MODES[mode].description}
-
 CONFIGURATION:
 - Repository: ${flags.repo || 'current directory repository'}
 - Branch: ${flags.branch || 'current branch'}
 - Template: ${flags.template || 'default workflow'}
 - Auto-approve: ${flags['auto-approve'] || false}
 - Verbose: ${flags.verbose || false}
-
 GITHUB WORKFLOW REQUIREMENTS:
-
 1. REPOSITORY ANALYSIS:
    - Analyze current repository structure and configuration
    - Check existing workflows, branches, and protection rules
    - Identify integration points and dependencies
    - Document current state and proposed changes
-
 2. WORKFLOW DESIGN:
    - Design GitHub Actions workflows appropriate for the objective
    - Create or update .github/workflows/ files
    - Configure triggers, jobs, and steps
    - Set up proper permissions and security measures
-
 3. INTEGRATION SETUP:
    - Configure branch protection rules if needed
    - Set up automated testing and quality gates
    - Configure deployment pipelines if applicable
    - Set up notifications and monitoring
-
 4. AUTOMATION IMPLEMENTATION:
    - Create or update GitHub Actions YAML files
    - Set up any required secrets and environment variables
    - Configure automated issue and PR management
    - Implement approval workflows and review assignments
-
 5. MONITORING & REPORTING:
    - Set up workflow monitoring and status reporting
    - Configure failure notifications and alerts
    - Create documentation for the automation
    - Set up metrics and analytics collection
-
 EXECUTION APPROACH:
 1. Analyze the current repository and GitHub configuration
 2. Design the appropriate workflow automation for the objective
 3. Create or update GitHub Actions and configuration files
 4. Test the workflow with proper validation
 5. Document the automation and provide usage instructions
-
 TARGET DIRECTORY:
 Use the current repository's .github/ directory for workflows and configuration.
-
 IMPORTANT:
 - Create actual, working GitHub Actions workflows - not templates
 - Include proper error handling and security measures
@@ -226,15 +198,13 @@ IMPORTANT:
 - Follow GitHub Actions best practices and conventions
 - Ensure workflows are production-ready and maintainable
 - Include proper testing and validation steps
-
 Begin execution now. Create all necessary GitHub workflow files and configuration.`;
-
     console.log('🚀 Launching GitHub automation via Claude...');
     
     // Execute Claude with the GitHub prompt
     const { spawn } = await import('child_process');
     
-    const claudeArgs = [];
+    const _claudeArgs = [];
     
     // Add auto-permission flag if requested
     if (flags['auto-approve'] || flags['dangerously-skip-permissions']) {
@@ -242,7 +212,7 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
     }
     
     // Spawn claude process
-    const claudeProcess = spawn('claude', claudeArgs, {
+    const _claudeProcess = spawn('claude', _claudeArgs, {
       stdio: ['pipe', 'inherit', 'inherit'],
       shell: false
     });
@@ -252,7 +222,7 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
     claudeProcess.stdin.end();
     
     // Wait for the process to complete
-    await new Promise((resolve, reject) => {
+    await new Promise((_resolve, reject) => {
       claudeProcess.on('close', (code) => {
         if (code === 0) {
           printSuccess('✅ GitHub automation completed successfully!');
@@ -266,8 +236,7 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
         reject(err);
       });
     });
-
-  } catch (error) {
+  } catch (_error) {
     printError(`❌ GitHub automation failed: ${error.message}`);
     
     // Fallback implementation details
@@ -282,19 +251,18 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
     console.log('Install Claude: https://claude.ai/code');
   }
 }
-
 // Allow direct execution for testing
 if (import.meta.main) {
-  const args = [];
-  const flags = {};
+  const _args = [];
+  const _flags = { /* empty */ };
   
   // Parse arguments and flags from Deno.args if available
   if (typeof Deno !== 'undefined' && Deno.args) {
-    for (let i = 0; i < Deno.args.length; i++) {
-      const arg = Deno.args[i];
+    for (let _i = 0; i < Deno.args.length; i++) {
+      const _arg = Deno.args[i];
       if (arg.startsWith('--')) {
-        const flagName = arg.substring(2);
-        const nextArg = Deno.args[i + 1];
+        const _flagName = arg.substring(2);
+        const _nextArg = Deno.args[i + 1];
         
         if (nextArg && !nextArg.startsWith('--')) {
           flags[flagName] = nextArg;
@@ -308,5 +276,5 @@ if (import.meta.main) {
     }
   }
   
-  await githubCommand(args, flags);
+  await githubCommand(_args, flags);
 }

@@ -1,4 +1,3 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 // Main exports for the swarm system
 export * from './coordinator.js';
 export * from './executor.js';
@@ -7,17 +6,14 @@ export * from './strategies/base.js';
 export * from './strategies/auto.js';
 export * from './strategies/research.js';
 export * from './memory.js';
-
 // Prompt copying system exports
 export * from './prompt-copier.js';
 export * from './prompt-copier-enhanced.js';
 export * from './prompt-utils.js';
 export * from './prompt-manager.js';
 export * from './prompt-cli.js';
-
 // Optimizations
 export * from './optimizations/index.js';
-
 // Utility function to get all exports
 export function getSwarmComponents() {
   return {

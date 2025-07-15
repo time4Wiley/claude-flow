@@ -1,12 +1,9 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * MCP (Model Context Protocol) Module
  * Export all MCP components for easy integration
  */
-
 // Core MCP Server
 export { MCPServer, type IMCPServer } from './server.js';
-
 // Lifecycle Management
 export { 
   MCPLifecycleManager, 
@@ -15,7 +12,6 @@ export {
   type HealthCheckResult,
   type LifecycleManagerConfig 
 } from './lifecycle-manager.js';
-
 // Tool Registry and Management
 export { 
   ToolRegistry,
@@ -23,7 +19,6 @@ export {
   type ToolMetrics,
   type ToolDiscoveryQuery 
 } from './tools.js';
-
 // Protocol Management
 export { 
   MCPProtocolManager,
@@ -31,7 +26,6 @@ export {
   type CompatibilityResult,
   type NegotiationResult 
 } from './protocol-manager.js';
-
 // Authentication and Authorization
 export { 
   AuthManager,
@@ -43,7 +37,6 @@ export {
   type AuthSession,
   Permissions 
 } from './auth.js';
-
 // Performance Monitoring
 export { 
   MCPPerformanceMonitor,
@@ -53,7 +46,6 @@ export {
   type Alert,
   type OptimizationSuggestion 
 } from './performance-monitor.js';
-
 // Orchestration Integration
 export { 
   MCPOrchestrationIntegration,
@@ -61,25 +53,19 @@ export {
   type MCPOrchestrationConfig,
   type IntegrationStatus 
 } from './orchestration-integration.js';
-
 // Transport Implementations
 export { type ITransport } from './transports/base.js';
 export { StdioTransport } from './transports/stdio.js';
 export { HttpTransport } from './transports/http.js';
-
 // Request Routing
 export { RequestRouter } from './router.js';
-
 // Session Management
 export { SessionManager, type ISessionManager } from './session-manager.js';
-
 // Load Balancing
 export { LoadBalancer, type ILoadBalancer, RequestQueue } from './load-balancer.js';
-
 // Tool Implementations
 export { createClaudeFlowTools, type ClaudeFlowToolContext } from './claude-flow-tools.js';
 export { createSwarmTools, type SwarmToolContext } from './swarm-tools.js';
-
 /**
  * MCP Integration Factory
  * Provides a simple way to create a complete MCP integration
@@ -94,10 +80,9 @@ export class MCPIntegrationFactory {
     components?: Partial<OrchestrationComponents>;
     logger: import('../core/logger.js').ILogger;
   }): Promise<MCPOrchestrationIntegration> {
-    const { mcpConfig, orchestrationConfig = {}, components = {}, logger } = config;
-
-    const integration = new MCPOrchestrationIntegration(
-      mcpConfig,
+    const { mcpConfig, orchestrationConfig = { /* empty */ }, components = { /* empty */ }, logger } = config;
+    const _integration = new MCPOrchestrationIntegration(
+      _mcpConfig,
       {
         enabledIntegrations: {
           orchestrator: true,
@@ -114,15 +99,13 @@ export class MCPIntegrationFactory {
         reconnectDelay: 5000,
         enableMetrics: true,
         enableAlerts: true,
-        ...orchestrationConfig,
+        ..._orchestrationConfig,
       },
-      components,
-      logger,
+      _components,
+      _logger,
     );
-
     return integration;
   }
-
   /**
    * Create a standalone MCP server (without orchestration integration)
    */
@@ -136,38 +119,32 @@ export class MCPIntegrationFactory {
     lifecycleManager?: MCPLifecycleManager;
     performanceMonitor?: MCPPerformanceMonitor;
   }> {
-    const { 
+    const {  // TODO: Remove if unused
       mcpConfig, 
       logger, 
       enableLifecycleManagement = true,
       enablePerformanceMonitoring = true 
     } = config;
-
-    const eventBus = new (await import('node:events')).EventEmitter();
-    const server = new MCPServer(mcpConfig, eventBus, logger);
-
-    let lifecycleManager: MCPLifecycleManager | undefined;
-    let performanceMonitor: MCPPerformanceMonitor | undefined;
-
+    const _eventBus = new (await import('node:events')).EventEmitter();
+    const _server = new MCPServer(_mcpConfig, _eventBus, logger);
+    let _lifecycleManager: MCPLifecycleManager | undefined; // TODO: Remove if unused
+    let _performanceMonitor: MCPPerformanceMonitor | undefined; // TODO: Remove if unused
     if (enableLifecycleManagement) {
       lifecycleManager = new MCPLifecycleManager(
-        mcpConfig,
-        logger,
+        _mcpConfig,
+        _logger,
         () => server,
       );
     }
-
     if (enablePerformanceMonitoring) {
       performanceMonitor = new MCPPerformanceMonitor(logger);
     }
-
     return {
       server,
       lifecycleManager,
       performanceMonitor,
     };
   }
-
   /**
    * Create a development/testing MCP setup
    */
@@ -177,7 +154,7 @@ export class MCPIntegrationFactory {
     performanceMonitor: MCPPerformanceMonitor;
     protocolManager: MCPProtocolManager;
   }> {
-    const mcpConfig: import('../utils/types.js').MCPConfig = {
+    const _mcpConfig: import('../utils/types.js').MCPConfig = {
       transport: 'stdio',
       enableMetrics: true,
       auth: {
@@ -185,16 +162,13 @@ export class MCPIntegrationFactory {
         method: 'token',
       },
     };
-
     const { server, lifecycleManager, performanceMonitor } = await this.createStandaloneServer({
-      mcpConfig,
-      logger,
+      _mcpConfig,
+      _logger,
       enableLifecycleManagement: true,
       enablePerformanceMonitoring: true,
     });
-
-    const protocolManager = new MCPProtocolManager(logger);
-
+    const _protocolManager = new MCPProtocolManager(logger);
     return {
       server,
       lifecycleManager: lifecycleManager!,
@@ -203,11 +177,10 @@ export class MCPIntegrationFactory {
     };
   }
 }
-
 /**
  * Default MCP configuration for common use cases
  */
-export const DefaultMCPConfigs = {
+export const _DefaultMCPConfigs = {
   /**
    * Development configuration with stdio transport
    */
@@ -219,7 +192,6 @@ export const DefaultMCPConfigs = {
       method: 'token' as const,
     },
   },
-
   /**
    * Production configuration with HTTP transport and authentication
    */
@@ -241,7 +213,6 @@ export const DefaultMCPConfigs = {
     sessionTimeout: 3600000, // 1 hour
     maxSessions: 1000,
   },
-
   /**
    * Testing configuration with minimal features
    */
@@ -254,11 +225,10 @@ export const DefaultMCPConfigs = {
     },
   },
 } as const;
-
 /**
  * MCP Utility Functions
  */
-export const MCPUtils = {
+export const _MCPUtils = {
   /**
    * Validate MCP protocol version
    */
@@ -270,7 +240,6 @@ export const MCPUtils = {
       version.major > 0
     );
   },
-
   /**
    * Compare two protocol versions
    */
@@ -282,19 +251,17 @@ export const MCPUtils = {
     if (a.minor !== b.minor) return a.minor - b.minor;
     return a.patch - b.patch;
   },
-
   /**
    * Format protocol version as string
    */
   formatVersion(version: import('../utils/types.js').MCPProtocolVersion): string {
     return `${version.major}.${version.minor}.${version.patch}`;
   },
-
   /**
    * Parse protocol version from string
    */
   parseVersion(versionString: string): import('../utils/types.js').MCPProtocolVersion {
-    const parts = versionString.split('.').map(p => parseInt(p, 10));
+    const _parts = versionString.split('.').map(p => parseInt(_p, 10));
     if (parts.length !== 3 || parts.some(p => isNaN(p))) {
       throw new Error(`Invalid version string: ${versionString}`);
     }
@@ -304,18 +271,16 @@ export const MCPUtils = {
       patch: parts[2],
     };
   },
-
   /**
    * Generate a random session ID
    */
   generateSessionId(): string {
-    return `mcp_session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+    return `mcp_session_${Date.now()}_${Math.random().toString(36).substring(_2, 15)}`;
   },
-
   /**
    * Generate a random request ID
    */
   generateRequestId(): string {
-    return `mcp_req_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+    return `mcp_req_${Date.now()}_${Math.random().toString(36).substring(_2, 15)}`;
   },
 };

@@ -1,21 +1,16 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * ruv-swarm CLI commands for Claude Code integration
  * 
  * This module provides CLI commands that interact with the ruv-swarm
  * package to enable advanced swarm coordination and neural capabilities.
  */
-
 import { success, error, warning, info } from '../cli-core.js';
 import type { CommandContext } from '../cli-core.js';
 import { getRuvSwarmConfigManager } from '../../config/ruv-swarm-config.js';
 import { execAsync } from '../../utils/helpers.js';
-import { Logger } from '../../core/logger.js';
 import { isRuvSwarmAvailable, initializeRuvSwarmIntegration } from '../../mcp/ruv-swarm-tools.js';
-
 // Create logger for CLI commands
-const logger = new Logger({ level: 'info', format: 'text', destination: 'console' });
-
+const _logger = new Logger({ level: 'info', format: 'text', destination: 'console' });
 /**
  * Main ruv-swarm command handler
  */
@@ -25,16 +20,16 @@ export async function ruvSwarmAction(ctx: CommandContext) {
     return;
   }
   
-  const subcommand = ctx.args[0];
-  const subArgs = ctx.args.slice(1);
-  const subCtx: CommandContext = {
+  const _subcommand = ctx.args[0];
+  const _subArgs = ctx.args.slice(1);
+  const _subCtx: CommandContext = {
     ...ctx,
     args: subArgs
   };
   
   try {
     // Check if ruv-swarm is available first
-    const available = await isRuvSwarmAvailable(logger);
+    const _available = await isRuvSwarmAvailable(logger);
     if (!available) {
       error('ruv-swarm is not available');
       console.log('Install it with: npm install -g ruv-swarm');
@@ -44,35 +39,55 @@ export async function ruvSwarmAction(ctx: CommandContext) {
     
     switch (subcommand) {
       case 'init':
-        await handleInit(subCtx);
-        break;
+        {
+await handleInit(subCtx);
+        
+}break;
       case 'status':
-        await handleStatus(subCtx);
-        break;
+        {
+await handleStatus(subCtx);
+        
+}break;
       case 'spawn':
-        await handleSpawn(subCtx);
-        break;
+        {
+await handleSpawn(subCtx);
+        
+}break;
       case 'list':
-        await handleList(subCtx);
-        break;
+        {
+await handleList(subCtx);
+        
+}break;
       case 'orchestrate':
-        await handleOrchestrate(subCtx);
-        break;
+        {
+await handleOrchestrate(subCtx);
+        
+}break;
       case 'monitor':
-        await handleMonitor(subCtx);
-        break;
+        {
+await handleMonitor(subCtx);
+        
+}break;
       case 'neural':
-        await handleNeural(subCtx);
-        break;
+        {
+await handleNeural(subCtx);
+        
+}break;
       case 'benchmark':
-        await handleBenchmark(subCtx);
-        break;
+        {
+await handleBenchmark(subCtx);
+        
+}break;
       case 'config':
-        await handleConfig(subCtx);
-        break;
+        {
+await handleConfig(subCtx);
+        
+}break;
       case 'memory':
-        await handleMemory(subCtx);
-        break;
+        {
+await handleMemory(subCtx);
+        
+}break;
       default:
         error(`Unknown ruv-swarm subcommand: ${subcommand}`);
         showRuvSwarmHelp();
@@ -82,16 +97,15 @@ export async function ruvSwarmAction(ctx: CommandContext) {
     error(`ruv-swarm command failed: ${(err as Error).message}`);
   }
 }
-
 /**
  * Show ruv-swarm help
  */
 function showRuvSwarmHelp() {
-  console.log('ruv-swarm - Advanced AI swarm coordination with neural capabilities\
+  console.log('ruv-swarm - Advanced AI swarm coordination with neural capabilities
 ');
   
   console.log('Usage:');
-  console.log('  claude-flow ruv-swarm <command> [options]\
+  console.log('  claude-flow ruv-swarm <command> [options]
 ');
   
   console.log('Commands:');
@@ -104,7 +118,7 @@ function showRuvSwarmHelp() {
   console.log('  neural <subcommand>        Neural capabilities management');
   console.log('  benchmark [--type]         Run performance benchmarks');
   console.log('  config <subcommand>        Configuration management');
-  console.log('  memory [--detail]          Memory usage and management\
+  console.log('  memory [--detail]          Memory usage and management
 ');
   
   console.log('Examples:');
@@ -114,17 +128,16 @@ function showRuvSwarmHelp() {
   console.log('  claude-flow ruv-swarm neural train --iterations 20');
   console.log('  claude-flow ruv-swarm benchmark --type swarm');
 }
-
 /**
  * Handle swarm initialization
  */
 async function handleInit(ctx: CommandContext) {
-  const topology = ctx.flags.topology as string || 'mesh';
-  const maxAgents = ctx.flags.maxAgents as number || ctx.flags['max-agents'] as number || 5;
-  const strategy = ctx.flags.strategy as string || 'balanced';
+  const _topology = ctx.flags.topology as string || 'mesh';
+  const _maxAgents = ctx.flags.maxAgents as number || ctx.flags['max-agents'] as number || 5;
+  const _strategy = ctx.flags.strategy as string || 'balanced';
   
   if (!['mesh', 'hierarchical', 'ring', 'star'].includes(topology)) {
-    error('Invalid topology. Use: mesh, hierarchical, ring, or star');
+    error('Invalid topology. Use: _mesh, _hierarchical, _ring, or star');
     return;
   }
   
@@ -136,8 +149,8 @@ async function handleInit(ctx: CommandContext) {
   info(`Initializing ruv-swarm with ${topology} topology...`);
   
   try {
-    const command = `npx ruv-swarm swarm init --topology ${topology} --max-agents ${maxAgents} --strategy ${strategy}`;
-    const result = await execAsync(command);
+    const _command = `npx ruv-swarm swarm init --topology ${topology} --max-agents ${maxAgents} --strategy ${strategy}`;
+    const _result = await execAsync(command);
     
     if (result.stdout) {
       success('Swarm initialized successfully!');
@@ -145,7 +158,7 @@ async function handleInit(ctx: CommandContext) {
     }
     
     // Initialize integration
-    const integration = await initializeRuvSwarmIntegration(process.cwd(), logger);
+    const _integration = await initializeRuvSwarmIntegration(process.cwd(), logger);
     if (integration.success) {
       info('Claude Code integration enabled');
     } else {
@@ -156,27 +169,26 @@ async function handleInit(ctx: CommandContext) {
     error(`Failed to initialize swarm: ${(err as Error).message}`);
   }
 }
-
 /**
  * Handle swarm status
  */
 async function handleStatus(ctx: CommandContext) {
-  const verbose = ctx.flags.verbose as boolean || ctx.flags.v as boolean || false;
+  const _verbose = ctx.flags.verbose as boolean || ctx.flags.v as boolean || false;
   
   try {
-    const command = `npx ruv-swarm swarm status${verbose ? ' --verbose' : ''}`;
-    const result = await execAsync(command);
+    const _command = `npx ruv-swarm swarm status${verbose ? ' --verbose' : ''}`;
+    const _result = await execAsync(command);
     
     if (result.stdout) {
       // Try to parse as JSON for better formatting
       try {
-        const statusData = JSON.parse(result.stdout);
+        const _statusData = JSON.parse(result.stdout);
         
         if (statusData.success && statusData.data) {
-          console.log('🐝 Swarm Status:\
+          console.log('🐝 Swarm Status:
 ');
           
-          const data = statusData.data;
+          const _data = statusData.data;
           if (data.swarmId) {
             console.log(`  Swarm ID: ${data.swarmId}`);
           }
@@ -187,16 +199,16 @@ async function handleStatus(ctx: CommandContext) {
             console.log(`  Active Agents: ${data.agents.active || 0}/${data.agents.total || 0}`);
           }
           if (data.tasks !== undefined) {
-            console.log(`  Tasks: ${data.tasks.completed || 0} completed, ${data.tasks.running || 0} running`);
+            console.log(`  Tasks: ${data.tasks.completed || 0} _completed, ${data.tasks.running || 0} running`);
           }
           if (data.memory) {
             console.log(`  Memory Usage: ${data.memory.used || 'N/A'}`);
           }
           
           if (verbose && data.details) {
-            console.log('\
+            console.log('
 📋 Detailed Status:');
-            console.log(JSON.stringify(data.details, null, 2));
+            console.log(JSON.stringify(data._details, null, 2));
           }
         } else {
           console.log(result.stdout);
@@ -215,7 +227,6 @@ async function handleStatus(ctx: CommandContext) {
     error(`Failed to get swarm status: ${(err as Error).message}`);
   }
 }
-
 /**
  * Handle agent spawning
  */
@@ -223,24 +234,24 @@ async function handleSpawn(ctx: CommandContext) {
   if (ctx.args.length === 0) {
     error('Agent type is required');
     console.log('Usage: claude-flow ruv-swarm spawn <type> [--name <name>]');
-    console.log('Types: researcher, coder, analyst, optimizer, coordinator');
+    console.log('Types: _researcher, _coder, _analyst, _optimizer, coordinator');
     return;
   }
   
-  const type = ctx.args[0];
-  const name = ctx.flags.name as string;
-  const capabilities = ctx.flags.capabilities as string;
+  const _type = ctx.args[0];
+  const _name = ctx.flags.name as string;
+  const _capabilities = ctx.flags.capabilities as string;
   
   if (!['researcher', 'coder', 'analyst', 'optimizer', 'coordinator'].includes(type)) {
     error('Invalid agent type');
-    console.log('Valid types: researcher, coder, analyst, optimizer, coordinator');
+    console.log('Valid types: _researcher, _coder, _analyst, _optimizer, coordinator');
     return;
   }
   
   info(`Spawning ${type} agent...`);
   
   try {
-    let command = `npx ruv-swarm agent spawn --type ${type}`;
+    let _command = `npx ruv-swarm agent spawn --type ${type}`;
     
     if (name) {
       command += ` --name \"${name}\"`;
@@ -250,11 +261,11 @@ async function handleSpawn(ctx: CommandContext) {
       command += ` --capabilities \"${capabilities}\"`;
     }
     
-    const result = await execAsync(command);
+    const _result = await execAsync(command);
     
     if (result.stdout) {
       try {
-        const spawnData = JSON.parse(result.stdout);
+        const _spawnData = JSON.parse(result.stdout);
         if (spawnData.success) {
           success('Agent spawned successfully!');
           console.log(`  Agent ID: ${spawnData.data.agentId}`);
@@ -274,20 +285,19 @@ async function handleSpawn(ctx: CommandContext) {
     error(`Failed to spawn agent: ${(err as Error).message}`);
   }
 }
-
 /**
  * Handle agent listing
  */
 async function handleList(ctx: CommandContext) {
-  const filter = ctx.flags.filter as string || 'all';
+  const _filter = ctx.flags.filter as string || 'all';
   
   try {
-    const command = `npx ruv-swarm agent list --filter ${filter}`;
-    const result = await execAsync(command);
+    const _command = `npx ruv-swarm agent list --filter ${filter}`;
+    const _result = await execAsync(command);
     
     if (result.stdout) {
       try {
-        const listData = JSON.parse(result.stdout);
+        const _listData = JSON.parse(result.stdout);
         if (listData.success && listData.data.agents) {
           console.log(`🤖 Agents (${listData.data.count}):`);
           
@@ -296,8 +306,8 @@ async function handleList(ctx: CommandContext) {
             return;
           }
           
-          listData.data.agents.forEach((agent: any, index: number) => {
-            console.log(`\
+          listData.data.agents.forEach((agent: _any, index: number) => {
+            console.log(`
   ${index + 1}. ${agent.id || agent.agentId}`);
             console.log(`     Type: ${agent.type}`);
             console.log(`     Status: ${agent.status}`);
@@ -320,7 +330,6 @@ async function handleList(ctx: CommandContext) {
     error(`Failed to list agents: ${(err as Error).message}`);
   }
 }
-
 /**
  * Handle task orchestration
  */
@@ -331,25 +340,25 @@ async function handleOrchestrate(ctx: CommandContext) {
     return;
   }
   
-  const task = ctx.args.join(' ');
-  const strategy = ctx.flags.strategy as string || 'adaptive';
-  const priority = ctx.flags.priority as string || 'medium';
-  const maxAgents = ctx.flags.maxAgents as number || ctx.flags['max-agents'] as number;
+  const _task = ctx.args.join(' ');
+  const _strategy = ctx.flags.strategy as string || 'adaptive';
+  const _priority = ctx.flags.priority as string || 'medium';
+  const _maxAgents = ctx.flags.maxAgents as number || ctx.flags['max-agents'] as number;
   
   info(`Orchestrating task: ${task}`);
   
   try {
-    let command = `npx ruv-swarm task orchestrate --task \"${task}\" --strategy ${strategy} --priority ${priority}`;
+    let _command = `npx ruv-swarm task orchestrate --task \"${task}\" --strategy ${strategy} --priority ${priority}`;
     
     if (maxAgents) {
       command += ` --max-agents ${maxAgents}`;
     }
     
-    const result = await execAsync(command);
+    const _result = await execAsync(command);
     
     if (result.stdout) {
       try {
-        const taskData = JSON.parse(result.stdout);
+        const _taskData = JSON.parse(result.stdout);
         if (taskData.success) {
           success('Task orchestration started!');
           console.log(`  Task ID: ${taskData.data.taskId}`);
@@ -371,19 +380,18 @@ async function handleOrchestrate(ctx: CommandContext) {
     error(`Failed to orchestrate task: ${(err as Error).message}`);
   }
 }
-
 /**
  * Handle swarm monitoring
  */
 async function handleMonitor(ctx: CommandContext) {
-  const duration = ctx.flags.duration as number || 30;
-  const interval = ctx.flags.interval as number || 5;
+  const _duration = ctx.flags.duration as number || 30;
+  const _interval = ctx.flags.interval as number || 5;
   
   info(`Monitoring swarm for ${duration} seconds...`);
   
   try {
-    const command = `npx ruv-swarm swarm monitor --duration ${duration} --interval ${interval}`;
-    const result = await execAsync(command);
+    const _command = `npx ruv-swarm swarm monitor --duration ${duration} --interval ${interval}`;
+    const _result = await execAsync(command);
     
     if (result.stdout) {
       console.log(result.stdout);
@@ -393,7 +401,6 @@ async function handleMonitor(ctx: CommandContext) {
     error(`Failed to monitor swarm: ${(err as Error).message}`);
   }
 }
-
 /**
  * Handle neural capabilities
  */
@@ -406,19 +413,19 @@ async function handleNeural(ctx: CommandContext) {
     return;
   }
   
-  const subcommand = ctx.args[0];
+  const _subcommand = ctx.args[0];
   
   try {
     switch (subcommand) {
       case 'status': {
-        const agentId = ctx.flags.agentId as string || ctx.flags['agent-id'] as string;
-        let command = 'npx ruv-swarm neural status';
+        const _agentId = ctx.flags.agentId as string || ctx.flags['agent-id'] as string;
+        let _command = 'npx ruv-swarm neural status';
         
         if (agentId) {
           command += ` --agent-id ${agentId}`;
         }
         
-        const result = await execAsync(command);
+        const _result = await execAsync(command);
         if (result.stdout) {
           console.log(result.stdout);
         }
@@ -426,10 +433,10 @@ async function handleNeural(ctx: CommandContext) {
       }
       
       case 'train': {
-        const agentId = ctx.flags.agentId as string || ctx.flags['agent-id'] as string;
-        const iterations = ctx.flags.iterations as number || 10;
+        const _agentId = ctx.flags.agentId as string || ctx.flags['agent-id'] as string;
+        const _iterations = ctx.flags.iterations as number || 10;
         
-        let command = `npx ruv-swarm neural train --iterations ${iterations}`;
+        let _command = `npx ruv-swarm neural train --iterations ${iterations}`;
         
         if (agentId) {
           command += ` --agent-id ${agentId}`;
@@ -437,7 +444,7 @@ async function handleNeural(ctx: CommandContext) {
         
         info(`Training neural agents for ${iterations} iterations...`);
         
-        const result = await execAsync(command);
+        const _result = await execAsync(command);
         if (result.stdout) {
           console.log(result.stdout);
         }
@@ -445,10 +452,10 @@ async function handleNeural(ctx: CommandContext) {
       }
       
       case 'patterns': {
-        const pattern = ctx.flags.pattern as string || 'all';
-        const command = `npx ruv-swarm neural patterns --pattern ${pattern}`;
+        const _pattern = ctx.flags.pattern as string || 'all';
+        const _command = `npx ruv-swarm neural patterns --pattern ${pattern}`;
         
-        const result = await execAsync(command);
+        const _result = await execAsync(command);
         if (result.stdout) {
           console.log(result.stdout);
         }
@@ -463,19 +470,18 @@ async function handleNeural(ctx: CommandContext) {
     error(`Neural command failed: ${(err as Error).message}`);
   }
 }
-
 /**
  * Handle benchmarking
  */
 async function handleBenchmark(ctx: CommandContext) {
-  const type = ctx.flags.type as string || 'all';
-  const iterations = ctx.flags.iterations as number || 10;
+  const _type = ctx.flags.type as string || 'all';
+  const _iterations = ctx.flags.iterations as number || 10;
   
   info(`Running ${type} benchmark with ${iterations} iterations...`);
   
   try {
-    const command = `npx ruv-swarm benchmark run --type ${type} --iterations ${iterations}`;
-    const result = await execAsync(command);
+    const _command = `npx ruv-swarm benchmark run --type ${type} --iterations ${iterations}`;
+    const _result = await execAsync(command);
     
     if (result.stdout) {
       console.log(result.stdout);
@@ -485,7 +491,6 @@ async function handleBenchmark(ctx: CommandContext) {
     error(`Benchmark failed: ${(err as Error).message}`);
   }
 }
-
 /**
  * Handle configuration management
  */
@@ -499,16 +504,16 @@ async function handleConfig(ctx: CommandContext) {
     return;
   }
   
-  const subcommand = ctx.args[0];
-  const configManager = getRuvSwarmConfigManager(logger);
+  const _subcommand = ctx.args[0];
+  const _configManager = getRuvSwarmConfigManager(logger);
   
   try {
     switch (subcommand) {
       case 'show': {
-        const config = configManager.getConfig();
-        console.log('🔧 ruv-swarm Configuration:\
+        const _config = configManager.getConfig();
+        console.log('🔧 ruv-swarm Configuration:
 ');
-        console.log(JSON.stringify(config, null, 2));
+        console.log(JSON.stringify(_config, null, 2));
         break;
       }
       
@@ -519,8 +524,8 @@ async function handleConfig(ctx: CommandContext) {
           return;
         }
         
-        const path = ctx.args[1];
-        const value = ctx.args[2];
+        const _path = ctx.args[1];
+        const _value = ctx.args[2];
         const [section, key] = path.split('.');
         
         if (!section || !key) {
@@ -529,12 +534,12 @@ async function handleConfig(ctx: CommandContext) {
         }
         
         // Parse value
-        let parsedValue: any = value;
+        let _parsedValue: unknown = value;
         if (value === 'true') parsedValue = true;
         else if (value === 'false') parsedValue = false;
         else if (!isNaN(Number(value))) parsedValue = Number(value);
         
-        const updates = { [section]: { [key]: parsedValue } };
+        const _updates = { [section]: { [key]: parsedValue } };
         configManager.updateConfig(updates);
         
         success(`Configuration updated: ${path} = ${value}`);
@@ -548,7 +553,7 @@ async function handleConfig(ctx: CommandContext) {
       }
       
       case 'validate': {
-        const validation = configManager.validateConfig();
+        const _validation = configManager.validateConfig();
         if (validation.valid) {
           success('Configuration is valid');
         } else {
@@ -566,25 +571,24 @@ async function handleConfig(ctx: CommandContext) {
     error(`Config command failed: ${(err as Error).message}`);
   }
 }
-
 /**
  * Handle memory management
  */
 async function handleMemory(ctx: CommandContext) {
-  const detail = ctx.flags.detail as string || 'summary';
+  const _detail = ctx.flags.detail as string || 'summary';
   
   try {
-    const command = `npx ruv-swarm memory usage --detail ${detail}`;
-    const result = await execAsync(command);
+    const _command = `npx ruv-swarm memory usage --detail ${detail}`;
+    const _result = await execAsync(command);
     
     if (result.stdout) {
       try {
-        const memoryData = JSON.parse(result.stdout);
+        const _memoryData = JSON.parse(result.stdout);
         if (memoryData.success) {
-          console.log('💾 Memory Usage:\
+          console.log('💾 Memory Usage:
 ');
           
-          const data = memoryData.data;
+          const _data = memoryData.data;
           if (data.total !== undefined) {
             console.log(`  Total Memory: ${formatBytes(data.total)}`);
           }
@@ -599,9 +603,9 @@ async function handleMemory(ctx: CommandContext) {
           }
           
           if (detail === 'detailed' && data.breakdown) {
-            console.log('\
+            console.log('
 📊 Memory Breakdown:');
-            console.log(JSON.stringify(data.breakdown, null, 2));
+            console.log(JSON.stringify(data._breakdown, null, 2));
           }
         } else {
           console.log(result.stdout);
@@ -615,17 +619,15 @@ async function handleMemory(ctx: CommandContext) {
     error(`Failed to get memory usage: ${(err as Error).message}`);
   }
 }
-
 /**
  * Format bytes to human readable string
  */
 function formatBytes(bytes: number): string {
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const _sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   if (bytes === 0) return '0 B';
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  const _i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return Math.round(bytes / Math.pow(_1024, i) * 100) / 100 + ' ' + sizes[i];
 }
-
 export default {
   ruvSwarmAction
 };

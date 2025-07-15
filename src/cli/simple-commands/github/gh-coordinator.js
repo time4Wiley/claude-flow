@@ -1,52 +1,45 @@
-/* eslint-env node */
 #!/usr/bin/env node
+/* eslint-env node */
 /**
  * GitHub Coordinator Command
  * Provides GitHub workflow orchestration and coordination capabilities
  */
-
 import { printSuccess, printError, printWarning, printInfo } from '../utils.js';
 import { githubAPI } from './github-api.js';
 import { execSync } from 'child_process';
-
 class GitHubCoordinator {
   constructor() {
     this.api = githubAPI;
     this.workflows = new Map();
     this.activeCoordinations = new Map();
   }
-
   /**
    * Initialize GitHub coordination
    */
-  async initialize(options = {}) {
+  async initialize(options = { /* empty */ }) {
     printInfo('🚀 Initializing GitHub Coordinator...');
     
     // Authenticate with GitHub
-    const authenticated = await this.api.authenticate(options.token);
+    const _authenticated = await this.api.authenticate(options.token);
     if (!authenticated) {
       throw new Error('Failed to authenticate with GitHub');
     }
-
     // Check if we're in a git repository
     try {
-      const remoteUrl = execSync('git config --get remote.origin.url', { encoding: 'utf8' }).trim();
-      const repoMatch = remoteUrl.match(/github\.com[:/]([^/]+)\/([^/]+?)(?:\.git)?$/);
+      const _remoteUrl = execSync('git config --get remote.origin.url', { encoding: 'utf8' }).trim();
+      const _repoMatch = remoteUrl.match(/github.com[:/]([^/]+)/([^/]+?)(?:.git)?$/);
       
       if (repoMatch) {
         this.currentRepo = { owner: repoMatch[1], repo: repoMatch[2] };
         printSuccess(`Connected to repository: ${this.currentRepo.owner}/${this.currentRepo.repo}`);
       }
-    } catch (error) {
+    } catch (_error) {
       printWarning('Not in a git repository or no GitHub remote found');
     }
-
     // Initialize swarm integration
     await this.initializeSwarmIntegration();
-
     printSuccess('✅ GitHub Coordinator initialized successfully');
   }
-
   /**
    * Initialize swarm integration for coordination
    */
@@ -56,35 +49,32 @@ class GitHubCoordinator {
       execSync('npx ruv-swarm --version', { stdio: 'pipe' });
       
       // Initialize swarm for GitHub coordination
-      const swarmInit = execSync('npx ruv-swarm hook pre-task --description "GitHub workflow coordination"', 
+      const _swarmInit = execSync('npx ruv-swarm hook pre-task --description "GitHub workflow coordination"', 
         { encoding: 'utf8' });
       
       if (swarmInit.includes('continue')) {
         printSuccess('🐝 Swarm integration initialized for GitHub coordination');
         this.swarmEnabled = true;
       }
-    } catch (error) {
+    } catch (_error) {
       printWarning('Swarm integration not available - continuing without swarm features');
       this.swarmEnabled = false;
     }
   }
-
   /**
    * Coordinate CI/CD pipeline setup
    */
-  async coordinateCIPipeline(options = {}) {
+  async coordinateCIPipeline(options = { /* empty */ }) {
     printInfo('🔄 Coordinating CI/CD pipeline setup...');
     
     if (!this.currentRepo) {
       throw new Error('No GitHub repository context available');
     }
-
     const { owner, repo } = this.currentRepo;
-    const pipeline = options.pipeline || 'nodejs';
-    const autoApprove = options.autoApprove || false;
-
+    const _pipeline = options.pipeline || 'nodejs';
+    const _autoApprove = options.autoApprove || false;
     // Create workflow coordination plan
-    const coordinationPlan = {
+    const _coordinationPlan = {
       id: `ci-setup-${Date.now()}`,
       type: 'ci_pipeline_setup',
       repository: `${owner}/${repo}`,
@@ -99,19 +89,15 @@ class GitHubCoordinator {
       ],
       status: 'planning'
     };
-
-    this.activeCoordinations.set(coordinationPlan.id, coordinationPlan);
-
+    this.activeCoordinations.set(coordinationPlan._id, coordinationPlan);
     // Execute coordination with swarm if available
     if (this.swarmEnabled) {
       await this.executeWithSwarm(coordinationPlan);
     } else {
       await this.executeCoordination(coordinationPlan);
     }
-
     return coordinationPlan;
   }
-
   /**
    * Execute coordination with swarm integration
    */
@@ -119,7 +105,7 @@ class GitHubCoordinator {
     printInfo('🐝 Executing coordination with swarm...');
     
     // Store coordination plan in swarm memory
-    const memoryKey = `github-coordination/${coordinationPlan.id}`;
+    const _memoryKey = `github-coordination/${coordinationPlan.id}`;
     execSync(`npx ruv-swarm hook notification --message "GitHub Coordination: ${coordinationPlan.type} started" --telemetry true`);
     
     // Execute each step with swarm coordination
@@ -130,16 +116,14 @@ class GitHubCoordinator {
       execSync(`npx ruv-swarm hook pre-task --description "GitHub step: ${step}"`);
       
       // Execute step
-      await this.executeCoordinationStep(coordinationPlan, step);
+      await this.executeCoordinationStep(_coordinationPlan, step);
       
       // Post-step hook
       execSync(`npx ruv-swarm hook post-edit --file "github-coordination" --memory-key "${memoryKey}/${step}"`);
     }
-
     // Final coordination notification
     execSync(`npx ruv-swarm hook notification --message "GitHub Coordination: ${coordinationPlan.type} completed" --telemetry true`);
   }
-
   /**
    * Execute coordination without swarm
    */
@@ -148,53 +132,62 @@ class GitHubCoordinator {
     
     for (const step of coordinationPlan.steps) {
       printInfo(`Executing step: ${step}`);
-      await this.executeCoordinationStep(coordinationPlan, step);
+      await this.executeCoordinationStep(_coordinationPlan, step);
     }
   }
-
   /**
    * Execute individual coordination step
    */
-  async executeCoordinationStep(coordinationPlan, step) {
+  async executeCoordinationStep(_coordinationPlan, step) {
     const { owner, repo } = this.currentRepo;
     
     switch (step) {
       case 'analyze_repository_structure':
-        await this.analyzeRepositoryStructure(owner, repo);
-        break;
+        {
+await this.analyzeRepositoryStructure(_owner, repo);
+        
+}break;
       case 'create_workflow_files':
-        await this.createWorkflowFiles(owner, repo, coordinationPlan.pipeline);
-        break;
+        {
+await this.createWorkflowFiles(_owner, _repo, coordinationPlan.pipeline);
+        
+}break;
       case 'setup_environment_secrets':
-        await this.setupEnvironmentSecrets(owner, repo);
-        break;
+        {
+await this.setupEnvironmentSecrets(_owner, repo);
+        
+}break;
       case 'configure_branch_protection':
-        await this.configureBranchProtection(owner, repo);
-        break;
+        {
+await this.configureBranchProtection(_owner, repo);
+        
+}break;
       case 'test_pipeline_execution':
-        await this.testPipelineExecution(owner, repo);
-        break;
+        {
+await this.testPipelineExecution(_owner, repo);
+        
+}break;
       case 'setup_notifications':
-        await this.setupNotifications(owner, repo);
-        break;
+        {
+await this.setupNotifications(_owner, repo);
+        
+}break;
       default:
         printWarning(`Unknown coordination step: ${step}`);
     }
   }
-
   /**
    * Analyze repository structure
    */
-  async analyzeRepositoryStructure(owner, repo) {
+  async analyzeRepositoryStructure(_owner, repo) {
     printInfo('📊 Analyzing repository structure...');
     
-    const response = await this.api.getRepository(owner, repo);
+    const _response = await this.api.getRepository(_owner, repo);
     if (!response.success) {
       throw new Error(`Failed to get repository info: ${response.error}`);
     }
-
-    const repoData = response.data;
-    const analysis = {
+    const _repoData = response.data;
+    const _analysis = {
       language: repoData.language,
       size: repoData.size,
       defaultBranch: repoData.default_branch,
@@ -202,74 +195,64 @@ class GitHubCoordinator {
       hasTests: false,
       hasPackageJson: false
     };
-
     // Check for existing workflows
-    const workflowsResponse = await this.api.listWorkflows(owner, repo);
+    const _workflowsResponse = await this.api.listWorkflows(_owner, repo);
     if (workflowsResponse.success) {
       analysis.hasWorkflows = workflowsResponse.data.total_count > 0;
     }
-
     // Check for package.json (Node.js projects)
     try {
-      const packageResponse = await this.api.request(`/repos/${owner}/${repo}/contents/package.json`);
+      const _packageResponse = await this.api.request(`/repos/${owner}/${repo}/contents/package.json`);
       analysis.hasPackageJson = packageResponse.success;
-    } catch (error) {
+    } catch (_error) {
       // package.json doesn't exist
     }
-
     printSuccess(`✅ Repository analysis complete: ${analysis.language} project`);
     return analysis;
   }
-
   /**
    * Create workflow files
    */
-  async createWorkflowFiles(owner, repo, pipeline) {
+  async createWorkflowFiles(_owner, _repo, pipeline) {
     printInfo('📝 Creating workflow files...');
     
-    const workflowContent = this.generateWorkflowContent(pipeline);
-    const workflowPath = `.github/workflows/${pipeline}-ci.yml`;
+    const _workflowContent = this.generateWorkflowContent(pipeline);
+    const _workflowPath = `.github/workflows/${pipeline}-ci.yml`;
     
     // Create workflow file content
-    const createFileData = {
+    const _createFileData = {
       message: `Add ${pipeline} CI workflow`,
       content: Buffer.from(workflowContent).toString('base64'),
       path: workflowPath
     };
-
     // Check if file exists
-    const existingFile = await this.api.request(`/repos/${owner}/${repo}/contents/${workflowPath}`);
+    const _existingFile = await this.api.request(`/repos/${owner}/${repo}/contents/${workflowPath}`);
     if (existingFile.success) {
       // Update existing file
       createFileData.sha = existingFile.data.sha;
       createFileData.message = `Update ${pipeline} CI workflow`;
     }
-
-    const response = await this.api.request(`/repos/${owner}/${repo}/contents/${workflowPath}`, {
+    const _response = await this.api.request(`/repos/${owner}/${repo}/contents/${workflowPath}`, {
       method: 'PUT',
       body: createFileData
     });
-
     if (response.success) {
       printSuccess(`✅ Workflow file created: ${workflowPath}`);
     } else {
       throw new Error(`Failed to create workflow file: ${response.error}`);
     }
   }
-
   /**
    * Generate workflow content based on pipeline type
    */
   generateWorkflowContent(pipeline) {
-    const templates = {
+    const _templates = {
       nodejs: `name: Node.js CI
-
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -281,10 +264,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Use Node.js \${{ matrix.node-version }}
+    - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
-        node-version: \${{ matrix.node-version }}
+        node-version: ${{ matrix.node-version }}
         cache: 'npm'
         
     - name: Install dependencies
@@ -312,13 +295,11 @@ jobs:
 `,
       
       python: `name: Python CI
-
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -330,10 +311,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python \${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: \${{ matrix.python-version }}
+        python-version: ${{ matrix.python-version }}
         
     - name: Install dependencies
       run: |
@@ -351,13 +332,11 @@ jobs:
 `,
       
       docker: `name: Docker CI
-
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -379,38 +358,33 @@ jobs:
         output: 'trivy-results.sarif'
 `
     };
-
     return templates[pipeline] || templates.nodejs;
   }
-
   /**
    * Setup environment secrets
    */
-  async setupEnvironmentSecrets(owner, repo) {
+  async setupEnvironmentSecrets(_owner, repo) {
     printInfo('🔐 Setting up environment secrets...');
     
-    const secrets = [
+    const _secrets = [
       { name: 'NODE_ENV', description: 'Node.js environment' },
       { name: 'DATABASE_URL', description: 'Database connection string' },
       { name: 'API_KEY', description: 'API authentication key' }
     ];
-
     printInfo('Recommended secrets to configure:');
     secrets.forEach(secret => {
       console.log(`  - ${secret.name}: ${secret.description}`);
     });
-
     printWarning('Note: Secrets must be configured manually in GitHub repository settings');
     printSuccess('✅ Environment secrets guidance provided');
   }
-
   /**
    * Configure branch protection
    */
-  async configureBranchProtection(owner, repo) {
+  async configureBranchProtection(_owner, repo) {
     printInfo('🛡️  Configuring branch protection...');
     
-    const protectionConfig = {
+    const _protectionConfig = {
       required_status_checks: {
         strict: true,
         contexts: ['test']
@@ -422,8 +396,7 @@ jobs:
       },
       restrictions: null
     };
-
-    const response = await this.api.updateBranchProtection(owner, repo, 'main', protectionConfig);
+    const _response = await this.api.updateBranchProtection(_owner, _repo, 'main', protectionConfig);
     
     if (response.success) {
       printSuccess('✅ Branch protection configured for main branch');
@@ -431,39 +404,35 @@ jobs:
       printWarning(`⚠️  Failed to configure branch protection: ${response.error}`);
     }
   }
-
   /**
    * Test pipeline execution
    */
-  async testPipelineExecution(owner, repo) {
+  async testPipelineExecution(_owner, repo) {
     printInfo('🧪 Testing pipeline execution...');
     
-    const workflows = await this.api.listWorkflows(owner, repo);
+    const _workflows = await this.api.listWorkflows(_owner, repo);
     if (!workflows.success) {
       printWarning('No workflows found to test');
       return;
     }
-
-    const recentRuns = await this.api.listWorkflowRuns(owner, repo, { per_page: 5 });
+    const _recentRuns = await this.api.listWorkflowRuns(_owner, _repo, { per_page: 5 });
     if (recentRuns.success) {
       printInfo(`Found ${recentRuns.data.total_count} recent workflow runs`);
       
-      const latestRun = recentRuns.data.workflow_runs[0];
+      const _latestRun = recentRuns.data.workflow_runs[0];
       if (latestRun) {
         printInfo(`Latest run: ${latestRun.conclusion} (${latestRun.status})`);
       }
     }
-
     printSuccess('✅ Pipeline execution status checked');
   }
-
   /**
    * Setup notifications
    */
-  async setupNotifications(owner, repo) {
+  async setupNotifications(_owner, repo) {
     printInfo('📢 Setting up notifications...');
     
-    const webhookConfig = {
+    const _webhookConfig = {
       name: 'web',
       active: true,
       events: ['push', 'pull_request', 'issues', 'workflow_run'],
@@ -473,29 +442,25 @@ jobs:
         insecure_ssl: '0'
       }
     };
-
     printInfo('Webhook configuration template:');
-    console.log(JSON.stringify(webhookConfig, null, 2));
+    console.log(JSON.stringify(_webhookConfig, null, 2));
     
     printWarning('Note: Webhook URL must be configured with your actual endpoint');
     printSuccess('✅ Notification setup guidance provided');
   }
-
   /**
    * Coordinate release process
    */
-  async coordinateRelease(options = {}) {
+  async coordinateRelease(options = { /* empty */ }) {
     printInfo('🚀 Coordinating release process...');
     
     if (!this.currentRepo) {
       throw new Error('No GitHub repository context available');
     }
-
     const { owner, repo } = this.currentRepo;
-    const version = options.version || 'auto';
-    const prerelease = options.prerelease || false;
-
-    const coordinationPlan = {
+    const _version = options.version || 'auto';
+    const _prerelease = options.prerelease || false;
+    const _coordinationPlan = {
       id: `release-${Date.now()}`,
       type: 'release_coordination',
       repository: `${owner}/${repo}`,
@@ -511,37 +476,31 @@ jobs:
       ],
       status: 'planning'
     };
-
-    this.activeCoordinations.set(coordinationPlan.id, coordinationPlan);
-
+    this.activeCoordinations.set(coordinationPlan._id, coordinationPlan);
     if (this.swarmEnabled) {
       await this.executeWithSwarm(coordinationPlan);
     } else {
       await this.executeCoordination(coordinationPlan);
     }
-
     return coordinationPlan;
   }
-
   /**
    * Get coordination status
    */
   getCoordinationStatus(coordinationId) {
     return this.activeCoordinations.get(coordinationId) || null;
   }
-
   /**
    * List active coordinations
    */
   listActiveCoordinations() {
     return Array.from(this.activeCoordinations.values());
   }
-
   /**
    * Cancel coordination
    */
   cancelCoordination(coordinationId) {
-    const coordination = this.activeCoordinations.get(coordinationId);
+    const _coordination = this.activeCoordinations.get(coordinationId);
     if (coordination) {
       coordination.status = 'cancelled';
       this.activeCoordinations.delete(coordinationId);
@@ -551,15 +510,14 @@ jobs:
     return false;
   }
 }
-
 // Export coordination function
-export async function coordinateGitHubWorkflow(args, flags = {}) {
-  const coordinator = new GitHubCoordinator();
+export async function coordinateGitHubWorkflow(_args, flags = { /* empty */ }) {
+  const _coordinator = new GitHubCoordinator();
   
   try {
     await coordinator.initialize(flags);
     
-    const objective = args.join(' ').trim();
+    const _objective = args.join(' ').trim();
     
     if (objective.includes('CI/CD') || objective.includes('pipeline')) {
       return await coordinator.coordinateCIPipeline(flags);
@@ -569,28 +527,25 @@ export async function coordinateGitHubWorkflow(args, flags = {}) {
       // General coordination
       printInfo(`🎯 Coordinating: ${objective}`);
       
-      const coordinationPlan = {
+      const _coordinationPlan = {
         id: `general-${Date.now()}`,
         type: 'general_coordination',
         objective,
         steps: ['analyze_requirements', 'create_action_plan', 'execute_plan'],
         status: 'planning'
       };
-
-      coordinator.activeCoordinations.set(coordinationPlan.id, coordinationPlan);
+      coordinator.activeCoordinations.set(coordinationPlan._id, coordinationPlan);
       
       if (coordinator.swarmEnabled) {
         await coordinator.executeWithSwarm(coordinationPlan);
       } else {
         await coordinator.executeCoordination(coordinationPlan);
       }
-
       return coordinationPlan;
     }
-  } catch (error) {
+  } catch (_error) {
     printError(`❌ GitHub coordination failed: ${error.message}`);
     throw error;
   }
 }
-
 export default GitHubCoordinator;

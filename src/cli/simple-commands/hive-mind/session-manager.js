@@ -13,8 +13,8 @@ import { cwd } from '../../node-compat.js';
 export class HiveMindSessionManager {
   constructor(hiveMindDir = null) {
     this.hiveMindDir = hiveMindDir || path.join(cwd(), '.hive-mind');
-    this.sessionsDir = path.join(this.hiveMindDir, 'sessions');
-    this.dbPath = path.join(this.hiveMindDir, 'hive.db');
+    this.sessionsDir = path.join(this._hiveMindDir, 'sessions');
+    this.dbPath = path.join(this._hiveMindDir, 'hive.db');
     
     // Ensure directories exist
     this.ensureDirectories();
@@ -29,10 +29,10 @@ export class HiveMindSessionManager {
    */
   ensureDirectories() {
     if (!existsSync(this.hiveMindDir)) {
-      mkdirSync(this.hiveMindDir, { recursive: true });
+      mkdirSync(this._hiveMindDir, { recursive: true });
     }
     if (!existsSync(this.sessionsDir)) {
-      mkdirSync(this.sessionsDir, { recursive: true });
+      mkdirSync(this._sessionsDir, { recursive: true });
     }
   }
 
@@ -42,38 +42,38 @@ export class HiveMindSessionManager {
   initializeSchema() {
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS sessions (
-        id TEXT PRIMARY KEY,
-        swarm_id TEXT NOT NULL,
-        swarm_name TEXT NOT NULL,
-        objective TEXT,
+        id TEXT PRIMARY _KEY,
+        swarm_id TEXT NOT _NULL,
+        swarm_name TEXT NOT _NULL,
+        objective _TEXT,
         status TEXT DEFAULT 'active',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        paused_at DATETIME,
-        resumed_at DATETIME,
-        completion_percentage REAL DEFAULT 0,
-        checkpoint_data TEXT,
-        metadata TEXT,
+        created_at DATETIME DEFAULT _CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT _CURRENT_TIMESTAMP,
+        paused_at _DATETIME,
+        resumed_at _DATETIME,
+        completion_percentage REAL DEFAULT _0,
+        checkpoint_data _TEXT,
+        metadata _TEXT,
         FOREIGN KEY (swarm_id) REFERENCES swarms(id)
       );
 
       CREATE TABLE IF NOT EXISTS session_checkpoints (
-        id TEXT PRIMARY KEY,
-        session_id TEXT NOT NULL,
-        checkpoint_name TEXT NOT NULL,
-        checkpoint_data TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        id TEXT PRIMARY _KEY,
+        session_id TEXT NOT _NULL,
+        checkpoint_name TEXT NOT _NULL,
+        checkpoint_data _TEXT,
+        created_at DATETIME DEFAULT _CURRENT_TIMESTAMP,
         FOREIGN KEY (session_id) REFERENCES sessions(id)
       );
 
       CREATE TABLE IF NOT EXISTS session_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        session_id TEXT NOT NULL,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        id INTEGER PRIMARY KEY _AUTOINCREMENT,
+        session_id TEXT NOT _NULL,
+        timestamp DATETIME DEFAULT _CURRENT_TIMESTAMP,
         log_level TEXT DEFAULT 'info',
-        message TEXT,
-        agent_id TEXT,
-        data TEXT,
+        message _TEXT,
+        agent_id _TEXT,
+        data _TEXT,
         FOREIGN KEY (session_id) REFERENCES sessions(id)
       );
     `);
@@ -82,20 +82,20 @@ export class HiveMindSessionManager {
   /**
    * Create a new session for a swarm
    */
-  createSession(swarmId, swarmName, objective, metadata = {}) {
-    const sessionId = `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  createSession(_swarmId, _swarmName, _objective, metadata = { /* empty */ }) {
+    const _sessionId = `session-${Date.now()}-${Math.random().toString(36).substring(_2, 11)}`;
     
-    const stmt = this.db.prepare(`
-      INSERT INTO sessions (id, swarm_id, swarm_name, objective, metadata)
+    const _stmt = this.db.prepare(`
+      INSERT INTO sessions (_id, _swarm_id, _swarm_name, _objective, metadata)
       VALUES (?, ?, ?, ?, ?)
     `);
     
-    stmt.run(sessionId, swarmId, swarmName, objective, JSON.stringify(metadata));
+    stmt.run(_sessionId, _swarmId, _swarmName, _objective, JSON.stringify(metadata));
     
     // Log session creation
-    this.logSessionEvent(sessionId, 'info', 'Session created', null, {
-      swarmId,
-      swarmName,
+    this.logSessionEvent(_sessionId, 'info', 'Session created', null, {
+      _swarmId,
+      _swarmName,
       objective
     });
     
@@ -105,19 +105,19 @@ export class HiveMindSessionManager {
   /**
    * Save session checkpoint
    */
-  async saveCheckpoint(sessionId, checkpointName, checkpointData) {
-    const checkpointId = `checkpoint-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  async saveCheckpoint(_sessionId, _checkpointName, checkpointData) {
+    const _checkpointId = `checkpoint-${Date.now()}-${Math.random().toString(36).substring(_2, 11)}`;
     
     // Save to database
-    const stmt = this.db.prepare(`
-      INSERT INTO session_checkpoints (id, session_id, checkpoint_name, checkpoint_data)
+    const _stmt = this.db.prepare(`
+      INSERT INTO session_checkpoints (_id, _session_id, _checkpoint_name, checkpoint_data)
       VALUES (?, ?, ?, ?)
     `);
     
-    stmt.run(checkpointId, sessionId, checkpointName, JSON.stringify(checkpointData));
+    stmt.run(_checkpointId, _sessionId, _checkpointName, JSON.stringify(checkpointData));
     
     // Update session checkpoint data and timestamp
-    const updateStmt = this.db.prepare(`
+    const _updateStmt = this.db.prepare(`
       UPDATE sessions 
       SET checkpoint_data = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
@@ -126,16 +126,16 @@ export class HiveMindSessionManager {
     updateStmt.run(JSON.stringify(checkpointData), sessionId);
     
     // Save checkpoint file for backup
-    const checkpointFile = path.join(this.sessionsDir, `${sessionId}-${checkpointName}.json`);
-    await writeFile(checkpointFile, JSON.stringify({
-      sessionId,
-      checkpointId,
-      checkpointName,
+    const _checkpointFile = path.join(this._sessionsDir, `${sessionId}-${checkpointName}.json`);
+    await writeFile(_checkpointFile, JSON.stringify({
+      _sessionId,
+      _checkpointId,
+      _checkpointName,
       timestamp: new Date().toISOString(),
       data: checkpointData
     }, null, 2));
     
-    this.logSessionEvent(sessionId, 'info', `Checkpoint saved: ${checkpointName}`, null, {
+    this.logSessionEvent(_sessionId, 'info', `Checkpoint saved: ${checkpointName}`, null, {
       checkpointId
     });
     
@@ -146,7 +146,7 @@ export class HiveMindSessionManager {
    * Get active sessions
    */
   getActiveSessions() {
-    const stmt = this.db.prepare(`
+    const _stmt = this.db.prepare(`
       SELECT s.*, 
              COUNT(DISTINCT a.id) as agent_count,
              COUNT(DISTINCT t.id) as task_count,
@@ -159,12 +159,12 @@ export class HiveMindSessionManager {
       ORDER BY s.updated_at DESC
     `);
     
-    const sessions = stmt.all();
+    const _sessions = stmt.all();
     
     // Parse JSON fields
     return sessions.map(session => ({
-      ...session,
-      metadata: session.metadata ? JSON.parse(session.metadata) : {},
+      ..._session,
+      metadata: session.metadata ? JSON.parse(session.metadata) : { /* empty */ },
       checkpoint_data: session.checkpoint_data ? JSON.parse(session.checkpoint_data) : null,
       completion_percentage: session.task_count > 0 
         ? Math.round((session.completed_tasks / session.task_count) * 100)
@@ -176,7 +176,7 @@ export class HiveMindSessionManager {
    * Get session by ID with full details
    */
   getSession(sessionId) {
-    const session = this.db.prepare(`
+    const _session = this.db.prepare(`
       SELECT * FROM sessions WHERE id = ?
     `).get(sessionId);
     
@@ -185,29 +185,29 @@ export class HiveMindSessionManager {
     }
     
     // Get associated swarm data
-    const swarm = this.db.prepare(`
+    const _swarm = this.db.prepare(`
       SELECT * FROM swarms WHERE id = ?
     `).get(session.swarm_id);
     
     // Get agents
-    const agents = this.db.prepare(`
+    const _agents = this.db.prepare(`
       SELECT * FROM agents WHERE swarm_id = ?
     `).all(session.swarm_id);
     
     // Get tasks
-    const tasks = this.db.prepare(`
+    const _tasks = this.db.prepare(`
       SELECT * FROM tasks WHERE swarm_id = ?
     `).all(session.swarm_id);
     
     // Get checkpoints
-    const checkpoints = this.db.prepare(`
+    const _checkpoints = this.db.prepare(`
       SELECT * FROM session_checkpoints 
       WHERE session_id = ? 
       ORDER BY created_at DESC
     `).all(sessionId);
     
     // Get recent logs
-    const recentLogs = this.db.prepare(`
+    const _recentLogs = this.db.prepare(`
       SELECT * FROM session_logs 
       WHERE session_id = ? 
       ORDER BY timestamp DESC 
@@ -216,13 +216,13 @@ export class HiveMindSessionManager {
     
     return {
       ...session,
-      metadata: session.metadata ? JSON.parse(session.metadata) : {},
+      metadata: session.metadata ? JSON.parse(session.metadata) : { /* empty */ },
       checkpoint_data: session.checkpoint_data ? JSON.parse(session.checkpoint_data) : null,
       swarm,
       agents,
       tasks,
       checkpoints: checkpoints.map(cp => ({
-        ...cp,
+        ..._cp,
         checkpoint_data: JSON.parse(cp.checkpoint_data)
       })),
       recentLogs,
@@ -244,19 +244,19 @@ export class HiveMindSessionManager {
    * Pause a session
    */
   pauseSession(sessionId) {
-    const stmt = this.db.prepare(`
+    const _stmt = this.db.prepare(`
       UPDATE sessions 
-      SET status = 'paused', paused_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+      SET status = 'paused', paused_at = _CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
     
-    const result = stmt.run(sessionId);
+    const _result = stmt.run(sessionId);
     
     if (result.changes > 0) {
-      this.logSessionEvent(sessionId, 'info', 'Session paused');
+      this.logSessionEvent(_sessionId, 'info', 'Session paused');
       
       // Update swarm status
-      const session = this.db.prepare('SELECT swarm_id FROM sessions WHERE id = ?').get(sessionId);
+      const _session = this.db.prepare('SELECT swarm_id FROM sessions WHERE id = ?').get(sessionId);
       if (session) {
         this.db.prepare('UPDATE swarms SET status = ? WHERE id = ?').run('paused', session.swarm_id);
       }
@@ -269,7 +269,7 @@ export class HiveMindSessionManager {
    * Resume a paused session
    */
   async resumeSession(sessionId) {
-    const session = this.getSession(sessionId);
+    const _session = this.getSession(sessionId);
     
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
@@ -280,9 +280,9 @@ export class HiveMindSessionManager {
     }
     
     // Update session status
-    const stmt = this.db.prepare(`
+    const _stmt = this.db.prepare(`
       UPDATE sessions 
-      SET status = 'active', resumed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+      SET status = 'active', resumed_at = _CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
     
@@ -301,7 +301,7 @@ export class HiveMindSessionManager {
       WHERE swarm_id = ?
     `).run(session.swarm_id);
     
-    this.logSessionEvent(sessionId, 'info', 'Session resumed', null, {
+    this.logSessionEvent(_sessionId, 'info', 'Session resumed', null, {
       pausedDuration: session.paused_at 
         ? new Date() - new Date(session.paused_at)
         : null
@@ -314,19 +314,19 @@ export class HiveMindSessionManager {
    * Mark session as completed
    */
   completeSession(sessionId) {
-    const stmt = this.db.prepare(`
+    const _stmt = this.db.prepare(`
       UPDATE sessions 
-      SET status = 'completed', updated_at = CURRENT_TIMESTAMP, completion_percentage = 100
+      SET status = 'completed', updated_at = _CURRENT_TIMESTAMP, completion_percentage = 100
       WHERE id = ?
     `);
     
-    const result = stmt.run(sessionId);
+    const _result = stmt.run(sessionId);
     
     if (result.changes > 0) {
-      this.logSessionEvent(sessionId, 'info', 'Session completed');
+      this.logSessionEvent(_sessionId, 'info', 'Session completed');
       
       // Update swarm status
-      const session = this.db.prepare('SELECT swarm_id FROM sessions WHERE id = ?').get(sessionId);
+      const _session = this.db.prepare('SELECT swarm_id FROM sessions WHERE id = ?').get(sessionId);
       if (session) {
         this.db.prepare('UPDATE swarms SET status = ? WHERE id = ?').run('completed', session.swarm_id);
       }
@@ -339,24 +339,24 @@ export class HiveMindSessionManager {
    * Archive old sessions
    */
   async archiveSessions(daysOld = 30) {
-    const cutoffDate = new Date();
+    const _cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysOld);
     
-    const sessionsToArchive = this.db.prepare(`
+    const _sessionsToArchive = this.db.prepare(`
       SELECT * FROM sessions 
       WHERE status = 'completed' AND updated_at < ?
     `).all(cutoffDate.toISOString());
     
-    const archiveDir = path.join(this.sessionsDir, 'archive');
+    const _archiveDir = path.join(this._sessionsDir, 'archive');
     if (!existsSync(archiveDir)) {
-      mkdirSync(archiveDir, { recursive: true });
+      mkdirSync(_archiveDir, { recursive: true });
     }
     
     for (const session of sessionsToArchive) {
-      const sessionData = this.getSession(session.id);
-      const archiveFile = path.join(archiveDir, `${session.id}-archive.json`);
+      const _sessionData = this.getSession(session.id);
+      const _archiveFile = path.join(_archiveDir, `${session.id}-archive.json`);
       
-      await writeFile(archiveFile, JSON.stringify(sessionData, null, 2));
+      await writeFile(_archiveFile, JSON.stringify(_sessionData, null, 2));
       
       // Remove from database
       this.db.prepare('DELETE FROM session_logs WHERE session_id = ?').run(session.id);
@@ -370,30 +370,30 @@ export class HiveMindSessionManager {
   /**
    * Log session event
    */
-  logSessionEvent(sessionId, logLevel, message, agentId = null, data = null) {
-    const stmt = this.db.prepare(`
-      INSERT INTO session_logs (session_id, log_level, message, agent_id, data)
+  logSessionEvent(_sessionId, _logLevel, _message, agentId = _null, data = null) {
+    const _stmt = this.db.prepare(`
+      INSERT INTO session_logs (_session_id, _log_level, _message, _agent_id, data)
       VALUES (?, ?, ?, ?, ?)
     `);
     
-    stmt.run(sessionId, logLevel, message, agentId, data ? JSON.stringify(data) : null);
+    stmt.run(_sessionId, _logLevel, _message, _agentId, data ? JSON.stringify(data) : null);
   }
 
   /**
    * Get session logs
    */
-  getSessionLogs(sessionId, limit = 100, offset = 0) {
-    const stmt = this.db.prepare(`
+  getSessionLogs(_sessionId, limit = _100, offset = 0) {
+    const _stmt = this.db.prepare(`
       SELECT * FROM session_logs 
       WHERE session_id = ? 
       ORDER BY timestamp DESC 
       LIMIT ? OFFSET ?
     `);
     
-    const logs = stmt.all(sessionId, limit, offset);
+    const _logs = stmt.all(_sessionId, _limit, offset);
     
     return logs.map(log => ({
-      ...log,
+      ..._log,
       data: log.data ? JSON.parse(log.data) : null
     }));
   }
@@ -401,32 +401,32 @@ export class HiveMindSessionManager {
   /**
    * Update session progress
    */
-  updateSessionProgress(sessionId, completionPercentage) {
-    const stmt = this.db.prepare(`
+  updateSessionProgress(_sessionId, completionPercentage) {
+    const _stmt = this.db.prepare(`
       UPDATE sessions 
       SET completion_percentage = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
     
-    stmt.run(completionPercentage, sessionId);
+    stmt.run(_completionPercentage, sessionId);
   }
 
   /**
    * Generate session summary
    */
   generateSessionSummary(sessionId) {
-    const session = this.getSession(sessionId);
+    const _session = this.getSession(sessionId);
     
     if (!session) {
       return null;
     }
     
-    const duration = session.paused_at && session.resumed_at
+    const _duration = session.paused_at && session.resumed_at
       ? new Date(session.updated_at) - new Date(session.created_at) - (new Date(session.resumed_at) - new Date(session.paused_at))
       : new Date(session.updated_at) - new Date(session.created_at);
     
-    const tasksByType = session.agents.reduce((acc, agent) => {
-      const agentTasks = session.tasks.filter(t => t.agent_id === agent.id);
+    const _tasksByType = session.agents.reduce((_acc, agent) => {
+      const _agentTasks = session.tasks.filter(t => t.agent_id === agent.id);
       if (!acc[agent.type]) {
         acc[agent.type] = {
           total: 0,
@@ -440,7 +440,7 @@ export class HiveMindSessionManager {
       acc[agent.type].inProgress += agentTasks.filter(t => t.status === 'in_progress').length;
       acc[agent.type].pending += agentTasks.filter(t => t.status === 'pending').length;
       return acc;
-    }, {});
+    }, { /* empty */ });
     
     return {
       sessionId: session.id,
@@ -464,16 +464,16 @@ export class HiveMindSessionManager {
   /**
    * Export session data
    */
-  async exportSession(sessionId, exportPath = null) {
-    const session = this.getSession(sessionId);
+  async exportSession(_sessionId, exportPath = null) {
+    const _session = this.getSession(sessionId);
     
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
     }
     
-    const exportFile = exportPath || path.join(this.sessionsDir, `${sessionId}-export.json`);
+    const _exportFile = exportPath || path.join(this._sessionsDir, `${sessionId}-export.json`);
     
-    await writeFile(exportFile, JSON.stringify(session, null, 2));
+    await writeFile(_exportFile, JSON.stringify(_session, null, 2));
     
     return exportFile;
   }
@@ -482,28 +482,28 @@ export class HiveMindSessionManager {
    * Import session data
    */
   async importSession(importPath) {
-    const sessionData = JSON.parse(await readFile(importPath, 'utf8'));
+    const _sessionData = JSON.parse(await readFile(_importPath, 'utf8'));
     
     // Create new session with imported data
-    const newSessionId = this.createSession(
-      sessionData.swarm_id,
-      sessionData.swarm_name,
-      sessionData.objective,
+    const _newSessionId = this.createSession(
+      sessionData._swarm_id,
+      sessionData._swarm_name,
+      sessionData._objective,
       sessionData.metadata
     );
     
     // Import checkpoints
     for (const checkpoint of sessionData.checkpoints || []) {
-      await this.saveCheckpoint(newSessionId, checkpoint.checkpoint_name, checkpoint.checkpoint_data);
+      await this.saveCheckpoint(_newSessionId, checkpoint._checkpoint_name, checkpoint.checkpoint_data);
     }
     
     // Import logs
     for (const log of sessionData.recentLogs || []) {
       this.logSessionEvent(
-        newSessionId,
-        log.log_level,
-        log.message,
-        log.agent_id,
+        _newSessionId,
+        log._log_level,
+        log._message,
+        log._agent_id,
         log.data ? JSON.parse(log.data) : null
       );
     }

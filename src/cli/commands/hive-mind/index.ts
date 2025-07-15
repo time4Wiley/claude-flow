@@ -12,7 +12,7 @@ import { statusCommand } from './status.js';
 import { taskCommand } from './task.js';
 import { wizardCommand } from './wizard.js';
 
-export const hiveMindCommand = new Command('hive-mind')
+export const _hiveMindCommand = new Command('hive-mind')
   .description('Hive Mind collective intelligence swarm management')
   .addCommand(initCommand)
   .addCommand(spawnCommand)

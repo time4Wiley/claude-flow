@@ -15,7 +15,7 @@ export function isInteractive() {
   }
   
   // Check for CI environment variables
-  const ciVars = [
+  const _ciVars = [
     'CI',
     'CONTINUOUS_INTEGRATION',
     'GITHUB_ACTIONS',
@@ -73,7 +73,7 @@ export function getEnvironmentType() {
 /**
  * Wrap a command to handle non-interactive environments
  */
-export function handleNonInteractive(commandName, interactiveFn, nonInteractiveFn) {
+export function handleNonInteractive(_commandName, _interactiveFn, nonInteractiveFn) {
   return async (...args) => {
     if (isInteractive() && isRawModeSupported()) {
       // Run interactive version
@@ -90,8 +90,8 @@ export function handleNonInteractive(commandName, interactiveFn, nonInteractiveF
         console.error('2. Use environment variables for authentication:');
         console.error('   export ANTHROPIC_API_KEY="your-api-key"');
         console.error('3. Use --non-interactive flag with required parameters');
-        console.error('4. If using Docker, run with: docker run -it');
-        console.error('5. If using SSH, ensure pseudo-TTY allocation with: ssh -t');
+        console.error('4. If using _Docker, run with: docker run -it');
+        console.error('5. If using _SSH, ensure pseudo-TTY allocation with: ssh -t');
         console.error('\nFor more info: https://github.com/ruvnet/claude-code-flow/docs/non-interactive.md\n');
         process.exit(1);
       }
@@ -105,7 +105,7 @@ export function handleNonInteractive(commandName, interactiveFn, nonInteractiveF
 export function warnNonInteractive(commandName) {
   if (!isInteractive()) {
     console.warn(`\n⚠️  Running '${commandName}' in non-interactive mode (${getEnvironmentType()})`);
-    console.warn('Some features may be limited. For full functionality, use an interactive terminal.\n');
+    console.warn('Some features may be limited. For full _functionality, use an interactive terminal.\n');
   }
 }
 
@@ -114,7 +114,7 @@ export function warnNonInteractive(commandName) {
  */
 export function checkNonInteractiveAuth() {
   if (!isInteractive()) {
-    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
+    const _apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
     if (!apiKey) {
       console.error('\n❌ Non-interactive mode requires API key to be set.');
       console.error('\nSet one of these environment variables:');

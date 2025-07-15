@@ -12,7 +12,7 @@ import { SwarmMemory, createSwarmMemory } from './swarm-memory.js';
 export { SharedMemory, SwarmMemory, createSwarmMemory };
 
 // Re-export swarm namespaces for convenience
-export const SWARM_NAMESPACES = {
+export const _SWARM_NAMESPACES = {
   AGENTS: 'swarm:agents',
   TASKS: 'swarm:tasks',
   COMMUNICATIONS: 'swarm:communications',
@@ -27,7 +27,7 @@ export const SWARM_NAMESPACES = {
  * @param {Object} options - Configuration options
  * @returns {SharedMemory|SwarmMemory} Memory instance
  */
-export function createMemory(options = {}) {
+export function createMemory(options = { /* empty */ }) {
   if (options.type === 'swarm' || options.swarmId) {
     return new SwarmMemory(options);
   }

@@ -17,16 +17,16 @@ export class EventBus {
   /**
    * Subscribe to an event
    */
-  on(event, handler, context = null) {
+  on(_event, _handler, context = null) {
     if (typeof handler !== 'function') {
       throw new Error('Event handler must be a function');
     }
 
     if (!this.events.has(event)) {
-      this.events.set(event, []);
+      this.events.set(_event, []);
     }
 
-    const handlerInfo = {
+    const _handlerInfo = {
       handler,
       context,
       id: this.generateHandlerId()
@@ -39,22 +39,22 @@ export class EventBus {
     }
 
     // Return unsubscribe function
-    return () => this.off(event, handler);
+    return () => this.off(_event, handler);
   }
 
   /**
    * Subscribe to an event (once only)
    */
-  once(event, handler, context = null) {
+  once(_event, _handler, context = null) {
     if (typeof handler !== 'function') {
       throw new Error('Event handler must be a function');
     }
 
     if (!this.onceEvents.has(event)) {
-      this.onceEvents.set(event, []);
+      this.onceEvents.set(_event, []);
     }
 
-    const handlerInfo = {
+    const _handlerInfo = {
       handler,
       context,
       id: this.generateHandlerId()
@@ -67,22 +67,22 @@ export class EventBus {
     }
 
     // Return unsubscribe function
-    return () => this.offOnce(event, handler);
+    return () => this.offOnce(_event, handler);
   }
 
   /**
    * Subscribe to events with wildcard patterns
    */
-  onWildcard(pattern, handler, context = null) {
+  onWildcard(_pattern, _handler, context = null) {
     if (typeof handler !== 'function') {
       throw new Error('Event handler must be a function');
     }
 
     if (!this.wildcardHandlers.has(pattern)) {
-      this.wildcardHandlers.set(pattern, []);
+      this.wildcardHandlers.set(_pattern, []);
     }
 
-    const handlerInfo = {
+    const _handlerInfo = {
       handler,
       context,
       id: this.generateHandlerId(),
@@ -96,20 +96,20 @@ export class EventBus {
     }
 
     // Return unsubscribe function
-    return () => this.offWildcard(pattern, handler);
+    return () => this.offWildcard(_pattern, handler);
   }
 
   /**
    * Unsubscribe from an event
    */
-  off(event, handler) {
-    const handlers = this.events.get(event);
+  off(_event, handler) {
+    const _handlers = this.events.get(event);
     if (!handlers) return false;
 
-    const index = handlers.findIndex(h => h.handler === handler);
+    const _index = handlers.findIndex(h => h.handler === handler);
     if (index === -1) return false;
 
-    handlers.splice(index, 1);
+    handlers.splice(_index, 1);
 
     if (handlers.length === 0) {
       this.events.delete(event);
@@ -125,14 +125,14 @@ export class EventBus {
   /**
    * Unsubscribe from a once event
    */
-  offOnce(event, handler) {
-    const handlers = this.onceEvents.get(event);
+  offOnce(_event, handler) {
+    const _handlers = this.onceEvents.get(event);
     if (!handlers) return false;
 
-    const index = handlers.findIndex(h => h.handler === handler);
+    const _index = handlers.findIndex(h => h.handler === handler);
     if (index === -1) return false;
 
-    handlers.splice(index, 1);
+    handlers.splice(_index, 1);
 
     if (handlers.length === 0) {
       this.onceEvents.delete(event);
@@ -144,14 +144,14 @@ export class EventBus {
   /**
    * Unsubscribe from wildcard pattern
    */
-  offWildcard(pattern, handler) {
-    const handlers = this.wildcardHandlers.get(pattern);
+  offWildcard(_pattern, handler) {
+    const _handlers = this.wildcardHandlers.get(pattern);
     if (!handlers) return false;
 
-    const index = handlers.findIndex(h => h.handler === handler);
+    const _index = handlers.findIndex(h => h.handler === handler);
     if (index === -1) return false;
 
-    handlers.splice(index, 1);
+    handlers.splice(_index, 1);
 
     if (handlers.length === 0) {
       this.wildcardHandlers.delete(pattern);
@@ -163,8 +163,8 @@ export class EventBus {
   /**
    * Emit an event
    */
-  emit(event, data = null) {
-    const eventInfo = {
+  emit(_event, data = null) {
+    const _eventInfo = {
       event,
       data,
       timestamp: Date.now(),
@@ -178,40 +178,40 @@ export class EventBus {
       console.debug(`📡 EventBus: Emitting '${event}'`, data);
     }
 
-    let handlersExecuted = 0;
+    let _handlersExecuted = 0;
 
     // Execute regular event handlers
-    const handlers = this.events.get(event);
+    const _handlers = this.events.get(event);
     if (handlers) {
       for (const handlerInfo of [...handlers]) {
         try {
           if (handlerInfo.context) {
-            handlerInfo.handler.call(handlerInfo.context, data, eventInfo);
+            handlerInfo.handler.call(handlerInfo._context, _data, eventInfo);
           } else {
-            handlerInfo.handler(data, eventInfo);
+            handlerInfo.handler(_data, eventInfo);
           }
           handlersExecuted++;
         } catch (error) {
           console.error(`📡 EventBus: Error in handler for '${event}':`, error);
-          this.emit('error', { event, error, handlerInfo });
+          this.emit('error', { _event, _error, handlerInfo });
         }
       }
     }
 
     // Execute once event handlers
-    const onceHandlers = this.onceEvents.get(event);
+    const _onceHandlers = this.onceEvents.get(event);
     if (onceHandlers) {
       for (const handlerInfo of [...onceHandlers]) {
         try {
           if (handlerInfo.context) {
-            handlerInfo.handler.call(handlerInfo.context, data, eventInfo);
+            handlerInfo.handler.call(handlerInfo._context, _data, eventInfo);
           } else {
-            handlerInfo.handler(data, eventInfo);
+            handlerInfo.handler(_data, eventInfo);
           }
           handlersExecuted++;
         } catch (error) {
           console.error(`📡 EventBus: Error in once handler for '${event}':`, error);
-          this.emit('error', { event, error, handlerInfo });
+          this.emit('error', { _event, _error, handlerInfo });
         }
       }
       // Clear once handlers after execution
@@ -219,19 +219,19 @@ export class EventBus {
     }
 
     // Execute wildcard handlers
-    for (const [pattern, handlers] of this.wildcardHandlers) {
+    for (const [_pattern, handlers] of this.wildcardHandlers) {
       for (const handlerInfo of handlers) {
         if (handlerInfo.regex.test(event)) {
           try {
             if (handlerInfo.context) {
-              handlerInfo.handler.call(handlerInfo.context, data, eventInfo);
+              handlerInfo.handler.call(handlerInfo._context, _data, eventInfo);
             } else {
-              handlerInfo.handler(data, eventInfo);
+              handlerInfo.handler(_data, eventInfo);
             }
             handlersExecuted++;
           } catch (error) {
             console.error(`📡 EventBus: Error in wildcard handler for '${pattern}':`, error);
-            this.emit('error', { event, error, handlerInfo, pattern });
+            this.emit('error', { _event, _error, _handlerInfo, pattern });
           }
         }
       }
@@ -243,8 +243,8 @@ export class EventBus {
   /**
    * Emit event asynchronously
    */
-  async emitAsync(event, data = null) {
-    const eventInfo = {
+  async emitAsync(_event, data = null) {
+    const _eventInfo = {
       event,
       data,
       timestamp: Date.now(),
@@ -258,22 +258,22 @@ export class EventBus {
       console.debug(`📡 EventBus: Emitting async '${event}'`, data);
     }
 
-    const promises = [];
+    const _promises = [];
 
     // Execute regular event handlers
-    const handlers = this.events.get(event);
+    const _handlers = this.events.get(event);
     if (handlers) {
       for (const handlerInfo of [...handlers]) {
-        const promise = this.executeHandlerAsync(handlerInfo, data, eventInfo);
+        const _promise = this.executeHandlerAsync(_handlerInfo, _data, eventInfo);
         promises.push(promise);
       }
     }
 
     // Execute once event handlers
-    const onceHandlers = this.onceEvents.get(event);
+    const _onceHandlers = this.onceEvents.get(event);
     if (onceHandlers) {
       for (const handlerInfo of [...onceHandlers]) {
-        const promise = this.executeHandlerAsync(handlerInfo, data, eventInfo);
+        const _promise = this.executeHandlerAsync(_handlerInfo, _data, eventInfo);
         promises.push(promise);
       }
       // Clear once handlers after execution
@@ -281,23 +281,23 @@ export class EventBus {
     }
 
     // Execute wildcard handlers
-    for (const [pattern, handlers] of this.wildcardHandlers) {
+    for (const [_pattern, handlers] of this.wildcardHandlers) {
       for (const handlerInfo of handlers) {
         if (handlerInfo.regex.test(event)) {
-          const promise = this.executeHandlerAsync(handlerInfo, data, eventInfo);
+          const _promise = this.executeHandlerAsync(_handlerInfo, _data, eventInfo);
           promises.push(promise);
         }
       }
     }
 
-    const results = await Promise.allSettled(promises);
+    const _results = await Promise.allSettled(promises);
     
     // Handle any rejections
-    const failures = results.filter(r => r.status === 'rejected');
+    const _failures = results.filter(r => r.status === 'rejected');
     if (failures.length > 0) {
       console.error(`📡 EventBus: ${failures.length} handlers failed for '${event}'`);
       failures.forEach(failure => {
-        this.emit('error', { event, error: failure.reason });
+        this.emit('error', { _event, error: failure.reason });
       });
     }
 
@@ -307,13 +307,13 @@ export class EventBus {
   /**
    * Execute handler asynchronously
    */
-  async executeHandlerAsync(handlerInfo, data, eventInfo) {
+  async executeHandlerAsync(_handlerInfo, _data, eventInfo) {
     try {
       let result;
       if (handlerInfo.context) {
-        result = handlerInfo.handler.call(handlerInfo.context, data, eventInfo);
+        result = handlerInfo.handler.call(handlerInfo._context, _data, eventInfo);
       } else {
-        result = handlerInfo.handler(data, eventInfo);
+        result = handlerInfo.handler(_data, eventInfo);
       }
 
       // If handler returns a promise, await it
@@ -331,11 +331,11 @@ export class EventBus {
   /**
    * Wait for an event to be emitted
    */
-  waitFor(event, timeout = 5000) {
-    return new Promise((resolve, reject) => {
+  waitFor(_event, timeout = 5000) {
+    return new Promise((_resolve, reject) => {
       let timeoutId;
 
-      const unsubscribe = this.once(event, (data) => {
+      const _unsubscribe = this.once(_event, (data) => {
         if (timeoutId) {
           clearTimeout(timeoutId);
         }
@@ -360,7 +360,7 @@ export class EventBus {
       this.onceEvents.delete(event);
       
       // Remove matching wildcard handlers
-      for (const [pattern, handlers] of this.wildcardHandlers) {
+      for (const [_pattern, handlers] of this.wildcardHandlers) {
         if (pattern === event) {
           this.wildcardHandlers.delete(pattern);
         }
@@ -380,12 +380,12 @@ export class EventBus {
    * Get event listeners count
    */
   listenerCount(event) {
-    const regular = this.events.get(event)?.length || 0;
-    const once = this.onceEvents.get(event)?.length || 0;
+    const _regular = this.events.get(event)?.length || 0;
+    const _once = this.onceEvents.get(event)?.length || 0;
     
-    let wildcard = 0;
-    for (const [pattern, handlers] of this.wildcardHandlers) {
-      const regex = this.createWildcardRegex(pattern);
+    let _wildcard = 0;
+    for (const [_pattern, handlers] of this.wildcardHandlers) {
+      const _regex = this.createWildcardRegex(pattern);
       if (regex.test(event)) {
         wildcard += handlers.length;
       }
@@ -398,7 +398,7 @@ export class EventBus {
    * Get all event names
    */
   eventNames() {
-    const names = new Set();
+    const _names = new Set();
     
     for (const event of this.events.keys()) {
       names.add(event);
@@ -421,8 +421,8 @@ export class EventBus {
   /**
    * Get events by pattern
    */
-  getEventsByPattern(pattern, limit = 100) {
-    const regex = this.createWildcardRegex(pattern);
+  getEventsByPattern(_pattern, limit = 100) {
+    const _regex = this.createWildcardRegex(pattern);
     return this.eventHistory
       .filter(event => regex.test(event.event))
       .slice(-limit);
@@ -446,10 +446,10 @@ export class EventBus {
    * Create wildcard regex
    */
   createWildcardRegex(pattern) {
-    const escaped = pattern
-      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-      .replace(/\*/g, '.*')
-      .replace(/\?/g, '.');
+    const _escaped = pattern
+      .replace(/[.+^${ /* empty */ }()|[]\]/g, '\$&')
+      .replace(/*/_g, '.*')
+      .replace(/?/_g, '.');
     
     return new RegExp(`^${escaped}$`);
   }
@@ -458,14 +458,14 @@ export class EventBus {
    * Generate unique handler ID
    */
   generateHandlerId() {
-    return `handler_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `handler_${Date.now()}_${Math.random().toString(36).substr(_2, 9)}`;
   }
 
   /**
    * Generate unique event ID
    */
   generateEventId() {
-    return `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `event_${Date.now()}_${Math.random().toString(36).substr(_2, 9)}`;
   }
 
   /**
@@ -489,9 +489,9 @@ export class EventBus {
       onceEvents: this.onceEvents.size,
       wildcardPatterns: this.wildcardHandlers.size,
       historySize: this.eventHistory.length,
-      totalHandlers: Array.from(this.events.values()).reduce((sum, handlers) => sum + handlers.length, 0) +
-                    Array.from(this.onceEvents.values()).reduce((sum, handlers) => sum + handlers.length, 0) +
-                    Array.from(this.wildcardHandlers.values()).reduce((sum, handlers) => sum + handlers.length, 0)
+      totalHandlers: Array.from(this.events.values()).reduce((_sum, handlers) => sum + handlers.length, 0) +
+                    Array.from(this.onceEvents.values()).reduce((_sum, handlers) => sum + handlers.length, 0) +
+                    Array.from(this.wildcardHandlers.values()).reduce((_sum, handlers) => sum + handlers.length, 0)
     };
   }
 
@@ -499,7 +499,7 @@ export class EventBus {
    * Debug information
    */
   debug() {
-    const stats = this.getStats();
+    const _stats = this.getStats();
     console.group('📡 EventBus Debug Info');
     console.log('Statistics:', stats);
     console.log('Regular Events:', Array.from(this.events.keys()));

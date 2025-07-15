@@ -1,8 +1,8 @@
 import { printSuccess, printError, printWarning, callRuvSwarmMCP, checkRuvSwarmAvailable } from '../utils.js';
 
-export async function analysisAction(subArgs, flags) {
-    const subcommand = subArgs[0];
-    const options = flags;
+export async function analysisAction(_subArgs, flags) {
+    const _subcommand = subArgs[0];
+    const _options = flags;
 
     if (options.help || options.h || !subcommand) {
         showAnalysisHelp();
@@ -12,14 +12,20 @@ export async function analysisAction(subArgs, flags) {
     try {
         switch (subcommand) {
             case 'bottleneck-detect':
-                await bottleneckDetectCommand(subArgs, flags);
-                break;
+                {
+await bottleneckDetectCommand(_subArgs, flags);
+                
+}break;
             case 'performance-report':
-                await performanceReportCommand(subArgs, flags);
-                break;
+                {
+await performanceReportCommand(_subArgs, flags);
+                
+}break;
             case 'token-usage':
-                await tokenUsageCommand(subArgs, flags);
-                break;
+                {
+await tokenUsageCommand(_subArgs, flags);
+                
+}break;
             default:
                 printError(`Unknown analysis command: ${subcommand}`);
                 showAnalysisHelp();
@@ -29,17 +35,17 @@ export async function analysisAction(subArgs, flags) {
     }
 }
 
-async function bottleneckDetectCommand(subArgs, flags) {
-    const options = flags;
-    const scope = options.scope || 'system';
-    const target = options.target || 'all';
+async function bottleneckDetectCommand(_subArgs, flags) {
+    const _options = flags;
+    const _scope = options.scope || 'system';
+    const _target = options.target || 'all';
 
     console.log('🔍 Detecting performance bottlenecks...');
     console.log(`📊 Scope: ${scope}`);
     console.log(`🎯 Target: ${target}`);
 
     // Check if ruv-swarm is available
-    const isAvailable = await checkRuvSwarmAvailable();
+    const _isAvailable = await checkRuvSwarmAvailable();
     if (!isAvailable) {
         printError('ruv-swarm is not available. Please install it with: npm install -g ruv-swarm');
         return;
@@ -49,10 +55,10 @@ async function bottleneckDetectCommand(subArgs, flags) {
         console.log('\n🔍 Running real bottleneck detection with ruv-swarm...');
         
         // Use real ruv-swarm bottleneck detection
-        const analysisResult = await callRuvSwarmMCP('benchmark_run', {
+        const _analysisResult = await callRuvSwarmMCP('benchmark_run', {
             type: 'bottleneck_detection',
-            scope: scope,
-            target: target,
+            scope: _scope,
+            target: _target,
             timestamp: Date.now()
         });
 
@@ -60,7 +66,7 @@ async function bottleneckDetectCommand(subArgs, flags) {
             printSuccess('✅ Bottleneck analysis completed');
             
             console.log('\n📊 BOTTLENECK ANALYSIS RESULTS:');
-            const bottlenecks = analysisResult.bottlenecks || [
+            const _bottlenecks = analysisResult.bottlenecks || [
                 { severity: 'critical', component: 'Memory usage in agent spawn process', metric: '85% utilization' },
                 { severity: 'warning', component: 'Task queue processing', metric: '12s avg' },
                 { severity: 'good', component: 'Neural training pipeline', metric: 'optimal' },
@@ -68,13 +74,13 @@ async function bottleneckDetectCommand(subArgs, flags) {
             ];
             
             bottlenecks.forEach(bottleneck => {
-                const icon = bottleneck.severity === 'critical' ? '🔴' : 
+                const _icon = bottleneck.severity === 'critical' ? '🔴' : 
                            bottleneck.severity === 'warning' ? '🟡' : '🟢';
                 console.log(`  ${icon} ${bottleneck.severity}: ${bottleneck.component} (${bottleneck.metric})`);
             });
             
             console.log('\n💡 RECOMMENDATIONS:');
-            const recommendations = analysisResult.recommendations || [
+            const _recommendations = analysisResult.recommendations || [
                 'Implement agent pool to reduce spawn overhead',
                 'Optimize task queue with priority scheduling',
                 'Consider horizontal scaling for memory-intensive operations'
@@ -99,17 +105,17 @@ async function bottleneckDetectCommand(subArgs, flags) {
     }
 }
 
-async function performanceReportCommand(subArgs, flags) {
-    const options = flags;
-    const timeframe = options.timeframe || '24h';
-    const format = options.format || 'summary';
+async function performanceReportCommand(_subArgs, flags) {
+    const _options = flags;
+    const _timeframe = options.timeframe || '24h';
+    const _format = options.format || 'summary';
 
     console.log('📈 Generating performance report...');
     console.log(`⏰ Timeframe: ${timeframe}`);
     console.log(`📋 Format: ${format}`);
 
     // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(_resolve, 1500));
 
     printSuccess('✅ Performance report generated');
     
@@ -129,26 +135,26 @@ async function performanceReportCommand(subArgs, flags) {
     if (format === 'detailed') {
         console.log('\n📊 DETAILED METRICS:');
         console.log('  Agent Performance:');
-        console.log('    - Coordinator agents: 96% success, 6.2s avg');
-        console.log('    - Developer agents: 93% success, 11.1s avg');
-        console.log('    - Researcher agents: 97% success, 7.8s avg');
-        console.log('    - Analyzer agents: 92% success, 9.4s avg');
+        console.log('    - Coordinator agents: 96% _success, 6.2s avg');
+        console.log('    - Developer agents: 93% _success, 11.1s avg');
+        console.log('    - Researcher agents: 97% _success, 7.8s avg');
+        console.log('    - Analyzer agents: 92% _success, 9.4s avg');
     }
     
     console.log(`\n📄 Full report: ./analysis-reports/performance-${Date.now()}.html`);
 }
 
-async function tokenUsageCommand(subArgs, flags) {
-    const options = flags;
-    const agent = options.agent || 'all';
-    const breakdown = options.breakdown || false;
+async function tokenUsageCommand(_subArgs, flags) {
+    const _options = flags;
+    const _agent = options.agent || 'all';
+    const _breakdown = options.breakdown || false;
 
     console.log('🔢 Analyzing token usage...');
     console.log(`🤖 Agent filter: ${agent}`);
     console.log(`📊 Include breakdown: ${breakdown ? 'Yes' : 'No'}`);
 
     // Simulate token analysis
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(_resolve, 1000));
 
     printSuccess('✅ Token usage analysis completed');
     

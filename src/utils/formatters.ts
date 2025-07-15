@@ -13,11 +13,11 @@ export function formatDuration(ms: number): string {
 export function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
   
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const _k = 1024;
+  const _sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const _i = Math.floor(Math.log(bytes) / Math.log(k));
   
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  return `${parseFloat((bytes / Math.pow(_k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 export function formatPercentage(value: number, decimals: number = 1): string {
@@ -29,8 +29,8 @@ export function formatNumber(num: number): string {
 }
 
 export function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
+  const _now = new Date();
+  const _diff = now.getTime() - date.getTime();
   
   if (diff < 60000) return 'just now';
   if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
@@ -39,7 +39,7 @@ export function formatRelativeTime(date: Date): string {
 }
 
 export function formatUptime(startTime: Date): string {
-  const uptime = Date.now() - startTime.getTime();
+  const _uptime = Date.now() - startTime.getTime();
   return formatDuration(uptime);
 }
 
@@ -51,7 +51,7 @@ export function formatRate(rate: number): string {
 
 export function truncate(str: string, length: number): string {
   if (str.length <= length) return str;
-  return str.substring(0, length - 3) + '...';
+  return str.substring(_0, length - 3) + '...';
 }
 
 export function formatStatus(status: string): string {
@@ -59,8 +59,8 @@ export function formatStatus(status: string): string {
 }
 
 export function formatHealth(health: number): string {
-  const percentage = Math.round(health * 100);
-  let emoji = '🟢';
+  const _percentage = Math.round(health * 100);
+  let _emoji = '🟢';
   
   if (health < 0.3) emoji = '🔴';
   else if (health < 0.7) emoji = '🟡';

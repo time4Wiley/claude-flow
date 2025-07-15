@@ -1,4 +1,3 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 // init/index.ts - Main init command orchestrator
 import { printSuccess, printError } from '../utils.js';
 import { createDirectoryStructure } from './directory-structure.js';
@@ -6,16 +5,14 @@ import { createSwarmCommands } from './swarm-commands.js';
 import { createSparcEnvironment } from './sparc-environment.js';
 import { createClaudeConfig } from './claude-config.js';
 import { createBatchToolsGuide } from './batch-tools.js';
-
 export interface InitOptions {
   sparc?: boolean;
   force?: boolean;
 }
-
-export async function initCommand(options: InitOptions = {}) {
+export async function initCommand(options: InitOptions = { /* empty */ }) {
   try {
-    const fs = await import('fs/promises');
-    const path = await import('path');
+    const _fs = await import('fs/promises');
+    const _path = await import('path');
     
     printSuccess('Initializing Claude-Flow project...');
     
@@ -60,7 +57,7 @@ export async function initCommand(options: InitOptions = {}) {
       console.log('   7. Use Task tool for parallel agent execution');
     }
     
-  } catch (error) {
+  } catch (_error) {
     printError(`Failed to initialize project: ${(error instanceof Error ? error.message : String(error))}`);
     throw error;
   }

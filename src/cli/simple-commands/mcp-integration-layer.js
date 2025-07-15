@@ -3,9 +3,7 @@
  * Provides comprehensive integration with all Claude-Flow MCP tools
  * Supports real-time updates, error handling, and result streaming
  */
-
 import { compat } from '../runtime-detector.js';
-
 export class MCPIntegrationLayer {
   constructor(ui) {
     this.ui = ui;
@@ -77,14 +75,13 @@ export class MCPIntegrationLayer {
     
     this.initializeIntegration();
   }
-
   /**
    * Initialize MCP integration
    */
   async initializeIntegration() {
     try {
       // Check if MCP tools are available
-      const mcpAvailable = await this.checkMCPAvailability();
+      const _mcpAvailable = await this.checkMCPAvailability();
       if (!mcpAvailable) {
         this.ui.addLog('warning', 'MCP tools not available - using mock implementations');
         this.useMockMode = true;
@@ -98,54 +95,52 @@ export class MCPIntegrationLayer {
       
       this.ui.addLog('success', 'MCP Integration Layer initialized successfully');
       
-    } catch (error) {
+    } catch (_error) {
       this.ui.addLog('error', `Failed to initialize MCP integration: ${error.message}`);
       this.useMockMode = true;
     }
   }
-
   /**
    * Check if MCP tools are available
    */
   async checkMCPAvailability() {
     try {
       // Try to access a simple MCP tool
-      const result = await this.executeToolDirect('features_detect', {});
+      const _result = await this.executeToolDirect('features_detect', { /* empty */ });
       return result && result.success;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
-
   /**
    * Execute MCP tool with full error handling and retry logic
    */
-  async executeTool(toolName, parameters = {}, options = {}) {
-    const executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  async executeTool(_toolName, parameters = { /* empty */ }, options = { /* empty */ }) {
+    const _executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(_2, 9)}`;
     
     try {
       // Store execution info
-      this.activeTools.set(executionId, {
-        toolName,
-        parameters,
+      this.activeTools.set(_executionId, {
+        _toolName,
+        _parameters,
         startTime: Date.now(),
         status: 'running',
         progress: 0
       });
       
       // Notify UI of execution start
-      this.notifyUI('tool_start', { executionId, toolName });
+      this.notifyUI('tool_start', { _executionId, toolName });
       
       // Execute with retry logic
-      const result = await this.executeWithRetry(toolName, parameters, options);
+      const _result = await this.executeWithRetry(_toolName, _parameters, options);
       
       // Cache successful results
       if (result.success) {
-        this.cacheResult(toolName, parameters, result);
+        this.cacheResult(_toolName, _parameters, result);
       }
       
       // Update execution status
-      this.activeTools.set(executionId, {
+      this.activeTools.set(_executionId, {
         ...this.activeTools.get(executionId),
         status: 'completed',
         result,
@@ -153,13 +148,13 @@ export class MCPIntegrationLayer {
       });
       
       // Notify UI of completion
-      this.notifyUI('tool_complete', { executionId, toolName, result });
+      this.notifyUI('tool_complete', { _executionId, _toolName, result });
       
       return { executionId, result };
       
-    } catch (error) {
+    } catch (_error) {
       // Update execution status
-      this.activeTools.set(executionId, {
+      this.activeTools.set(_executionId, {
         ...this.activeTools.get(executionId),
         status: 'failed',
         error: error.message,
@@ -167,31 +162,30 @@ export class MCPIntegrationLayer {
       });
       
       // Notify UI of error
-      this.notifyUI('tool_error', { executionId, toolName, error: error.message });
+      this.notifyUI('tool_error', { _executionId, _toolName, error: error.message });
       
       throw error;
     }
   }
-
   /**
    * Execute tool with retry logic
    */
-  async executeWithRetry(toolName, parameters, options) {
-    const maxRetries = options.maxRetries || this.maxRetries;
-    let lastError;
+  async executeWithRetry(_toolName, _parameters, options) {
+    const _maxRetries = options.maxRetries || this.maxRetries;
+    let lastError; // TODO: Remove if unused
     
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    for (let _attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         if (attempt > 0) {
           // Wait before retry
-          await this.delay(this.retryDelay * Math.pow(2, attempt - 1));
+          await this.delay(this.retryDelay * Math.pow(_2, attempt - 1));
           this.ui.addLog('info', `Retrying ${toolName} (attempt ${attempt + 1}/${maxRetries + 1})`);
         }
         
-        const result = await this.executeToolDirect(toolName, parameters);
+        const _result = await this.executeToolDirect(_toolName, parameters);
         return result;
         
-      } catch (error) {
+      } catch (_error) {
         lastError = error;
         this.ui.addLog('warning', `Tool ${toolName} failed on attempt ${attempt + 1}: ${error.message}`);
       }
@@ -199,32 +193,30 @@ export class MCPIntegrationLayer {
     
     throw new Error(`Tool ${toolName} failed after ${maxRetries + 1} attempts: ${lastError.message}`);
   }
-
   /**
    * Execute tool directly (with or without MCP)
    */
-  async executeToolDirect(toolName, parameters) {
+  async executeToolDirect(_toolName, parameters) {
     if (this.useMockMode) {
-      return this.executeMockTool(toolName, parameters);
+      return this.executeMockTool(_toolName, parameters);
     }
     
     try {
       // Use the mcp__claude-flow__ tools that are available
-      const mcpToolName = `mcp__claude-flow__${toolName}`;
+      const _mcpToolName = `mcp__claude-flow__${toolName}`;
       
       // Check if we have this tool available (would need to be passed from the calling context)
       // For now, simulate execution
-      return this.executeMockTool(toolName, parameters);
+      return this.executeMockTool(_toolName, parameters);
       
-    } catch (error) {
+    } catch (_error) {
       throw new Error(`MCP tool execution failed: ${error.message}`);
     }
   }
-
   /**
    * Execute mock tool for demonstration and fallback
    */
-  async executeMockTool(toolName, parameters) {
+  async executeMockTool(_toolName, parameters) {
     // Simulate processing time
     await this.delay(Math.random() * 1000 + 500);
     
@@ -233,7 +225,7 @@ export class MCPIntegrationLayer {
       case 'swarm_init':
         return {
           success: true,
-          swarmId: `swarm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          swarmId: `swarm_${Date.now()}_${Math.random().toString(36).substr(_2, 9)}`,
           topology: parameters.topology || 'hierarchical',
           maxAgents: parameters.maxAgents || 8,
           strategy: parameters.strategy || 'auto',
@@ -241,10 +233,10 @@ export class MCPIntegrationLayer {
           timestamp: new Date().toISOString()
         };
         
-      case 'neural_train':
-        const epochs = parameters.epochs || 50;
-        const accuracy = Math.min(0.65 + (epochs / 100) * 0.3 + Math.random() * 0.05, 0.98);
-        return {
+      case 'neural_train': {
+        const _epochs = parameters.epochs || 50;
+        const _accuracy = Math.min(0.65 + (epochs / 100) * 0.3 + Math.random() * 0.05, 0.98);
+        return { /* empty */ }
           success: true,
           modelId: `model_${parameters.pattern_type || 'general'}_${Date.now()}`,
           pattern_type: parameters.pattern_type || 'coordination',
@@ -256,8 +248,8 @@ export class MCPIntegrationLayer {
         };
         
       case 'memory_usage':
-        if (parameters.action === 'store') {
-          return {
+        {
+if (parameters.action === 'store') { /* empty */ }return {
             success: true,
             action: 'store',
             key: parameters.key,
@@ -303,58 +295,55 @@ export class MCPIntegrationLayer {
         };
     }
   }
-
   /**
    * Execute multiple tools in parallel
    */
   async executeToolsParallel(toolExecutions) {
-    const promises = toolExecutions.map(({ toolName, parameters, options }) =>
-      this.executeTool(toolName, parameters, options)
+    const _promises = toolExecutions.map(({ _toolName, _parameters, options }) =>
+      this.executeTool(_toolName, _parameters, options)
     );
     
     return Promise.allSettled(promises);
   }
-
   /**
    * Execute tools in batch with progress tracking
    */
-  async executeToolsBatch(toolExecutions, progressCallback) {
-    const results = [];
-    const total = toolExecutions.length;
+  async executeToolsBatch(_toolExecutions, progressCallback) {
+    const _results = [];
+    const _total = toolExecutions.length;
     
-    for (let i = 0; i < total; i++) {
+    for (let _i = 0; i < total; i++) {
       const { toolName, parameters, options } = toolExecutions[i];
       
       try {
-        const result = await this.executeTool(toolName, parameters, options);
+        const _result = await this.executeTool(_toolName, _parameters, options);
         results.push({ success: true, result });
         
         if (progressCallback) {
           progressCallback({
-            completed: i + 1,
-            total,
+            completed: i + _1,
+            _total,
             progress: ((i + 1) / total) * 100,
             currentTool: toolName
           });
         }
         
-      } catch (error) {
+      } catch (_error) {
         results.push({ success: false, error: error.message });
       }
     }
     
     return results;
   }
-
   /**
    * Cache tool results for performance
    */
-  cacheResult(toolName, parameters, result) {
-    const cacheKey = this.generateCacheKey(toolName, parameters);
-    const ttl = this.getCacheTTL(toolName);
+  cacheResult(_toolName, _parameters, result) {
+    const _cacheKey = this.generateCacheKey(_toolName, parameters);
+    const _ttl = this.getCacheTTL(toolName);
     
-    this.resultCache.set(cacheKey, {
-      result,
+    this.resultCache.set(_cacheKey, {
+      _result,
       timestamp: Date.now(),
       ttl
     });
@@ -362,17 +351,16 @@ export class MCPIntegrationLayer {
     // Clean expired cache entries
     this.cleanExpiredCache();
   }
-
   /**
    * Get cached result if available and not expired
    */
-  getCachedResult(toolName, parameters) {
-    const cacheKey = this.generateCacheKey(toolName, parameters);
-    const cached = this.resultCache.get(cacheKey);
+  getCachedResult(_toolName, parameters) {
+    const _cacheKey = this.generateCacheKey(_toolName, parameters);
+    const _cached = this.resultCache.get(cacheKey);
     
     if (!cached) return null;
     
-    const age = Date.now() - cached.timestamp;
+    const _age = Date.now() - cached.timestamp;
     if (age > cached.ttl) {
       this.resultCache.delete(cacheKey);
       return null;
@@ -380,20 +368,18 @@ export class MCPIntegrationLayer {
     
     return cached.result;
   }
-
   /**
    * Generate cache key for tool execution
    */
-  generateCacheKey(toolName, parameters) {
+  generateCacheKey(_toolName, parameters) {
     return `${toolName}_${JSON.stringify(parameters)}`;
   }
-
   /**
    * Get cache TTL based on tool type
    */
   getCacheTTL(toolName) {
     // Different tools have different cache lifetimes
-    const ttlMap = {
+    const _ttlMap = {
       // Fast changing data - short TTL
       'swarm_status': 5000,
       'agent_metrics': 10000,
@@ -410,51 +396,45 @@ export class MCPIntegrationLayer {
     
     return ttlMap[toolName] || 60000; // Default 1 minute
   }
-
   /**
    * Clean expired cache entries
    */
   cleanExpiredCache() {
-    const now = Date.now();
-    for (const [key, cached] of this.resultCache.entries()) {
+    const _now = Date.now();
+    for (const [_key, cached] of this.resultCache.entries()) {
       if (now - cached.timestamp > cached.ttl) {
         this.resultCache.delete(key);
       }
     }
   }
-
   /**
    * Get tools by category
    */
   getToolsByCategory(category) {
     return this.toolCategories[category] || [];
   }
-
   /**
    * Get all available tool categories
    */
   getToolCategories() {
     return Object.keys(this.toolCategories);
   }
-
   /**
    * Get tool execution status
    */
   getExecutionStatus(executionId) {
     return this.activeTools.get(executionId);
   }
-
   /**
    * Cancel tool execution
    */
   async cancelExecution(executionId) {
-    const execution = this.activeTools.get(executionId);
+    const _execution = this.activeTools.get(executionId);
     if (execution && execution.status === 'running') {
       execution.status = 'cancelled';
       this.notifyUI('tool_cancelled', { executionId });
     }
   }
-
   /**
    * Start monitoring active tools
    */
@@ -464,26 +444,24 @@ export class MCPIntegrationLayer {
       this.cleanCompletedExecutions();
     }, 1000);
   }
-
   /**
    * Update progress for running tools
    */
   updateToolProgress() {
-    for (const [executionId, execution] of this.activeTools.entries()) {
+    for (const [_executionId, execution] of this.activeTools.entries()) {
       if (execution.status === 'running') {
-        const elapsed = Date.now() - execution.startTime;
+        const _elapsed = Date.now() - execution.startTime;
         // Estimate progress based on elapsed time (simplified)
-        const estimatedDuration = this.getEstimatedDuration(execution.toolName);
+        const _estimatedDuration = this.getEstimatedDuration(execution.toolName);
         execution.progress = Math.min((elapsed / estimatedDuration) * 100, 95);
       }
     }
   }
-
   /**
    * Get estimated duration for tool execution
    */
   getEstimatedDuration(toolName) {
-    const durationMap = {
+    const _durationMap = {
       'neural_train': 30000,
       'performance_report': 5000,
       'swarm_init': 2000,
@@ -492,19 +470,17 @@ export class MCPIntegrationLayer {
     
     return durationMap[toolName] || 3000; // Default 3 seconds
   }
-
   /**
    * Clean completed executions older than 1 hour
    */
   cleanCompletedExecutions() {
-    const oneHourAgo = Date.now() - 3600000;
-    for (const [executionId, execution] of this.activeTools.entries()) {
+    const _oneHourAgo = Date.now() - 3600000;
+    for (const [_executionId, execution] of this.activeTools.entries()) {
       if (execution.endTime && execution.endTime < oneHourAgo) {
         this.activeTools.delete(executionId);
       }
     }
   }
-
   /**
    * Setup event handlers for real-time updates
    */
@@ -516,43 +492,40 @@ export class MCPIntegrationLayer {
       });
     }
   }
-
   /**
    * Handle system shutdown
    */
   handleShutdown() {
     // Cancel all running executions
-    for (const [executionId, execution] of this.activeTools.entries()) {
+    for (const [_executionId, execution] of this.activeTools.entries()) {
       if (execution.status === 'running') {
         this.cancelExecution(executionId);
       }
     }
   }
-
   /**
    * Notify UI of events
    */
-  notifyUI(eventType, data) {
+  notifyUI(_eventType, data) {
     if (this.ui && typeof this.ui.addLog === 'function') {
-      const message = this.formatEventMessage(eventType, data);
-      const level = this.getEventLevel(eventType);
-      this.ui.addLog(level, message);
+      const _message = this.formatEventMessage(_eventType, data);
+      const _level = this.getEventLevel(eventType);
+      this.ui.addLog(_level, message);
     }
     
     // Notify subscribers
     for (const callback of this.subscriptions) {
       try {
-        callback(eventType, data);
-      } catch (error) {
+        callback(_eventType, data);
+      } catch (_error) {
         console.error('Error in event subscription:', error);
       }
     }
   }
-
   /**
    * Format event message for UI
    */
-  formatEventMessage(eventType, data) {
+  formatEventMessage(_eventType, data) {
     switch (eventType) {
       case 'tool_start':
         return `Started ${data.toolName} (ID: ${data.executionId})`;
@@ -566,7 +539,6 @@ export class MCPIntegrationLayer {
         return `Event: ${eventType}`;
     }
   }
-
   /**
    * Get event level for logging
    */
@@ -582,22 +554,20 @@ export class MCPIntegrationLayer {
         return 'info';
     }
   }
-
   /**
    * Subscribe to events
    */
-  subscribe(callback) {
+  subscribe(_callback) {
     this.subscriptions.add(callback);
     return () => this.subscriptions.delete(callback);
   }
-
   /**
    * Get comprehensive status
    */
   getStatus() {
-    const running = Array.from(this.activeTools.values()).filter(e => e.status === 'running').length;
-    const completed = Array.from(this.activeTools.values()).filter(e => e.status === 'completed').length;
-    const failed = Array.from(this.activeTools.values()).filter(e => e.status === 'failed').length;
+    const _running = Array.from(this.activeTools.values()).filter(e => e.status === 'running').length;
+    const _completed = Array.from(this.activeTools.values()).filter(e => e.status === 'completed').length;
+    const _failed = Array.from(this.activeTools.values()).filter(e => e.status === 'failed').length;
     
     return {
       mcpAvailable: !this.useMockMode,
@@ -608,13 +578,11 @@ export class MCPIntegrationLayer {
       totalTools: Object.values(this.toolCategories).flat().length
     };
   }
-
   /**
    * Utility delay function
    */
   delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(_resolve, ms));
   }
 }
-
 export default MCPIntegrationLayer;

@@ -1,8 +1,6 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Migration CLI Command Integration
  */
-
 import { Command } from 'commander';
 import { MigrationRunner } from '../../migration/migration-runner.js';
 import { MigrationAnalyzer } from '../../migration/migration-analyzer.js';
@@ -11,16 +9,15 @@ import type { MigrationStrategy } from '../../migration/types.js';
 import { logger } from '../../migration/logger.js';
 import * as path from 'path';
 import chalk from 'chalk';
-
 export function createMigrateCommand(): Command {
-  const command = new Command('migrate');
+  const _command = new Command('migrate');
   
   command
     .description('Migrate existing claude-flow projects to optimized prompts')
-    .option('-p, --path <path>', 'Project path', '.')
-    .option('-s, --strategy <type>', 'Migration strategy: full, selective, merge', 'selective')
-    .option('-b, --backup <dir>', 'Backup directory', '.claude-backup')
-    .option('-f, --force', 'Force migration without prompts')
+    .option('-_p, --path <path>', 'Project path', '.')
+    .option('-_s, --strategy <type>', 'Migration strategy: _full, _selective, merge', 'selective')
+    .option('-_b, --backup <dir>', 'Backup directory', '.claude-backup')
+    .option('-_f, --force', 'Force migration without prompts')
     .option('--dry-run', 'Simulate migration without making changes')
     .option('--preserve-custom', 'Preserve custom commands and configurations')
     .option('--skip-validation', 'Skip post-migration validation')
@@ -28,117 +25,109 @@ export function createMigrateCommand(): Command {
     .option('--verbose', 'Show detailed output')
     .action(async (options) => {
       try {
-        const projectPath = path.resolve(options.path);
+        const _projectPath = path.resolve(options.path);
         
         if (options.analyzeOnly) {
-          await analyzeProject(projectPath, options);
+          await analyzeProject(_projectPath, options);
         } else {
-          await runMigration(projectPath, options);
+          await runMigration(_projectPath, options);
         }
         
-      } catch (error) {
+      } catch (_error) {
         logger.error('Migration command failed:', error);
         process.exit(1);
       }
     });
-
   // Sub-commands
   command
     .command('analyze [path]')
     .description('Analyze project for migration readiness')
-    .option('-d, --detailed', 'Show detailed analysis')
-    .option('-o, --output <file>', 'Output analysis to file')
+    .option('-_d, --detailed', 'Show detailed analysis')
+    .option('-_o, --output <file>', 'Output analysis to file')
     .action(async (projectPath = '.', options) => {
       await analyzeProject(path.resolve(projectPath), options);
     });
-
   command
     .command('rollback [path]')
     .description('Rollback to previous configuration')
-    .option('-b, --backup <dir>', 'Backup directory', '.claude-backup')
-    .option('-t, --timestamp <time>', 'Restore from specific timestamp')
-    .option('-f, --force', 'Force rollback without prompts')
+    .option('-_b, --backup <dir>', 'Backup directory', '.claude-backup')
+    .option('-_t, --timestamp <time>', 'Restore from specific timestamp')
+    .option('-_f, --force', 'Force rollback without prompts')
     .option('--list', 'List available backups')
     .action(async (projectPath = '.', options) => {
       const { RollbackManager } = await import('../../migration/rollback-manager.js');
-      const rollbackManager = new RollbackManager(path.resolve(projectPath), options.backup);
+      const _rollbackManager = new RollbackManager(path.resolve(projectPath), options.backup);
       
       if (options.list) {
-        const backups = await rollbackManager.listBackups();
+        const _backups = await rollbackManager.listBackups();
         rollbackManager.printBackupSummary(backups);
         return;
       }
       
-      await rollbackManager.rollback(options.timestamp, !options.force);
+      await rollbackManager.rollback(options._timestamp, !options.force);
     });
-
   command
     .command('validate [path]')
     .description('Validate migration was successful')
-    .option('-v, --verbose', 'Show detailed validation results')
+    .option('-_v, --verbose', 'Show detailed validation results')
     .action(async (projectPath = '.', options) => {
       const { MigrationRunner } = await import('../../migration/migration-runner.js');
-      const runner = new MigrationRunner({
+      const _runner = new MigrationRunner({
         projectPath: path.resolve(projectPath),
         strategy: 'full'
       });
       
-      const isValid = await runner.validate(options.verbose);
+      const _isValid = await runner.validate(options.verbose);
       process.exit(isValid ? 0 : 1);
     });
-
   command
     .command('status [path]')
     .description('Show migration status and available backups')
     .action(async (projectPath = '.') => {
       await showMigrationStatus(path.resolve(projectPath));
     });
-
   return command;
 }
-
-async function analyzeProject(projectPath: string, options: any): Promise<void> {
+async function analyzeProject(projectPath: string, options: unknown): Promise<void> {
   logger.info(`Analyzing project at ${projectPath}...`);
   
   const { MigrationAnalyzer } = await import('../../migration/migration-analyzer.js');
-  const analyzer = new MigrationAnalyzer();
-  const analysis = await analyzer.analyze(projectPath);
+  const _analyzer = new MigrationAnalyzer();
+  const _analysis = await analyzer.analyze(projectPath);
   
   if (options.output) {
-    await analyzer.saveAnalysis(analysis, options.output);
+    await analyzer.saveAnalysis(_analysis, options.output);
     logger.success(`Analysis saved to ${options.output}`);
   }
   
-  analyzer.printAnalysis(analysis, options.detailed || options.verbose);
+  analyzer.printAnalysis(_analysis, options.detailed || options.verbose);
 }
-
-async function runMigration(projectPath: string, options: any): Promise<void> {
+async function runMigration(projectPath: string, options: unknown): Promise<void> {
   const { MigrationRunner } = await import('../../migration/migration-runner.js');
-  const runner = new MigrationRunner({
-    projectPath,
-    strategy: options.strategy as MigrationStrategy,
-    backupDir: options.backup,
-    force: options.force,
-    dryRun: options.dryRun,
-    preserveCustom: options.preserveCustom,
+  const _runner = new MigrationRunner({
+    _projectPath,
+    strategy: options.strategy as _MigrationStrategy,
+    backupDir: options._backup,
+    force: options._force,
+    dryRun: options._dryRun,
+    preserveCustom: options._preserveCustom,
     skipValidation: options.skipValidation
   });
   
-  const result = await runner.run();
+  const _result = await runner.run();
   
   if (!result.success) {
     process.exit(1);
   }
 }
-
 async function showMigrationStatus(projectPath: string): Promise<void> {
   console.log(chalk.bold('\n📊 Migration Status'));
   console.log(chalk.gray('─'.repeat(50)));
   
   // Project analysis
   const { MigrationAnalyzer } = await import('../../migration/migration-analyzer.js');
-  const analyzer = new MigrationAnalyzer();
-  const analysis = await analyzer.analyze(projectPath);
+  const _analyzer = new MigrationAnalyzer();
+  const _analysis = await analyzer.analyze(projectPath);
   
   console.log(`\n${chalk.bold('Project:')} ${projectPath}`);
   console.log(`${chalk.bold('Status:')} ${analysis.hasOptimizedPrompts ? chalk.green('Migrated') : chalk.yellow('Not Migrated')}`);
@@ -147,13 +136,13 @@ async function showMigrationStatus(projectPath: string): Promise<void> {
   
   // Backup status
   const { RollbackManager } = await import('../../migration/rollback-manager.js');
-  const rollbackManager = new RollbackManager(projectPath);
-  const backups = await rollbackManager.listBackups();
+  const _rollbackManager = new RollbackManager(projectPath);
+  const _backups = await rollbackManager.listBackups();
   
   console.log(`\n${chalk.bold('Backups Available:')} ${backups.length}`);
   
   if (backups.length > 0) {
-    const latestBackup = backups[0];
+    const _latestBackup = backups[0];
     console.log(`${chalk.bold('Latest Backup:')} ${latestBackup.timestamp.toLocaleString()}`);
   }
   

@@ -3,9 +3,8 @@
  * Memory Manager Test Module
  * Tests the memory management functionality
  */
-
 export class MemoryTest {
-  constructor(memoryManager, terminal) {
+  constructor(_memoryManager, terminal) {
     this.memoryManager = memoryManager;
     this.terminal = terminal;
   }
@@ -23,7 +22,7 @@ export class MemoryTest {
       await this.testMemoryOperations();
       
       this.terminal.writeSuccess('✅ All memory tests completed successfully!');
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`❌ Memory tests failed: ${error.message}`);
     }
   }
@@ -36,7 +35,7 @@ export class MemoryTest {
     
     // Test panel toggle
     this.memoryManager.togglePanel();
-    const panelVisible = !document.getElementById('memoryPanel')?.classList.contains('hidden');
+    const _panelVisible = !document.getElementById('memoryPanel')?.classList.contains('hidden');
     
     if (panelVisible) {
       this.terminal.writeSuccess('✅ Memory panel opens correctly');
@@ -45,7 +44,7 @@ export class MemoryTest {
     }
     
     // Test panel components
-    const requiredElements = [
+    const _requiredElements = [
       'memoryToolsGrid',
       'namespaceSelect',
       'memoryTable',
@@ -54,7 +53,7 @@ export class MemoryTest {
     ];
     
     for (const elementId of requiredElements) {
-      const element = document.getElementById(elementId);
+      const _element = document.getElementById(elementId);
       if (element) {
         this.terminal.writeSuccess(`✅ ${elementId} component found`);
       } else {
@@ -69,18 +68,18 @@ export class MemoryTest {
   async testMemoryTools() {
     this.terminal.writeInfo('Testing memory tools...');
     
-    const tools = Object.keys(this.memoryManager.memoryTools);
+    const _tools = Object.keys(this.memoryManager.memoryTools);
     this.terminal.writeInfo(`Found ${tools.length} memory tools:`);
     
     for (const tool of tools) {
-      const toolInfo = this.memoryManager.memoryTools[tool];
+      const _toolInfo = this.memoryManager.memoryTools[tool];
       this.terminal.writeLine(`  ${toolInfo.icon} ${toolInfo.name} - ${toolInfo.description}`);
     }
     
     if (tools.length === 10) {
       this.terminal.writeSuccess('✅ All 10 memory tools are configured');
     } else {
-      throw new Error(`Expected 10 memory tools, found ${tools.length}`);
+      throw new Error(`Expected 10 memory _tools, found ${tools.length}`);
     }
   }
   
@@ -91,7 +90,7 @@ export class MemoryTest {
     this.terminal.writeInfo('Testing namespace operations...');
     
     // Test namespace switching
-    const originalNamespace = this.memoryManager.currentNamespace;
+    const _originalNamespace = this.memoryManager.currentNamespace;
     
     // Switch to test namespace
     await this.memoryManager.switchNamespace('test');
@@ -113,7 +112,7 @@ export class MemoryTest {
     this.terminal.writeInfo('Testing memory operations...');
     
     // Test utility functions
-    const testData = {
+    const _testData = {
       size: this.memoryManager.formatSize(1024),
       ttl: this.memoryManager.formatTTL(Date.now() + 3600000),
       truncate: this.memoryManager.truncateValue('This is a very long test string that should be truncated'),
@@ -152,7 +151,7 @@ export class MemoryTest {
   async testMockData() {
     this.terminal.writeInfo('Testing with mock data...');
     
-    const mockEntries = [
+    const _mockEntries = [
       {
         key: 'test/key1',
         value: 'test value 1',
@@ -162,7 +161,7 @@ export class MemoryTest {
       },
       {
         key: 'test/key2',
-        value: JSON.stringify({ test: 'data', array: [1, 2, 3] }),
+        value: JSON.stringify({ test: 'data', array: [_1, _2, 3] }),
         size: 512,
         ttl: null,
         namespace: 'test'
@@ -173,8 +172,8 @@ export class MemoryTest {
     this.memoryManager.updateMemoryTable(mockEntries);
     
     // Check if table was populated
-    const tableBody = document.getElementById('memoryTableBody');
-    const rows = tableBody?.getElementsByTagName('tr');
+    const _tableBody = document.getElementById('memoryTableBody');
+    const _rows = tableBody?.getElementsByTagName('tr');
     
     if (rows && rows.length === mockEntries.length) {
       this.terminal.writeSuccess('✅ Memory table updates correctly');
@@ -184,7 +183,7 @@ export class MemoryTest {
     
     // Test filtering
     this.memoryManager.filterMemoryEntries('key1');
-    const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+    const _visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
     
     if (visibleRows.length === 1) {
       this.terminal.writeSuccess('✅ Memory filtering works');
@@ -200,7 +199,7 @@ export class MemoryTest {
    * Generate test report
    */
   generateReport() {
-    const report = {
+    const _report = {
       timestamp: new Date().toISOString(),
       tests: {
         panel: 'passed',
@@ -222,16 +221,15 @@ export class MemoryTest {
     };
     
     this.terminal.writeInfo('📊 Memory Manager Test Report:');
-    this.terminal.writeLine(JSON.stringify(report, null, 2));
+    this.terminal.writeLine(JSON.stringify(_report, _null, 2));
     
     return report;
   }
 }
-
 // Export test runner function
 export async function runMemoryTests() {
   if (window.memoryManager && window.claudeConsole) {
-    const tester = new MemoryTest(window.memoryManager, window.claudeConsole.terminal);
+    const _tester = new MemoryTest(window._memoryManager, window.claudeConsole.terminal);
     await tester.runTests();
     await tester.testMockData();
     return tester.generateReport();
@@ -240,6 +238,5 @@ export async function runMemoryTests() {
     return null;
   }
 }
-
 // Make test runner globally available
 window.runMemoryTests = runMemoryTests;

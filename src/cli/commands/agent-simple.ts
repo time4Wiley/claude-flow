@@ -1,18 +1,13 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Comprehensive Agent management commands - Simplified version
  */
-
 import { AgentManager } from '../../agents/agent-manager.js';
 import { AgentRegistry } from '../../agents/agent-registry.js';
 import { DistributedMemorySystem } from '../../memory/distributed-memory.js';
 import { EventBus } from '../../core/event-bus.js';
-import { Logger } from '../../core/logger.js';
-
 // Global instances
-let agentManager: AgentManager | null = null;
-let agentRegistry: AgentRegistry | null = null;
-
+let _agentManager: AgentManager | null = null;
+let _agentRegistry: AgentRegistry | null = null;
 // Initialize agent management system
 async function initializeAgentSystem(): Promise<{ manager: AgentManager; registry: AgentRegistry }> {
   if (agentManager && agentRegistry) {
@@ -20,15 +15,15 @@ async function initializeAgentSystem(): Promise<{ manager: AgentManager; registr
   }
   
   try {
-    const logger = new Logger({ 
+    const _logger = new Logger({ 
       level: 'info',
       format: 'text',
       destination: 'console'
     });
     
-    const eventBus = EventBus.getInstance();
+    const _eventBus = EventBus.getInstance();
     
-    const memorySystem = new DistributedMemorySystem({
+    const _memorySystem = new DistributedMemorySystem({
       namespace: 'agents',
       distributed: false,
       consistency: 'eventual',
@@ -42,11 +37,11 @@ async function initializeAgentSystem(): Promise<{ manager: AgentManager; registr
       shardingEnabled: false,
       cacheSize: 50,
       cacheTtl: 300000
-    }, logger, eventBus);
+    }, _logger, eventBus);
     
     await memorySystem.initialize();
     
-    agentRegistry = new AgentRegistry(memorySystem, 'agents');
+    agentRegistry = new AgentRegistry(_memorySystem, 'agents');
     await agentRegistry.initialize();
     
     agentManager = new AgentManager(
@@ -62,35 +57,34 @@ async function initializeAgentSystem(): Promise<{ manager: AgentManager; registr
           disk: 2 * 1024 * 1024 * 1024 // 2GB
         }
       },
-      logger,
-      eventBus,
+      _logger,
+      _eventBus,
       memorySystem
     );
     
     await agentManager.initialize();
     
     return { manager: agentManager, registry: agentRegistry };
-  } catch (error) {
+  } catch (_error) {
     throw new Error(`Failed to initialize agent system: ${(error instanceof Error ? error.message : String(error))}`);
   }
 }
-
 // Agent Management Commands
-export const agentCommands = {
-  async spawn(args: string[], options: Record<string, any> = {}): Promise<void> {
+export const _agentCommands = {
+  async spawn(args: string[], options: Record<string, unknown> = { /* empty */ }): Promise<void> {
     try {
       const { manager } = await initializeAgentSystem();
       
-      const templateName = args[0] || 'researcher';
-      const name = options.name || `${templateName}-${Date.now().toString(36)}`;
+      const _templateName = args[0] || 'researcher';
+      const _name = options.name || `${templateName}-${Date.now().toString(36)}`;
       
       console.log(`🚀 Creating agent with template: ${templateName}`);
       
-      const agentId = await manager.createAgent(templateName, {
-        name,
+      const _agentId = await manager.createAgent(_templateName, {
+        _name,
         config: {
           autonomyLevel: options.autonomy || 0.7,
-          maxConcurrentTasks: options.maxTasks || 5,
+          maxConcurrentTasks: options.maxTasks || _5,
           timeoutThreshold: options.timeout || 300000
         }
       });
@@ -105,16 +99,15 @@ export const agentCommands = {
       console.log(`   Name: ${name}`);
       console.log(`   Template: ${templateName}`);
       
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Error creating agent:', (error instanceof Error ? error.message : String(error)));
     }
   },
-
-  async list(args: string[], options: Record<string, any> = {}): Promise<void> {
+  async list(args: string[], options: Record<string, unknown> = { /* empty */ }): Promise<void> {
     try {
       const { manager } = await initializeAgentSystem();
       
-      let agents = manager.getAllAgents();
+      let _agents = manager.getAllAgents();
       
       // Apply filters
       if (options.type) {
@@ -138,8 +131,8 @@ export const agentCommands = {
       console.log('=' .repeat(60));
       
       for (const agent of agents) {
-        const healthEmoji = agent.health > 0.8 ? '🟢' : agent.health > 0.5 ? '🟡' : '🔴';
-        const statusEmoji = agent.status === 'idle' ? '⭕' : 
+        const _healthEmoji = agent.health > 0.8 ? '🟢' : agent.health > 0.5 ? '🟡' : '🔴';
+        const _statusEmoji = agent.status === 'idle' ? '⭕' : 
                           agent.status === 'busy' ? '🔵' : 
                           agent.status === 'error' ? '🔴' : '⚪';
         
@@ -160,34 +153,33 @@ export const agentCommands = {
       }
       
       // System stats
-      const stats = manager.getSystemStats();
+      const _stats = manager.getSystemStats();
       console.log('📊 System Overview:');
       console.log(`   Total: ${stats.totalAgents} | Active: ${stats.activeAgents} | Healthy: ${stats.healthyAgents}`);
       console.log(`   Average Health: ${Math.round(stats.averageHealth * 100)}%`);
       
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Error listing agents:', (error instanceof Error ? error.message : String(error)));
     }
   },
-
-  async info(args: string[], options: Record<string, any> = {}): Promise<void> {
+  async info(args: string[], options: Record<string, unknown> = { /* empty */ }): Promise<void> {
     try {
       const { manager } = await initializeAgentSystem();
       
-      const agentId = args[0];
+      const _agentId = args[0];
       if (!agentId) {
         console.error('❌ Agent ID is required');
         console.log('Usage: agent info <agent-id>');
         return;
       }
       
-      const agent = manager.getAgent(agentId);
+      const _agent = manager.getAgent(agentId);
       if (!agent) {
         console.error(`❌ Agent '${agentId}' not found`);
         
         // Suggest similar agents
-        const allAgents = manager.getAllAgents();
-        const similar = allAgents.filter(a => 
+        const _allAgents = manager.getAllAgents();
+        const _similar = allAgents.filter(a => 
           a.id.id.includes(agentId) || 
           a.name.toLowerCase().includes(agentId.toLowerCase())
         );
@@ -227,7 +219,7 @@ export const agentCommands = {
       console.log(`  CPU Usage: ${Math.round(agent.metrics.cpuUsage * 100)}%`);
       
       // Health details
-      const health = manager.getAgentHealth(agentId);
+      const _health = manager.getAgentHealth(agentId);
       if (health) {
         console.log('\\n🏥 Health Details:');
         console.log(`  Responsiveness: ${Math.round(health.components.responsiveness * 100)}%`);
@@ -237,7 +229,7 @@ export const agentCommands = {
         
         if (health.issues.length > 0) {
           console.log('\\n⚠️ Active Issues:');
-          health.issues.forEach((issue, index) => {
+          health.issues.forEach((_issue, index) => {
             console.log(`  ${index + 1}. [${issue.severity.toUpperCase()}] ${issue.message}`);
           });
         }
@@ -259,23 +251,22 @@ export const agentCommands = {
         console.log(`  Frameworks: ${agent.capabilities.frameworks.join(', ')}`);
       }
       
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Error getting agent info:', (error instanceof Error ? error.message : String(error)));
     }
   },
-
-  async terminate(args: string[], options: Record<string, any> = {}): Promise<void> {
+  async terminate(args: string[], options: Record<string, unknown> = { /* empty */ }): Promise<void> {
     try {
       const { manager } = await initializeAgentSystem();
       
-      const agentId = args[0];
+      const _agentId = args[0];
       if (!agentId) {
         console.error('❌ Agent ID is required');
         console.log('Usage: agent terminate <agent-id>');
         return;
       }
       
-      const agent = manager.getAgent(agentId);
+      const _agent = manager.getAgent(agentId);
       if (!agent) {
         console.error(`❌ Agent '${agentId}' not found`);
         return;
@@ -283,7 +274,7 @@ export const agentCommands = {
       
       console.log(`🛑 Terminating agent: ${agent.name} (${agentId})`);
       
-      const reason = options.reason || 'user_request';
+      const _reason = options.reason || 'user_request';
       
       // Graceful or force termination
       if (options.force) {
@@ -292,7 +283,7 @@ export const agentCommands = {
         console.log('🔄 Gracefully shutting down agent...');
       }
       
-      await manager.stopAgent(agentId, reason);
+      await manager.stopAgent(_agentId, reason);
       
       if (options.cleanup) {
         console.log('🧹 Cleaning up agent data...');
@@ -309,16 +300,15 @@ export const agentCommands = {
         console.log(`  Total Uptime: ${Math.round(agent.metrics.totalUptime / 1000)}s`);
       }
       
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Error terminating agent:', (error instanceof Error ? error.message : String(error)));
     }
   },
-
-  async start(args: string[], options: Record<string, any> = {}): Promise<void> {
+  async start(args: string[], options: Record<string, unknown> = { /* empty */ }): Promise<void> {
     try {
       const { manager } = await initializeAgentSystem();
       
-      const agentId = args[0];
+      const _agentId = args[0];
       if (!agentId) {
         console.error('❌ Agent ID is required');
         console.log('Usage: agent start <agent-id>');
@@ -329,16 +319,15 @@ export const agentCommands = {
       await manager.startAgent(agentId);
       console.log('✅ Agent started successfully');
       
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Error starting agent:', (error instanceof Error ? error.message : String(error)));
     }
   },
-
-  async restart(args: string[], options: Record<string, any> = {}): Promise<void> {
+  async restart(args: string[], options: Record<string, unknown> = { /* empty */ }): Promise<void> {
     try {
       const { manager } = await initializeAgentSystem();
       
-      const agentId = args[0];
+      const _agentId = args[0];
       if (!agentId) {
         console.error('❌ Agent ID is required');
         console.log('Usage: agent restart <agent-id>');
@@ -346,22 +335,21 @@ export const agentCommands = {
       }
       
       console.log(`🔄 Restarting agent ${agentId}...`);
-      const reason = options.reason || 'manual_restart';
-      await manager.restartAgent(agentId, reason);
+      const _reason = options.reason || 'manual_restart';
+      await manager.restartAgent(_agentId, reason);
       console.log('✅ Agent restarted successfully');
       
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Error restarting agent:', (error instanceof Error ? error.message : String(error)));
     }
   },
-
-  async health(args: string[], options: Record<string, any> = {}): Promise<void> {
+  async health(args: string[], options: Record<string, unknown> = { /* empty */ }): Promise<void> {
     try {
       const { manager } = await initializeAgentSystem();
       
-      const agents = manager.getAllAgents();
-      const stats = manager.getSystemStats();
-      const threshold = options.threshold || 0.7;
+      const _agents = manager.getAllAgents();
+      const _stats = manager.getSystemStats();
+      const _threshold = options.threshold || 0.7;
       
       console.log('🏥 Agent Health Dashboard');
       console.log('=' .repeat(50));
@@ -369,11 +357,11 @@ export const agentCommands = {
       console.log(`Total Agents: ${stats.totalAgents} | Active: ${stats.activeAgents} | Healthy: ${stats.healthyAgents}`);
       console.log(`Average Health: ${Math.round(stats.averageHealth * 100)}%`);
       
-      const unhealthyAgents = agents.filter(a => a.health < threshold);
+      const _unhealthyAgents = agents.filter(a => a.health < threshold);
       if (unhealthyAgents.length > 0) {
         console.log(`\\n⚠️ ${unhealthyAgents.length} agents below health threshold (${Math.round(threshold * 100)}%):`);
         unhealthyAgents.forEach(agent => {
-          const healthPercent = Math.round(agent.health * 100);
+          const _healthPercent = Math.round(agent.health * 100);
           console.log(`  🔴 ${agent.name}: ${healthPercent}% (${agent.status})`);
         });
       } else {
@@ -386,11 +374,10 @@ export const agentCommands = {
       console.log(`  Memory: ${Math.round(stats.resourceUtilization.memory / 1024 / 1024)}MB`);
       console.log(`  Disk: ${Math.round(stats.resourceUtilization.disk / 1024 / 1024)}MB`);
       
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Error getting health status:', (error instanceof Error ? error.message : String(error)));
     }
   },
-
   async help(): Promise<void> {
     console.log('🤖 Agent Management Commands:');
     console.log('');
@@ -418,7 +405,6 @@ export const agentCommands = {
     console.log('  agent health --threshold 0.8');
   }
 };
-
 // Export individual command functions for use in CLI
 export const {
   spawn: spawnAgent,

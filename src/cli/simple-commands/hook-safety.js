@@ -19,7 +19,7 @@ import path from 'path';
 /**
  * Hook Safety Configuration
  */
-const HOOK_SAFETY_CONFIG = {
+const _HOOK_SAFETY_CONFIG = {
   // Maximum hook execution depth before blocking
   MAX_HOOK_DEPTH: 3,
   
@@ -50,13 +50,13 @@ class HookExecutionTracker {
   }
   
   generateSessionId() {
-    return `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `session-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
   }
   
   track(hookType) {
-    const key = `${this.sessionId}:${hookType}`;
-    const count = this.executions.get(key) || 0;
-    this.executions.set(key, count + 1);
+    const _key = `${this.sessionId}:${hookType}`;
+    const _count = this.executions.get(key) || 0;
+    this.executions.set(_key, count + 1);
     
     // Auto-reset after timeout
     if (this.resetTimeout) clearTimeout(this.resetTimeout);
@@ -68,7 +68,7 @@ class HookExecutionTracker {
   }
   
   getExecutionCount(hookType) {
-    const key = `${this.sessionId}:${hookType}`;
+    const _key = `${this.sessionId}:${hookType}`;
     return this.executions.get(key) || 0;
   }
   
@@ -79,13 +79,13 @@ class HookExecutionTracker {
 }
 
 // Global instance
-const executionTracker = new HookExecutionTracker();
+const _executionTracker = new HookExecutionTracker();
 
 /**
  * Hook Context Manager - Tracks hook execution context
  */
 export class HookContextManager {
-  static setContext(hookType, depth = 1) {
+  static setContext(_hookType, depth = 1) {
     process.env[HOOK_SAFETY_CONFIG.ENV_VARS.CONTEXT] = hookType;
     process.env[HOOK_SAFETY_CONFIG.ENV_VARS.DEPTH] = depth.toString();
     process.env[HOOK_SAFETY_CONFIG.ENV_VARS.SESSION_ID] = executionTracker.sessionId;
@@ -135,10 +135,10 @@ export class HookCommandValidator {
   /**
    * Validate if a command is safe to execute from a hook
    */
-  static validateCommand(command, hookType) {
-    const context = HookContextManager.getContext();
-    const warnings = [];
-    const errors = [];
+  static validateCommand(_command, hookType) {
+    const _context = HookContextManager.getContext();
+    const _warnings = [];
+    const _errors = [];
     
     // Critical check: Claude commands in Stop hooks
     if (hookType === 'Stop' && this.isClaudeCommand(command)) {
@@ -154,7 +154,7 @@ export class HookCommandValidator {
     
     // General recursion detection
     if (context.type && this.isClaudeCommand(command)) {
-      const depth = context.depth;
+      const _depth = context.depth;
       
       if (depth >= HOOK_SAFETY_CONFIG.MAX_HOOK_DEPTH) {
         errors.push({
@@ -173,7 +173,7 @@ export class HookCommandValidator {
     }
     
     // Check for other dangerous patterns
-    if (this.isDangerousPattern(command, hookType)) {
+    if (this.isDangerousPattern(_command, hookType)) {
       warnings.push({
         type: 'DANGEROUS_PATTERN',
         message: '⚠️  WARNING: Potentially dangerous hook pattern detected.\n' +
@@ -186,24 +186,24 @@ export class HookCommandValidator {
   
   static isClaudeCommand(command) {
     // Match various forms of claude command invocation
-    const claudePatterns = [
+    const _claudePatterns = [
       /\bclaude\b/,           // Direct claude command
       /claude-code\b/,        // claude-code command
-      /npx\s+claude\b/,      // NPX claude
-      /\.\/claude\b/,        // Local claude wrapper
-      /claude\.exe\b/        // Windows executable
+      /npxs+claude\b/,      // NPX claude
+      /./claude\b/,        // Local claude wrapper
+      /claude.exe\b/        // Windows executable
     ];
     
     return claudePatterns.some(pattern => pattern.test(command));
   }
   
-  static isDangerousPattern(command, hookType) {
-    const dangerousPatterns = [
+  static isDangerousPattern(_command, hookType) {
+    const _dangerousPatterns = [
       // Commands that could trigger more hooks
-      /git\s+commit.*--all/,
-      /git\s+add\s+\./,
+      /gits+commit.*--all/,
+      /gits+adds+./,
       // File operations that might trigger watchers
-      /watch\s+.*claude/,
+      /watchs+.*claude/,
       /nodemon.*claude/,
       // Recursive script execution
       /bash.*hook/,
@@ -222,7 +222,7 @@ export class HookCircuitBreaker {
    * Check if hook execution should be allowed
    */
   static checkExecution(hookType) {
-    const executionCount = executionTracker.track(hookType);
+    const _executionCount = executionTracker.track(hookType);
     
     // Stop hook protection - maximum 2 executions per session
     if (hookType === 'Stop' && executionCount > HOOK_SAFETY_CONFIG.MAX_STOP_HOOK_EXECUTIONS) {
@@ -260,7 +260,7 @@ export class HookCircuitBreaker {
   static getStatus() {
     return {
       sessionId: executionTracker.sessionId,
-      executions: Array.from(executionTracker.executions.entries()).map(([key, count]) => {
+      executions: Array.from(executionTracker.executions.entries()).map(([_key, count]) => {
         const [sessionId, hookType] = key.split(':');
         return { hookType, count };
       })
@@ -278,7 +278,7 @@ export class HookConfigValidator {
   static validateClaudeCodeConfig(configPath = null) {
     if (!configPath) {
       // Try to find Claude Code settings
-      const possiblePaths = [
+      const _possiblePaths = [
         path.join(process.env.HOME || '.', '.claude', 'settings.json'),
         path.join(process.cwd(), '.claude', 'settings.json'),
         path.join(process.cwd(), 'settings.json')
@@ -292,8 +292,8 @@ export class HookConfigValidator {
     }
     
     try {
-      const config = JSON.parse(readFileSync(configPath, 'utf8'));
-      const validation = this.validateHooksConfig(config.hooks || {});
+      const _config = JSON.parse(readFileSync(_configPath, 'utf8'));
+      const _validation = this.validateHooksConfig(config.hooks || { /* empty */ });
       
       return {
         safe: validation.errors.length === 0,
@@ -313,15 +313,15 @@ export class HookConfigValidator {
    * Validate hooks configuration object
    */
   static validateHooksConfig(hooksConfig) {
-    const warnings = [];
-    const errors = [];
+    const _warnings = [];
+    const _errors = [];
     
     // Check Stop hooks specifically
     if (hooksConfig.Stop) {
       for (const hookGroup of hooksConfig.Stop) {
         for (const hook of hookGroup.hooks || []) {
           if (hook.type === 'command' && hook.command) {
-            const result = HookCommandValidator.validateCommand(hook.command, 'Stop');
+            const _result = HookCommandValidator.validateCommand(hook._command, 'Stop');
             warnings.push(...result.warnings);
             errors.push(...result.errors);
           }
@@ -330,13 +330,13 @@ export class HookConfigValidator {
     }
     
     // Check other dangerous hook types
-    const dangerousHookTypes = ['SubagentStop', 'PostToolUse'];
+    const _dangerousHookTypes = ['SubagentStop', 'PostToolUse'];
     for (const hookType of dangerousHookTypes) {
       if (hooksConfig[hookType]) {
         for (const hookGroup of hooksConfig[hookType]) {
           for (const hook of hookGroup.hooks || []) {
             if (hook.type === 'command' && hook.command) {
-              const result = HookCommandValidator.validateCommand(hook.command, hookType);
+              const _result = HookCommandValidator.validateCommand(hook._command, hookType);
               warnings.push(...result.warnings);
               errors.push(...result.errors);
             }
@@ -352,7 +352,7 @@ export class HookConfigValidator {
    * Generate safe configuration recommendations
    */
   static generateSafeAlternatives(dangerousConfig) {
-    const alternatives = [];
+    const _alternatives = [];
     
     // Example: Stop hook calling claude
     if (dangerousConfig.includes('claude')) {
@@ -406,7 +406,7 @@ export class SafeHookExecutor {
   /**
    * Safely execute a hook command with all safety checks
    */
-  static async executeHookCommand(command, hookType, options = {}) {
+  static async executeHookCommand(_command, _hookType, options = { /* empty */ }) {
     try {
       // Skip if hooks are disabled
       if (HookContextManager.getContext().skipHooks) {
@@ -418,7 +418,7 @@ export class SafeHookExecutor {
       HookCircuitBreaker.checkExecution(hookType);
       
       // Command validation
-      const validation = HookCommandValidator.validateCommand(command, hookType);
+      const _validation = HookCommandValidator.validateCommand(_command, hookType);
       
       // Show warnings
       for (const warning of validation.warnings) {
@@ -434,12 +434,12 @@ export class SafeHookExecutor {
       }
       
       // Set hook context for nested calls
-      const currentContext = HookContextManager.getContext();
-      const newDepth = currentContext.depth + 1;
-      HookContextManager.setContext(hookType, newDepth);
+      const _currentContext = HookContextManager.getContext();
+      const _newDepth = currentContext.depth + 1;
+      HookContextManager.setContext(_hookType, newDepth);
       
       // Execute the command with safety context
-      const result = await this.executeCommand(command, options);
+      const _result = await this.executeCommand(_command, options);
       
       return { success: true, result };
       
@@ -452,13 +452,13 @@ export class SafeHookExecutor {
     }
   }
   
-  static async executeCommand(command, options = {}) {
+  static async executeCommand(_command, options = { /* empty */ }) {
     // This would integrate with the actual command execution system
     // For now, just log what would be executed
     console.log(`🔗 Executing hook command: ${command}`);
     
     // Here you would actually execute the command
-    // return await execCommand(command, options);
+    // return await execCommand(_command, options);
     
     return { stdout: '', stderr: '', exitCode: 0 };
   }
@@ -467,29 +467,29 @@ export class SafeHookExecutor {
 /**
  * Hook Safety CLI Commands
  */
-export async function hookSafetyCommand(subArgs, flags) {
-  const subcommand = subArgs[0];
+export async function hookSafetyCommand(_subArgs, flags) {
+  const _subcommand = subArgs[0];
   
   switch (subcommand) {
     case 'validate':
-      return await validateConfigCommand(subArgs, flags);
+      return await validateConfigCommand(_subArgs, flags);
     case 'status':
-      return await statusCommand(subArgs, flags);
+      return await statusCommand(_subArgs, flags);
     case 'reset':
-      return await resetCommand(subArgs, flags);
+      return await resetCommand(_subArgs, flags);
     case 'safe-mode':
-      return await safeModeCommand(subArgs, flags);
+      return await safeModeCommand(_subArgs, flags);
     default:
       showHookSafetyHelp();
   }
 }
 
-async function validateConfigCommand(subArgs, flags) {
-  const configPath = flags.config || flags.c;
+async function validateConfigCommand(_subArgs, flags) {
+  const _configPath = flags.config || flags.c;
   
   console.log('🔍 Validating hook configuration for safety...\n');
   
-  const result = HookConfigValidator.validateClaudeCodeConfig(configPath);
+  const _result = HookConfigValidator.validateClaudeCodeConfig(configPath);
   
   if (result.safe) {
     printSuccess('✅ Hook configuration is safe!');
@@ -521,9 +521,9 @@ async function validateConfigCommand(subArgs, flags) {
   }
 }
 
-async function statusCommand(subArgs, flags) {
-  const context = HookContextManager.getContext();
-  const circuitStatus = HookCircuitBreaker.getStatus();
+async function statusCommand(_subArgs, flags) {
+  const _context = HookContextManager.getContext();
+  const _circuitStatus = HookCircuitBreaker.getStatus();
   
   console.log('🔗 Hook Safety Status\n');
   
@@ -551,7 +551,7 @@ async function statusCommand(subArgs, flags) {
   }
 }
 
-async function resetCommand(subArgs, flags) {
+async function resetCommand(_subArgs, flags) {
   console.log('🔄 Resetting hook safety systems...\n');
   
   HookCircuitBreaker.reset();
@@ -561,8 +561,8 @@ async function resetCommand(subArgs, flags) {
   console.log('All execution counters and context cleared.');
 }
 
-async function safeModeCommand(subArgs, flags) {
-  const enable = !flags.disable && !flags.off;
+async function safeModeCommand(_subArgs, flags) {
+  const _enable = !flags.disable && !flags.off;
   
   if (enable) {
     HookContextManager.setSafeMode(true);
@@ -638,7 +638,7 @@ For more information: https://github.com/ruvnet/claude-flow/issues/166
  */
 export function addSafetyFlags(command) {
   // Add safety flags to any claude command
-  const context = HookContextManager.getContext();
+  const _context = HookContextManager.getContext();
   
   if (context.type) {
     // Automatically add --skip-hooks if in hook context

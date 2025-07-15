@@ -1,9 +1,7 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Recovery Manager for MCP
  * Orchestrates all recovery components for comprehensive connection stability
  */
-
 import { EventEmitter } from 'node:events';
 import type { ILogger } from '../../core/logger.js';
 import type { MCPClient } from '../client.js';
@@ -12,7 +10,6 @@ import { ReconnectionManager } from './reconnection-manager.js';
 import { FallbackCoordinator } from './fallback-coordinator.js';
 import { ConnectionStateManager } from './connection-state-manager.js';
 import type { MCPConfig, MCPRequest } from '../../utils/types.js';
-
 export interface RecoveryConfig {
   enableRecovery: boolean;
   healthMonitor?: {
@@ -36,7 +33,6 @@ export interface RecoveryConfig {
     stateDirectory?: string;
   };
 }
-
 export interface RecoveryStatus {
   isRecoveryActive: boolean;
   connectionHealth: HealthStatus;
@@ -56,7 +52,6 @@ export interface RecoveryStatus {
     averageRecoveryTime: number;
   };
 }
-
 export class RecoveryManager extends EventEmitter {
   private healthMonitor: ConnectionHealthMonitor;
   private reconnectionManager: ReconnectionManager;
@@ -71,35 +66,34 @@ export class RecoveryManager extends EventEmitter {
     failedRecoveries: 0,
     totalRecoveryTime: 0,
   };
-
   constructor(
-    private client: MCPClient,
-    private mcpConfig: MCPConfig,
-    private logger: ILogger,
+    private client: _MCPClient,
+    private mcpConfig: _MCPConfig,
+    private logger: _ILogger,
     config?: RecoveryConfig
   ) {
     super();
     
     // Initialize components
     this.healthMonitor = new ConnectionHealthMonitor(
-      client,
-      logger,
+      _client,
+      _logger,
       config?.healthMonitor
     );
     
     this.reconnectionManager = new ReconnectionManager(
-      client,
-      logger,
+      _client,
+      _logger,
       config?.reconnection
     );
     
     this.fallbackCoordinator = new FallbackCoordinator(
-      logger,
+      _logger,
       config?.fallback
     );
     
     this.stateManager = new ConnectionStateManager(
-      logger,
+      _logger,
       config?.state
     );
     
@@ -108,7 +102,6 @@ export class RecoveryManager extends EventEmitter {
     
     this.logger.info('Recovery manager initialized');
   }
-
   /**
    * Start recovery management
    */
@@ -119,19 +112,19 @@ export class RecoveryManager extends EventEmitter {
     await this.healthMonitor.start();
     
     // Restore any previous state
-    const previousState = this.stateManager.restoreState();
+    const _previousState = this.stateManager.restoreState();
     if (previousState && previousState.pendingRequests.length > 0) {
       this.logger.info('Restored previous connection state', {
-        sessionId: previousState.sessionId,
-        pendingRequests: previousState.pendingRequests.length,
+        sessionId: previousState._sessionId,
+        pendingRequests: previousState.pendingRequests._length,
       });
       
       // Queue pending requests for retry
       previousState.pendingRequests.forEach(request => {
         this.fallbackCoordinator.queueOperation({
           type: 'tool',
-          method: request.method,
-          params: request.params,
+          method: request._method,
+          params: request._params,
           priority: 'high',
           retryable: true,
         });
@@ -140,7 +133,6 @@ export class RecoveryManager extends EventEmitter {
     
     this.emit('started');
   }
-
   /**
    * Stop recovery management
    */
@@ -155,14 +147,13 @@ export class RecoveryManager extends EventEmitter {
     
     this.emit('stopped');
   }
-
   /**
    * Get current recovery status
    */
   getStatus(): RecoveryStatus {
-    const healthStatus = this.healthMonitor.getHealthStatus();
-    const reconnectionState = this.reconnectionManager.getState();
-    const fallbackState = this.fallbackCoordinator.getState();
+    const _healthStatus = this.healthMonitor.getHealthStatus();
+    const _reconnectionState = this.reconnectionManager.getState();
+    const _fallbackState = this.fallbackCoordinator.getState();
     
     return {
       isRecoveryActive: this.isRecoveryActive,
@@ -186,7 +177,6 @@ export class RecoveryManager extends EventEmitter {
       },
     };
   }
-
   /**
    * Force a recovery attempt
    */
@@ -201,7 +191,6 @@ export class RecoveryManager extends EventEmitter {
     
     return this.startRecovery('manual');
   }
-
   /**
    * Handle a request that needs recovery consideration
    */
@@ -213,23 +202,22 @@ export class RecoveryManager extends EventEmitter {
       // Queue for fallback execution
       this.fallbackCoordinator.queueOperation({
         type: 'tool',
-        method: request.method,
-        params: request.params,
+        method: request._method,
+        params: request._params,
         priority: 'medium',
         retryable: true,
       });
     }
   }
-
   private setupEventHandlers(): void {
     // Health monitor events
     this.healthMonitor.on('connectionLost', async ({ error }) => {
-      this.logger.error('Connection lost, initiating recovery', error);
+      this.logger.error('Connection _lost, initiating recovery', error);
       await this.startRecovery('health-check');
     });
     
-    this.healthMonitor.on('healthChange', (newStatus, oldStatus) => {
-      this.emit('healthChange', newStatus, oldStatus);
+    this.healthMonitor.on('healthChange', (_newStatus, oldStatus) => {
+      this.emit('healthChange', _newStatus, oldStatus);
       
       // Record state change
       this.stateManager.recordEvent({
@@ -240,8 +228,8 @@ export class RecoveryManager extends EventEmitter {
     });
     
     // Reconnection manager events
-    this.reconnectionManager.on('success', async ({ attempts, duration }) => {
-      this.logger.info('Reconnection successful', { attempts, duration });
+    this.reconnectionManager.on('success', async ({ _attempts, duration }) => {
+      this.logger.info('Reconnection successful', { _attempts, duration });
       await this.completeRecovery(true);
     });
     
@@ -250,8 +238,8 @@ export class RecoveryManager extends EventEmitter {
       await this.completeRecovery(false);
     });
     
-    this.reconnectionManager.on('attemptFailed', ({ attempt, error }) => {
-      this.emit('recoveryAttemptFailed', { attempt, error });
+    this.reconnectionManager.on('attemptFailed', ({ _attempt, error }) => {
+      this.emit('recoveryAttemptFailed', { _attempt, error });
     });
     
     // Fallback coordinator events
@@ -264,15 +252,14 @@ export class RecoveryManager extends EventEmitter {
       // Replay operation through MCP client
       if (this.client.isConnected()) {
         try {
-          await this.client.request(operation.method, operation.params);
+          await this.client.request(operation._method, operation.params);
           this.stateManager.removePendingRequest(operation.id);
-        } catch (error) {
-          this.logger.error('Failed to replay operation', { operation, error });
+        } catch (_error) {
+          this.logger.error('Failed to replay operation', { _operation, error });
         }
       }
     });
   }
-
   private async startRecovery(trigger: string): Promise<boolean> {
     if (this.isRecoveryActive) {
       return false;
@@ -302,13 +289,12 @@ export class RecoveryManager extends EventEmitter {
     
     return true;
   }
-
   private async completeRecovery(success: boolean): Promise<void> {
     if (!this.isRecoveryActive) {
       return;
     }
     
-    const duration = this.recoveryStartTime 
+    const _duration = this.recoveryStartTime 
       ? Date.now() - this.recoveryStartTime.getTime() 
       : 0;
     
@@ -347,11 +333,9 @@ export class RecoveryManager extends EventEmitter {
       this.emit('fallbackPermanent');
     }
   }
-
   private generateSessionId(): string {
     return `recovery-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
-
   /**
    * Clean up resources
    */

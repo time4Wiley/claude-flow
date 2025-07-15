@@ -9,7 +9,7 @@ This directory stores agent-specific memory data, configurations, and persistent
 ## Structure
 Each agent gets its own subdirectory for isolated memory storage:
 
-\`\`\`
+```
 memory/agents/
 ├── agent_001/
 │   ├── state.json           # Agent state and configuration
@@ -21,11 +21,11 @@ memory/agents/
 └── shared/
     ├── common_knowledge.md  # Shared knowledge across agents
     └── global_config.json  # Global agent configurations
-\`\`\`
+```
 
 ## Usage Guidelines
 1. **Agent Isolation**: Each agent should only read/write to its own directory
-2. **Shared Resources**: Use the \`shared/\` directory for cross-agent information
+2. **Shared Resources**: Use the `shared/` directory for cross-agent information
 3. **State Persistence**: Update state.json whenever agent status changes
 4. **Knowledge Sharing**: Document discoveries in knowledge.md files
 5. **Cleanup**: Remove directories for terminated agents periodically
@@ -44,7 +44,7 @@ This directory stores session-based memory data, conversation history, and conte
 ## Structure
 Sessions are organized by date and session ID for easy retrieval:
 
-\`\`\`
+```
 memory/sessions/
 ├── 2024-01-10/
 │   ├── session_001/
@@ -57,7 +57,7 @@ memory/sessions/
 └── shared/
     ├── patterns.md              # Common session patterns
     └── templates/               # Session template files
-\`\`\`
+```
 
 ## Usage Guidelines
 1. **Session Isolation**: Each session gets its own directory

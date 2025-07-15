@@ -351,7 +351,7 @@ export interface MCPTool {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;
-  handler: (input: unknown, context?: MCPContext) => Promise<unknown>;
+  handler: (input: _unknown, context?: MCPContext) => Promise<unknown>;
 }
 
 export interface MCPPrompt {

@@ -3,7 +3,6 @@
  * Simple CLI wrapper for Claude-Flow (JavaScript version)
  * This version avoids TypeScript issues in node_modules
  */
-
 import { 
   executeCommand, 
   hasCommand, 
@@ -17,47 +16,38 @@ import { spawn } from 'child_process';
 import process from 'process';
 import readline from 'readline';
 import { getMainHelp, getCommandHelp } from './help-text.js';
-
-const VERSION = '2.0.0-alpha.51';
-
+const _VERSION = '2.0.0-alpha.51';
 function printHelp() {
   console.log(getMainHelp());
 }
-
 function printCommandHelp(command) {
-  const help = getCommandHelp(command);
+  const _help = getCommandHelp(command);
   console.log(help);
 }
-
 // Legacy help function for backward compatibility
 function printLegacyHelp() {
   console.log(`
 🌊 Claude-Flow v${VERSION} - Enterprise-Grade AI Agent Orchestration Platform
-
-🎯 ENTERPRISE FEATURES: Complete ruv-swarm integration with 27 MCP tools, neural networking, and production-ready infrastructure
-
+🎯 ENTERPRISE FEATURES: Complete ruv-swarm integration with 27 MCP _tools, neural _networking, and production-ready infrastructure
 USAGE:
   claude-flow <command> [options]
-
 🚀 INSTALLATION & ENTERPRISE SETUP:
   npx claude-flow@2.0.0 init --sparc  # Enterprise SPARC + ruv-swarm integration
   
   The --sparc flag creates:
   • Complete ruv-swarm integration with 27 MCP tools
   • Neural network processing with WASM optimization
-  • Multi-agent coordination (hierarchical, mesh, ring, star topologies)
+  • Multi-agent coordination (_hierarchical, _mesh, _ring, star topologies)
   • Cross-session memory and persistent learning
   • GitHub workflow automation (6 specialized modes)
   • Production-ready Docker infrastructure
   • Enterprise security and compliance features
-
 🧠 SWARM INTELLIGENCE COMMANDS (v2.0.0):
   swarm "objective" [--strategy] [--mode] [--max-agents N] [--parallel] [--monitor]
     --strategy: research, development, analysis, testing, optimization, maintenance
     --mode: centralized, distributed, hierarchical, mesh, hybrid
     --parallel: Enable parallel execution (2.8-4.4x speed improvement)
     --monitor: Real-time swarm monitoring and performance tracking
-
 🐙 GITHUB WORKFLOW AUTOMATION (v2.0.0):
   github gh-coordinator        # GitHub workflow orchestration and coordination
   github pr-manager           # Pull request management with multi-reviewer coordination
@@ -65,7 +55,6 @@ USAGE:
   github release-manager      # Release coordination and deployment pipelines
   github repo-architect       # Repository structure optimization
   github sync-coordinator     # Multi-package synchronization and version alignment
-
 🏗️ CORE ENTERPRISE COMMANDS:
   init [--sparc]              # Initialize with enterprise environment + ruv-swarm
   start [--ui] [--swarm]      # Start orchestration with swarm intelligence
@@ -74,7 +63,6 @@ USAGE:
   sparc <subcommand>          # 17 SPARC modes with neural enhancement
   memory <subcommand>         # Cross-session persistent memory with neural learning
   status                      # Comprehensive system status with performance metrics
-
 🤖 NEURAL AGENT TYPES (ruv-swarm Integration):
   researcher     # Research with web access and data analysis
   coder          # Code development with neural patterns
@@ -84,7 +72,6 @@ USAGE:
   coordinator    # Multi-agent orchestration and workflow management
   reviewer       # Code review with security and quality checks
   optimizer      # Performance optimization and bottleneck analysis
-
 🎮 ENTERPRISE QUICK START:
   # Initialize enterprise environment
   npx claude-flow@2.0.0 init --sparc
@@ -103,14 +90,12 @@ USAGE:
   
   # Real-time system monitoring
   ./claude-flow status --verbose
-
 🏢 ENTERPRISE COMMAND CATEGORIES:
   Core Intelligence:    swarm, agent, sparc, memory, neural
   GitHub Automation:    github (6 specialized modes)
   Development:          init, start, status, config, workflow
   Infrastructure:       mcp, terminal, session, docker
   Enterprise:           project, deploy, cloud, security, analytics, audit
-
 🧠 NEURAL NETWORK FEATURES (v2.0.0):
   • WASM-powered cognitive patterns with SIMD optimization
   • 27 MCP tools for comprehensive workflow automation
@@ -118,21 +103,18 @@ USAGE:
   • Real-time performance monitoring (sub-10ms response times)
   • 32.3% token usage reduction through intelligent coordination
   • Self-healing workflows with automatic error recovery
-
 📊 ENTERPRISE PERFORMANCE METRICS:
   • 84.8% SWE-Bench solve rate through coordinated intelligence
   • 2.8-4.4x speed improvement with parallel execution
   • 60% Docker build performance improvement
   • 100% test success rate with comprehensive validation
   • Sub-10ms MCP response times
-
 🔗 INTEGRATION & COMPATIBILITY:
   • Node.js 20+ optimization for enterprise environments
   • Complete Claude Code integration with enhanced capabilities
-  • Multi-platform support (Windows, macOS, Linux)
+  • Multi-platform support (_Windows, _macOS, Linux)
   • Enterprise security with access control and audit logging
   • Cross-package synchronization and dependency management
-
 GET DETAILED HELP:
   claude-flow help <command>           # Command-specific enterprise documentation
   claude-flow <command> --help         # Alternative help syntax
@@ -142,47 +124,38 @@ GET DETAILED HELP:
     claude-flow help github            # GitHub workflow automation
     claude-flow help neural            # Neural network processing
     claude-flow help enterprise        # Enterprise features and compliance
-
 COMMON OPTIONS:
   --verbose, -v                        Enable detailed output with performance metrics
   --help                               Show command help with enterprise features
   --config <path>                      Use custom enterprise configuration
   --parallel                           Enable parallel execution (default for swarms)
   --monitor                            Real-time monitoring and performance tracking
-
 📚 Documentation: https://github.com/ruvnet/claude-code-flow
 🐝 ruv-swarm: https://github.com/ruvnet/ruv-FANN/tree/main/ruv-swarm
-
 🚀 Enterprise-Grade AI Agent Orchestration - Built with ❤️ by rUv for the Claude community
 `);
 }
-
 function printVersion() {
   console.log(`Claude-Flow v${VERSION}`);
 }
-
 function printError(message) {
   console.error(`❌ Error: ${message}`);
 }
-
 function printSuccess(message) {
   console.log(`✅ ${message}`);
 }
-
 function printWarning(message) {
   console.warn(`⚠️  Warning: ${message}`);
 }
-
 function showHelpWithCommands() {
   printHelp();
   console.log('\nRegistered Commands:');
-  const commands = listCommands();
+  const _commands = listCommands();
   for (const command of commands) {
     console.log(`  ${command.name.padEnd(12)} ${command.description}`);
   }
   console.log('\nUse "claude-flow help <command>" for detailed usage information');
 }
-
 async function main() {
   // args is imported from node-compat.js
   
@@ -190,12 +163,11 @@ async function main() {
     printHelp();
     return;
   }
-
-  const command = args[0];
+  const _command = args[0];
   const { flags, args: parsedArgs } = parseFlags(args.slice(1));
   
   // Apply environment-based smart defaults
-  let enhancedFlags = flags;
+  let _enhancedFlags = flags;
   try {
     const { detectExecutionEnvironment, applySmartDefaults } = await import('./utils/environment-detector.js');
     enhancedFlags = applySmartDefaults(flags);
@@ -209,7 +181,7 @@ async function main() {
   
   // Check if user is asking for help on a specific command
   if (command !== 'help' && command !== '--help' && command !== '-h' && (enhancedFlags.help || enhancedFlags.h)) {
-    const detailedHelp = getCommandHelp(command);
+    const _detailedHelp = getCommandHelp(command);
     if (detailedHelp && !detailedHelp.includes('Help not available')) {
       printCommandHelp(command);
     } else if (hasCommand(command)) {
@@ -220,15 +192,16 @@ async function main() {
     }
     return;
   }
-
   // Handle special commands first
   switch (command) {
     case 'env-check':
     case 'environment':
-      if (enhancedFlags._environment) {
-        const env = enhancedFlags._environment;
+      {
+if (enhancedFlags._environment) {
+        const _env = enhancedFlags._environment;
         console.log('\n🖥️  Environment Detection Results:');
-        console.log(`   Terminal: ${env.terminalType}`);
+        console.log(`   Terminal: ${env.terminalType
+}}`);
         console.log(`   Interactive: ${env.isInteractive ? 'Yes' : 'No'}`);
         console.log(`   TTY Support: ${env.supportsRawMode ? 'Yes' : 'No'}`);
         console.log(`   Detected: ${env.isVSCode ? 'VS Code' : env.isCI ? 'CI/CD' : env.isDocker ? 'Docker' : env.isSSH ? 'SSH' : 'Standard Terminal'}`);
@@ -248,18 +221,22 @@ async function main() {
     case 'version':
     case '--version':
     case '-v':
-      printVersion();
-      return;
+      {
+printVersion();
+      
+}return;
       
     case 'help':
     case '--help':
     case '-h':
-      if (parsedArgs.length > 0) {
+      {
+if (parsedArgs.length > 0) {
         // Try our detailed help first
-        const detailedHelp = getCommandHelp(parsedArgs[0]);
+        const _detailedHelp = getCommandHelp(parsedArgs[0]);
         if (detailedHelp && !detailedHelp.includes('Help not available')) {
           printCommandHelp(parsedArgs[0]);
-        } else {
+        
+}} else {
           // Fall back to command registry help
           showCommandHelp(parsedArgs[0]);
         }
@@ -268,11 +245,10 @@ async function main() {
       }
       return;
   }
-
   // Check if this is a registered modular command
   if (hasCommand(command)) {
     try {
-      await executeCommand(command, parsedArgs, flags);
+      await executeCommand(_command, _parsedArgs, flags);
       return;
     } catch (err) {
       printError(err.message);
@@ -280,48 +256,51 @@ async function main() {
       return;
     }
   }
-
   // Legacy command handling (to be refactored)
-  const subArgs = parsedArgs; // Use parsed args for legacy commands
+  const _subArgs = parsedArgs; // Use parsed args for legacy commands
   
   switch (command) {
     case 'status':
-      printSuccess('Claude-Flow System Status:');
+      {
+printSuccess('Claude-Flow System Status:');
       console.log('🟡 Status: Not Running (orchestrator not started)');
       console.log('🤖 Agents: 0 active');
       console.log('📋 Tasks: 0 in queue');
       console.log('💾 Memory: Ready');
       console.log('🖥️  Terminal Pool: Ready');
       console.log('🌐 MCP Server: Stopped');
-      break;
+      
+}break;
       
       
     case 'monitor':
-      printSuccess('Starting system monitor...');
+      {
+printSuccess('Starting system monitor...');
       console.log('📊 Real-time monitoring would display here');
-      break;
+      
+}break;
       
     case 'spawn': {
       // Convenience alias for agent spawn
-      const spawnType = subArgs[0] || 'general';
-      const spawnName = flags.name || `agent-${Date.now()}`;
+      const _spawnType = subArgs[0] || 'general';
+      const _spawnName = flags.name || `agent-${Date.now()}`;
       
       printSuccess(`Spawning ${spawnType} agent: ${spawnName}`);
       console.log('🤖 Agent would be created with the following configuration:');
       console.log(`   Type: ${spawnType}`);
       console.log(`   Name: ${spawnName}`);
-      console.log('   Capabilities: Research, Analysis, Code Generation');
+      console.log('   Capabilities: _Research, _Analysis, Code Generation');
       console.log('   Status: Ready');
       console.log('\n📋 Note: Full agent spawning requires orchestrator to be running');
       break;
     }
       
     case 'terminal': {
-      const terminalCmd = subArgs[0];
+      const _terminalCmd = subArgs[0];
       switch (terminalCmd) {
         case 'pool': {
-          const poolCmd = subArgs[1];
-          const detailed = subArgs.includes('--detailed') || subArgs.includes('-d');
+          const _poolCmd = subArgs[1];
+          const _detailed = subArgs.includes('--detailed') || subArgs.includes('-d');
           
           if (poolCmd === 'status') {
             printSuccess('Terminal Pool Status:');
@@ -355,7 +334,7 @@ async function main() {
             console.log('🖥️  Status: Created');
             console.log('🐚 Shell: /bin/bash');
           } else if (poolCmd === 'terminate') {
-            const termId = subArgs[2];
+            const _termId = subArgs[2];
             if (termId) {
               printSuccess(`Terminating terminal: ${termId}`);
               console.log('✅ Terminal terminated successfully');
@@ -374,21 +353,21 @@ async function main() {
             console.log('   • Terminals Recycled: 0');
             console.log('   • Average Lifetime: N/A');
           } else {
-            console.log('Terminal pool commands: status, list, create, terminate, stats');
-            console.log('Options: --detailed, -d');
+            console.log('Terminal pool commands: _status, _list, _create, _terminate, stats');
+            console.log('Options: --_detailed, -d');
           }
           break;
         }
           
         case 'create': {
           // Advanced terminal creation
-          const nameIndex = subArgs.indexOf('--name');
-          const shellIndex = subArgs.indexOf('--shell');
-          const wdIndex = subArgs.indexOf('--working-directory');
-          const envIndex = subArgs.indexOf('--env');
-          const persistentIndex = subArgs.indexOf('--persistent');
+          const _nameIndex = subArgs.indexOf('--name');
+          const _shellIndex = subArgs.indexOf('--shell');
+          const _wdIndex = subArgs.indexOf('--working-directory');
+          const _envIndex = subArgs.indexOf('--env');
+          const _persistentIndex = subArgs.indexOf('--persistent');
           
-          const terminalConfig = {
+          const _terminalConfig = {
             name: nameIndex >= 0 ? subArgs[nameIndex + 1] : 'terminal-' + Date.now(),
             shell: shellIndex >= 0 ? subArgs[shellIndex + 1] : 'bash',
             workingDirectory: wdIndex >= 0 ? subArgs[wdIndex + 1] : cwd(),
@@ -411,10 +390,10 @@ async function main() {
           
         case 'execute':
         case 'exec': {
-          const execCmd = subArgs.slice(1).join(' ');
-          const sessionFlag = subArgs.indexOf('--session');
-          const timeoutFlag = subArgs.indexOf('--timeout');
-          const backgroundFlag = subArgs.includes('--background');
+          const _execCmd = subArgs.slice(1).join(' ');
+          const _sessionFlag = subArgs.indexOf('--session');
+          const _timeoutFlag = subArgs.indexOf('--timeout');
+          const _backgroundFlag = subArgs.includes('--background');
           
           if (execCmd && sessionFlag < 0) {
             printSuccess(`Executing command: ${execCmd}`);
@@ -424,11 +403,11 @@ async function main() {
               console.log('🔄 Running in background');
             }
           } else if (sessionFlag >= 0) {
-            const sessionId = subArgs[sessionFlag + 1];
-            const cmdStart = subArgs.indexOf('"');
-            const cmdEnd = subArgs.lastIndexOf('"');
-            const command = cmdStart >= 0 && cmdEnd > cmdStart ? 
-              subArgs.slice(cmdStart, cmdEnd + 1).join(' ').slice(1, -1) : 
+            const _sessionId = subArgs[sessionFlag + 1];
+            const _cmdStart = subArgs.indexOf('"');
+            const _cmdEnd = subArgs.lastIndexOf('"');
+            const _command = cmdStart >= 0 && cmdEnd > cmdStart ? 
+              subArgs.slice(_cmdStart, cmdEnd + 1).join(' ').slice(_1, -1) : 
               'echo "No command"';
             
             printSuccess(`Executing in session ${sessionId}: ${command}`);
@@ -443,27 +422,27 @@ async function main() {
           
         case 'batch-exec': {
           // Batch command execution
-          const batchSession = subArgs.find(arg => !arg.startsWith('--'));
-          const commandsFlag = subArgs.indexOf('--commands');
-          const fileFlag = subArgs.indexOf('--file');
+          const _batchSession = subArgs.find(arg => !arg.startsWith('--'));
+          const _commandsFlag = subArgs.indexOf('--commands');
+          const _fileFlag = subArgs.indexOf('--file');
           
           if (commandsFlag >= 0) {
-            const commands = subArgs[commandsFlag + 1].split(',');
+            const _commands = subArgs[commandsFlag + 1].split(',');
             printSuccess(`Executing ${commands.length} commands in sequence`);
-            commands.forEach((cmd, i) => {
+            commands.forEach((_cmd, i) => {
               console.log(`  ${i + 1}. ${cmd}`);
             });
           } else if (fileFlag >= 0) {
             printSuccess(`Executing commands from file: ${subArgs[fileFlag + 1]}`);
           } else {
-            console.log('Usage: terminal batch-exec --commands "cmd1,cmd2,cmd3" [--session <id>]');
+            console.log('Usage: terminal batch-exec --commands "_cmd1,_cmd2,cmd3" [--session <id>]');
           }
           break;
         }
           
         case 'list': {
           // List all terminal sessions
-          const listDetailed = subArgs.includes('--detailed');
+          const _listDetailed = subArgs.includes('--detailed');
           printSuccess('Active Terminal Sessions:');
           console.log('📋 No active terminal sessions');
           if (listDetailed) {
@@ -475,10 +454,12 @@ async function main() {
           break;
           
         case 'info':
-          // Get terminal info
-          const infoSessionId = subArgs[1];
+          {
+// Get terminal info
+          const _infoSessionId = subArgs[1];
           if (infoSessionId) {
-            printSuccess(`Terminal Information: ${infoSessionId}`);
+            printSuccess(`Terminal Information: ${infoSessionId
+}}`);
             console.log('🆔 Session ID: ' + infoSessionId);
             console.log('📍 Status: Not found');
             console.log('🐚 Shell: N/A');
@@ -491,10 +472,12 @@ async function main() {
           break;
           
         case 'attach':
-          // Attach to terminal
-          const attachId = subArgs[1];
+          {
+// Attach to terminal
+          const _attachId = subArgs[1];
           if (attachId) {
-            printSuccess(`Attaching to terminal: ${attachId}`);
+            printSuccess(`Attaching to terminal: ${attachId
+}}`);
             console.log('🔗 Would enter interactive mode');
             console.log('💡 Press Ctrl+D to detach');
           } else {
@@ -503,10 +486,12 @@ async function main() {
           break;
           
         case 'detach':
-          // Detach from terminal
-          const detachId = subArgs[1];
+          {
+// Detach from terminal
+          const _detachId = subArgs[1];
           if (detachId) {
-            printSuccess(`Detaching from terminal: ${detachId}`);
+            printSuccess(`Detaching from terminal: ${detachId
+}}`);
             console.log('✅ Session continues running in background');
           } else {
             printError('Usage: terminal detach <session-id>');
@@ -514,11 +499,13 @@ async function main() {
           break;
           
         case 'terminate':
-          // Terminate terminal
-          const terminateId = subArgs[1];
-          const graceful = subArgs.includes('--graceful');
+          {
+// Terminate terminal
+          const _terminateId = subArgs[1];
+          const _graceful = subArgs.includes('--graceful');
           if (terminateId) {
-            printSuccess(`Terminating terminal: ${terminateId}`);
+            printSuccess(`Terminating terminal: ${terminateId
+}}`);
             if (graceful) {
               console.log('🕐 Graceful shutdown initiated');
             }
@@ -529,21 +516,25 @@ async function main() {
           break;
           
         case 'cleanup':
-          // Cleanup idle terminals
-          const idleTime = subArgs.find(arg => arg.includes('--idle-longer-than'));
+          {
+// Cleanup idle terminals
+          const _idleTime = subArgs.find(arg => arg.includes('--idle-longer-than'));
           printSuccess('Cleaning up idle terminals...');
           console.log('🧹 Scanning for idle sessions');
           if (idleTime) {
-            console.log(`⏱️  Idle threshold: ${idleTime.split('=')[1] || '30m'}`);
+            console.log(`⏱️  Idle threshold: ${idleTime.split('=')[1] || '30m'
+}}`);
           }
           console.log('✅ Cleanup complete: 0 terminals removed');
           break;
           
         case 'monitor':
-          // Monitor terminal
-          const monitorId = subArgs[1];
+          {
+// Monitor terminal
+          const _monitorId = subArgs[1];
           if (monitorId) {
-            printSuccess(`Monitoring terminal: ${monitorId}`);
+            printSuccess(`Monitoring terminal: ${monitorId
+}}`);
             console.log('📊 Real-time metrics would display here');
             console.log('   • CPU: 0%');
             console.log('   • Memory: 0MB');
@@ -554,11 +545,13 @@ async function main() {
           break;
           
         case 'record':
-          // Record terminal session
-          const recordId = subArgs[1];
-          const outputFlag = subArgs.indexOf('--output');
+          {
+// Record terminal session
+          const _recordId = subArgs[1];
+          const _outputFlag = subArgs.indexOf('--output');
           if (recordId && outputFlag >= 0) {
-            printSuccess(`Recording terminal session: ${recordId}`);
+            printSuccess(`Recording terminal session: ${recordId
+}}`);
             console.log(`📹 Output file: ${subArgs[outputFlag + 1]}`);
             console.log('🔴 Recording started');
           } else {
@@ -567,23 +560,27 @@ async function main() {
           break;
           
         case 'replay':
-          // Replay terminal session
-          const replayFile = subArgs[1];
+          {
+// Replay terminal session
+          const _replayFile = subArgs[1];
           if (replayFile) {
-            printSuccess(`Replaying session from: ${replayFile}`);
+            printSuccess(`Replaying session from: ${replayFile
+}}`);
             console.log('▶️  Playback would start here');
-            console.log('⏸️  Controls: space=pause, arrows=seek, q=quit');
+            console.log('⏸️  Controls: space=_pause, arrows=_seek, q=quit');
           } else {
             printError('Usage: terminal replay <recording-file>');
           }
           break;
           
         case 'share':
-          // Share terminal session
-          const shareId = subArgs[1];
-          const accessLevel = subArgs.find(arg => arg.includes('--access-level'));
+          {
+// Share terminal session
+          const _shareId = subArgs[1];
+          const _accessLevel = subArgs.find(arg => arg.includes('--access-level'));
           if (shareId) {
-            printSuccess(`Sharing terminal session: ${shareId}`);
+            printSuccess(`Sharing terminal session: ${shareId
+}}`);
             console.log(`🔗 Share URL: https://claude-flow.local/terminal/${shareId}/view`);
             console.log(`🔐 Access: ${accessLevel ? accessLevel.split('=')[1] : 'read-only'}`);
             console.log('⏱️  Expires in: 2 hours');
@@ -593,11 +590,13 @@ async function main() {
           break;
           
         case 'multi-config':
-          // Multi-terminal configuration
-          const multiCmd = subArgs[1];
+          {
+// Multi-terminal configuration
+          const _multiCmd = subArgs[1];
           if (multiCmd === 'create') {
-            const configName = subArgs.find(arg => !arg.startsWith('--'));
-            printSuccess(`Creating multi-terminal configuration: ${configName || 'default'}`);
+            const _configName = subArgs.find(arg => !arg.startsWith('--'));
+            printSuccess(`Creating multi-terminal configuration: ${configName || '
+}default'}`);
             console.log('📋 Configuration template created');
           } else {
             console.log('Usage: terminal multi-config create --name <name> --config <file>');
@@ -605,10 +604,12 @@ async function main() {
           break;
           
         case 'multi-launch':
-          // Launch multi-terminal environment
-          const envName = subArgs[1];
+          {
+// Launch multi-terminal environment
+          const _envName = subArgs[1];
           if (envName) {
-            printSuccess(`Launching multi-terminal environment: ${envName}`);
+            printSuccess(`Launching multi-terminal environment: ${envName
+}}`);
             console.log('🚀 Starting terminals in dependency order...');
             console.log('   1. database - Starting...');
             console.log('   2. backend-api - Waiting for database...');
@@ -620,23 +621,27 @@ async function main() {
           break;
           
         case 'batch-create':
-          // Batch create terminals
-          const configFile = subArgs.find(arg => arg.includes('--config'));
+          {
+// Batch create terminals
+          const _configFile = subArgs.find(arg => arg.includes('--config'));
           printSuccess('Creating multiple terminal sessions...');
           if (configFile) {
-            console.log(`📄 Loading config from: ${configFile.split('=')[1]}`);
+            console.log(`📄 Loading config from: ${configFile.split('=')[1]
+}}`);
           }
           console.log('✅ Created 3 terminal sessions');
           break;
           
         case 'session':
-          // Legacy session command handling
-          const sessionCmd = subArgs[1];
+          {
+// Legacy session command handling
+          const _sessionCmd = subArgs[1];
           if (sessionCmd === 'list') {
             printSuccess('Terminal Sessions:');
             console.log('📋 No active sessions');
-          } else if (sessionCmd === 'info') {
-            const sessionId = subArgs[2];
+          
+}} else if (sessionCmd === 'info') {
+            const _sessionId = subArgs[2];
             if (sessionId) {
               printSuccess(`Session Info: ${sessionId}`);
               console.log('🆔 Session ID: ' + sessionId);
@@ -645,14 +650,14 @@ async function main() {
               printError('Usage: terminal session info <session-id>');
             }
           } else {
-            console.log('Terminal session commands: list, info');
+            console.log('Terminal session commands: _list, info');
           }
           break;
           
         default:
           console.log('Terminal commands:');
           console.log('  Basic:');
-          console.log('    pool         - Manage terminal pool (status, list, create, terminate)');
+          console.log('    pool         - Manage terminal pool (_status, _list, _create, terminate)');
           console.log('    create       - Create new terminal with options');
           console.log('    execute      - Execute command in terminal');
           console.log('    list         - List all active terminals');
@@ -676,18 +681,20 @@ async function main() {
           console.log('  terminal pool status --detailed');
           console.log('  terminal create --name "dev" --shell bash --persistent');
           console.log('  terminal execute "npm test" --session dev --timeout 5m');
-          console.log('  terminal batch-exec --commands "cd /app,npm install,npm start"');
-          console.log('  terminal monitor dev --metrics cpu,memory');
+          console.log('  terminal batch-exec --commands "cd /_app,npm _install,npm start"');
+          console.log('  terminal monitor dev --metrics _cpu,memory');
       }
       break;
       
     case 'session':
-      printSuccess('Terminal session manager ready');
+      {
+printSuccess('Terminal session manager ready');
       console.log('🖥️  Session operations would be handled here');
-      break;
       
-    case 'workflow':
-      const workflowFile = subArgs[0];
+}break;
+      
+    case 'workflow': {
+      const _workflowFile = subArgs[0];
       if (workflowFile) {
         printSuccess(`Executing workflow: ${workflowFile}`);
         console.log('🔄 Workflow execution would start here');
@@ -695,26 +702,30 @@ async function main() {
         printError('Please specify a workflow file');
       }
       break;
+    }
       
     case 'repl':
-      printSuccess('Starting interactive REPL mode...');
+      {
+printSuccess('Starting interactive REPL mode...');
       await startRepl();
-      break;
       
-    case 'project':
-      const projectCmd = subArgs[0];
-      switch (projectCmd) {
-        case 'create':
-          const projectName = subArgs[1];
+}break;
+      
+    case 'project': {
+      const _projectCmd = subArgs[0];
+      switch (projectCmd) { /* empty */ }
+        case 'create': {
+          const _projectName = subArgs[1];
           if (!projectName) {
             printError('Usage: project create <name> [options]');
             break;
+        }
           }
           
-          const isolationFlag = subArgs.indexOf('--isolation');
-          const resourceQuotaFlag = subArgs.indexOf('--resource-quota');
-          const securityProfileFlag = subArgs.indexOf('--security-profile');
-          const templateFlag = subArgs.indexOf('--template');
+          const _isolationFlag = subArgs.indexOf('--isolation');
+          const _resourceQuotaFlag = subArgs.indexOf('--resource-quota');
+          const _securityProfileFlag = subArgs.indexOf('--security-profile');
+          const _templateFlag = subArgs.indexOf('--template');
           
           printSuccess(`Creating project: ${projectName}`);
           console.log('🏗️  Project Configuration:');
@@ -739,11 +750,12 @@ async function main() {
           console.log('\n✅ Project created successfully!');
           break;
           
-        case 'switch':
-          const switchProject = subArgs[1];
+        case 'switch': {
+          const _switchProject = subArgs[1];
           if (!switchProject) {
             printError('Usage: project switch <name>');
             break;
+        }
           }
           printSuccess(`Switching to project: ${switchProject}`);
           console.log('🔄 Loading project context...');
@@ -753,12 +765,12 @@ async function main() {
           console.log(`\n📍 Active project: ${switchProject}`);
           break;
           
-        case 'list':
-          const showActive = subArgs.includes('--active');
-          const withStats = subArgs.includes('--with-stats');
+        case 'list': {
+          const _showActive = subArgs.includes('--active');
+          const _withStats = subArgs.includes('--with-stats');
           
           printSuccess('Available projects:');
-          const projects = [
+          const _projects = [
             { name: 'microservices-platform', status: 'active', agents: 12, tasks: 45 },
             { name: 'ai-research', status: 'idle', agents: 3, tasks: 8 },
             { name: 'frontend-apps', status: 'archived', agents: 0, tasks: 0 }
@@ -775,20 +787,21 @@ async function main() {
             }
           });
           break;
+        }
           
-        case 'config':
-          const configAction = subArgs[1];
-          const configProject = subArgs[2];
+        case 'config': {
+          const _configAction = subArgs[1];
+          const _configProject = subArgs[2];
           
           if (configAction === 'set' && configProject) {
-            const configKey = subArgs[3];
-            const configValue = subArgs.slice(4).join(' ');
+            const _configKey = subArgs[3];
+            const _configValue = subArgs.slice(4).join(' ');
             
             printSuccess(`Updating project configuration: ${configProject}`);
             console.log(`   Setting: ${configKey} = ${configValue}`);
             console.log('✅ Configuration updated');
           } else if (configAction === 'get' && configProject) {
-            const configKey = subArgs[3];
+            const _configKey = subArgs[3];
             console.log(`Project: ${configProject}`);
             console.log(`${configKey}: (configuration value)`);
           } else {
@@ -796,12 +809,14 @@ async function main() {
             console.log('       project config get <project> <key>');
           }
           break;
+        }
           
-        case 'monitor':
-          const monitorProject = subArgs[1];
+        case 'monitor': {
+          const _monitorProject = subArgs[1];
           if (!monitorProject) {
             printError('Usage: project monitor <name> [options]');
             break;
+        }
           }
           
           printSuccess(`Monitoring project: ${monitorProject}`);
@@ -817,20 +832,21 @@ async function main() {
           console.log('     • Task Success Rate: 94%');
           console.log('   Costs:');
           console.log('     • Today: $124.50');
-          console.log('     • This Month: $2,845.00');
+          console.log('     • This Month: $_2,845.00');
           break;
           
-        case 'backup':
-          const backupProject = subArgs[1];
+        case 'backup': {
+          const _backupProject = subArgs[1];
           if (!backupProject) {
             printError('Usage: project backup <name> [options]');
             break;
+        }
           }
           
-          const includeData = subArgs.includes('--include-data');
-          const includeConfig = subArgs.includes('--include-config');
-          const includeHistory = subArgs.includes('--include-history');
-          const outputFlag = subArgs.indexOf('--output');
+          const _includeData = subArgs.includes('--include-data');
+          const _includeConfig = subArgs.includes('--include-config');
+          const _includeHistory = subArgs.includes('--include-history');
+          const _outputFlag = subArgs.indexOf('--output');
           
           printSuccess(`Creating backup for project: ${backupProject}`);
           console.log('🗄️  Backup Configuration:');
@@ -843,24 +859,25 @@ async function main() {
           console.log('   ✓ Compressing files');
           console.log('   ✓ Encrypting backup');
           
-          const outputFile = outputFlag >= 0 ? subArgs[outputFlag + 1] : `${backupProject}-backup-${Date.now()}.tar.gz`;
+          const _outputFile = outputFlag >= 0 ? subArgs[outputFlag + 1] : `${backupProject}-backup-${Date.now()}.tar.gz`;
           console.log(`\n✅ Backup created: ${outputFile}`);
           console.log('   Size: 145MB');
           console.log('   Checksum: sha256:abcd1234...');
           break;
           
-        case 'share':
-          const shareFrom = subArgs[1];
-          const shareTo = subArgs[2];
+        case 'share': {
+          const _shareFrom = subArgs[1];
+          const _shareTo = subArgs[2];
           
           if (!shareFrom || !shareTo) {
             printError('Usage: project share <from-project> <to-project> [options]');
             break;
+        }
           }
           
-          const agentsFlag = subArgs.indexOf('--agents');
-          const permissionsFlag = subArgs.indexOf('--permissions');
-          const durationFlag = subArgs.indexOf('--duration');
+          const _agentsFlag = subArgs.indexOf('--agents');
+          const _permissionsFlag = subArgs.indexOf('--permissions');
+          const _durationFlag = subArgs.indexOf('--duration');
           
           printSuccess(`Sharing resources from ${shareFrom} to ${shareTo}`);
           if (agentsFlag >= 0) {
@@ -875,16 +892,17 @@ async function main() {
           console.log('\n✅ Resource sharing configured');
           break;
           
-        case 'federation':
-          const fedCmd = subArgs[1];
+        case 'federation': {
+          const _fedCmd = subArgs[1];
           
           if (fedCmd === 'create') {
-            const fedName = subArgs[2];
-            const projectsFlag = subArgs.indexOf('--projects');
+            const _fedName = subArgs[2];
+            const _projectsFlag = subArgs.indexOf('--projects');
             
             if (!fedName) {
               printError('Usage: project federation create <name> --projects <project-list>');
               break;
+        }
             }
             
             printSuccess(`Creating federation: ${fedName}`);
@@ -892,16 +910,16 @@ async function main() {
               console.log(`   Projects: ${subArgs[projectsFlag + 1]}`);
             }
             console.log('   Coordination Model: hierarchical');
-            console.log('   Shared Resources: knowledge-base, artifact-registry');
+            console.log('   Shared Resources: knowledge-_base, artifact-registry');
             console.log('\n✅ Federation created successfully');
           } else if (fedCmd === 'list') {
             printSuccess('Active federations:');
             console.log('\n🏢 development-ecosystem');
-            console.log('   Projects: backend-services, frontend-apps, infrastructure');
+            console.log('   Projects: backend-_services, frontend-_apps, infrastructure');
             console.log('   Coordinator: infrastructure');
             console.log('   Status: Active');
           } else {
-            console.log('Federation commands: create, list, workflow');
+            console.log('Federation commands: _create, _list, workflow');
           }
           break;
           
@@ -916,24 +934,24 @@ async function main() {
           console.log('  share     - Share resources between projects');
           console.log('  federation - Manage project federations');
           console.log('\nExamples:');
-          console.log('  project create "microservices" --isolation strict --resource-quota "agents:15,memory:4GB"');
+          console.log('  project create "microservices" --isolation strict --resource-quota "agents:_15,memory:4GB"');
           console.log('  project switch "microservices"');
           console.log('  project monitor "microservices" --real-time');
       }
       break;
       
-    case 'cloud':
-      const cloudCmd = subArgs[0];
-      const cloudProvider = subArgs[1];
+    case 'cloud': {
+      const _cloudCmd = subArgs[0];
+      const _cloudProvider = subArgs[1];
       
-      switch (cloudCmd) {
+      switch (cloudCmd) { /* empty */ }
         case 'aws':
           switch (cloudProvider) {
-            case 'deploy':
-              const awsServices = subArgs.indexOf('--services');
-              const awsRegions = subArgs.indexOf('--regions');
-              const awsHA = subArgs.includes('--ha-configuration');
-              const awsCostOpt = subArgs.includes('--cost-optimization');
+            case 'deploy': {
+              const _awsServices = subArgs.indexOf('--services');
+              const _awsRegions = subArgs.indexOf('--regions');
+              const _awsHA = subArgs.includes('--ha-configuration');
+              const _awsCostOpt = subArgs.includes('--cost-optimization');
               
               printSuccess('Deploying Claude-Flow to AWS');
               console.log('☁️  AWS Deployment Configuration:');
@@ -959,44 +977,49 @@ async function main() {
               console.log('   API Gateway: https://api.aws.claude-flow.com');
               console.log('   Monitoring: https://console.aws.amazon.com/cloudwatch');
               break;
+            }
               
             case 'configure':
-              printSuccess('Configuring AWS integration');
+              {
+printSuccess('Configuring AWS integration');
               console.log('🔧 AWS Configuration:');
               console.log('   ✓ IAM roles and policies');
               console.log('   ✓ VPC and security groups');
               console.log('   ✓ Auto-scaling policies');
               console.log('   ✓ Backup and disaster recovery');
               console.log('   ✓ Cost monitoring and alerts');
-              break;
+              
+}break;
               
             case 'status':
-              printSuccess('AWS Infrastructure Status');
+              {
+printSuccess('AWS Infrastructure Status');
               console.log('\n🏗️  Infrastructure Health:');
               console.log('   ECS Cluster: 3/3 instances healthy');
               console.log('   Lambda Functions: 12/12 active');
               console.log('   RDS Database: Available (Multi-AZ)');
-              console.log('   S3 Buckets: 5 buckets, 2.3TB stored');
-              console.log('   CloudWatch: 47 metrics, 0 alarms');
+              console.log('   S3 Buckets: 5 _buckets, 2.3TB stored');
+              console.log('   CloudWatch: 47 _metrics, 0 alarms');
               
               console.log('\n💰 Cost Summary (This Month):');
               console.log('   Compute (ECS/Lambda): $1,245.50');
               console.log('   Storage (S3/EBS): $342.25');
               console.log('   Network: $87.30');
-              console.log('   Total: $1,675.05');
-              break;
+              console.log('   Total: $_1,675.05');
+              
+}break;
               
             default:
-              console.log('AWS commands: deploy, configure, status');
+              console.log('AWS commands: _deploy, _configure, status');
           }
           break;
           
         case 'azure':
           switch (cloudProvider) {
-            case 'deploy':
-              const azureServices = subArgs.indexOf('--services');
-              const azureRegions = subArgs.indexOf('--regions');
-              const azureIntegration = subArgs.includes('--integration-with-aws');
+            case 'deploy': {
+              const _azureServices = subArgs.indexOf('--services');
+              const _azureRegions = subArgs.indexOf('--regions');
+              const _azureIntegration = subArgs.includes('--integration-with-aws');
               
               printSuccess('Deploying Claude-Flow to Azure');
               console.log('☁️  Azure Deployment Configuration:');
@@ -1021,44 +1044,49 @@ async function main() {
               console.log('   API Gateway: https://api.azure.claude-flow.com');
               console.log('   Monitoring: https://portal.azure.com');
               break;
+            }
               
             case 'configure':
-              printSuccess('Configuring Azure integration');
+              {
+printSuccess('Configuring Azure integration');
               console.log('🔧 Azure Configuration:');
               console.log('   ✓ Service principals and RBAC');
               console.log('   ✓ Virtual networks and NSGs');
               console.log('   ✓ Auto-scaling rules');
               console.log('   ✓ Backup and site recovery');
               console.log('   ✓ Cost management and budgets');
-              break;
+              
+}break;
               
             case 'status':
-              printSuccess('Azure Infrastructure Status');
+              {
+printSuccess('Azure Infrastructure Status');
               console.log('\n🏗️  Infrastructure Health:');
               console.log('   AKS Cluster: 3/3 nodes ready');
               console.log('   Azure Functions: 8/8 active');
               console.log('   Cosmos DB: Available (Global)');
-              console.log('   Blob Storage: 3 containers, 1.8TB stored');
-              console.log('   Azure Monitor: 35 metrics, 0 alerts');
+              console.log('   Blob Storage: 3 _containers, 1.8TB stored');
+              console.log('   Azure Monitor: 35 _metrics, 0 alerts');
               
               console.log('\n💰 Cost Summary (This Month):');
               console.log('   Compute (AKS/Functions): $985.40');
               console.log('   Storage (Blob/Cosmos): $267.85');
               console.log('   Network: $63.20');
-              console.log('   Total: $1,316.45');
-              break;
+              console.log('   Total: $_1,316.45');
+              
+}break;
               
             default:
-              console.log('Azure commands: deploy, configure, status');
+              console.log('Azure commands: _deploy, _configure, status');
           }
           break;
           
         case 'gcp':
           switch (cloudProvider) {
-            case 'deploy':
-              const gcpServices = subArgs.indexOf('--services');
-              const gcpRegions = subArgs.indexOf('--regions');
-              const multiCloud = subArgs.includes('--multi-cloud-networking');
+            case 'deploy': {
+              const _gcpServices = subArgs.indexOf('--services');
+              const _gcpRegions = subArgs.indexOf('--regions');
+              const _multiCloud = subArgs.includes('--multi-cloud-networking');
               
               printSuccess('Deploying Claude-Flow to Google Cloud');
               console.log('☁️  GCP Deployment Configuration:');
@@ -1083,44 +1111,50 @@ async function main() {
               console.log('   API Gateway: https://api.gcp.claude-flow.com');
               console.log('   Monitoring: https://console.cloud.google.com');
               break;
+            }
               
             case 'configure':
-              printSuccess('Configuring GCP integration');
+              {
+printSuccess('Configuring GCP integration');
               console.log('🔧 GCP Configuration:');
               console.log('   ✓ Service accounts and IAM');
               console.log('   ✓ VPC networks and firewall rules');
               console.log('   ✓ Auto-scaling policies');
               console.log('   ✓ Backup and disaster recovery');
               console.log('   ✓ Budget alerts and cost optimization');
-              break;
+              
+}break;
               
             case 'status':
-              printSuccess('GCP Infrastructure Status');
+              {
+printSuccess('GCP Infrastructure Status');
               console.log('\n🏗️  Infrastructure Health:');
               console.log('   GKE Cluster: 3/3 nodes ready');
               console.log('   Cloud Functions: 10/10 active');
               console.log('   Cloud SQL: Available (HA)');
-              console.log('   Cloud Storage: 4 buckets, 2.1TB stored');
-              console.log('   Cloud Monitoring: 42 metrics, 0 incidents');
+              console.log('   Cloud Storage: 4 _buckets, 2.1TB stored');
+              console.log('   Cloud Monitoring: 42 _metrics, 0 incidents');
               
               console.log('\n💰 Cost Summary (This Month):');
               console.log('   Compute (GKE/Functions): $1,125.30');
               console.log('   Storage (Cloud Storage/SQL): $298.75');
               console.log('   Network: $71.45');
-              console.log('   Total: $1,495.50');
-              break;
+              console.log('   Total: $_1,495.50');
+              
+}break;
               
             default:
-              console.log('GCP commands: deploy, configure, status');
+              console.log('GCP commands: _deploy, _configure, status');
           }
           break;
           
-        case 'multi-cloud':
-          const multiCloudCmd = subArgs[1];
+        case 'multi-cloud': {
+          const _multiCloudCmd = subArgs[1];
           
-          switch (multiCloudCmd) {
+          switch (multiCloudCmd) { /* empty */ }
             case 'deploy':
-              printSuccess('Deploying multi-cloud Claude-Flow architecture');
+              {
+printSuccess('Deploying multi-cloud Claude-Flow architecture');
               console.log('🌐 Multi-Cloud Deployment:');
               console.log('   Primary: AWS (us-east-1)');
               console.log('   Secondary: Azure (eastus)');
@@ -1136,28 +1170,32 @@ async function main() {
               console.log('   Global endpoint: https://global.claude-flow.com');
               console.log('   Failover time: < 30 seconds');
               console.log('   Data consistency: Eventually consistent');
-              break;
+              
+}break;
               
             case 'status':
-              printSuccess('Multi-Cloud Infrastructure Status');
+              {
+printSuccess('Multi-Cloud Infrastructure Status');
               console.log('\n🌐 Global Infrastructure:');
               console.log('   AWS (Primary): 🟢 Healthy');
               console.log('   Azure (Secondary): 🟢 Healthy');
               console.log('   GCP (Tertiary): 🟢 Healthy');
               
               console.log('\n📊 Traffic Distribution:');
-              console.log('   AWS: 45% (2,341 req/min)');
-              console.log('   Azure: 35% (1,823 req/min)');
-              console.log('   GCP: 20% (1,042 req/min)');
+              console.log('   AWS: 45% (_2,341 req/min)');
+              console.log('   Azure: 35% (_1,823 req/min)');
+              console.log('   GCP: 20% (_1,042 req/min)');
               
               console.log('\n💰 Total Cost (This Month): $4,487.00');
-              break;
               
-            case 'failover':
-              const failoverTarget = subArgs[2];
+}break;
+              
+            case 'failover': {
+              const _failoverTarget = subArgs[2];
               if (!failoverTarget) {
                 printError('Usage: cloud multi-cloud failover <target-cloud>');
                 break;
+            }
               }
               
               printWarning(`Initiating failover to ${failoverTarget}`);
@@ -1171,20 +1209,21 @@ async function main() {
               break;
               
             default:
-              console.log('Multi-cloud commands: deploy, status, failover');
+              console.log('Multi-cloud commands: _deploy, _status, failover');
           }
           break;
           
-        case 'kubernetes':
-          const k8sCmd = subArgs[1];
+        case 'kubernetes': {
+          const _k8sCmd = subArgs[1];
           
-          switch (k8sCmd) {
+          switch (k8sCmd) { /* empty */ }
             case 'deploy':
-              printSuccess('Deploying Claude-Flow to Kubernetes');
+              {
+printSuccess('Deploying Claude-Flow to Kubernetes');
               console.log('⚙️  Kubernetes Deployment:');
               console.log('   Namespace: claude-flow');
               console.log('   Replicas: 3');
-              console.log('   Resources: 1Gi memory, 500m CPU per pod');
+              console.log('   Resources: 1Gi _memory, 500m CPU per pod');
               
               console.log('\n📦 Deploying Components:');
               console.log('   ✓ Orchestrator deployment');
@@ -1198,10 +1237,11 @@ async function main() {
               console.log('   Pods: 3/3 running');
               console.log('   Service: claude-flow-orchestrator-service');
               console.log('   Ingress: https://k8s.claude-flow.com');
-              break;
               
-            case 'scale':
-              const replicas = subArgs[2] || '5';
+}break;
+              
+            case 'scale': {
+              const _replicas = subArgs[2] || '5';
               printSuccess(`Scaling Claude-Flow to ${replicas} replicas`);
               console.log('📈 Scaling Progress:');
               console.log('   Current replicas: 3');
@@ -1210,9 +1250,11 @@ async function main() {
               console.log('   ✓ Rolling update in progress');
               console.log(`   ✓ Scaled to ${replicas} replicas successfully`);
               break;
+            }
               
             case 'status':
-              printSuccess('Kubernetes Cluster Status');
+              {
+printSuccess('Kubernetes Cluster Status');
               console.log('\n⚙️  Cluster Information:');
               console.log('   Namespace: claude-flow');
               console.log('   Deployments: 3/3 ready');
@@ -1225,10 +1267,11 @@ async function main() {
               console.log('   CPU: 1.2/3.0 cores (40%)');
               console.log('   Memory: 2.1/3.0 GB (70%)');
               console.log('   Storage: 8.5/50 GB (17%)');
-              break;
+              
+}break;
               
             default:
-              console.log('Kubernetes commands: deploy, scale, status');
+              console.log('Kubernetes commands: _deploy, _scale, status');
           }
           break;
           
@@ -1240,37 +1283,39 @@ async function main() {
           console.log('  multi-cloud   - Multi-cloud deployment and management');
           console.log('  kubernetes    - Kubernetes deployment and management');
           console.log('\nExamples:');
-          console.log('  cloud aws deploy --services "ecs,lambda,rds" --regions "us-east-1,us-west-2"');
-          console.log('  cloud azure deploy --services "aks,functions,cosmos-db"');
-          console.log('  cloud gcp deploy --services "gke,cloud-functions,cloud-sql"');
+          console.log('  cloud aws deploy --services "_ecs,_lambda,rds" --regions "us-east-_1,us-west-2"');
+          console.log('  cloud azure deploy --services "_aks,_functions,cosmos-db"');
+          console.log('  cloud gcp deploy --services "_gke,cloud-_functions,cloud-sql"');
           console.log('  cloud multi-cloud deploy');
           console.log('  cloud kubernetes deploy');
       }
       break;
       
-    case 'claude':
-      const claudeCmd = subArgs[0];
-      switch (claudeCmd) {
+    case 'claude': {
+      const _claudeCmd = subArgs[0];
+      switch (claudeCmd) { /* empty */ }
         case 'spawn':
-          // Extract task description and flags
-          let taskEndIndex = subArgs.length;
-          for (let i = 1; i < subArgs.length; i++) {
+          {
+// Extract task description and flags
+          let _taskEndIndex = subArgs.length;
+          for (let _i = 1; i < subArgs.length; i++) {
             if (subArgs[i].startsWith('-')) {
               taskEndIndex = i;
-              break;
+              
+}break;
             }
           }
           
-          const task = subArgs.slice(1, taskEndIndex).join(' ');
+          const _task = subArgs.slice(_1, taskEndIndex).join(' ');
           if (!task) {
             printError('Usage: claude spawn <task description> [options]');
             break;
           }
           
           // Parse flags
-          const flags = {};
-          for (let i = taskEndIndex; i < subArgs.length; i++) {
-            const arg = subArgs[i];
+          const _flags = { /* empty */ };
+          for (let _i = taskEndIndex; i < subArgs.length; i++) {
+            const _arg = subArgs[i];
             if (arg === '--tools' || arg === '-t') {
               flags.tools = subArgs[++i];
             } else if (arg === '--no-permissions') {
@@ -1295,7 +1340,7 @@ async function main() {
           }
           
           // Build tools list
-          let tools = flags.tools || 'View,Edit,Replace,GlobTool,GrepTool,LS,Bash';
+          let _tools = flags.tools || 'View,Edit,Replace,GlobTool,GrepTool,LS,Bash';
           if (flags.parallel) {
             tools += ',BatchTool,dispatch_agent';
           }
@@ -1303,7 +1348,7 @@ async function main() {
             tools += ',WebFetchTool';
           }
           
-          const instanceId = `claude-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          const _instanceId = `claude-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
           
           if (flags.dryRun) {
             printWarning('DRY RUN - Would execute:');
@@ -1334,15 +1379,11 @@ async function main() {
             console.log('');
             
             // Build the actual claude command with enhanced guidance
-            let enhancedTask = `# Task Assignment
-
+            let _enhancedTask = `# Task Assignment
 ## Your Primary Task
 ${task}
-
 ## Development Environment
-
 You are working in a development environment with advanced orchestration capabilities available if needed.
-
 ### Project Context
 - Working Directory: ${process.cwd()}
 - Instance ID: ${instanceId}
@@ -1350,46 +1391,33 @@ You are working in a development environment with advanced orchestration capabil
 ${flags.coverage ? `- Test Coverage Target: ${flags.coverage}%` : ''}
 ${flags.commit ? `- Git Commit Strategy: ${flags.commit}` : ''}
 ${flags.config ? `- MCP Config: ${flags.config}` : ''}
-
 ### Available Tools
 - You have access to these tools: ${tools}
 ${flags.tools ? `- Custom tools specified: ${flags.tools}` : ''}
-
 ### Optional Orchestration Features
-
 If this task requires complex coordination, memory persistence, or multi-agent collaboration, you can use the claude-flow system:
-
 1. **Persistent Memory** (if needed for your task)
-   - Store project data: \`npx claude-flow memory store <key> "<value>"\`
-   - Retrieve stored data: \`npx claude-flow memory query <key>\`
-   - Export/Import memory: \`npx claude-flow memory export/import <file>\`
-
+   - Store project data: `npx claude-flow memory store <key> "<value>"`
+   - Retrieve stored data: `npx claude-flow memory query <key>`
+   - Export/Import memory: `npx claude-flow memory export/import <file>`
 2. **Task Coordination** (if working on complex multi-part tasks)
-   - Check task status: \`npx claude-flow status\`
-   - Monitor progress: \`npx claude-flow monitor\`
-   - List active tasks: \`npx claude-flow task list\`
-
+   - Check task status: `npx claude-flow status`
+   - Monitor progress: `npx claude-flow monitor`
+   - List active tasks: `npx claude-flow task list`
 3. **Multi-Agent Collaboration** (if task benefits from parallelization)
-   - Spawn specialized agents: \`npx claude-flow agent spawn <type> --name <name>\`
-   - Create subtasks: \`npx claude-flow task create <type> "<description>"\`
-   - Coordinate work: \`npx claude-flow task assign <task-id> <agent-id>\``;
-
+   - Spawn specialized agents: `npx claude-flow agent spawn <type> --name <name>`
+   - Create subtasks: `npx claude-flow task create <type> "<description>"`
+   - Coordinate work: `npx claude-flow task assign <task-id> <agent-id>``;
             if (flags.parallel) {
               enhancedTask += `
-
    **Parallel Execution Enabled**: The orchestration system can help coordinate parallel work if needed.`;
             }
-
             if (flags.research) {
               enhancedTask += `
-
    **Research Mode**: Web research tools are available for information gathering.`;
             }
-
             enhancedTask += `
-
 ### Task Execution Guidelines
-
 1. **Focus on Your Primary Objective**:
    - Understand the specific requirements of the task
    - Plan your approach based on the project's needs
@@ -1397,7 +1425,6 @@ If this task requires complex coordination, memory persistence, or multi-agent c
    ${flags.mode === 'backend-only' ? '   - Focus on backend implementation' : ''}
    ${flags.mode === 'frontend-only' ? '   - Focus on frontend implementation' : ''}
    ${flags.mode === 'api-only' ? '   - Focus on API design and implementation' : ''}
-
 2. **Development Best Practices**:
    - Write clean, maintainable code following project conventions
    - Include appropriate tests and documentation
@@ -1406,7 +1433,6 @@ If this task requires complex coordination, memory persistence, or multi-agent c
    ${flags.commit === 'phase' ? '   - Commit changes after completing major phases' : ''}
    ${flags.commit === 'feature' ? '   - Commit changes after each feature is complete' : ''}
    ${flags.commit === 'manual' ? '   - Only commit when explicitly requested' : ''}
-
 3. **Leverage Orchestration When Beneficial**:
    - For complex tasks requiring persistent state, use the memory bank
    - For multi-part projects, use task coordination features
@@ -1415,42 +1441,33 @@ If this task requires complex coordination, memory persistence, or multi-agent c
    ${flags.research ? '   - Research tools are available if needed' : ''}
    ${flags.noPermissions ? '   - Running with --no-permissions mode' : ''}
    ${flags.verbose ? '   - Verbose mode enabled for detailed output' : ''}
-
 ## Getting Started
-
 Begin working on your task. The orchestration features are available as tools to help you be more effective, but your primary focus should be on delivering the requested functionality.
-
 ### Quick Reference (if using orchestration features)
-
-\`\`\`bash
+```bash
 # Example: Storing project-specific data
 Bash("npx claude-flow memory store project_config '{\\"name\\": \\"my-app\\", \\"version\\": \\"1.0.0\\"}'")
-
 # Example: Checking for previous work
 Bash("npx claude-flow memory query previous_implementation")
-
 # Example: Creating subtasks for complex projects
 Bash("npx claude-flow task create frontend 'Build React components'")
 Bash("npx claude-flow task create backend 'Implement API endpoints'")
-\`\`\`
-
+```
 Remember: These are optional tools. Use them when they add value to your development process.
-
 ## Development Mode: ${flags.mode || 'full'}
 ${flags.mode === 'backend-only' ? 'Focus on server-side implementation, APIs, and business logic.' : ''}
 ${flags.mode === 'frontend-only' ? 'Focus on client-side implementation, UI/UX, and user interactions.' : ''}
 ${flags.mode === 'api-only' ? 'Focus on API design, documentation, and endpoint implementation.' : ''}
 ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all aspects of the application.' : ''}
-
 `;
             
-            const claudeArgs = [enhancedTask];
+            const _claudeArgs = [enhancedTask];
             claudeArgs.push('--allowedTools', tools);
             
             // DEBUG: Log what we're about to pass
             console.log('\n🔍 DEBUG - Command Construction:');
             console.log(`First arg length: ${claudeArgs[0].length} chars`);
-            console.log(`First 100 chars: ${claudeArgs[0].substring(0, 100)}...`);
+            console.log(`First 100 chars: ${claudeArgs[0].substring(_0, 100)}...`);
             console.log(`Args count: ${claudeArgs.length}`);
             
             if (flags.noPermissions) {
@@ -1473,10 +1490,10 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
                 console.log(`claude ${claudeArgs.map(arg => arg.includes(' ') || arg.includes('\n') ? `"${arg}"` : arg).join(' ')}`);
               }
               
-              const child = spawn('claude', claudeArgs, {
+              const _child = spawn('claude', _claudeArgs, {
                 env: {
-                  ...process.env,
-                  CLAUDE_INSTANCE_ID: instanceId,
+                  ...process._env,
+                  CLAUDE_INSTANCE_ID: _instanceId,
                   CLAUDE_FLOW_MODE: flags.mode || 'full',
                   CLAUDE_FLOW_COVERAGE: (flags.coverage || 80).toString(),
                   CLAUDE_FLOW_COMMIT: flags.commit || 'phase',
@@ -1507,18 +1524,19 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           }
           break;
           
-        case 'batch':
-          const workflowFile = subArgs[1];
+        case 'batch': {
+          const _workflowFile = subArgs[1];
           if (!workflowFile) {
             printError('Usage: claude batch <workflow-file>');
             break;
+        }
           }
           printSuccess(`Loading workflow: ${workflowFile}`);
           console.log('📋 Batch execution would process workflow file');
           break;
           
         default:
-          console.log('Claude commands: spawn, batch');
+          console.log('Claude commands: _spawn, batch');
           console.log('\nExamples:');
           console.log('  claude-flow claude spawn "implement user authentication" --research --parallel');
           console.log('  claude-flow claude spawn "fix bug in payment system" --no-permissions');
@@ -1527,13 +1545,13 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
       break;
       
       
-    case 'deploy':
-      const deployCmd = subArgs[0];
-      switch (deployCmd) {
-        case 'ha-cluster':
-          const nodes = subArgs.find(arg => arg.includes('--nodes'));
-          const regions = subArgs.find(arg => arg.includes('--regions'));
-          const replicationFactor = subArgs.find(arg => arg.includes('--replication-factor'));
+    case 'deploy': {
+      const _deployCmd = subArgs[0];
+      switch (deployCmd) { /* empty */ }
+        case 'ha-cluster': {
+          const _nodes = subArgs.find(arg => arg.includes('--nodes'));
+          const _regions = subArgs.find(arg => arg.includes('--regions'));
+          const _replicationFactor = subArgs.find(arg => arg.includes('--replication-factor'));
           
           printSuccess('Deploying High Availability Cluster...');
           console.log('🏗️  HA Configuration:');
@@ -1553,9 +1571,10 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           console.log('\n✅ HA cluster deployed successfully!');
           console.log('   Cluster endpoint: https://claude-flow-ha.example.com');
           break;
+        }
           
-        case 'scaling':
-          const scalingAction = subArgs[1];
+        case 'scaling': {
+          const _scalingAction = subArgs[1];
           
           if (scalingAction === 'configure') {
             printSuccess('Configuring Auto-Scaling...');
@@ -1564,7 +1583,7 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   Max Instances: 50');
             console.log('   Scale Up Threshold: CPU:70%, Memory:80%');
             console.log('   Scale Down Threshold: CPU:30%, Memory:40%');
-            console.log('   Cool-down Periods: Up:300s, Down:600s');
+            console.log('   Cool-down Periods: Up:_300s, Down:600s');
             console.log('\n✅ Auto-scaling configured');
           } else if (scalingAction === 'predictive') {
             printSuccess('Enabling Predictive Scaling...');
@@ -1575,22 +1594,23 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   ML Model: LSTM-based forecasting');
             console.log('\n✅ Predictive scaling enabled');
           } else {
-            console.log('Scaling commands: configure, predictive, status');
+            console.log('Scaling commands: _configure, _predictive, status');
           }
           break;
+        }
           
-        case 'security':
-          const securityAction = subArgs[1];
+        case 'security': {
+          const _securityAction = subArgs[1];
           
           if (securityAction === 'harden') {
             printSuccess('Applying Security Hardening...');
             console.log('🔒 Security Configuration:');
             console.log('   Profile: enterprise');
-            console.log('   Encryption: all-traffic, at-rest');
+            console.log('   Encryption: all-_traffic, at-rest');
             console.log('   Authentication: multi-factor');
             console.log('   Authorization: RBAC');
             console.log('   Audit Logging: comprehensive');
-            console.log('   Compliance: SOC2, GDPR, HIPAA');
+            console.log('   Compliance: _SOC2, _GDPR, HIPAA');
             
             console.log('\n🛡️  Applying security measures:');
             console.log('   ✓ Enabling encryption at rest');
@@ -1609,13 +1629,15 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   Anomalies Detected: 0');
             console.log('   Compliance Status: ✅ Compliant');
           } else {
-            console.log('Security commands: harden, policy, rbac, monitor');
+            console.log('Security commands: _harden, _policy, _rbac, monitor');
           }
           break;
+        }
           
         case 'kubernetes':
         case 'k8s':
-          printSuccess('Deploying to Kubernetes...');
+          {
+printSuccess('Deploying to Kubernetes...');
           console.log('☸️  Kubernetes Deployment:');
           console.log('   Namespace: claude-flow');
           console.log('   Replicas: 3');
@@ -1630,7 +1652,8 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           console.log('   ✓ Created secret/claude-flow-secrets');
           console.log('\n✅ Kubernetes deployment complete');
           console.log('   Service endpoint: http://a1b2c3d4.elb.amazonaws.com');
-          break;
+          
+}break;
           
         default:
           console.log('Deploy commands:');
@@ -1639,17 +1662,18 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           console.log('  security    - Security hardening and monitoring');
           console.log('  kubernetes  - Deploy to Kubernetes cluster');
           console.log('\nExamples:');
-          console.log('  deploy ha-cluster --nodes=3 --regions="us-east-1,us-west-2"');
+          console.log('  deploy ha-cluster --nodes=3 --regions="us-east-_1,us-west-2"');
           console.log('  deploy scaling configure --min=2 --max=50');
           console.log('  deploy security harden --profile enterprise');
       }
       break;
       
-    case 'analytics':
-      const analyticsCmd = subArgs[0];
-      switch (analyticsCmd) {
+    case 'analytics': {
+      const _analyticsCmd = subArgs[0];
+      switch (analyticsCmd) { /* empty */ }
         case 'performance':
-          printSuccess('Performance Analytics Report');
+          {
+printSuccess('Performance Analytics Report');
           console.log('\n📊 System Performance (Last 30 Days):');
           console.log('   Agent Productivity:');
           console.log('     • Tasks Completed: 12,847');
@@ -1663,47 +1687,51 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           console.log('     • Performance: ↑ 12% improvement');
           console.log('     • Efficiency: ↑ 8% improvement');
           console.log('     • Costs: ↓ 15% reduction');
-          break;
+          
+}break;
           
         case 'business-impact':
-          printSuccess('Business Impact Analysis');
+          {
+printSuccess('Business Impact Analysis');
           console.log('\n💼 Business Metrics:');
           console.log('   Productivity Gains:');
           console.log('     • Development Velocity: +45%');
           console.log('     • Time to Market: -30%');
           console.log('     • Defect Rate: -62%');
           console.log('   Cost Savings:');
-          console.log('     • Monthly Savings: $24,500');
+          console.log('     • Monthly Savings: $_24,500');
           console.log('     • ROI: 312%');
           console.log('     • Payback Period: 3.2 months');
           console.log('   Quality Improvements:');
           console.log('     • Code Coverage: 92%');
           console.log('     • Customer Satisfaction: +18%');
-          break;
           
-        case 'cost':
-          const costCmd = subArgs[1];
+}break;
+          
+        case 'cost': {
+          const _costCmd = subArgs[1];
           if (costCmd === 'analyze') {
             printSuccess('Cost Analysis Report');
             console.log('\n💰 Cost Breakdown:');
             console.log('   By Project:');
-            console.log('     • microservices-platform: $8,234 (41%)');
-            console.log('     • ai-research: $5,123 (26%)');
-            console.log('     • frontend-apps: $3,456 (17%)');
-            console.log('     • other: $3,187 (16%)');
+            console.log('     • microservices-platform: $_8,234 (41%)');
+            console.log('     • ai-research: $_5,123 (26%)');
+            console.log('     • frontend-apps: $_3,456 (17%)');
+            console.log('     • other: $_3,187 (16%)');
             console.log('   By Resource:');
-            console.log('     • Compute: $12,450 (62%)');
-            console.log('     • Storage: $4,230 (21%)');
-            console.log('     • Network: $2,120 (11%)');
-            console.log('     • Other: $1,200 (6%)');
+            console.log('     • Compute: $_12,450 (62%)');
+            console.log('     • Storage: $_4,230 (21%)');
+            console.log('     • Network: $_2,120 (11%)');
+            console.log('     • Other: $_1,200 (6%)');
             console.log('   Optimization Opportunities:');
-            console.log('     • Use spot instances: Save $3,200/month');
+            console.log('     • Use spot instances: Save $_3,200/month');
             console.log('     • Optimize storage: Save $800/month');
-            console.log('     • Schedule off-peak: Save $1,500/month');
+            console.log('     • Schedule off-peak: Save $_1,500/month');
           } else {
-            console.log('Cost commands: analyze, optimize, budget');
+            console.log('Cost commands: _analyze, _optimize, budget');
           }
           break;
+        }
           
         default:
           console.log('Analytics commands:');
@@ -1717,20 +1745,21 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
       }
       break;
       
-    case 'security':
-      const securityCmd = subArgs[0];
-      switch (securityCmd) {
+    case 'security': {
+      const _securityCmd = subArgs[0];
+      switch (securityCmd) { /* empty */ }
         case 'status':
-          printSuccess('Enterprise Security Status');
+          {
+printSuccess('Enterprise Security Status');
           console.log('\n🔐 Authentication:');
           console.log('   Method: Token-based (JWT)');
-          console.log('   MFA: Enabled (TOTP, SMS, Hardware Keys)');
+          console.log('   MFA: Enabled (_TOTP, _SMS, Hardware Keys)');
           console.log('   Sessions: 42 active');
           console.log('   Session Timeout: 4 hours');
           
           console.log('\n🛡️  Authorization:');
           console.log('   Model: Role-Based Access Control (RBAC)');
-          console.log('   Roles: 5 defined (admin, developer, operator, auditor, viewer)');
+          console.log('   Roles: 5 defined (_admin, _developer, _operator, _auditor, viewer)');
           console.log('   Permissions: 47 granular permissions');
           console.log('   Policy Engine: Active');
           
@@ -1742,7 +1771,7 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           
           console.log('\n⚡ Circuit Breakers:');
           console.log('   Total Breakers: 12');
-          console.log('   Status: 10 closed, 1 half-open, 1 open');
+          console.log('   Status: 10 _closed, 1 half-_open, 1 open');
           console.log('   Last Triggered: api-gateway (2 minutes ago)');
           
           console.log('\n📝 Audit Logging:');
@@ -1750,11 +1779,12 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           console.log('   Storage: Encrypted S3 bucket');
           console.log('   Retention: 7 years');
           console.log('   Events Today: 48,234');
-          console.log('   Compliance: SOC2, GDPR, HIPAA compliant');
-          break;
+          console.log('   Compliance: _SOC2, _GDPR, HIPAA compliant');
           
-        case 'auth':
-          const authAction = subArgs[1];
+}break;
+          
+        case 'auth': {
+          const _authAction = subArgs[1];
           
           if (authAction === 'configure') {
             printSuccess('Configuring Authentication...');
@@ -1765,7 +1795,7 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   MFA Required: Yes');
             console.log('   Password Policy:');
             console.log('     • Minimum length: 12 characters');
-            console.log('     • Complexity: Upper, lower, numbers, symbols');
+            console.log('     • Complexity: _Upper, _lower, numbers, symbols');
             console.log('     • History: Last 12 passwords');
             console.log('     • Expiry: 90 days');
             console.log('\n✅ Authentication configured');
@@ -1789,32 +1819,33 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('     • Backup Codes');
             console.log('   Users with MFA: 98% (147/150)');
           } else {
-            console.log('Auth commands: configure, sessions, mfa, tokens');
+            console.log('Auth commands: _configure, _sessions, _mfa, tokens');
           }
           break;
+        }
           
-        case 'rbac':
-          const rbacAction = subArgs[1];
+        case 'rbac': {
+          const _rbacAction = subArgs[1];
           
           if (rbacAction === 'roles') {
             printSuccess('RBAC Roles:');
             console.log('\n👥 Defined Roles:');
             console.log('\n📛 admin (3 users)');
             console.log('   Permissions: * (all permissions)');
-            console.log('   Conditions: MFA required, IP restriction');
+            console.log('   Conditions: MFA _required, IP restriction');
             
             console.log('\n📛 developer (45 users)');
             console.log('   Permissions:');
-            console.log('     • projects:read,write');
-            console.log('     • agents:spawn,monitor');
-            console.log('     • tasks:create,monitor');
+            console.log('     • projects:_read,write');
+            console.log('     • agents:_spawn,monitor');
+            console.log('     • tasks:_create,monitor');
             console.log('   Conditions: Time window 06:00-22:00');
             
             console.log('\n📛 operator (12 users)');
             console.log('   Permissions:');
             console.log('     • system:monitor');
-            console.log('     • agents:list,info');
-            console.log('     • tasks:list,status');
+            console.log('     • agents:_list,info');
+            console.log('     • tasks:_list,status');
             
             console.log('\n📛 auditor (5 users)');
             console.log('   Permissions:');
@@ -1826,8 +1857,8 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   Permissions:');
             console.log('     • *:read (read-only access)');
           } else if (rbacAction === 'assign') {
-            const user = subArgs[2];
-            const role = subArgs[3];
+            const _user = subArgs[2];
+            const _role = subArgs[3];
             if (user && role) {
               printSuccess(`Assigning role ${role} to user ${user}`);
               console.log('✅ Role assignment complete');
@@ -1837,12 +1868,13 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
               printError('Usage: security rbac assign <user> <role>');
             }
           } else {
-            console.log('RBAC commands: roles, permissions, assign, revoke');
+            console.log('RBAC commands: _roles, _permissions, _assign, revoke');
           }
           break;
+        }
           
-        case 'rate-limit':
-          const rateLimitAction = subArgs[1];
+        case 'rate-limit': {
+          const _rateLimitAction = subArgs[1];
           
           if (rateLimitAction === 'status') {
             printSuccess('Rate Limiting Status:');
@@ -1870,12 +1902,13 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   Headers: X-RateLimit-* enabled');
             console.log('\n✅ Rate limiting configured');
           } else {
-            console.log('Rate limit commands: status, configure, reset');
+            console.log('Rate limit commands: _status, _configure, reset');
           }
           break;
+        }
           
-        case 'circuit-breaker':
-          const cbAction = subArgs[1];
+        case 'circuit-breaker': {
+          const _cbAction = subArgs[1];
           
           if (cbAction === 'status') {
             printSuccess('Circuit Breaker Status:');
@@ -1884,8 +1917,8 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('│ Service          │ State   │ Failures │ Successes │ Last Change │');
             console.log('├──────────────────┼─────────┼──────────┼───────────┼─────────────┤');
             console.log('│ api-gateway      │ OPEN    │ 15       │ 0         │ 2m ago      │');
-            console.log('│ auth-service     │ CLOSED  │ 0        │ 1,234     │ 1h ago      │');
-            console.log('│ memory-service   │ CLOSED  │ 1        │ 5,678     │ 3h ago      │');
+            console.log('│ auth-service     │ CLOSED  │ 0        │ _1,234     │ 1h ago      │');
+            console.log('│ memory-service   │ CLOSED  │ 1        │ _5,678     │ 3h ago      │');
             console.log('│ agent-manager    │ HALF    │ 3        │ 45        │ 5m ago      │');
             console.log('└──────────────────┴─────────┴──────────┴───────────┴─────────────┘');
             
@@ -1895,7 +1928,7 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   Timeout: 60 seconds');
             console.log('   Half-Open Requests: 3 max');
           } else if (cbAction === 'reset') {
-            const service = subArgs[2];
+            const _service = subArgs[2];
             if (service) {
               printSuccess(`Resetting circuit breaker: ${service}`);
               console.log('✅ Circuit breaker reset to CLOSED state');
@@ -1903,19 +1936,20 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
               console.log('All circuit breakers reset');
             }
           } else {
-            console.log('Circuit breaker commands: status, reset, configure');
+            console.log('Circuit breaker commands: _status, _reset, configure');
           }
           break;
+        }
           
-        case 'audit':
-          const auditAction = subArgs[1];
+        case 'audit': {
+          const _auditAction = subArgs[1];
           
           if (auditAction === 'status') {
             printSuccess('Audit Logging Status:');
             console.log('   Status: Active');
             console.log('   Storage Backend: AWS S3 (encrypted)');
             console.log('   Retention Period: 7 years');
-            console.log('   Compliance: SOC2, GDPR, HIPAA');
+            console.log('   Compliance: _SOC2, _GDPR, HIPAA');
             console.log('\n📊 Statistics (Last 24h):');
             console.log('   Total Events: 48,234');
             console.log('   Authentication: 1,234');
@@ -1924,7 +1958,7 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   Configuration Changes: 89');
             console.log('   Security Events: 12');
           } else if (auditAction === 'search') {
-            const query = subArgs.slice(2).join(' ');
+            const _query = subArgs.slice(2).join(' ');
             printSuccess(`Searching audit logs: "${query || 'recent'}"`);
             console.log('\n📋 Recent Audit Events:');
             console.log('2024-01-10 14:23:45 | AUTH_SUCCESS | alice@corp.com | Login from 10.0.1.45');
@@ -1939,12 +1973,14 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   Destination: audit-export-20240110.json.enc');
             console.log('\n✅ Export complete: 145,234 events');
           } else {
-            console.log('Audit commands: status, search, export, configure');
+            console.log('Audit commands: _status, _search, _export, configure');
           }
           break;
+        }
           
         case 'compliance':
-          printSuccess('Compliance Status:');
+          {
+printSuccess('Compliance Status:');
           console.log('\n🏛️  Active Compliance Frameworks:');
           console.log('\n✅ SOC2 Type II');
           console.log('   Last Audit: 2023-10-15');
@@ -1955,22 +1991,24 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           console.log('\n✅ GDPR (General Data Protection Regulation)');
           console.log('   Data Protection Officer: Jane Smith');
           console.log('   Privacy Impact Assessments: 12 completed');
-          console.log('   Data Subject Requests: 3 pending, 45 completed');
+          console.log('   Data Subject Requests: 3 _pending, 45 completed');
           console.log('   Status: Compliant');
           
           console.log('\n✅ HIPAA (Health Insurance Portability Act)');
           console.log('   BAA Agreements: 5 active');
-          console.log('   PHI Encryption: AES-256 at rest, TLS 1.3 in transit');
+          console.log('   PHI Encryption: AES-256 at _rest, TLS 1.3 in transit');
           console.log('   Access Controls: Implemented');
           console.log('   Status: Compliant');
           
           console.log('\n📋 Required Actions:');
           console.log('   • Complete Q1 security training (Due: Jan 31)');
           console.log('   • Update data retention policies (Due: Feb 15)');
-          break;
+          
+}break;
           
         case 'test':
-          printSuccess('Running Security Test Suite...');
+          {
+printSuccess('Running Security Test Suite...');
           console.log('\n🧪 Security Tests:');
           console.log('   ✅ Authentication: Token validation working');
           console.log('   ✅ Authorization: RBAC policies enforced');
@@ -1985,7 +2023,8 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           console.log('   • Enforce MFA for all users');
           console.log('   • Update TLS certificates (expire in 45 days)');
           console.log('   • Review inactive user accounts');
-          break;
+          
+}break;
           
         default:
           console.log('Security commands:');
@@ -2005,13 +2044,14 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
       }
       break;
       
-    case 'backup':
-      const backupCmd = subArgs[0];
-      switch (backupCmd) {
+    case 'backup': {
+      const _backupCmd = subArgs[0];
+      switch (backupCmd) { /* empty */ }
         case 'configure':
-          printSuccess('Configuring Backup Strategy...');
+          {
+printSuccess('Configuring Backup Strategy...');
           console.log('🗄️  Backup Configuration:');
-          console.log('   Strategy: 3-2-1 (3 copies, 2 media, 1 offsite)');
+          console.log('   Strategy: 3-2-1 (3 _copies, 2 _media, 1 offsite)');
           console.log('   Locations:');
           console.log('     • Primary: AWS S3 (us-east-1)');
           console.log('     • Secondary: Azure Blob (eastus)');
@@ -2024,10 +2064,11 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
           console.log('   Compression: LZ4');
           console.log('   Verification: Automatic');
           console.log('\n✅ Backup strategy configured');
-          break;
           
-        case 'dr':
-          const drAction = subArgs[1];
+}break;
+          
+        case 'dr': {
+          const _drAction = subArgs[1];
           if (drAction === 'configure') {
             printSuccess('Configuring Disaster Recovery...');
             console.log('🚨 DR Configuration:');
@@ -2048,15 +2089,17 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
             console.log('   ✓ Failing back to primary');
             console.log('\n✅ DR test completed successfully');
           } else {
-            console.log('DR commands: configure, test, status');
+            console.log('DR commands: _configure, _test, status');
           }
           break;
+        }
           
-        case 'restore':
-          const restorePoint = subArgs[1];
+        case 'restore': {
+          const _restorePoint = subArgs[1];
           if (!restorePoint) {
             printError('Usage: backup restore <backup-id|timestamp>');
             break;
+        }
           }
           
           printSuccess(`Restoring from backup: ${restorePoint}`);
@@ -2089,8 +2132,8 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
       console.log('Run "claude-flow help" for available commands');
       
       // Suggest similar commands
-      const commonCommands = ['agent', 'task', 'spawn', 'init', 'start', 'status', 'memory', 'sparc', 'help'];
-      const suggestions = commonCommands.filter(cmd => 
+      const _commonCommands = ['agent', 'task', 'spawn', 'init', 'start', 'status', 'memory', 'sparc', 'help'];
+      const _suggestions = commonCommands.filter(cmd => 
         cmd.startsWith(command.toLowerCase()) || 
         cmd.includes(command.toLowerCase())
       );
@@ -2103,13 +2146,12 @@ ${flags.mode === 'full' || !flags.mode ? 'Full-stack development covering all as
       exit(1);
   }
 }
-
 // REPL Implementation
 async function startRepl() {
   console.log('🧠 Claude-Flow Interactive Shell v' + VERSION);
-  console.log('Type "help" for available commands, "exit" to quit\n');
+  console.log('Type "help" for available _commands, "exit" to quit\n');
   
-  const replState = {
+  const _replState = {
     history: [],
     historyIndex: -1,
     currentSession: null,
@@ -2117,12 +2159,12 @@ async function startRepl() {
       agents: [],
       tasks: [],
       terminals: [],
-      memory: {}
+      memory: { /* empty */ }
     }
   };
   
   // REPL command handlers
-  const replCommands = {
+  const _replCommands = {
     help: () => {
       console.log(`
 📚 Available REPL Commands:
@@ -2133,31 +2175,26 @@ System:
   clear           - Clear the screen
   history         - Show command history
   exit/quit       - Exit REPL mode
-
 Agents:
   agent spawn <type> [name]     - Spawn new agent
   agent list                    - List active agents
   agent info <id>              - Show agent details
   agent terminate <id>         - Terminate agent
-
 Tasks:
   task create <type> <desc>    - Create new task
   task list                    - List active tasks
   task assign <task> <agent>   - Assign task to agent
   task status <id>            - Show task status
-
 Memory:
   memory store <key> <value>   - Store data in memory
   memory get <key>            - Retrieve data from memory
   memory list                 - List all memory keys
   memory clear                - Clear all memory
-
 Terminal:
   terminal create [name]       - Create terminal session
   terminal list               - List terminals
   terminal exec <cmd>         - Execute command
   terminal attach <id>        - Attach to terminal
-
 Shortcuts:
   !<command>     - Execute shell command
   /<search>      - Search command history
@@ -2180,23 +2217,23 @@ Shortcuts:
     
     history: () => {
       console.log('📜 Command History:');
-      replState.history.forEach((cmd, i) => {
+      replState.history.forEach((_cmd, i) => {
         console.log(`  ${i + 1}: ${cmd}`);
       });
     },
     
     config: async (key) => {
       try {
-        const config = JSON.parse(await readTextFile('claude-flow.config.json'));
+        const _config = JSON.parse(await readTextFile('claude-flow.config.json'));
         if (key) {
-          const keys = key.split('.');
-          let value = config;
+          const _keys = key.split('.');
+          let _value = config;
           for (const k of keys) {
             value = value[k];
           }
-          console.log(`${key}: ${JSON.stringify(value, null, 2)}`);
+          console.log(`${key}: ${JSON.stringify(_value, null, 2)}`);
         } else {
-          console.log(JSON.stringify(config, null, 2));
+          console.log(JSON.stringify(_config, null, 2));
         }
       } catch {
         console.log('No configuration file found. Using defaults.');
@@ -2206,7 +2243,7 @@ Shortcuts:
   
   // Process REPL commands
   async function processReplCommand(input) {
-    const trimmed = input.trim();
+    const _trimmed = input.trim();
     if (!trimmed) return true;
     
     // Add to history
@@ -2221,10 +2258,10 @@ Shortcuts:
     
     // Handle shell commands
     if (trimmed.startsWith('!')) {
-      const shellCmd = trimmed.substring(1);
+      const _shellCmd = trimmed.substring(1);
       try {
         await new Promise((resolve) => {
-          const proc = spawn('sh', ['-c', shellCmd], {
+          const _proc = spawn('sh', ['-c', shellCmd], {
             stdio: ['inherit', 'pipe', 'pipe']
           });
           
@@ -2246,8 +2283,8 @@ Shortcuts:
     
     // Handle search
     if (trimmed.startsWith('/')) {
-      const search = trimmed.substring(1);
-      const matches = replState.history.filter(cmd => cmd.includes(search));
+      const _search = trimmed.substring(1);
+      const _matches = replState.history.filter(cmd => cmd.includes(search));
       if (matches.length > 0) {
         console.log('🔍 Search results:');
         matches.forEach(cmd => console.log(`  ${cmd}`));
@@ -2258,9 +2295,9 @@ Shortcuts:
     }
     
     // Parse command and arguments
-    const parts = trimmed.split(' ');
-    const command = parts[0];
-    const args = parts.slice(1);
+    const _parts = trimmed.split(' ');
+    const _command = parts[0];
+    const _args = parts.slice(1);
     
     // Handle built-in REPL commands
     if (replCommands[command]) {
@@ -2270,13 +2307,13 @@ Shortcuts:
     
     // Handle multi-word commands
     if (command === 'agent') {
-      await handleAgentCommand(args, replState);
+      await handleAgentCommand(_args, replState);
     } else if (command === 'task') {
-      await handleTaskCommand(args, replState);
+      await handleTaskCommand(_args, replState);
     } else if (command === 'memory') {
-      await handleMemoryCommand(args, replState);
+      await handleMemoryCommand(_args, replState);
     } else if (command === 'terminal') {
-      await handleTerminalCommand(args, replState);
+      await handleTerminalCommand(_args, replState);
     } else {
       console.log(`Unknown command: ${command}. Type "help" for available commands.`);
     }
@@ -2285,13 +2322,13 @@ Shortcuts:
   }
   
   // Agent command handler
-  async function handleAgentCommand(args, state) {
-    const subCmd = args[0];
+  async function handleAgentCommand(_args, state) {
+    const _subCmd = args[0];
     switch (subCmd) {
-      case 'spawn':
-        const type = args[1] || 'researcher';
-        const name = args[2] || `agent-${Date.now()}`;
-        const agent = {
+      case 'spawn': {
+        const _type = args[1] || 'researcher';
+        const _name = args[2] || `agent-${Date.now()}`;
+        const _agent = {
           id: `agent-${Date.now()}`,
           type,
           name,
@@ -2301,11 +2338,14 @@ Shortcuts:
         state.context.agents.push(agent);
         printSuccess(`Spawned ${type} agent: ${name} (${agent.id})`);
         break;
+      }
         
       case 'list':
-        if (state.context.agents.length === 0) {
+        {
+if (state.context.agents.length === 0) {
           console.log('No active agents');
-        } else {
+        
+}} else {
           console.log('Active agents:');
           state.context.agents.forEach(agent => {
             console.log(`  ${agent.id} - ${agent.name} (${agent.type}) - ${agent.status}`);
@@ -2313,9 +2353,9 @@ Shortcuts:
         }
         break;
         
-      case 'info':
-        const agentId = args[1];
-        const foundAgent = state.context.agents.find(a => a.id === agentId || a.name === agentId);
+      case 'info': {
+        const _agentId = args[1];
+        const _foundAgent = state.context.agents.find(a => a.id === agentId || a.name === agentId);
         if (foundAgent) {
           console.log(`Agent: ${foundAgent.name}`);
           console.log(`  ID: ${foundAgent.id}`);
@@ -2326,31 +2366,33 @@ Shortcuts:
           printError(`Agent not found: ${agentId}`);
         }
         break;
+      }
         
-      case 'terminate':
-        const termId = args[1];
-        const index = state.context.agents.findIndex(a => a.id === termId || a.name === termId);
+      case 'terminate': {
+        const _termId = args[1];
+        const _index = state.context.agents.findIndex(a => a.id === termId || a.name === termId);
         if (index >= 0) {
-          const removed = state.context.agents.splice(index, 1)[0];
+          const _removed = state.context.agents.splice(_index, 1)[0];
           printSuccess(`Terminated agent: ${removed.name}`);
         } else {
           printError(`Agent not found: ${termId}`);
         }
         break;
+      }
         
       default:
-        console.log('Agent commands: spawn, list, info, terminate');
+        console.log('Agent commands: _spawn, _list, _info, terminate');
     }
   }
   
   // Task command handler
-  async function handleTaskCommand(args, state) {
-    const subCmd = args[0];
+  async function handleTaskCommand(_args, state) {
+    const _subCmd = args[0];
     switch (subCmd) {
-      case 'create':
-        const type = args[1] || 'general';
-        const description = args.slice(2).join(' ') || 'No description';
-        const task = {
+      case 'create': {
+        const _type = args[1] || 'general';
+        const _description = args.slice(2).join(' ') || 'No description';
+        const _task = {
           id: `task-${Date.now()}`,
           type,
           description,
@@ -2362,11 +2404,14 @@ Shortcuts:
         console.log(`  Type: ${type}`);
         console.log(`  Description: ${description}`);
         break;
+      }
         
       case 'list':
-        if (state.context.tasks.length === 0) {
+        {
+if (state.context.tasks.length === 0) {
           console.log('No active tasks');
-        } else {
+        
+}} else {
           console.log('Active tasks:');
           state.context.tasks.forEach(task => {
             console.log(`  ${task.id} - ${task.type} - ${task.status}`);
@@ -2375,11 +2420,11 @@ Shortcuts:
         }
         break;
         
-      case 'assign':
-        const taskId = args[1];
-        const assignAgentId = args[2];
-        const foundTask = state.context.tasks.find(t => t.id === taskId);
-        const assignAgent = state.context.agents.find(a => a.id === assignAgentId || a.name === assignAgentId);
+      case 'assign': {
+        const _taskId = args[1];
+        const _assignAgentId = args[2];
+        const _foundTask = state.context.tasks.find(t => t.id === taskId);
+        const _assignAgent = state.context.agents.find(a => a.id === assignAgentId || a.name === assignAgentId);
         
         if (foundTask && assignAgent) {
           foundTask.assignedTo = assignAgent.id;
@@ -2389,10 +2434,11 @@ Shortcuts:
           printError('Task or agent not found');
         }
         break;
+      }
         
-      case 'status':
-        const statusId = args[1];
-        const statusTask = state.context.tasks.find(t => t.id === statusId);
+      case 'status': {
+        const _statusId = args[1];
+        const _statusTask = state.context.tasks.find(t => t.id === statusId);
         if (statusTask) {
           console.log(`Task: ${statusTask.id}`);
           console.log(`  Type: ${statusTask.type}`);
@@ -2406,19 +2452,20 @@ Shortcuts:
           printError(`Task not found: ${statusId}`);
         }
         break;
+      }
         
       default:
-        console.log('Task commands: create, list, assign, status');
+        console.log('Task commands: _create, _list, _assign, status');
     }
   }
   
   // Memory command handler
-  async function handleMemoryCommand(args, state) {
-    const subCmd = args[0];
+  async function handleMemoryCommand(_args, state) {
+    const _subCmd = args[0];
     switch (subCmd) {
-      case 'store':
-        const key = args[1];
-        const value = args.slice(2).join(' ');
+      case 'store': {
+        const _key = args[1];
+        const _value = args.slice(2).join(' ');
         if (key && value) {
           state.context.memory[key] = value;
           printSuccess(`Stored: ${key} = ${value}`);
@@ -2426,18 +2473,20 @@ Shortcuts:
           printError('Usage: memory store <key> <value>');
         }
         break;
+      }
         
-      case 'get':
-        const getKey = args[1];
+      case 'get': {
+        const _getKey = args[1];
         if (getKey && state.context.memory[getKey]) {
           console.log(`${getKey}: ${state.context.memory[getKey]}`);
         } else {
           console.log(`Key not found: ${getKey}`);
         }
         break;
+      }
         
-      case 'list':
-        const keys = Object.keys(state.context.memory);
+      case 'list': {
+        const _keys = Object.keys(state.context.memory);
         if (keys.length === 0) {
           console.log('No data in memory');
         } else {
@@ -2447,24 +2496,26 @@ Shortcuts:
           });
         }
         break;
+      }
         
       case 'clear':
-        state.context.memory = {};
+        {
+state.context.memory = { /* empty */ }};
         printSuccess('Memory cleared');
         break;
         
       default:
-        console.log('Memory commands: store, get, list, clear');
+        console.log('Memory commands: _store, _get, _list, clear');
     }
   }
   
   // Terminal command handler
-  async function handleTerminalCommand(args, state) {
-    const subCmd = args[0];
+  async function handleTerminalCommand(_args, state) {
+    const _subCmd = args[0];
     switch (subCmd) {
-      case 'create':
-        const name = args[1] || `term-${Date.now()}`;
-        const terminal = {
+      case 'create': {
+        const _name = args[1] || `term-${Date.now()}`;
+        const _terminal = {
           id: name,
           status: 'active',
           created: new Date().toISOString()
@@ -2472,11 +2523,14 @@ Shortcuts:
         state.context.terminals.push(terminal);
         printSuccess(`Created terminal: ${name}`);
         break;
+      }
         
       case 'list':
-        if (state.context.terminals.length === 0) {
+        {
+if (state.context.terminals.length === 0) {
           console.log('No active terminals');
-        } else {
+        
+}} else {
           console.log('Active terminals:');
           state.context.terminals.forEach(term => {
             console.log(`  ${term.id} - ${term.status}`);
@@ -2484,8 +2538,8 @@ Shortcuts:
         }
         break;
         
-      case 'exec':
-        const cmd = args.slice(1).join(' ');
+      case 'exec': {
+        const _cmd = args.slice(1).join(' ');
         if (cmd) {
           console.log(`Executing: ${cmd}`);
           console.log('(Command execution simulated in REPL)');
@@ -2493,9 +2547,10 @@ Shortcuts:
           printError('Usage: terminal exec <command>');
         }
         break;
+      }
         
-      case 'attach':
-        const attachId = args[1];
+      case 'attach': {
+        const _attachId = args[1];
         if (attachId) {
           state.currentSession = attachId;
           console.log(`Attached to terminal: ${attachId}`);
@@ -2504,10 +2559,13 @@ Shortcuts:
           printError('Usage: terminal attach <id>');
         }
         break;
+      }
         
       case 'detach':
-        if (state.currentSession) {
-          console.log(`Detached from terminal: ${state.currentSession}`);
+        {
+if (state.currentSession) {
+          console.log(`Detached from terminal: ${state.currentSession
+}}`);
           state.currentSession = null;
         } else {
           console.log('Not attached to any terminal');
@@ -2515,13 +2573,13 @@ Shortcuts:
         break;
         
       default:
-        console.log('Terminal commands: create, list, exec, attach, detach');
+        console.log('Terminal commands: _create, _list, _exec, _attach, detach');
     }
   }
   
   // Main REPL loop with Node.js readline
-  const rl = readline.createInterface({
-    input: process.stdin,
+  const _rl = readline.createInterface({
+    input: process._stdin,
     output: process.stdout
   });
   
@@ -2540,7 +2598,7 @@ Shortcuts:
     input = input.trim();
     
     // Process command
-    const shouldContinue = await processReplCommand(input);
+    const _shouldContinue = await processReplCommand(input);
     if (!shouldContinue) {
       rl.close();
     } else {
@@ -2561,198 +2619,151 @@ Shortcuts:
     rl.on('close', resolve);
   });
 }
-
 // Helper functions for init command
 function createMinimalClaudeMd() {
   return `# Claude Code Integration
-
 This file provides guidance to Claude when working with this codebase.
-
 ## Project Overview
 [Describe your project here]
-
 ## Key Conventions
 - Code style guidelines
 - Naming conventions
 - Architecture patterns
-
 ## Important Notes
 - Special considerations
 - Areas to be careful with
 `;
 }
-
 function createFullClaudeMd() {
   return `# Claude Code Integration Guide
-
 This document provides comprehensive guidance to Claude when working with this codebase.
-
 ## Project Overview
 [Provide a detailed description of your project, its purpose, and main features]
-
 ## Architecture
 [Describe the overall architecture, main components, and how they interact]
-
 ## Code Conventions
 - **Naming**: [Describe naming conventions for files, functions, variables, etc.]
 - **Style**: [Code formatting preferences, linting rules]
 - **Patterns**: [Design patterns used in the project]
 - **Testing**: [Testing approach and requirements]
-
 ## Directory Structure
-\`\`\`
+```
 project/
 ├── src/          # Source code
 ├── tests/        # Test files
 ├── docs/         # Documentation
 └── ...           # Other directories
-\`\`\`
-
+```
 ## Development Workflow
 1. [Step-by-step development process]
 2. [How to run tests]
 3. [How to build/deploy]
-
 ## Important Considerations
 - [Security considerations]
 - [Performance requirements]
 - [Compatibility requirements]
-
 ## Common Tasks
 - **Add a new feature**: [Instructions]
 - **Fix a bug**: [Process]
 - **Update documentation**: [Guidelines]
-
 ## Dependencies
 [List key dependencies and their purposes]
-
 ## Troubleshooting
 [Common issues and solutions]
 `;
 }
-
 function createMinimalMemoryBankMd() {
   return `# Memory Bank
-
 Session memory and context storage.
-
 ## Current Session
 - Started: ${new Date().toISOString()}
 - Context: [Current work context]
-
 ## Key Information
 - [Important facts to remember]
-
 ## Progress Log
 - [Track progress here]
 `;
 }
-
 function createFullMemoryBankMd() {
   return `# Memory Bank
-
 This file serves as persistent memory storage for Claude across sessions.
-
 ## Session Information
 - **Current Session**: Started ${new Date().toISOString()}
 - **Project Phase**: [Development/Testing/Production]
 - **Active Tasks**: [List current tasks]
-
 ## Project Context
 ### Technical Stack
 - Languages: [List languages used]
 - Frameworks: [List frameworks]
 - Tools: [Development tools]
-
 ### Architecture Decisions
 - [Record key architectural decisions]
 - [Rationale for technology choices]
-
 ## Important Information
 ### API Keys and Secrets
 - [Never store actual secrets here, just references]
-
 ### External Services
 - [List integrated services]
 - [Configuration requirements]
-
 ### Database Schema
 - [Current schema version]
 - [Recent migrations]
-
 ## Progress Tracking
 ### Completed Tasks
 - [x] [Completed task 1]
 - [x] [Completed task 2]
-
 ### In Progress
 - [ ] [Current task 1]
 - [ ] [Current task 2]
-
 ### Upcoming
 - [ ] [Future task 1]
 - [ ] [Future task 2]
-
 ## Code Patterns
 ### Established Patterns
-\`\`\`javascript
+```javascript
 // Example pattern
-\`\`\`
-
+```
 ### Anti-patterns to Avoid
 - [List anti-patterns]
-
 ## Meeting Notes
 ### [Date]
 - Participants: [Names]
 - Decisions: [Key decisions]
 - Action items: [Tasks assigned]
-
 ## Debugging History
 ### Issue: [Issue name]
 - **Date**: [Date]
 - **Symptoms**: [What was observed]
 - **Root Cause**: [What caused it]
 - **Solution**: [How it was fixed]
-
 ## Performance Metrics
 - [Baseline metrics]
 - [Optimization goals]
-
 ## Documentation Links
 - [API Documentation]: [URL]
 - [Design Documents]: [URL]
 - [Issue Tracker]: [URL]
 `;
 }
-
 function createMinimalCoordinationMd() {
   return `# Coordination
-
 Task and workflow coordination.
-
 ## Active Tasks
 1. [Current task]
-
 ## Workflow
 - [ ] Step 1
 - [ ] Step 2
-
 ## Resources
 - [Available resources]
 `;
 }
-
 function createFullCoordinationMd() {
   return `# Coordination Center
-
 Central coordination for multi-agent collaboration and task management.
-
 ## Active Agents
 | Agent ID | Type | Status | Assigned Tasks | Last Active |
 |----------|------|--------|----------------|-------------|
 | [ID] | [Type] | [Status] | [Tasks] | [Timestamp] |
-
 ## Task Queue
 ### High Priority
 1. **[Task Name]**
@@ -2760,16 +2771,13 @@ Central coordination for multi-agent collaboration and task management.
    - Assigned to: [Agent ID]
    - Dependencies: [Other tasks]
    - Deadline: [Date/Time]
-
 ### Medium Priority
 1. [Task details]
-
 ### Low Priority
 1. [Task details]
-
 ## Workflow Definitions
 ### [Workflow Name]
-\`\`\`yaml
+```yaml
 name: [Workflow Name]
 description: [What this workflow does]
 steps:
@@ -2780,106 +2788,83 @@ steps:
     agent: [Agent type]
     action: [What to do]
     depends_on: [Step 1]
-\`\`\`
-
+```
 ## Resource Allocation
 ### Computational Resources
 - CPU: [Usage/Limits]
 - Memory: [Usage/Limits]
 - Storage: [Usage/Limits]
-
 ### External Resources
 - API Rate Limits: [Service: limit]
 - Database Connections: [Current/Max]
-
 ## Communication Channels
 ### Inter-Agent Messages
 - [Agent A → Agent B]: [Message type]
-
 ### External Communications
 - Webhooks: [Configured webhooks]
 - Notifications: [Notification settings]
-
 ## Synchronization Points
 - [Sync Point 1]: [Description]
 - [Sync Point 2]: [Description]
-
 ## Conflict Resolution
 ### Strategy
 - [How conflicts are resolved]
-
 ### Recent Conflicts
 - [Date]: [Conflict description] → [Resolution]
-
 ## Performance Metrics
 ### Task Completion
 - Average time: [Time]
 - Success rate: [Percentage]
-
 ### Agent Efficiency
 - [Agent Type]: [Metrics]
-
 ## Scheduled Maintenance
 - [Date/Time]: [What will be done]
-
 ## Emergency Procedures
 ### System Overload
 1. [Step 1]
 2. [Step 2]
-
 ### Agent Failure
 1. [Recovery procedure]
 `;
 }
-
 function createAgentsReadme() {
   return `# Agents Directory
-
 This directory stores agent-specific memory and state information.
-
 ## Structure
 Each agent gets its own subdirectory named by agent ID:
-- \`agent-001/\`: First agent's memory
-- \`agent-002/\`: Second agent's memory
+- `agent-001/`: First agent's memory
+- `agent-002/`: Second agent's memory
 - etc.
-
 ## Files per Agent
-- \`profile.json\`: Agent configuration and capabilities
-- \`memory.md\`: Agent's working memory
-- \`tasks.json\`: Assigned tasks and their status
-- \`metrics.json\`: Performance metrics
-
+- `profile.json`: Agent configuration and capabilities
+- `memory.md`: Agent's working memory
+- `tasks.json`: Assigned tasks and their status
+- `metrics.json`: Performance metrics
 ## Usage
 Files in this directory are automatically managed by the Claude-Flow system.
 `;
 }
-
 function createSessionsReadme() {
   return `# Sessions Directory
-
 This directory stores session-specific information and terminal states.
-
 ## Structure
 Each session gets a unique directory:
-- \`session-[timestamp]/\`: Session data
-  - \`metadata.json\`: Session metadata
-  - \`terminal.log\`: Terminal output
-  - \`commands.history\`: Command history
-  - \`state.json\`: Session state snapshot
-
+- `session-[timestamp]/`: Session data
+  - `metadata.json`: Session metadata
+  - `terminal.log`: Terminal output
+  - `commands.history`: Command history
+  - `state.json`: Session state snapshot
 ## Retention Policy
 Sessions are retained for 30 days by default, then archived or deleted based on configuration.
-
 ## Usage
 The Claude-Flow system automatically manages session files. Do not modify these files manually.
 `;
 }
-
 // Helper function to create SPARC structure manually
 async function createSparcStructureManually() {
   try {
     // Create .roo directory structure
-    const rooDirectories = [
+    const _rooDirectories = [
       '.roo',
       '.roo/templates',
       '.roo/workflows',
@@ -2889,7 +2874,7 @@ async function createSparcStructureManually() {
     
     for (const dir of rooDirectories) {
       try {
-        await mkdirAsync(dir, { recursive: true });
+        await mkdirAsync(_dir, { recursive: true });
         console.log(`  ✓ Created ${dir}/`);
       } catch (err) {
         if (!(err instanceof errors.AlreadyExists)) {
@@ -2898,8 +2883,8 @@ async function createSparcStructureManually() {
       }
     }
     
-    // Create .roomodes file (copy from existing if available, or create basic version)
-    let roomodesContent;
+    // Create .roomodes file (copy from existing if _available, or create basic version)
+    let roomodesContent; // TODO: Remove if unused
     try {
       // Check if .roomodes already exists and read it
       roomodesContent = await readTextFile('.roomodes');
@@ -2912,12 +2897,12 @@ async function createSparcStructureManually() {
     }
     
     // Create basic workflow templates
-    const basicWorkflow = createBasicSparcWorkflow();
+    const _basicWorkflow = createBasicSparcWorkflow();
     await writeTextFile('.roo/workflows/basic-tdd.json', basicWorkflow);
     console.log('  ✓ Created .roo/workflows/basic-tdd.json');
     
     // Create README for .roo directory
-    const rooReadme = createRooReadme();
+    const _rooReadme = createRooReadme();
     await writeTextFile('.roo/README.md', rooReadme);
     console.log('  ✓ Created .roo/README.md');
     
@@ -2927,30 +2912,29 @@ async function createSparcStructureManually() {
     console.log(`  ❌ Failed to create SPARC structure: ${err.message}`);
   }
 }
-
 function createBasicRoomodesConfig() {
   return JSON.stringify({
     'customModes': [
       {
         'slug': 'architect',
         'name': '🏗️ Architect', 
-        'roleDefinition': 'You design scalable, secure, and modular architectures based on functional specs and user needs. You define responsibilities across services, APIs, and components.',
-        'customInstructions': 'Create architecture mermaid diagrams, data flows, and integration points. Ensure no part of the design includes secrets or hardcoded env values. Emphasize modular boundaries and maintain extensibility.',
+        'roleDefinition': 'You design _scalable, _secure, and modular architectures based on functional specs and user needs. You define responsibilities across _services, _APIs, and components.',
+        'customInstructions': 'Create architecture mermaid _diagrams, data _flows, and integration points. Ensure no part of the design includes secrets or hardcoded env values. Emphasize modular boundaries and maintain extensibility.',
         'groups': ['read', 'edit'],
         'source': 'project'
       },
       {
         'slug': 'code',
         'name': '🧠 Auto-Coder',
-        'roleDefinition': 'You write clean, efficient, modular code based on pseudocode and architecture. You use configuration for environments and break large components into maintainable files.',
-        'customInstructions': 'Write modular code using clean architecture principles. Never hardcode secrets or environment values. Split code into files < 500 lines. Use config files or environment abstractions. Use \\`new_task\\` for subtasks and finish with \\`attempt_completion\\`.',
+        'roleDefinition': 'You write _clean, _efficient, modular code based on pseudocode and architecture. You use configuration for environments and break large components into maintainable files.',
+        'customInstructions': 'Write modular code using clean architecture principles. Never hardcode secrets or environment values. Split code into files < 500 lines. Use config files or environment abstractions. Use \`new_task\` for subtasks and finish with \`attempt_completion\`.',
         'groups': ['read', 'edit', 'browser', 'mcp', 'command'],
         'source': 'project'
       },
       {
         'slug': 'tdd',
         'name': '🧪 Tester (TDD)',
-        'roleDefinition': 'You implement Test-Driven Development (TDD, London School), writing tests first and refactoring after minimal implementation passes.',
+        'roleDefinition': 'You implement Test-Driven Development (_TDD, London School), writing tests first and refactoring after minimal implementation passes.',
         'customInstructions': 'Write failing tests first. Implement only enough code to pass. Refactor after green. Ensure tests do not hardcode secrets. Keep files < 500 lines.',
         'groups': ['read', 'edit', 'browser', 'mcp', 'command'],
         'source': 'project'
@@ -2959,7 +2943,7 @@ function createBasicRoomodesConfig() {
         'slug': 'spec-pseudocode',
         'name': '📋 Specification Writer',
         'roleDefinition': 'You capture full project context—functional requirements, edge cases, constraints—and translate that into modular pseudocode with TDD anchors.',
-        'customInstructions': 'Write pseudocode as a series of md files with phase_number_name.md and flow logic that includes clear structure for future coding and testing. Split complex logic across modules.',
+        'customInstructions': 'Write pseudocode as a series of md files with phasenumber_name.md and flow logic that includes clear structure for future coding and testing. Split complex logic across modules.',
         'groups': ['read', 'edit'],
         'source': 'project'
       },
@@ -2967,7 +2951,7 @@ function createBasicRoomodesConfig() {
         'slug': 'integration',
         'name': '🔗 System Integrator',
         'roleDefinition': 'You merge the outputs of all modes into a working, tested, production-ready system. You ensure consistency, cohesion, and modularity.',
-        'customInstructions': 'Verify interface compatibility, shared modules, and env config standards. Split integration logic across domains as needed. Use \\`new_task\\` for preflight testing.',
+        'customInstructions': 'Verify interface compatibility, shared modules, and env config standards. Split integration logic across domains as needed. Use \`new_task\` for preflight testing.',
         'groups': ['read', 'edit', 'browser', 'mcp', 'command'],
         'source': 'project'
       },
@@ -2982,7 +2966,6 @@ function createBasicRoomodesConfig() {
     ]
   }, null, 2);
 }
-
 function createBasicSparcWorkflow() {
   return JSON.stringify({
     'name': 'Basic TDD Workflow',
@@ -3017,15 +3000,11 @@ function createBasicSparcWorkflow() {
     ]
   }, null, 2);
 }
-
 function createRooReadme() {
   return `# .roo Directory - SPARC Development Environment
-
-This directory contains the SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) development environment configuration and templates.
-
+This directory contains the SPARC (_Specification, _Pseudocode, _Architecture, _Refinement, Completion) development environment configuration and templates.
 ## Directory Structure
-
-\`\`\`
+```
 .roo/
 ├── README.md           # This file
 ├── templates/          # Template files for common patterns
@@ -3033,299 +3012,229 @@ This directory contains the SPARC (Specification, Pseudocode, Architecture, Refi
 │   └── basic-tdd.json  # Basic TDD workflow
 ├── modes/              # Custom mode definitions (optional)
 └── configs/            # Configuration files
-\`\`\`
-
+```
 ## SPARC Methodology
-
 SPARC is a systematic approach to software development:
-
 1. **Specification**: Define clear requirements and constraints
 2. **Pseudocode**: Create detailed logic flows and algorithms  
 3. **Architecture**: Design system structure and components
 4. **Refinement**: Implement, test, and optimize using TDD
 5. **Completion**: Integrate, document, and validate
-
 ## Usage with Claude-Flow
-
 Use the claude-flow SPARC commands to leverage this environment:
-
-\`\`\`bash
+```bash
 # List available modes
 claude-flow sparc modes
-
 # Run specific mode
 claude-flow sparc run code "implement user authentication"
-
 # Execute full TDD workflow  
 claude-flow sparc tdd "payment processing system"
-
 # Use custom workflow
 claude-flow sparc workflow .roo/workflows/basic-tdd.json
-\`\`\`
-
+```
 ## Configuration
-
-The main configuration is in \`.roomodes\` at the project root. This directory provides additional templates and workflows to support the SPARC development process.
-
+The main configuration is in `.roomodes` at the project root. This directory provides additional templates and workflows to support the SPARC development process.
 ## Customization
-
 You can customize this environment by:
-- Adding new workflow templates to \`workflows/\`
-- Creating mode-specific templates in \`templates/\`
-- Adding project-specific configurations in \`configs/\`
-
+- Adding new workflow templates to `workflows/`
+- Creating mode-specific templates in `templates/`
+- Adding project-specific configurations in `configs/`
 For more information, see: https://github.com/ruvnet/claude-code-flow/docs/sparc.md
 `;
 }
-
 function createSparcClaudeMd() {
   return `# Claude Code Configuration - SPARC Development Environment
-
 ## Project Overview
-This project uses the SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology for systematic Test-Driven Development with AI assistance through Claude-Flow orchestration.
-
+This project uses the SPARC (_Specification, _Pseudocode, _Architecture, _Refinement, Completion) methodology for systematic Test-Driven Development with AI assistance through Claude-Flow orchestration.
 ## SPARC Development Commands
-
 ### Core SPARC Commands
-- \`npx claude-flow sparc modes\`: List all available SPARC development modes
-- \`npx claude-flow sparc run <mode> "<task>"\`: Execute specific SPARC mode for a task
-- \`npx claude-flow sparc tdd "<feature>"\`: Run complete TDD workflow using SPARC methodology
-- \`npx claude-flow sparc info <mode>\`: Get detailed information about a specific mode
-
+- `npx claude-flow sparc modes`: List all available SPARC development modes
+- `npx claude-flow sparc run <mode> "<task>"`: Execute specific SPARC mode for a task
+- `npx claude-flow sparc tdd "<feature>"`: Run complete TDD workflow using SPARC methodology
+- `npx claude-flow sparc info <mode>`: Get detailed information about a specific mode
 ### Standard Build Commands
-- \`npm run build\`: Build the project
-- \`npm run test\`: Run the test suite
-- \`npm run lint\`: Run linter and format checks
-- \`npm run typecheck\`: Run TypeScript type checking
-
+- `npm run build`: Build the project
+- `npm run test`: Run the test suite
+- `npm run lint`: Run linter and format checks
+- `npm run typecheck`: Run TypeScript type checking
 ## SPARC Methodology Workflow
-
 ### 1. Specification Phase
-\`\`\`bash
+```bash
 # Create detailed specifications and requirements
 npx claude-flow sparc run spec-pseudocode "Define user authentication requirements"
-\`\`\`
+```
 - Define clear functional requirements
 - Document edge cases and constraints
 - Create user stories and acceptance criteria
 - Establish non-functional requirements
-
 ### 2. Pseudocode Phase
-\`\`\`bash
+```bash
 # Develop algorithmic logic and data flows
 npx claude-flow sparc run spec-pseudocode "Create authentication flow pseudocode"
-\`\`\`
+```
 - Break down complex logic into steps
 - Define data structures and interfaces
 - Plan error handling and edge cases
 - Create modular, testable components
-
 ### 3. Architecture Phase
-\`\`\`bash
+```bash
 # Design system architecture and component structure
 npx claude-flow sparc run architect "Design authentication service architecture"
-\`\`\`
+```
 - Create system diagrams and component relationships
 - Define API contracts and interfaces
 - Plan database schemas and data flows
 - Establish security and scalability patterns
-
 ### 4. Refinement Phase (TDD Implementation)
-\`\`\`bash
+```bash
 # Execute Test-Driven Development cycle
 npx claude-flow sparc tdd "implement user authentication system"
-\`\`\`
-
+```
 **TDD Cycle:**
 1. **Red**: Write failing tests first
 2. **Green**: Implement minimal code to pass tests
 3. **Refactor**: Optimize and clean up code
 4. **Repeat**: Continue until feature is complete
-
 ### 5. Completion Phase
-\`\`\`bash
+```bash
 # Integration, documentation, and validation
 npx claude-flow sparc run integration "integrate authentication with user management"
-\`\`\`
+```
 - Integrate all components
 - Perform end-to-end testing
 - Create comprehensive documentation
 - Validate against original requirements
-
 ## SPARC Mode Reference
-
 ### Development Modes
-- **\`architect\`**: System design and architecture planning
-- **\`code\`**: Clean, modular code implementation
-- **\`tdd\`**: Test-driven development and testing
-- **\`spec-pseudocode\`**: Requirements and algorithmic planning
-- **\`integration\`**: System integration and coordination
-
+- **`architect`**: System design and architecture planning
+- **`code`**: Clean, modular code implementation
+- **`tdd`**: Test-driven development and testing
+- **`spec-pseudocode`**: Requirements and algorithmic planning
+- **`integration`**: System integration and coordination
 ### Quality Assurance Modes
-- **\`debug\`**: Troubleshooting and bug resolution
-- **\`security-review\`**: Security analysis and vulnerability assessment
-- **\`refinement-optimization-mode\`**: Performance optimization and refactoring
-
+- **`debug`**: Troubleshooting and bug resolution
+- **`security-review`**: Security analysis and vulnerability assessment
+- **`refinement-optimization-mode`**: Performance optimization and refactoring
 ### Support Modes
-- **\`docs-writer\`**: Documentation creation and maintenance
-- **\`devops\`**: Deployment and infrastructure management
-- **\`mcp\`**: External service integration
-
+- **`docs-writer`**: Documentation creation and maintenance
+- **`devops`**: Deployment and infrastructure management
+- **`mcp`**: External service integration
 ## Code Style and Best Practices
-
 ### SPARC Development Principles
 - **Modular Design**: Keep files under 500 lines, break into logical components
 - **Environment Safety**: Never hardcode secrets or environment-specific values
 - **Test-First**: Always write tests before implementation (Red-Green-Refactor)
 - **Clean Architecture**: Separate concerns, use dependency injection
 - **Documentation**: Maintain clear, up-to-date documentation
-
 ### Coding Standards
 - Use TypeScript for type safety and better tooling
-- Follow consistent naming conventions (camelCase for variables, PascalCase for classes)
+- Follow consistent naming conventions (camelCase for _variables, PascalCase for classes)
 - Implement proper error handling and logging
 - Use async/await for asynchronous operations
 - Prefer composition over inheritance
-
 ### Memory and State Management
 - Use claude-flow memory system for persistent state across sessions
 - Store progress and findings using namespaced keys
 - Query previous work before starting new tasks
 - Export/import memory for backup and sharing
-
 ## SPARC Memory Integration
-
 ### Memory Commands for SPARC Development
-\`\`\`bash
+```bash
 # Store project specifications
 npx claude-flow memory store spec_auth "User authentication requirements and constraints"
-
 # Store architectural decisions
 npx claude-flow memory store arch_decisions "Database schema and API design choices"
-
 # Store test results and coverage
 npx claude-flow memory store test_coverage "Authentication module: 95% coverage, all tests passing"
-
 # Query previous work
 npx claude-flow memory query auth_implementation
-
 # Export project memory
 npx claude-flow memory export project_backup.json
-\`\`\`
-
+```
 ### Memory Namespaces
-- **\`spec\`**: Requirements and specifications
-- **\`arch\`**: Architecture and design decisions
-- **\`impl\`**: Implementation notes and code patterns
-- **\`test\`**: Test results and coverage reports
-- **\`debug\`**: Bug reports and resolution notes
-
+- **`spec`**: Requirements and specifications
+- **`arch`**: Architecture and design decisions
+- **`impl`**: Implementation notes and code patterns
+- **`test`**: Test results and coverage reports
+- **`debug`**: Bug reports and resolution notes
 ## Workflow Examples
-
 ### Feature Development Workflow
-\`\`\`bash
+```bash
 # 1. Start with specification
 npx claude-flow sparc run spec-pseudocode "User profile management feature"
-
 # 2. Design architecture
 npx claude-flow sparc run architect "Profile service architecture with data validation"
-
 # 3. Implement with TDD
 npx claude-flow sparc tdd "user profile CRUD operations"
-
 # 4. Security review
 npx claude-flow sparc run security-review "profile data access and validation"
-
 # 5. Integration testing
 npx claude-flow sparc run integration "profile service with authentication system"
-
 # 6. Documentation
 npx claude-flow sparc run docs-writer "profile service API documentation"
-\`\`\`
-
+```
 ### Bug Fix Workflow
-\`\`\`bash
+```bash
 # 1. Debug and analyze
 npx claude-flow sparc run debug "authentication token expiration issue"
-
 # 2. Write regression tests
 npx claude-flow sparc run tdd "token refresh mechanism tests"
-
 # 3. Implement fix
 npx claude-flow sparc run code "fix token refresh in authentication service"
-
 # 4. Security review
 npx claude-flow sparc run security-review "token handling security implications"
-\`\`\`
-
+```
 ## Configuration Files
-
 ### SPARC Configuration
-- **\`.roomodes\`**: SPARC mode definitions and configurations
-- **\`.roo/\`**: Templates, workflows, and mode-specific rules
-
+- **`.roomodes`**: SPARC mode definitions and configurations
+- **`.roo/`**: Templates, workflows, and mode-specific rules
 ### Claude-Flow Configuration
-- **\`memory/\`**: Persistent memory and session data
-- **\`coordination/\`**: Multi-agent coordination settings
-
+- **`memory/`**: Persistent memory and session data
+- **`coordination/`**: Multi-agent coordination settings
 ## Git Workflow Integration
-
 ### Commit Strategy with SPARC
 - **Specification commits**: After completing requirements analysis
 - **Architecture commits**: After design phase completion
 - **TDD commits**: After each Red-Green-Refactor cycle
 - **Integration commits**: After successful component integration
 - **Documentation commits**: After completing documentation updates
-
 ### Branch Strategy
-- **\`feature/sparc-<feature-name>\`**: Feature development with SPARC methodology
-- **\`hotfix/sparc-<issue>\`**: Bug fixes using SPARC debugging workflow
-- **\`refactor/sparc-<component>\`**: Refactoring using optimization mode
-
+- **`feature/sparc-<feature-name>`**: Feature development with SPARC methodology
+- **`hotfix/sparc-<issue>`**: Bug fixes using SPARC debugging workflow
+- **`refactor/sparc-<component>`**: Refactoring using optimization mode
 ## Troubleshooting
-
 ### Common SPARC Issues
-- **Mode not found**: Check \`.roomodes\` file exists and is valid JSON
-- **Memory persistence**: Ensure \`memory/\` directory has write permissions
+- **Mode not found**: Check `.roomodes` file exists and is valid JSON
+- **Memory persistence**: Ensure `memory/` directory has write permissions
 - **Tool access**: Verify required tools are available for the selected mode
 - **Namespace conflicts**: Use unique memory namespaces for different features
-
 ### Debug Commands
-\`\`\`bash
+```bash
 # Check SPARC configuration
 npx claude-flow sparc modes
-
 # Verify memory system
 npx claude-flow memory stats
-
 # Check system status
 npx claude-flow status
-
 # View detailed mode information
 npx claude-flow sparc info <mode-name>
-\`\`\`
-
+```
 ## Project Architecture
-
 This SPARC-enabled project follows a systematic development approach:
 - **Clear separation of concerns** through modular design
 - **Test-driven development** ensuring reliability and maintainability
 - **Iterative refinement** for continuous improvement
 - **Comprehensive documentation** for team collaboration
 - **AI-assisted development** through specialized SPARC modes
-
 ## Important Notes
-
-- Always run tests before committing (\`npm run test\`)
+- Always run tests before committing (`npm run test`)
 - Use SPARC memory system to maintain context across sessions
 - Follow the Red-Green-Refactor cycle during TDD phases
 - Document architectural decisions in memory for future reference
 - Regular security reviews for any authentication or data handling code
-
 For more information about SPARC methodology, see: https://github.com/ruvnet/claude-code-flow/docs/sparc.md
 `;
 }
-
 if (isMainModule(import.meta.url)) {
   await main();
 }

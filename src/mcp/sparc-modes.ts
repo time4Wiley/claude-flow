@@ -1,11 +1,8 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 export interface SparcMode {
   name: string;
   description: string;
@@ -16,22 +13,21 @@ export interface SparcMode {
   instructions?: string;
   systemPrompt?: string;
 }
-
 export async function loadSparcModes(): Promise<SparcMode[]> {
-  const modesPath = path.join(__dirname, '../../.roomodes');
+  const _modesPath = path.join(__dirname, '../../.roomodes');
   
   try {
-    const content = await fs.readFile(modesPath, 'utf-8');
-    const modesData = JSON.parse(content);
-    const modes: SparcMode[] = [];
+    const _content = await fs.readFile(_modesPath, 'utf-8');
+    const _modesData = JSON.parse(content);
+    const _modes: SparcMode[] = [];
     
     // Convert JSON format to SparcMode format
-    for (const [name, config] of Object.entries(modesData)) {
-      const mode: SparcMode = {
+    for (const [_name, config] of Object.entries(modesData)) {
+      const _mode: SparcMode = {
         name: name,
-        description: (config as any).description || '',
-        tools: (config as any).tools || [],
-        systemPrompt: (config as any).prompt || '',
+        description: (config as unknown).description || '',
+        tools: (config as unknown).tools || [],
+        systemPrompt: (config as unknown).prompt || '',
       };
       
       // Add default best practices based on mode
@@ -42,14 +38,13 @@ export async function loadSparcModes(): Promise<SparcMode[]> {
     
     // Successfully loaded modes
     return modes;
-  } catch (error) {
+  } catch (_error) {
     console.error('Error loading SPARC modes:', error);
     return getDefaultModes();
   }
 }
-
 function getModeBestPractices(modeName: string): string[] {
-  const bestPracticesMap: Record<string, string[]> = {
+  const _bestPracticesMap: Record<string, string[]> = {
     'orchestrator': [
       'Use batch operations when working with multiple files',
       'Store intermediate results in Memory for coordination',
@@ -179,7 +174,6 @@ function getModeBestPractices(modeName: string): string[] {
     'Optimize for efficiency',
   ];
 }
-
 function getDefaultModes(): SparcMode[] {
   return [
     {

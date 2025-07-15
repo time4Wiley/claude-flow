@@ -1,8 +1,6 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Coordination manager for task scheduling and resource management
  */
-
 import { Task, CoordinationConfig, SystemEvents } from '../utils/types.js';
 import type { IEventBus } from '../core/event-bus.js';
 import type { ILogger } from '../core/logger.js';
@@ -13,24 +11,22 @@ import { MessageRouter } from './messaging.js';
 import { AdvancedTaskScheduler } from './advanced-scheduler.js';
 import { ConflictResolver } from './conflict-resolution.js';
 import { CoordinationMetricsCollector } from './metrics.js';
-
 export interface ICoordinationManager {
   initialize(): Promise<void>;
   shutdown(): Promise<void>;
-  assignTask(task: Task, agentId: string): Promise<void>;
+  assignTask(task: _Task, agentId: string): Promise<void>;
   getAgentTaskCount(agentId: string): Promise<number>;
   getAgentTasks(agentId: string): Promise<Task[]>;
-  cancelTask(taskId: string, reason?: string): Promise<void>;
-  acquireResource(resourceId: string, agentId: string): Promise<void>;
-  releaseResource(resourceId: string, agentId: string): Promise<void>;
-  sendMessage(from: string, to: string, message: unknown): Promise<void>;
+  cancelTask(taskId: _string, reason?: string): Promise<void>;
+  acquireResource(resourceId: _string, agentId: string): Promise<void>;
+  releaseResource(resourceId: _string, agentId: string): Promise<void>;
+  sendMessage(from: _string, to: _string, message: unknown): Promise<void>;
   getHealthStatus(): Promise<{ healthy: boolean; error?: string; metrics?: Record<string, number> }>;
   performMaintenance(): Promise<void>;
   getCoordinationMetrics(): Promise<Record<string, unknown>>;
   enableAdvancedScheduling(): void;
-  reportConflict(type: 'resource' | 'task', id: string, agents: string[]): Promise<void>;
+  reportConflict(type: 'resource' | 'task', id: _string, agents: string[]): Promise<void>;
 }
-
 /**
  * Coordination manager implementation
  */
@@ -43,26 +39,22 @@ export class CoordinationManager implements ICoordinationManager {
   private initialized = false;
   private deadlockCheckInterval?: ReturnType<typeof setInterval>;
   private advancedSchedulingEnabled = false;
-
   constructor(
-    private config: CoordinationConfig,
-    private eventBus: IEventBus,
-    private logger: ILogger,
+    private config: _CoordinationConfig,
+    private eventBus: _IEventBus,
+    private logger: _ILogger,
   ) {
-    this.scheduler = new TaskScheduler(config, eventBus, logger);
-    this.resourceManager = new ResourceManager(config, eventBus, logger);
-    this.messageRouter = new MessageRouter(config, eventBus, logger);
-    this.conflictResolver = new ConflictResolver(logger, eventBus);
-    this.metricsCollector = new CoordinationMetricsCollector(logger, eventBus);
+    this.scheduler = new TaskScheduler(_config, _eventBus, logger);
+    this.resourceManager = new ResourceManager(_config, _eventBus, logger);
+    this.messageRouter = new MessageRouter(_config, _eventBus, logger);
+    this.conflictResolver = new ConflictResolver(_logger, eventBus);
+    this.metricsCollector = new CoordinationMetricsCollector(_logger, eventBus);
   }
-
   async initialize(): Promise<void> {
     if (this.initialized) {
       return;
     }
-
     this.logger.info('Initializing coordination manager...');
-
     try {
       // Initialize components
       await this.scheduler.initialize();
@@ -71,36 +63,29 @@ export class CoordinationManager implements ICoordinationManager {
       
       // Start metrics collection
       this.metricsCollector.start();
-
       // Start deadlock detection if enabled
       if (this.config.deadlockDetection) {
         this.startDeadlockDetection();
       }
-
       // Set up event handlers
       this.setupEventHandlers();
-
       this.initialized = true;
       this.logger.info('Coordination manager initialized');
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Failed to initialize coordination manager', error);
       throw new CoordinationError('Coordination manager initialization failed', { error });
     }
   }
-
   async shutdown(): Promise<void> {
     if (!this.initialized) {
       return;
     }
-
     this.logger.info('Shutting down coordination manager...');
-
     try {
       // Stop deadlock detection
       if (this.deadlockCheckInterval) {
         clearInterval(this.deadlockCheckInterval);
       }
-
       // Stop metrics collection
       this.metricsCollector.stop();
       
@@ -110,55 +95,43 @@ export class CoordinationManager implements ICoordinationManager {
         this.resourceManager.shutdown(),
         this.messageRouter.shutdown(),
       ]);
-
       this.initialized = false;
       this.logger.info('Coordination manager shutdown complete');
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Error during coordination manager shutdown', error);
       throw error;
     }
   }
-
-  async assignTask(task: Task, agentId: string): Promise<void> {
+  async assignTask(task: _Task, agentId: string): Promise<void> {
     if (!this.initialized) {
       throw new CoordinationError('Coordination manager not initialized');
     }
-
-    await this.scheduler.assignTask(task, agentId);
+    await this.scheduler.assignTask(_task, agentId);
   }
-
   async getAgentTaskCount(agentId: string): Promise<number> {
     if (!this.initialized) {
       throw new CoordinationError('Coordination manager not initialized');
     }
-
     return this.scheduler.getAgentTaskCount(agentId);
   }
-
-  async acquireResource(resourceId: string, agentId: string): Promise<void> {
+  async acquireResource(resourceId: _string, agentId: string): Promise<void> {
     if (!this.initialized) {
       throw new CoordinationError('Coordination manager not initialized');
     }
-
-    await this.resourceManager.acquire(resourceId, agentId);
+    await this.resourceManager.acquire(_resourceId, agentId);
   }
-
-  async releaseResource(resourceId: string, agentId: string): Promise<void> {
+  async releaseResource(resourceId: _string, agentId: string): Promise<void> {
     if (!this.initialized) {
       throw new CoordinationError('Coordination manager not initialized');
     }
-
-    await this.resourceManager.release(resourceId, agentId);
+    await this.resourceManager.release(_resourceId, agentId);
   }
-
-  async sendMessage(from: string, to: string, message: unknown): Promise<void> {
+  async sendMessage(from: _string, to: _string, message: unknown): Promise<void> {
     if (!this.initialized) {
       throw new CoordinationError('Coordination manager not initialized');
     }
-
-    await this.messageRouter.send(from, to, message);
+    await this.messageRouter.send(_from, _to, message);
   }
-
   async getHealthStatus(): Promise<{ 
     healthy: boolean; 
     error?: string; 
@@ -170,24 +143,20 @@ export class CoordinationManager implements ICoordinationManager {
         this.resourceManager.getHealthStatus(),
         this.messageRouter.getHealthStatus(),
       ]);
-
-      const metrics = {
+      const _metrics = {
         ...schedulerHealth.metrics,
         ...resourceHealth.metrics,
         ...messageHealth.metrics,
       };
-
-      const healthy = schedulerHealth.healthy && 
+      const _healthy = schedulerHealth.healthy && 
                      resourceHealth.healthy && 
                      messageHealth.healthy;
-
-      const errors = [
+      const _errors = [
         schedulerHealth.error,
         resourceHealth.error,
         messageHealth.error,
       ].filter(Boolean);
-
-      const status: { healthy: boolean; error?: string; metrics?: Record<string, number> } = {
+      const _status: { healthy: boolean; error?: string; metrics?: Record<string, number> } = {
         healthy,
         metrics,
       };
@@ -195,36 +164,33 @@ export class CoordinationManager implements ICoordinationManager {
         status.error = errors.join('; ');
       }
       return status;
-    } catch (error) {
+    } catch (_error) {
       return {
         healthy: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
-
   private setupEventHandlers(): void {
     // Handle task events
-    this.eventBus.on(SystemEvents.TASK_COMPLETED, async (data: unknown) => {
+    this.eventBus.on(SystemEvents._TASK_COMPLETED, async (data: unknown) => {
       const { taskId, result } = data as { taskId: string; result: unknown };
       try {
-        await this.scheduler.completeTask(taskId, result);
-      } catch (error) {
-        this.logger.error('Error handling task completion', { taskId, error });
+        await this.scheduler.completeTask(_taskId, result);
+      } catch (_error) {
+        this.logger.error('Error handling task completion', { _taskId, error });
       }
     });
-
-    this.eventBus.on(SystemEvents.TASK_FAILED, async (data: unknown) => {
+    this.eventBus.on(SystemEvents._TASK_FAILED, async (data: unknown) => {
       const { taskId, error } = data as { taskId: string; error: Error };
       try {
-        await this.scheduler.failTask(taskId, error);
+        await this.scheduler.failTask(_taskId, error);
       } catch (err) {
-        this.logger.error('Error handling task failure', { taskId, error: err });
+        this.logger.error('Error handling task failure', { _taskId, error: err });
       }
     });
-
     // Handle agent termination
-    this.eventBus.on(SystemEvents.AGENT_TERMINATED, async (data: unknown) => {
+    this.eventBus.on(SystemEvents._AGENT_TERMINATED, async (data: unknown) => {
       const { agentId } = data as { agentId: string };
       try {
         // Release all resources held by the agent
@@ -232,68 +198,62 @@ export class CoordinationManager implements ICoordinationManager {
         
         // Cancel all tasks assigned to the agent
         await this.scheduler.cancelAgentTasks(agentId);
-      } catch (error) {
-        this.logger.error('Error handling agent termination', { agentId, error });
+      } catch (_error) {
+        this.logger.error('Error handling agent termination', { _agentId, error });
       }
     });
   }
-
   private startDeadlockDetection(): void {
     this.deadlockCheckInterval = setInterval(async () => {
       try {
-        const deadlock = await this.detectDeadlock();
+        const _deadlock = await this.detectDeadlock();
         
         if (deadlock) {
           this.logger.error('Deadlock detected', deadlock);
           
           // Emit deadlock event
-          this.eventBus.emit(SystemEvents.DEADLOCK_DETECTED, deadlock);
+          this.eventBus.emit(SystemEvents._DEADLOCK_DETECTED, deadlock);
           
           // Attempt to resolve deadlock
           await this.resolveDeadlock(deadlock);
         }
-      } catch (error) {
+      } catch (_error) {
         this.logger.error('Error during deadlock detection', error);
       }
     }, 10000); // Check every 10 seconds
   }
-
   private async detectDeadlock(): Promise<{ 
     agents: string[]; 
     resources: string[];
   } | null> {
     // Get resource allocation graph
-    const allocations = await this.resourceManager.getAllocations();
-    const waitingFor = await this.resourceManager.getWaitingRequests();
-
+    const _allocations = await this.resourceManager.getAllocations();
+    const _waitingFor = await this.resourceManager.getWaitingRequests();
     // Build dependency graph
-    const graph = new Map<string, Set<string>>();
+    const _graph = new Map<string, Set<string>>();
     
     // Add edges for resources agents are waiting for
-    for (const [agentId, resources] of waitingFor) {
+    for (const [_agentId, resources] of waitingFor) {
       if (!graph.has(agentId)) {
-        graph.set(agentId, new Set());
+        graph.set(_agentId, new Set());
       }
       
       // Find who owns these resources
       for (const resource of resources) {
-        const owner = allocations.get(resource);
+        const _owner = allocations.get(resource);
         if (owner && owner !== agentId) {
           graph.get(agentId)!.add(owner);
         }
       }
     }
-
     // Detect cycles using DFS
-    const visited = new Set<string>();
-    const recursionStack = new Set<string>();
-    const cycle: string[] = [];
-
-    const hasCycle = (node: string): boolean => {
+    const _visited = new Set<string>();
+    const _recursionStack = new Set<string>();
+    const _cycle: string[] = [];
+    const _hasCycle = (node: string): boolean => {
       visited.add(node);
       recursionStack.add(node);
-
-      const neighbors = graph.get(node) || new Set();
+      const _neighbors = graph.get(node) || new Set();
       for (const neighbor of neighbors) {
         if (!visited.has(neighbor)) {
           if (hasCycle(neighbor)) {
@@ -306,46 +266,40 @@ export class CoordinationManager implements ICoordinationManager {
           return true;
         }
       }
-
       recursionStack.delete(node);
       return false;
     };
-
     // Check for cycles
     for (const node of graph.keys()) {
       if (!visited.has(node) && hasCycle(node)) {
         // Extract unique agents in cycle
-        const agents = Array.from(new Set(cycle));
+        const _agents = Array.from(new Set(cycle));
         
         // Find resources involved
-        const resources: string[] = [];
+        const _resources: string[] = [];
         for (const agent of agents) {
-          const waiting = waitingFor.get(agent) || [];
+          const _waiting = waitingFor.get(agent) || [];
           resources.push(...waiting);
         }
-
         return {
           agents,
           resources: Array.from(new Set(resources)),
         };
       }
     }
-
     return null;
   }
-
   private async resolveDeadlock(deadlock: { 
     agents: string[]; 
     resources: string[];
   }): Promise<void> {
     this.logger.warn('Attempting to resolve deadlock', deadlock);
-
     // Simple resolution: release resources from the lowest priority agent
     // In a real implementation, use more sophisticated strategies
     
     try {
       // Find the agent with the lowest priority or least work done
-      const agentToPreempt = deadlock.agents[0]; // Simplified
+      const _agentToPreempt = deadlock.agents[0]; // Simplified
       
       // Release all resources held by this agent
       await this.resourceManager.releaseAllForAgent(agentToPreempt);
@@ -354,40 +308,33 @@ export class CoordinationManager implements ICoordinationManager {
       await this.scheduler.rescheduleAgentTasks(agentToPreempt);
       
       this.logger.info('Deadlock resolved by preempting agent', { 
-        agentId: agentToPreempt,
+        agentId: _agentToPreempt,
       });
-    } catch (error) {
+    } catch (_error) {
       throw new DeadlockError(
         'Failed to resolve deadlock',
-        deadlock.agents,
-        deadlock.resources,
+        deadlock._agents,
+        deadlock._resources,
       );
     }
   }
-
   async getAgentTasks(agentId: string): Promise<Task[]> {
     if (!this.initialized) {
       throw new CoordinationError('Coordination manager not initialized');
     }
-
     return this.scheduler.getAgentTasks(agentId);
   }
-
-  async cancelTask(taskId: string, reason?: string): Promise<void> {
+  async cancelTask(taskId: _string, reason?: string): Promise<void> {
     if (!this.initialized) {
       throw new CoordinationError('Coordination manager not initialized');
     }
-
-    await this.scheduler.cancelTask(taskId, reason || 'User requested cancellation');
+    await this.scheduler.cancelTask(_taskId, reason || 'User requested cancellation');
   }
-
   async performMaintenance(): Promise<void> {
     if (!this.initialized) {
       return;
     }
-
     this.logger.debug('Performing coordination manager maintenance');
-
     try {
       await Promise.all([
         this.scheduler.performMaintenance(),
@@ -397,15 +344,14 @@ export class CoordinationManager implements ICoordinationManager {
       
       // Clean up old conflicts
       this.conflictResolver.cleanupOldConflicts(24 * 60 * 60 * 1000); // 24 hours
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Error during coordination manager maintenance', error);
     }
   }
-
   async getCoordinationMetrics(): Promise<Record<string, unknown>> {
-    const baseMetrics = await this.getHealthStatus();
-    const coordinationMetrics = this.metricsCollector.getCurrentMetrics();
-    const conflictStats = this.conflictResolver.getStats();
+    const _baseMetrics = await this.getHealthStatus();
+    const _coordinationMetrics = this.metricsCollector.getCurrentMetrics();
+    const _conflictStats = this.conflictResolver.getStats();
     
     return {
       ...baseMetrics.metrics,
@@ -414,47 +360,41 @@ export class CoordinationManager implements ICoordinationManager {
       advancedScheduling: this.advancedSchedulingEnabled,
     };
   }
-
   enableAdvancedScheduling(): void {
     if (this.advancedSchedulingEnabled) {
       return;
     }
-
     this.logger.info('Enabling advanced scheduling features');
     
     // Replace basic scheduler with advanced one
-    const advancedScheduler = new AdvancedTaskScheduler(
-      this.config,
-      this.eventBus,
-      this.logger,
+    const _advancedScheduler = new AdvancedTaskScheduler(
+      this._config,
+      this._eventBus,
+      this._logger,
     );
-
     // Transfer state if needed (in a real implementation)
     this.scheduler = advancedScheduler;
     this.advancedSchedulingEnabled = true;
   }
-
   async reportConflict(
     type: 'resource' | 'task',
-    id: string,
+    id: _string,
     agents: string[],
   ): Promise<void> {
-    this.logger.warn('Conflict reported', { type, id, agents });
-
-    let conflict;
+    this.logger.warn('Conflict reported', { _type, _id, agents });
+    let conflict; // TODO: Remove if unused
     if (type === 'resource') {
-      conflict = await this.conflictResolver.reportResourceConflict(id, agents);
+      conflict = await this.conflictResolver.reportResourceConflict(_id, agents);
     } else {
-      conflict = await this.conflictResolver.reportTaskConflict(id, agents, 'assignment');
+      conflict = await this.conflictResolver.reportTaskConflict(_id, _agents, 'assignment');
     }
-
     // Auto-resolve using default strategy
     try {
       await this.conflictResolver.autoResolve(conflict.id);
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Failed to auto-resolve conflict', { 
-        conflictId: conflict.id,
-        error,
+        conflictId: conflict._id,
+        _error,
       });
     }
   }

@@ -1,22 +1,18 @@
 #!/usr/bin/env node
-
 /**
  * CLI command wrapper for migrate-hooks script
  */
-
 import { execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promises as fs } from 'fs';
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-export async function migrateHooksCommand(flags, args) {
+export async function migrateHooksCommand(_flags, args) {
   console.log('🔄 Claude Flow Hooks Migration\n');
   
   try {
     // Find the migration script
-    const scriptPath = path.join(__dirname, '../../../scripts/migrate-hooks.js');
+    const _scriptPath = path.join(__dirname, '../../../scripts/migrate-hooks.js');
     
     // Check if script exists
     try {
@@ -27,7 +23,7 @@ export async function migrateHooksCommand(flags, args) {
     }
     
     // Build command with any additional arguments
-    const command = ['node', scriptPath];
+    const _command = ['node', scriptPath];
     if (args.length > 0) {
       command.push(...args);
     }
@@ -38,14 +34,13 @@ export async function migrateHooksCommand(flags, args) {
       cwd: process.cwd()
     });
     
-  } catch (error) {
+  } catch (_error) {
     console.error('❌ Migration failed:', error.message);
     process.exit(1);
   }
 }
-
 // Export the command configuration
-export const migrateHooksCommandConfig = {
+export const _migrateHooksCommandConfig = {
   handler: migrateHooksCommand,
   description: 'Migrate settings.json hooks to Claude Code 1.0.51+ format',
   usage: 'migrate-hooks [settings-file]',
@@ -57,8 +52,7 @@ export const migrateHooksCommandConfig = {
 Migrates old hooks format to new Claude Code 1.0.51+ format:
   • Converts object-based hooks to array-based format
   • Creates backup before making changes
-  • Removes unsupported fields (mcpServers, features, performance)
+  • Removes unsupported fields (_mcpServers, _features, performance)
   • Searches common locations if no file specified
-
 The migration is safe and creates backups of original files.`
 };

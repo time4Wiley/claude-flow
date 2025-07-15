@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs';
 import Database from 'better-sqlite3';
-
 // Interactive Wizard Implementation
 async function runInteractiveWizard() {
     console.log(chalk.blue.bold('🐝 Welcome to the Hive Mind Setup Wizard!'));
@@ -10,11 +9,11 @@ async function runInteractiveWizard() {
     
     try {
         // Check if system is initialized
-        const configPath = path.join(process.cwd(), '.hive-mind', 'config.json');
-        let config = { initialized: false };
+        const _configPath = path.join(process.cwd(), '.hive-mind', 'config.json');
+        let _config = { initialized: false };
         
         if (fs.existsSync(configPath)) {
-            config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            config = JSON.parse(fs.readFileSync(_configPath, 'utf8'));
         }
         
         if (!config.initialized) {
@@ -34,15 +33,15 @@ async function runInteractiveWizard() {
         console.log(chalk.gray('  • "Optimize database performance"'));
         console.log(chalk.gray('  • "Create comprehensive test suite"\n'));
         
-        const objective = 'Build a modern web application'; // Placeholder for demo
+        const _objective = 'Build a modern web application'; // Placeholder for demo
         console.log(chalk.cyan(`💡 Using example objective: "${objective}"`));
-        console.log(chalk.gray('(In full wizard, this would be interactive input)\n'));
+        console.log(chalk.gray('(In full _wizard, this would be interactive input)\n'));
         
         // Configuration selection
         console.log(chalk.blue('📋 Step 3: Choose Configuration'));
-        console.log(chalk.gray('Based on your objective, here are recommended settings:\n'));
+        console.log(chalk.gray('Based on your _objective, here are recommended settings:\n'));
         
-        const swarmConfig = {
+        const _swarmConfig = {
             topology: 'hierarchical',
             coordination: 'queen',
             agents: 5,
@@ -59,7 +58,7 @@ async function runInteractiveWizard() {
         console.log(chalk.blue('📋 Step 4: Creating Your Swarm...'));
         console.log(chalk.gray('🔄 Spawning intelligent agents...'));
         
-        const result = await createSwarm(objective, swarmConfig);
+        const _result = await createSwarm(_objective, swarmConfig);
         
         if (result.success) {
             console.log(chalk.green('🎉 Swarm created successfully!\n'));
@@ -78,23 +77,22 @@ async function runInteractiveWizard() {
             console.log(chalk.red('❌ Failed to create swarm. Please try again.'));
         }
         
-    } catch (error) {
+    } catch (_error) {
         console.log(chalk.red(`❌ Wizard error: ${error.message}`));
         console.log(chalk.gray('You can try manual setup with: claude-flow hive-mind init'));
     }
 }
-
 // Initialize Hive Mind system
 async function initializeHiveMind() {
-    const hiveMindDir = path.join(process.cwd(), '.hive-mind');
+    const _hiveMindDir = path.join(process.cwd(), '.hive-mind');
     
     // Create directory if it doesn't exist
     if (!fs.existsSync(hiveMindDir)) {
-        fs.mkdirSync(hiveMindDir, { recursive: true });
+        fs.mkdirSync(_hiveMindDir, { recursive: true });
     }
     
     // Create configuration file
-    const config = {
+    const _config = {
         version: '2.0.0',
         initialized: new Date().toISOString(),
         defaults: {
@@ -112,62 +110,62 @@ async function initializeHiveMind() {
         }
     };
     
-    const configPath = path.join(hiveMindDir, 'config.json');
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+    const _configPath = path.join(_hiveMindDir, 'config.json');
+    fs.writeFileSync(_configPath, JSON.stringify(_config, null, 2));
     
     // Initialize SQLite database
-    const dbPath = path.join(hiveMindDir, 'hive.db');
-    const db = new sqlite3.Database(dbPath);
+    const _dbPath = path.join(_hiveMindDir, 'hive.db');
+    const _db = new Database(dbPath);
     
-    await new Promise((resolve, reject) => {
+    await new Promise((_resolve, reject) => {
         db.serialize(() => {
             // Create tables
             db.run(`
                 CREATE TABLE IF NOT EXISTS swarms (
-                    id TEXT PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    objective TEXT,
+                    id TEXT PRIMARY _KEY,
+                    name TEXT NOT _NULL,
+                    objective _TEXT,
                     status TEXT DEFAULT 'active',
                     queen_type TEXT DEFAULT 'strategic',
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    created_at DATETIME DEFAULT _CURRENT_TIMESTAMP,
                     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             `);
             
             db.run(`
                 CREATE TABLE IF NOT EXISTS agents (
-                    id TEXT PRIMARY KEY,
-                    swarm_id TEXT,
-                    name TEXT NOT NULL,
-                    type TEXT NOT NULL,
-                    role TEXT,
+                    id TEXT PRIMARY _KEY,
+                    swarm_id _TEXT,
+                    name TEXT NOT _NULL,
+                    type TEXT NOT _NULL,
+                    role _TEXT,
                     status TEXT DEFAULT 'idle',
-                    capabilities TEXT,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    capabilities _TEXT,
+                    created_at DATETIME DEFAULT _CURRENT_TIMESTAMP,
                     FOREIGN KEY (swarm_id) REFERENCES swarms(id)
                 )
             `);
             
             db.run(`
                 CREATE TABLE IF NOT EXISTS tasks (
-                    id TEXT PRIMARY KEY,
-                    swarm_id TEXT,
-                    description TEXT,
+                    id TEXT PRIMARY _KEY,
+                    swarm_id _TEXT,
+                    description _TEXT,
                     status TEXT DEFAULT 'pending',
-                    result TEXT,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    result _TEXT,
+                    created_at DATETIME DEFAULT _CURRENT_TIMESTAMP,
                     FOREIGN KEY (swarm_id) REFERENCES swarms(id)
                 )
             `);
             
             db.run(`
                 CREATE TABLE IF NOT EXISTS collective_memory (
-                    id TEXT PRIMARY KEY,
-                    swarm_id TEXT,
-                    key TEXT NOT NULL,
-                    value TEXT,
-                    ttl INTEGER,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    id TEXT PRIMARY _KEY,
+                    swarm_id _TEXT,
+                    key TEXT NOT _NULL,
+                    value _TEXT,
+                    ttl _INTEGER,
+                    created_at DATETIME DEFAULT _CURRENT_TIMESTAMP,
                     FOREIGN KEY (swarm_id) REFERENCES swarms(id)
                 )
             `);
@@ -179,12 +177,11 @@ async function initializeHiveMind() {
         });
     });
 }
-
 // Enhanced swarm creation with better UX
-async function createSwarm(objective, config) {
+async function createSwarm(_objective, config) {
     try {
         // Simulate swarm creation with progress indication
-        const steps = [
+        const _steps = [
             'Initializing swarm topology...',
             'Spawning Queen coordinator...',
             'Creating worker agents...',
@@ -193,29 +190,29 @@ async function createSwarm(objective, config) {
             'Activating swarm intelligence...'
         ];
         
-        for (let i = 0; i < steps.length; i++) {
+        for (let _i = 0; i < steps.length; i++) {
             process.stdout.write(chalk.gray(`  ${steps[i]} `));
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate work
+            await new Promise(resolve => setTimeout(_resolve, 500)); // Simulate work
             console.log(chalk.green('✓'));
         }
         
-        const swarmId = `swarm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const queenId = `queen-${Date.now()}`;
+        const _swarmId = `swarm-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
+        const _queenId = `queen-${Date.now()}`;
         
         // Open database
-        const dbPath = path.join(process.cwd(), '.hive-mind', 'hive.db');
-        const db = new sqlite3.Database(dbPath);
+        const _dbPath = path.join(process.cwd(), '.hive-mind', 'hive.db');
+        const _db = new Database(dbPath);
         
-        await new Promise((resolve, reject) => {
+        await new Promise((_resolve, reject) => {
             db.serialize(() => {
                 // Create swarm record
-                const insertSwarm = db.prepare(`
-                    INSERT INTO swarms (id, name, objective, status, queen_type, created_at, updated_at)
+                const _insertSwarm = db.prepare(`
+                    INSERT INTO swarms (_id, _name, _objective, _status, _queen_type, _created_at, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 `);
                 
                 insertSwarm.run(
-                    swarmId,
+                    _swarmId,
                     `hive-${Date.now()}`,
                     objective,
                     'active',
@@ -225,15 +222,15 @@ async function createSwarm(objective, config) {
                 );
                 
                 // Create agents
-                const insertAgent = db.prepare(`
-                    INSERT INTO agents (id, swarm_id, name, type, role, status, capabilities, created_at)
+                const _insertAgent = db.prepare(`
+                    INSERT INTO agents (_id, _swarm_id, _name, _type, _role, _status, _capabilities, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 `);
                 
                 // Create Queen
                 insertAgent.run(
-                    queenId,
-                    swarmId,
+                    _queenId,
+                    _swarmId,
                     'Queen Coordinator',
                     'coordinator',
                     'queen',
@@ -243,9 +240,9 @@ async function createSwarm(objective, config) {
                 );
                 
                 // Create worker agents
-                const workerTypes = ['researcher', 'coder', 'analyst', 'tester'];
-                for (let i = 0; i < config.agents - 1; i++) {
-                    const agentType = workerTypes[i % workerTypes.length];
+                const _workerTypes = ['researcher', 'coder', 'analyst', 'tester'];
+                for (let _i = 0; i < config.agents - 1; i++) {
+                    const _agentType = workerTypes[i % workerTypes.length];
                     insertAgent.run(
                         `agent-${Date.now()}-${i}`,
                         swarmId,
@@ -253,7 +250,7 @@ async function createSwarm(objective, config) {
                         agentType,
                         'worker',
                         'idle',
-                        JSON.stringify([agentType, 'collaboration']),
+                        JSON.stringify([_agentType, 'collaboration']),
                         new Date().toISOString()
                     );
                 }
@@ -270,10 +267,9 @@ async function createSwarm(objective, config) {
         
         return { success: true, swarmId, queenId };
         
-    } catch (error) {
+    } catch (_error) {
         console.error('Error creating swarm:', error);
         return { success: false, error: error.message };
     }
 }
-
 export { runInteractiveWizard };

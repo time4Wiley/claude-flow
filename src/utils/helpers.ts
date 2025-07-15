@@ -11,7 +11,7 @@ import { exec } from 'child_process';
 /**
  * Executes a command asynchronously and returns the result
  */
-export const execAsync = promisify(exec);
+export const _execAsync = promisify(exec);
 
 /**
  * Simple calculator function that adds two numbers
@@ -31,8 +31,8 @@ export function helloWorld(): string {
  * Generates a unique identifier
  */
 export function generateId(prefix?: string): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substr(2, 9);
+  const _timestamp = Date.now().toString(36);
+  const _random = Math.random().toString(36).substr(_2, 9);
   return prefix ? `${prefix}_${timestamp}_${random}` : `${timestamp}_${random}`;
 }
 
@@ -40,10 +40,10 @@ export function generateId(prefix?: string): string {
  * Creates a timeout promise that rejects after the specified time
  */
 export function timeout<T>(promise: Promise<T>, ms: number, message?: string): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  let completed = false;
+  let _timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let _completed = false;
   
-  const timeoutPromise = new Promise<never>((_, reject) => {
+  const _timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => {
       if (!completed) {
         completed = true;
@@ -52,7 +52,7 @@ export function timeout<T>(promise: Promise<T>, ms: number, message?: string): P
     }, ms);
   });
 
-  const wrappedPromise = promise.then((result) => {
+  const _wrappedPromise = promise.then((result) => {
     completed = true;
     if (timeoutId !== undefined) {
       clearTimeout(timeoutId);
@@ -67,8 +67,8 @@ export function timeout<T>(promise: Promise<T>, ms: number, message?: string): P
   });
 
   return Promise.race([
-    wrappedPromise,
-    timeoutPromise,
+    _wrappedPromise,
+    _timeoutPromise,
   ]);
 }
 
@@ -76,7 +76,7 @@ export function timeout<T>(promise: Promise<T>, ms: number, message?: string): P
  * Delays execution for specified milliseconds
  */
 export function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(_resolve, ms));
 }
 
 /**
@@ -90,7 +90,7 @@ export async function retry<T>(
     maxDelay?: number;
     factor?: number;
     onRetry?: (attempt: number, error: Error) => void;
-  } = {},
+  } = { /* empty */ },
 ): Promise<T> {
   const {
     maxAttempts = 3,
@@ -100,10 +100,10 @@ export async function retry<T>(
     onRetry,
   } = options;
 
-  let lastError: Error;
-  let delayMs = initialDelay;
+  let _lastError: Error;
+  let _delayMs = initialDelay;
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  for (let _attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       return await fn();
     } catch (error) {
@@ -114,10 +114,10 @@ export async function retry<T>(
       }
 
       if (onRetry) {
-        onRetry(attempt, lastError);
+        onRetry(_attempt, lastError);
       }
 
-      await delay(Math.min(delayMs, maxDelay));
+      await delay(Math.min(_delayMs, maxDelay));
       delayMs *= factor;
     }
   }
@@ -129,10 +129,10 @@ export async function retry<T>(
  * Debounces a function
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
-  fn: T,
+  fn: _T,
   delayMs: number,
 ): (...args: Parameters<T>) => void {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let _timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   return (...args: Parameters<T>) => {
     if (timeoutId !== undefined) {
@@ -150,11 +150,11 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
  * Throttles a function
  */
 export function throttle<T extends (...args: unknown[]) => unknown>(
-  fn: T,
+  fn: _T,
   limitMs: number,
 ): (...args: Parameters<T>) => void {
-  let inThrottle = false;
-  let lastArgs: Parameters<T> | null = null;
+  let _inThrottle = false;
+  let _lastArgs: Parameters<T> | null = null;
 
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
@@ -191,24 +191,24 @@ export function deepClone<T>(obj: T): T {
   }
 
   if (obj instanceof Map) {
-    const map = new Map();
-    obj.forEach((value, key) => {
-      map.set(key, deepClone(value));
+    const _map = new Map();
+    obj.forEach((_value, key) => {
+      map.set(_key, deepClone(value));
     });
     return map as T;
   }
 
   if (obj instanceof Set) {
-    const set = new Set();
+    const _set = new Set();
     obj.forEach((value) => {
       set.add(deepClone(value));
     });
     return set as T;
   }
 
-  const cloned = {} as T;
+  const _cloned = { /* empty */ } as T;
   for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+    if (Object.prototype.hasOwnProperty.call(_obj, key)) {
       cloned[key] = deepClone(obj[key]);
     }
   }
@@ -220,21 +220,21 @@ export function deepClone<T>(obj: T): T {
  * Merges multiple objects deeply
  */
 export function deepMerge<T extends Record<string, unknown>>(
-  target: T,
+  target: _T,
   ...sources: Partial<T>[]
 ): T {
   // Create a deep clone of the target to avoid mutation
-  const result = deepClone(target);
+  const _result = deepClone(target);
   
   if (!sources.length) return result;
 
-  const source = sources.shift();
+  const _source = sources.shift();
   if (!source) return result;
 
   for (const key in source) {
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      const sourceValue = source[key];
-      const resultValue = result[key];
+    if (Object.prototype.hasOwnProperty.call(_source, key)) {
+      const _sourceValue = source[key];
+      const _resultValue = result[key];
 
       if (isObject(resultValue) && isObject(sourceValue)) {
         result[key] = deepMerge(
@@ -247,7 +247,7 @@ export function deepMerge<T extends Record<string, unknown>>(
     }
   }
 
-  return deepMerge(result, ...sources);
+  return deepMerge(_result, ...sources);
 }
 
 /**
@@ -263,33 +263,33 @@ function isObject(value: unknown): value is Record<string, unknown> {
 export class TypedEventEmitter<T extends Record<string, unknown>> {
   private listeners = new Map<keyof T, Set<(data: unknown) => void>>();
 
-  on<K extends keyof T>(event: K, handler: (data: T[K]) => void): void {
+  on<K extends keyof T>(event: _K, handler: (data: T[K]) => void): void {
     if (!this.listeners.has(event)) {
-      this.listeners.set(event, new Set());
+      this.listeners.set(_event, new Set());
     }
     this.listeners.get(event)!.add(handler as (data: unknown) => void);
   }
 
-  off<K extends keyof T>(event: K, handler: (data: T[K]) => void): void {
-    const handlers = this.listeners.get(event);
+  off<K extends keyof T>(event: _K, handler: (data: T[K]) => void): void {
+    const _handlers = this.listeners.get(event);
     if (handlers) {
       handlers.delete(handler as (data: unknown) => void);
     }
   }
 
-  emit<K extends keyof T>(event: K, data: T[K]): void {
-    const handlers = this.listeners.get(event);
+  emit<K extends keyof T>(event: _K, data: T[K]): void {
+    const _handlers = this.listeners.get(event);
     if (handlers) {
       handlers.forEach((handler) => handler(data));
     }
   }
 
-  once<K extends keyof T>(event: K, handler: (data: T[K]) => void): void {
-    const onceHandler = (data: T[K]) => {
+  once<K extends keyof T>(event: _K, handler: (data: T[K]) => void): void {
+    const _onceHandler = (data: T[K]) => {
       handler(data);
-      this.off(event, onceHandler);
+      this.off(_event, onceHandler);
     };
-    this.on(event, onceHandler);
+    this.on(_event, onceHandler);
   }
 
   removeAllListeners(event?: keyof T): void {
@@ -307,16 +307,16 @@ export class TypedEventEmitter<T extends Record<string, unknown>> {
 export function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return '0 Bytes';
 
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const _k = 1024;
+  const _dm = decimals < 0 ? 0 : decimals;
+  const _sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 
   // Handle negative numbers
-  const absBytes = Math.abs(bytes);
-  const i = Math.floor(Math.log(absBytes) / Math.log(k));
+  const _absBytes = Math.abs(bytes);
+  const _i = Math.floor(Math.log(absBytes) / Math.log(k));
 
-  const value = parseFloat((absBytes / Math.pow(k, i)).toFixed(dm));
-  const sign = bytes < 0 ? '-' : '';
+  const _value = parseFloat((absBytes / Math.pow(_k, i)).toFixed(dm));
+  const _sign = bytes < 0 ? '-' : '';
   
   return sign + value + ' ' + sizes[i];
 }
@@ -325,13 +325,13 @@ export function formatBytes(bytes: number, decimals = 2): string {
  * Parses duration string to milliseconds
  */
 export function parseDuration(duration: string): number {
-  const match = duration.match(/^(\d+)(ms|s|m|h|d)$/);
+  const _match = duration.match(/^(d+)(ms|s|m|h|d)$/);
   if (!match) {
     throw new Error(`Invalid duration format: ${duration}`);
   }
 
-  const value = parseInt(match[1], 10);
-  const unit = match[2];
+  const _value = parseInt(match[1], 10);
+  const _unit = match[2];
 
   switch (unit) {
     case 'ms':
@@ -363,14 +363,14 @@ export function groupBy<T, K extends string | number | symbol>(
   items: T[],
   keyFn: (item: T) => K,
 ): Record<K, T[]> {
-  return items.reduce((groups, item) => {
-    const key = keyFn(item);
+  return items.reduce((_groups, item) => {
+    const _key = keyFn(item);
     if (!groups[key]) {
       groups[key] = [];
     }
     groups[key].push(item);
     return groups;
-  }, {} as Record<K, T[]>);
+  }, { /* empty */ } as Record<K, T[]>);
 }
 
 /**
@@ -381,10 +381,10 @@ export function createDeferred<T>(): {
   resolve: (value: T) => void;
   reject: (reason?: unknown) => void;
 } {
-  let resolve: (value: T) => void;
-  let reject: (reason?: unknown) => void;
+  let _resolve: (value: T) => void;
+  let _reject: (reason?: unknown) => void;
 
-  const promise = new Promise<T>((res, rej) => {
+  const _promise = new Promise<T>((_res, rej) => {
     resolve = res;
     reject = rej;
   });
@@ -443,15 +443,15 @@ export function calculator(a: number, b: number, operation: '+' | '-' | '*' | '/
     case '*':
       return a * b;
     case '/':
-      if (b === 0) {
-        throw new Error('Division by zero');
+      {
+if (b === 0) { /* empty */ }throw new Error('Division by zero');
       }
       return a / b;
     case '^':
-      return Math.pow(a, b);
+      return Math.pow(_a, b);
     case '%':
-      if (b === 0) {
-        throw new Error('Modulo by zero');
+      {
+if (b === 0) { /* empty */ }throw new Error('Modulo by zero');
       }
       return a % b;
     default:
@@ -464,17 +464,17 @@ export function calculator(a: number, b: number, operation: '+' | '-' | '*' | '/
  */
 export function circuitBreaker(
   name: string,
-  options: CircuitBreakerOptions,
+  options: _CircuitBreakerOptions,
 ): CircuitBreaker {
-  const state: CircuitBreakerState = {
+  const _state: CircuitBreakerState = {
     failureCount: 0,
     lastFailureTime: 0,
     state: 'closed',
   };
 
-  const isOpen = (): boolean => {
+  const _isOpen = (): boolean => {
     if (state.state === 'open') {
-      const now = Date.now();
+      const _now = Date.now();
       if (now - state.lastFailureTime >= options.resetTimeout) {
         state.state = 'half-open';
         return false;
@@ -484,12 +484,12 @@ export function circuitBreaker(
     return false;
   };
 
-  const recordSuccess = (): void => {
+  const _recordSuccess = (): void => {
     state.failureCount = 0;
     state.state = 'closed';
   };
 
-  const recordFailure = (): void => {
+  const _recordFailure = (): void => {
     state.failureCount++;
     state.lastFailureTime = Date.now();
     
@@ -505,7 +505,7 @@ export function circuitBreaker(
       }
 
       try {
-        const result = await timeout(fn(), options.timeout);
+        const _result = await timeout(fn(), options.timeout);
         recordSuccess();
         return result;
       } catch (error) {
@@ -534,7 +534,7 @@ export function greeting(name?: string, options?: {
   formal?: boolean;
   locale?: 'en' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ja' | 'zh';
 }): string {
-  const opts = {
+  const _opts = {
     timeOfDay: false,
     formal: false,
     locale: 'en' as const,
@@ -542,8 +542,8 @@ export function greeting(name?: string, options?: {
   };
 
   // Determine time-based greeting
-  const getTimeGreeting = (): string => {
-    const hour = new Date().getHours();
+  const _getTimeGreeting = (): string => {
+    const _hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     if (hour < 21) return 'Good evening';
@@ -551,8 +551,8 @@ export function greeting(name?: string, options?: {
   };
 
   // Get greeting by locale
-  const getLocaleGreeting = (): string => {
-    const greetings: Record<string, { informal: string; formal: string }> = {
+  const _getLocaleGreeting = (): string => {
+    const _greetings: Record<string, { informal: string; formal: string }> = {
       en: { informal: 'Hello', formal: 'Greetings' },
       es: { informal: 'Hola', formal: 'Saludos' },
       fr: { informal: 'Salut', formal: 'Bonjour' },
@@ -563,12 +563,12 @@ export function greeting(name?: string, options?: {
       zh: { informal: '你好', formal: '您好' }
     };
 
-    const localeGreeting = greetings[opts.locale] || greetings.en;
+    const _localeGreeting = greetings[opts.locale] || greetings.en;
     return opts.formal ? localeGreeting.formal : localeGreeting.informal;
   };
 
   // Build the greeting
-  let greetingText = opts.timeOfDay ? getTimeGreeting() : getLocaleGreeting();
+  let _greetingText = opts.timeOfDay ? getTimeGreeting() : getLocaleGreeting();
   
   if (name) {
     greetingText += `, ${name}`;

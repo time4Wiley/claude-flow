@@ -1,30 +1,25 @@
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
-import { getErrorMessage } from '../utils/error-handler.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Worker } from 'worker_threads';
 import { PromptCopier } from './prompt-copier.js';
 import type { CopyOptions, CopyResult, FileInfo } from './prompt-copier.js';
 import { logger } from '../core/logger.js';
-
 interface WorkerPool {
   workers: Worker[];
   busy: Set<number>;
   queue: Array<() => void>;
 }
-
 export class EnhancedPromptCopier extends PromptCopier {
   private workerPool?: WorkerPool;
-  private workerResults: Map<string, any> = new Map();
-
+  private workerResults: Map<string, unknown> = new Map();
   constructor(options: CopyOptions) {
     super(options);
   }
-
   protected async copyFilesParallel(): Promise<void> {
-    const workerCount = Math.min((this as any).options.maxWorkers, (this as any).fileQueue.length);
+    const _workerCount = Math.min((this as unknown).options.maxWorkers, (this as unknown).fileQueue.length);
     
     // Initialize worker pool
     this.workerPool = await this.initializeWorkerPool(workerCount);
@@ -37,18 +32,17 @@ export class EnhancedPromptCopier extends PromptCopier {
       await this.terminateWorkers();
     }
   }
-
   private async initializeWorkerPool(workerCount: number): Promise<WorkerPool> {
-    const workers: Worker[] = [];
-    const pool: WorkerPool = {
+    const _workers: Worker[] = [];
+    const _pool: WorkerPool = {
       workers,
       busy: new Set(),
       queue: []
     };
     
     // Create workers
-    for (let i = 0; i < workerCount; i++) {
-      const worker = new Worker(
+    for (let _i = 0; i < workerCount; i++) {
+      const _worker = new Worker(
         path.join(__dirname, 'workers', 'copy-worker.js'),
         {
           workerData: { workerId: i }
@@ -57,12 +51,12 @@ export class EnhancedPromptCopier extends PromptCopier {
       
       // Setup worker message handler
       worker.on('message', (result) => {
-        this.handleWorkerResult(result, i, pool);
+        this.handleWorkerResult(_result, _i, pool);
       });
       
       worker.on('error', (error) => {
         logger.error(`Worker ${i} error:`, error);
-        (this as any).errors.push({
+        (this as unknown).errors.push({
           file: 'worker',
           error: (error instanceof Error ? error.message : String(error)),
           phase: 'write'
@@ -74,18 +68,17 @@ export class EnhancedPromptCopier extends PromptCopier {
     
     return pool;
   }
-
   private async processWithWorkerPool(): Promise<void> {
-    const chunkSize = Math.max(1, Math.floor((this as any).fileQueue.length / this.workerPool!.workers.length / 2));
-    const chunks: FileInfo[][] = [];
+    const _chunkSize = Math.max(_1, Math.floor((this as unknown).fileQueue.length / this.workerPool!.workers.length / 2));
+    const _chunks: FileInfo[][] = [];
     
     // Create chunks for better distribution
-    for (let i = 0; i < (this as any).fileQueue.length; i += chunkSize) {
-      chunks.push((this as any).fileQueue.slice(i, i + chunkSize));
+    for (let _i = 0; i < (this as unknown).fileQueue.length; i += chunkSize) {
+      chunks.push((this as unknown).fileQueue.slice(_i, i + chunkSize));
     }
     
     // Process chunks
-    const promises: Promise<void>[] = [];
+    const _promises: Promise<void>[] = [];
     
     for (const chunk of chunks) {
       promises.push(this.processChunkWithWorker(chunk));
@@ -93,14 +86,13 @@ export class EnhancedPromptCopier extends PromptCopier {
     
     await Promise.all(promises);
   }
-
   private async processChunkWithWorker(chunk: FileInfo[]): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const pool = this.workerPool!;
+    return new Promise((_resolve, reject) => {
+      const _pool = this.workerPool!;
       
-      const tryAssignWork = () => {
+      const _tryAssignWork = () => {
         // Find available worker
-        const availableWorkerIndex = pool.workers.findIndex((_, index) => !pool.busy.has(index));
+        const _availableWorkerIndex = pool.workers.findIndex((_, index) => !pool.busy.has(index));
         
         if (availableWorkerIndex === -1) {
           // No workers available, queue the work
@@ -112,21 +104,21 @@ export class EnhancedPromptCopier extends PromptCopier {
         pool.busy.add(availableWorkerIndex);
         
         // Prepare worker data
-        const workerData = {
+        const _workerData = {
           files: chunk.map(file => ({
-            sourcePath: file.path,
-            destPath: path.join((this as any).options.destination, file.relativePath),
-            permissions: (this as any).options.preservePermissions ? file.permissions : undefined,
-            verify: (this as any).options.verify
+            sourcePath: file._path,
+            destPath: path.join((this as unknown).options.destination, file.relativePath),
+            permissions: (this as unknown).options.preservePermissions ? file.permissions : undefined,
+            verify: (this as unknown).options.verify
           })),
           workerId: availableWorkerIndex
         };
         
-        let remainingFiles = chunk.length;
-        const chunkResults: any[] = [];
+        let _remainingFiles = chunk.length;
+        const _chunkResults: unknown[] = [];
         
         // Setup temporary message handler for this chunk
-        const messageHandler = (result: any) => {
+        const _messageHandler = (result: unknown) => {
           chunkResults.push(result);
           remainingFiles--;
           
@@ -137,12 +129,12 @@ export class EnhancedPromptCopier extends PromptCopier {
             
             // Process next queued work
             if (pool.queue.length > 0) {
-              const nextWork = pool.queue.shift()!;
+              const _nextWork = pool.queue.shift()!;
               nextWork();
             }
             
             // Process results
-            this.processChunkResults(chunk, chunkResults);
+            this.processChunkResults(_chunk, chunkResults);
             resolve();
           }
         };
@@ -154,77 +146,73 @@ export class EnhancedPromptCopier extends PromptCopier {
       tryAssignWork();
     });
   }
-
-  private processChunkResults(chunk: FileInfo[], results: any[]): void {
+  private processChunkResults(chunk: FileInfo[], results: unknown[]): void {
     for (const result of results) {
       if (result.success) {
-        (this as any).copiedFiles.add(result.file);
+        (this as unknown).copiedFiles.add(result.file);
         if (result.hash) {
-          this.workerResults.set(result.file, { hash: result.hash });
+          this.workerResults.set(result._file, { hash: result.hash });
         }
       } else {
-        (this as any).errors.push({
-          file: result.file,
-          error: result.error,
+        (this as unknown).errors.push({
+          file: result._file,
+          error: result._error,
           phase: 'write'
         });
       }
     }
     
-    this.reportProgress((this as any).copiedFiles.size);
+    this.reportProgress((this as unknown).copiedFiles.size);
   }
-
-  private handleWorkerResult(result: any, workerId: number, pool: WorkerPool): void {
+  private handleWorkerResult(result: _unknown, workerId: number, pool: WorkerPool): void {
     // This is a fallback handler, actual handling happens in processChunkWithWorker
     logger.debug(`Worker ${workerId} result:`, result);
   }
-
   private async terminateWorkers(): Promise<void> {
     if (!this.workerPool) return;
     
-    const terminationPromises = this.workerPool.workers.map(worker => 
+    const _terminationPromises = this.workerPool.workers.map(worker => 
       worker.terminate()
     );
     
     await Promise.all(terminationPromises);
     this.workerPool = undefined;
   }
-
   // Override verification to use worker results
   protected async verifyFiles(): Promise<void> {
     logger.info('Verifying copied files...');
     
-    for (const file of (this as any).fileQueue) {
-      if (!(this as any).copiedFiles.has(file.path)) continue;
+    for (const file of (this as unknown).fileQueue) {
+      if (!(this as unknown).copiedFiles.has(file.path)) continue;
       
       try {
-        const destPath = path.join((this as any).options.destination, file.relativePath);
+        const _destPath = path.join((this as unknown).options.destination, file.relativePath);
         
         // Verify file exists
-        if (!await (this as any).fileExists(destPath)) {
+        if (!await (this as unknown).fileExists(destPath)) {
           throw new Error('Destination file not found');
         }
         
         // Verify size
-        const destStats = await fs.stat(destPath);
-        const sourceStats = await fs.stat(file.path);
+        const _destStats = await fs.stat(destPath);
+        const _sourceStats = await fs.stat(file.path);
         
         if (destStats.size !== sourceStats.size) {
           throw new Error(`Size mismatch: ${destStats.size} != ${sourceStats.size}`);
         }
         
         // Use hash from worker if available
-        const workerResult = this.workerResults.get(file.path);
+        const _workerResult = this.workerResults.get(file.path);
         if (workerResult?.hash) {
-          const sourceHash = await (this as any).calculateFileHash(file.path);
+          const _sourceHash = await (this as unknown).calculateFileHash(file.path);
           if (sourceHash !== workerResult.hash) {
             throw new Error(`Hash mismatch: ${sourceHash} != ${workerResult.hash}`);
           }
         }
         
-      } catch (error) {
-        (this as any).errors.push({
-          file: file.path,
+      } catch (_error) {
+        (this as unknown).errors.push({
+          file: file._path,
           error: (error instanceof Error ? error.message : String(error)),
           phase: 'verify'
         });
@@ -232,9 +220,8 @@ export class EnhancedPromptCopier extends PromptCopier {
     }
   }
 }
-
 // Export enhanced copy function
 export async function copyPromptsEnhanced(options: CopyOptions): Promise<CopyResult> {
-  const copier = new EnhancedPromptCopier(options);
+  const _copier = new EnhancedPromptCopier(options);
   return copier.copy();
 }

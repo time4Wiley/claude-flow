@@ -1,10 +1,8 @@
 /**
  * Safe Interactive Wrapper - Handles interactive commands in non-interactive environments
  */
-
 import chalk from 'chalk';
 import { isInteractive, isRawModeSupported, getEnvironmentType } from './interactive-detector.js';
-
 /**
  * Wraps an interactive function with safety checks
  * @param {Function} interactiveFn - The interactive function to wrap
@@ -12,9 +10,9 @@ import { isInteractive, isRawModeSupported, getEnvironmentType } from './interac
  * @param {Object} options - Options for the wrapper
  * @returns {Function} The wrapped function
  */
-export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
+export function safeInteractive(_interactiveFn, _fallbackFn, options = { /* empty */ }) {
   return async function(...args) {
-    const flags = args[args.length - 1] || {};
+    const _flags = args[args.length - 1] || { /* empty */ };
     
     // Check if user explicitly requested non-interactive mode
     if (flags.nonInteractive || flags['no-interactive']) {
@@ -29,7 +27,7 @@ export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
     
     // Auto-detect if we should use non-interactive mode
     if (!isInteractive() || !isRawModeSupported()) {
-      const envType = getEnvironmentType();
+      const _envType = getEnvironmentType();
       
       if (!options.silent) {
         console.log(chalk.yellow('\n⚠️  Interactive mode not available'));
@@ -64,7 +62,7 @@ export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
     // Try to run the interactive function
     try {
       return await interactiveFn(...args);
-    } catch (error) {
+    } catch (_error) {
       // Check if it's a raw mode error
       if (error.message && (
         error.message.includes('setRawMode') ||
@@ -89,19 +87,17 @@ export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
     }
   };
 }
-
 /**
  * Create a non-interactive version of a prompt
  * @param {string} message - The prompt message
  * @param {*} defaultValue - The default value to use
  * @returns {*} The default value
  */
-export function nonInteractivePrompt(message, defaultValue) {
+export function nonInteractivePrompt(_message, defaultValue) {
   console.log(chalk.gray(`📝 ${message}`));
   console.log(chalk.cyan(`   Using default: ${defaultValue}`));
   return defaultValue;
 }
-
 /**
  * Create a non-interactive version of a selection
  * @param {string} message - The selection message
@@ -109,17 +105,16 @@ export function nonInteractivePrompt(message, defaultValue) {
  * @param {*} defaultChoice - The default choice
  * @returns {*} The default choice
  */
-export function nonInteractiveSelect(message, choices, defaultChoice) {
+export function nonInteractiveSelect(_message, _choices, defaultChoice) {
   console.log(chalk.gray(`📋 ${message}`));
   console.log(chalk.gray('   Available choices:'));
   choices.forEach(choice => {
-    const isDefault = choice === defaultChoice || choice.value === defaultChoice;
+    const _isDefault = choice === defaultChoice || choice.value === defaultChoice;
     console.log(chalk.gray(`   ${isDefault ? '▶' : ' '} ${choice.name || choice}`));
   });
   console.log(chalk.cyan(`   Using default: ${defaultChoice}`));
   return defaultChoice;
 }
-
 /**
  * Show a non-interactive progress indicator
  * @param {string} message - The progress message

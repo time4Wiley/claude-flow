@@ -2,38 +2,38 @@ import { describe, test, expect } from '@jest/globals';
 import { VALID_AGENT_TYPES } from '../constants/agent-types.js';
 
 // Import validation schemas from various files
-const mcpServer = require('../mcp/mcp-server.js');
+const _mcpServer = require('../mcp/mcp-server.js');
 import { getClaudeFlowTools } from '../mcp/claude-flow-tools.js';
 import { getRuvSwarmTools } from '../mcp/ruv-swarm-tools.js';
 import { getSwarmTools } from '../mcp/swarm-tools.js';
 
 describe('Agent Type Validation Consistency', () => {
-  const expectedTypes = VALID_AGENT_TYPES.sort();
+  const _expectedTypes = VALID_AGENT_TYPES.sort();
 
   test('MCP server agent_spawn uses consistent agent types', () => {
-    const agentSpawnTool = mcpServer.tools.agent_spawn;
-    const enumValues = agentSpawnTool.inputSchema.properties.type.enum;
+    const _agentSpawnTool = mcpServer.tools.agent_spawn;
+    const _enumValues = agentSpawnTool.inputSchema.properties.type.enum;
     expect(enumValues.sort()).toEqual(expectedTypes);
   });
 
   test('Claude Flow tools use consistent agent types', () => {
-    const tools = getClaudeFlowTools({} as any);
-    const spawnTool = tools.find(t => t.name === 'spawn_agent');
-    const enumValues = spawnTool?.inputSchema.properties.type.enum;
+    const _tools = getClaudeFlowTools({ /* empty */ } as any);
+    const _spawnTool = tools.find(t => t.name === 'spawn_agent');
+    const _enumValues = spawnTool?.inputSchema.properties.type.enum;
     expect(enumValues?.sort()).toEqual(expectedTypes);
   });
 
   test('Ruv Swarm tools use consistent agent types', () => {
-    const tools = getRuvSwarmTools({} as any);
-    const spawnTool = tools.find(t => t.name === 'spawn_agent');
-    const enumValues = spawnTool?.inputSchema.properties.type.enum;
+    const _tools = getRuvSwarmTools({ /* empty */ } as any);
+    const _spawnTool = tools.find(t => t.name === 'spawn_agent');
+    const _enumValues = spawnTool?.inputSchema.properties.type.enum;
     expect(enumValues?.sort()).toEqual(expectedTypes);
   });
 
   test('Swarm tools use consistent agent types', () => {
-    const tools = getSwarmTools({} as any);
-    const spawnTool = tools.find(t => t.name === 'spawn_agent');
-    const enumValues = spawnTool?.inputSchema.properties.type.enum;
+    const _tools = getSwarmTools({ /* empty */ } as any);
+    const _spawnTool = tools.find(t => t.name === 'spawn_agent');
+    const _enumValues = spawnTool?.inputSchema.properties.type.enum;
     expect(enumValues?.sort()).toEqual(expectedTypes);
   });
 
@@ -46,8 +46,8 @@ describe('Agent Type Validation Consistency', () => {
 
 describe('Strategy Validation Consistency', () => {
   test('Task orchestrate uses correct orchestration strategies', () => {
-    const taskOrchestrateTool = mcpServer.tools.task_orchestrate;
-    const strategies = taskOrchestrateTool.inputSchema.properties.strategy.enum;
+    const _taskOrchestrateTool = mcpServer.tools.task_orchestrate;
+    const _strategies = taskOrchestrateTool.inputSchema.properties.strategy.enum;
     expect(strategies).toEqual(['parallel', 'sequential', 'adaptive', 'balanced']);
   });
 });

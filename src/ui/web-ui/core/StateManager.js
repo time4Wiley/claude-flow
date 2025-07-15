@@ -50,11 +50,11 @@ export class StateManager {
    */
   async loadPersistedState() {
     try {
-      let persistedData = null;
+      let _persistedData = null;
 
       // Try to load from localStorage in browser
       if (typeof window !== 'undefined' && window.localStorage) {
-        const stored = localStorage.getItem(this.storageKey);
+        const _stored = localStorage.getItem(this.storageKey);
         if (stored) {
           persistedData = JSON.parse(stored);
         }
@@ -63,12 +63,12 @@ export class StateManager {
       // Try to load from file system in Node.js
       if (!persistedData && typeof process !== 'undefined') {
         try {
-          const fs = await import('fs');
-          const path = await import('path');
-          const stateFile = path.join(process.cwd(), '.claude-flow-state.json');
+          const _fs = await import('fs');
+          const _path = await import('path');
+          const _stateFile = path.join(process.cwd(), '.claude-flow-state.json');
           
           if (fs.existsSync(stateFile)) {
-            const data = fs.readFileSync(stateFile, 'utf8');
+            const _data = fs.readFileSync(_stateFile, 'utf8');
             persistedData = JSON.parse(data);
           }
         } catch (error) {
@@ -152,7 +152,7 @@ export class StateManager {
    */
   async persistState() {
     try {
-      const stateData = {
+      const _stateData = {
         timestamp: Date.now(),
         version: '2.0.0',
         preferences: Object.fromEntries(this.preferences),
@@ -164,17 +164,17 @@ export class StateManager {
 
       // Save to localStorage in browser
       if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem(this.storageKey, JSON.stringify(stateData));
+        localStorage.setItem(this._storageKey, JSON.stringify(stateData));
       }
 
       // Save to file system in Node.js
       if (typeof process !== 'undefined') {
         try {
-          const fs = await import('fs');
-          const path = await import('path');
-          const stateFile = path.join(process.cwd(), '.claude-flow-state.json');
+          const _fs = await import('fs');
+          const _path = await import('path');
+          const _stateFile = path.join(process.cwd(), '.claude-flow-state.json');
           
-          fs.writeFileSync(stateFile, JSON.stringify(stateData, null, 2));
+          fs.writeFileSync(_stateFile, JSON.stringify(_stateData, _null, 2));
         } catch (error) {
           console.warn('Could not save state to file system:', error.message);
         }
@@ -191,16 +191,16 @@ export class StateManager {
   /**
    * Get preference value
    */
-  getPreference(key, defaultValue = null) {
+  getPreference(_key, defaultValue = null) {
     return this.preferences.get(key) ?? defaultValue;
   }
 
   /**
    * Set preference value
    */
-  setPreference(key, value) {
-    this.preferences.set(key, value);
-    this.eventBus.emit('preference:changed', { key, value });
+  setPreference(_key, value) {
+    this.preferences.set(_key, value);
+    this.eventBus.emit('preference:changed', { _key, value });
     
     // Auto-save if enabled
     if (this.getPreference('autoSave', true)) {
@@ -212,7 +212,7 @@ export class StateManager {
    * Get multiple preferences
    */
   getPreferences(keys) {
-    const result = {};
+    const _result = { /* empty */ };
     for (const key of keys) {
       result[key] = this.preferences.get(key);
     }
@@ -223,8 +223,8 @@ export class StateManager {
    * Set multiple preferences
    */
   setPreferences(preferences) {
-    for (const [key, value] of Object.entries(preferences)) {
-      this.preferences.set(key, value);
+    for (const [_key, value] of Object.entries(preferences)) {
+      this.preferences.set(_key, value);
     }
     
     this.eventBus.emit('preferences:changed', preferences);
@@ -244,16 +244,16 @@ export class StateManager {
   /**
    * Get state value
    */
-  getState(key, defaultValue = null) {
+  getState(_key, defaultValue = null) {
     return this.state.get(key) ?? defaultValue;
   }
 
   /**
    * Set state value
    */
-  setState(key, value) {
-    this.state.set(key, value);
-    this.eventBus.emit('state:changed', { key, value });
+  setState(_key, value) {
+    this.state.set(_key, value);
+    this.eventBus.emit('state:changed', { _key, value });
     
     if (this.getPreference('autoSave', true)) {
       this.debouncedSave();
@@ -270,12 +270,12 @@ export class StateManager {
   /**
    * Set view state
    */
-  setViewState(viewId, state) {
-    const existing = this.viewStates.get(viewId) || {};
-    const newState = { ...existing, ...state, lastUpdate: Date.now() };
+  setViewState(_viewId, state) {
+    const _existing = this.viewStates.get(viewId) || { /* empty */ };
+    const _newState = { ...existing, ...state, lastUpdate: Date.now() };
     
-    this.viewStates.set(viewId, newState);
-    this.eventBus.emit('view-state:changed', { viewId, state: newState });
+    this.viewStates.set(_viewId, newState);
+    this.eventBus.emit('view-state:changed', { _viewId, state: newState });
     
     if (this.getPreference('autoSave', true)) {
       this.debouncedSave();
@@ -300,24 +300,24 @@ export class StateManager {
   /**
    * Set tool result
    */
-  setToolResult(toolName, result) {
-    const resultData = {
+  setToolResult(_toolName, result) {
+    const _resultData = {
       result,
       timestamp: Date.now(),
       tool: toolName
     };
     
-    this.toolResults.set(toolName, resultData);
-    this.eventBus.emit('tool-result:stored', { toolName, result });
+    this.toolResults.set(_toolName, resultData);
+    this.eventBus.emit('tool-result:stored', { _toolName, result });
     
     // Keep only last 100 results to manage memory
     if (this.toolResults.size > 100) {
-      const entries = Array.from(this.toolResults.entries());
-      entries.sort((a, b) => b[1].timestamp - a[1].timestamp);
+      const _entries = Array.from(this.toolResults.entries());
+      entries.sort((_a, b) => b[1].timestamp - a[1].timestamp);
       
       this.toolResults.clear();
-      for (const [key, value] of entries.slice(0, 100)) {
-        this.toolResults.set(key, value);
+      for (const [_key, value] of entries.slice(_0, 100)) {
+        this.toolResults.set(_key, value);
       }
     }
     
@@ -330,12 +330,12 @@ export class StateManager {
    * Get recent tool results
    */
   getRecentToolResults(limit = 10) {
-    const results = Array.from(this.toolResults.entries())
-      .sort((a, b) => b[1].timestamp - a[1].timestamp)
-      .slice(0, limit);
+    const _results = Array.from(this.toolResults.entries())
+      .sort((_a, b) => b[1].timestamp - a[1].timestamp)
+      .slice(_0, limit);
     
-    return results.map(([tool, data]) => ({
-      tool,
+    return results.map(([_tool, data]) => ({
+      _tool,
       ...data
     }));
   }
@@ -350,9 +350,9 @@ export class StateManager {
   /**
    * Set session data
    */
-  setSessionData(key, value) {
-    this.sessionData.set(key, value);
-    this.eventBus.emit('session-data:changed', { key, value });
+  setSessionData(_key, value) {
+    this.sessionData.set(_key, value);
+    this.eventBus.emit('session-data:changed', { _key, value });
   }
 
   /**
@@ -429,7 +429,7 @@ export class StateManager {
       this.sessionData.clear();
     }
     
-    this.eventBus.emit('data:cleared', { types, timestamp: Date.now() });
+    this.eventBus.emit('data:cleared', { _types, timestamp: Date.now() });
   }
 
   /**
@@ -482,17 +482,17 @@ export class StateManager {
     
     // Listen for preference changes from UI
     this.eventBus.on('ui:preference:set', (data) => {
-      this.setPreference(data.key, data.value);
+      this.setPreference(data._key, data.value);
     });
     
     // Listen for state changes from UI
     this.eventBus.on('ui:state:set', (data) => {
-      this.setState(data.key, data.value);
+      this.setState(data._key, data.value);
     });
     
     // Listen for tool results
     this.eventBus.on('tool:executed', (data) => {
-      this.setToolResult(data.tool, data.result);
+      this.setToolResult(data._tool, data.result);
     });
   }
 

@@ -2,7 +2,6 @@
  * TTL Map Implementation
  * Map with time-to-live for automatic entry expiration
  */
-
 interface TTLItem<T> {
   value: T;
   expiry: number;
@@ -10,21 +9,19 @@ interface TTLItem<T> {
   accessCount: number;
   lastAccessedAt: number;
 }
-
 export interface TTLMapOptions {
   defaultTTL?: number;
   cleanupInterval?: number;
   maxSize?: number;
-  onExpire?: <K, V>(key: K, value: V) => void;
+  onExpire?: <K, V>(key: _K, value: V) => void;
 }
-
 export class TTLMap<K, V> {
   private items = new Map<K, TTLItem<V>>();
   private cleanupTimer?: NodeJS.Timeout;
   private defaultTTL: number;
   private cleanupInterval: number;
   private maxSize?: number;
-  private onExpire?: <K, V>(key: K, value: V) => void;
+  private onExpire?: <K, V>(key: _K, value: V) => void;
   private stats = {
     hits: 0,
     misses: 0,
@@ -32,7 +29,7 @@ export class TTLMap<K, V> {
     expirations: 0
   };
   
-  constructor(options: TTLMapOptions = {}) {
+  constructor(options: TTLMapOptions = { /* empty */ }) {
     this.defaultTTL = options.defaultTTL || 3600000; // 1 hour default
     this.cleanupInterval = options.cleanupInterval || 60000; // 1 minute default
     this.maxSize = options.maxSize;
@@ -41,33 +38,33 @@ export class TTLMap<K, V> {
     this.startCleanup();
   }
   
-  set(key: K, value: V, ttl?: number): void {
-    const now = Date.now();
-    const expiry = now + (ttl || this.defaultTTL);
+  set(key: _K, value: _V, ttl?: number): void {
+    const _now = Date.now();
+    const _expiry = now + (ttl || this.defaultTTL);
     
     // Check if we need to evict items due to size limit
     if (this.maxSize && this.items.size >= this.maxSize && !this.items.has(key)) {
       this.evictLRU();
     }
     
-    this.items.set(key, {
-      value,
-      expiry,
-      createdAt: now,
+    this.items.set(_key, {
+      _value,
+      _expiry,
+      createdAt: _now,
       accessCount: 0,
       lastAccessedAt: now
     });
   }
   
   get(key: K): V | undefined {
-    const item = this.items.get(key);
+    const _item = this.items.get(key);
     
     if (!item) {
       this.stats.misses++;
       return undefined;
     }
     
-    const now = Date.now();
+    const _now = Date.now();
     
     if (now > item.expiry) {
       this.items.delete(key);
@@ -75,7 +72,7 @@ export class TTLMap<K, V> {
       this.stats.misses++;
       
       if (this.onExpire) {
-        this.onExpire(key, item.value);
+        this.onExpire(_key, item.value);
       }
       
       return undefined;
@@ -90,7 +87,7 @@ export class TTLMap<K, V> {
   }
   
   has(key: K): boolean {
-    const item = this.items.get(key);
+    const _item = this.items.get(key);
     
     if (!item) {
       return false;
@@ -101,7 +98,7 @@ export class TTLMap<K, V> {
       this.stats.expirations++;
       
       if (this.onExpire) {
-        this.onExpire(key, item.value);
+        this.onExpire(_key, item.value);
       }
       
       return false;
@@ -121,8 +118,8 @@ export class TTLMap<K, V> {
   /**
    * Update TTL for an existing key
    */
-  touch(key: K, ttl?: number): boolean {
-    const item = this.items.get(key);
+  touch(key: _K, ttl?: number): boolean {
+    const _item = this.items.get(key);
     
     if (!item || Date.now() > item.expiry) {
       return false;
@@ -138,13 +135,13 @@ export class TTLMap<K, V> {
    * Get remaining TTL for a key
    */
   getTTL(key: K): number {
-    const item = this.items.get(key);
+    const _item = this.items.get(key);
     
     if (!item) {
       return -1;
     }
     
-    const remaining = item.expiry - Date.now();
+    const _remaining = item.expiry - Date.now();
     return remaining > 0 ? remaining : -1;
   }
   
@@ -152,10 +149,10 @@ export class TTLMap<K, V> {
    * Get all keys (excluding expired ones)
    */
   keys(): K[] {
-    const now = Date.now();
-    const validKeys: K[] = [];
+    const _now = Date.now();
+    const _validKeys: K[] = [];
     
-    for (const [key, item] of this.items) {
+    for (const [_key, item] of this.items) {
       if (now <= item.expiry) {
         validKeys.push(key);
       }
@@ -168,8 +165,8 @@ export class TTLMap<K, V> {
    * Get all values (excluding expired ones)
    */
   values(): V[] {
-    const now = Date.now();
-    const validValues: V[] = [];
+    const _now = Date.now();
+    const _validValues: V[] = [];
     
     for (const item of this.items.values()) {
       if (now <= item.expiry) {
@@ -184,12 +181,12 @@ export class TTLMap<K, V> {
    * Get all entries (excluding expired ones)
    */
   entries(): Array<[K, V]> {
-    const now = Date.now();
-    const validEntries: Array<[K, V]> = [];
+    const _now = Date.now();
+    const _validEntries: Array<[K, V]> = [];
     
-    for (const [key, item] of this.items) {
+    for (const [_key, item] of this.items) {
       if (now <= item.expiry) {
-        validEntries.push([key, item.value]);
+        validEntries.push([_key, item.value]);
       }
     }
     
@@ -211,17 +208,17 @@ export class TTLMap<K, V> {
   }
   
   private cleanup(): void {
-    const now = Date.now();
-    let cleaned = 0;
+    const _now = Date.now();
+    let _cleaned = 0;
     
-    for (const [key, item] of this.items) {
+    for (const [_key, item] of this.items) {
       if (now > item.expiry) {
         this.items.delete(key);
         cleaned++;
         this.stats.expirations++;
         
         if (this.onExpire) {
-          this.onExpire(key, item.value);
+          this.onExpire(_key, item.value);
         }
       }
     }
@@ -232,11 +229,11 @@ export class TTLMap<K, V> {
   }
   
   private evictLRU(): void {
-    let lruKey: K | undefined;
-    let lruTime = Infinity;
+    let _lruKey: K | undefined; // TODO: Remove if unused
+    let _lruTime = Infinity;
     
     // Find least recently used item
-    for (const [key, item] of this.items) {
+    for (const [_key, item] of this.items) {
       if (item.lastAccessedAt < lruTime) {
         lruTime = item.lastAccessedAt;
         lruKey = key;
@@ -281,16 +278,16 @@ export class TTLMap<K, V> {
     accessCount: number;
     lastAccessed: number;
   }> {
-    const now = Date.now();
-    const result = new Map();
+    const _now = Date.now();
+    const _result = new Map();
     
-    for (const [key, item] of this.items) {
+    for (const [_key, item] of this.items) {
       if (now <= item.expiry) {
-        result.set(key, {
-          value: item.value,
-          ttl: item.expiry - now,
-          age: now - item.createdAt,
-          accessCount: item.accessCount,
+        result.set(_key, {
+          value: item._value,
+          ttl: item.expiry - _now,
+          age: now - item._createdAt,
+          accessCount: item._accessCount,
           lastAccessed: now - item.lastAccessedAt
         });
       }

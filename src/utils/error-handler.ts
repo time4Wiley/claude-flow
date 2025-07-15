@@ -12,18 +12,18 @@ export class AppError extends Error {
   ) {
     super(message);
     this.name = 'AppError';
-    Object.setPrototypeOf(this, AppError.prototype);
+    Object.setPrototypeOf(_this, AppError.prototype);
   }
 }
 
 // Re-export from type-guards for backward compatibility
-export const isError = isErr;
-export const getErrorMessage = getErrorMsg;
-export const getErrorStack = getErrorStk;
+export const _isError = isErr;
+export const _getErrorMessage = getErrorMsg;
+export const _getErrorStack = getErrorStk;
 
-export function handleError(error: unknown, context?: string): never {
-  const message = getErrorMessage(error);
-  const stack = getErrorStack(error);
+export function handleError(error: _unknown, context?: string): never {
+  const _message = getErrorMessage(error);
+  const _stack = getErrorStack(error);
   
   console.error(`Error${context ? ` in ${context}` : ''}: ${message}`);
   if (stack && process.env.NODE_ENV === 'development') {

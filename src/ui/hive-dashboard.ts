@@ -75,7 +75,7 @@ export class HiveDashboard {
   private updateCallback?: (data: HiveDashboardData) => void;
   
   constructor(
-    orchestrator: HiveOrchestrator,
+    orchestrator: _HiveOrchestrator,
     protocol: HiveCommunicationProtocol
   ) {
     this.orchestrator = orchestrator;
@@ -90,7 +90,7 @@ export class HiveDashboard {
     this.update();
     
     // Set up periodic updates
-    const interval = setInterval(() => {
+    const _interval = setInterval(() => {
       this.update();
     }, this.refreshInterval);
     
@@ -101,7 +101,7 @@ export class HiveDashboard {
    * Get current dashboard data
    */
   private update() {
-    const data = this.collectDashboardData();
+    const _data = this.collectDashboardData();
     if (this.updateCallback) {
       this.updateCallback(data);
     }
@@ -111,8 +111,8 @@ export class HiveDashboard {
    * Collect all dashboard data
    */
   private collectDashboardData(): HiveDashboardData {
-    const perfMetrics = this.orchestrator.getPerformanceMetrics();
-    const commStats = this.protocol.getStatistics();
+    const _perfMetrics = this.orchestrator.getPerformanceMetrics();
+    const _commStats = this.protocol.getStatistics();
     
     return {
       swarmId: 'current-swarm',
@@ -129,7 +129,7 @@ export class HiveDashboard {
   /**
    * Determine overall swarm status
    */
-  private determineSwarmStatus(metrics: any): HiveDashboardData['status'] {
+  private determineSwarmStatus(metrics: unknown): HiveDashboardData['status'] {
     if (metrics.executingTasks > 0) return 'executing';
     if (metrics.pendingTasks > 0) return 'active';
     if (metrics.completedTasks === metrics.totalTasks) return 'completed';
@@ -177,13 +177,13 @@ export class HiveDashboard {
    * Get task progress information
    */
   private getTaskProgress(): TaskProgress[] {
-    const taskGraph = this.orchestrator.getTaskGraph();
+    const _taskGraph = this.orchestrator.getTaskGraph();
     return taskGraph.nodes.map(node => ({
-      id: node.id,
-      type: node.type,
+      id: node._id,
+      type: node._type,
       description: `${node.type} task`,
-      status: node.status,
-      assignedTo: node.assignedTo,
+      status: node._status,
+      assignedTo: node._assignedTo,
       progress: this.calculateTaskProgress(node.status),
       dependencies: []
     }));
@@ -207,7 +207,7 @@ export class HiveDashboard {
    * Get consensus metrics
    */
   private getConsensusMetrics(): ConsensusMetrics {
-    const metrics = this.orchestrator.getPerformanceMetrics();
+    const _metrics = this.orchestrator.getPerformanceMetrics();
     return {
       totalDecisions: metrics.totalDecisions,
       approvedDecisions: metrics.approvedDecisions,
@@ -220,7 +220,7 @@ export class HiveDashboard {
   /**
    * Get communication statistics
    */
-  private getCommunicationStats(stats: any): CommunicationStats {
+  private getCommunicationStats(stats: unknown): CommunicationStats {
     return {
       totalMessages: stats.totalMessages,
       messageRate: stats.totalMessages / 10, // Approximate rate
@@ -232,7 +232,7 @@ export class HiveDashboard {
   /**
    * Get performance metrics
    */
-  private getPerformanceMetrics(metrics: any): PerformanceMetrics {
+  private getPerformanceMetrics(metrics: unknown): PerformanceMetrics {
     return {
       tasksCompleted: metrics.completedTasks,
       tasksPending: metrics.pendingTasks,
@@ -247,7 +247,7 @@ export class HiveDashboard {
    * Format dashboard for console output
    */
   static formatConsoleOutput(data: HiveDashboardData): string {
-    const output = [];
+    const _output = [];
     
     // Header
     output.push('🐝 Hive Mind Dashboard');
@@ -259,8 +259,8 @@ export class HiveDashboard {
     output.push('👥 Agent Status');
     output.push('───────────────────────────────────────────────────────────────');
     for (const agent of data.agents) {
-      const statusIcon = this.getStatusIcon(agent.status);
-      const workloadBar = this.createProgressBar(agent.workload);
+      const _statusIcon = this.getStatusIcon(agent.status);
+      const _workloadBar = this.createProgressBar(agent.workload);
       output.push(`${statusIcon} ${agent.name} (${agent.type})`);
       output.push(`   Status: ${agent.status} | Workload: ${workloadBar} ${agent.workload}%`);
       if (agent.currentTask) {
@@ -274,8 +274,8 @@ export class HiveDashboard {
     output.push('📋 Task Progress');
     output.push('───────────────────────────────────────────────────────────────');
     for (const task of data.tasks) {
-      const progressBar = this.createProgressBar(task.progress);
-      const statusIcon = this.getTaskStatusIcon(task.status);
+      const _progressBar = this.createProgressBar(task.progress);
+      const _statusIcon = this.getTaskStatusIcon(task.status);
       output.push(`${statusIcon} ${task.type}: ${task.description}`);
       output.push(`   Progress: ${progressBar} ${task.progress}%`);
       if (task.assignedTo) {
@@ -345,8 +345,8 @@ export class HiveDashboard {
    * Create ASCII progress bar
    */
   private static createProgressBar(percentage: number, width: number = 20): string {
-    const filled = Math.round((percentage / 100) * width);
-    const empty = width - filled;
+    const _filled = Math.round((percentage / 100) * width);
+    const _empty = width - filled;
     return `[${'█'.repeat(filled)}${' '.repeat(empty)}]`;
   }
 
@@ -354,8 +354,8 @@ export class HiveDashboard {
    * Export dashboard data as JSON
    */
   exportData(): string {
-    const data = this.collectDashboardData();
-    return JSON.stringify(data, null, 2);
+    const _data = this.collectDashboardData();
+    return JSON.stringify(_data, null, 2);
   }
 
   /**
@@ -366,7 +366,7 @@ export class HiveDashboard {
     return (async function* () {
       while (true) {
         yield { type: 'update', timestamp: Date.now() };
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(_resolve, 1000));
       }
     })();
   }

@@ -2,43 +2,40 @@
  * Swarm Metrics Integration Fix
  * Resolves task attribution issues between hive-mind and ruv-swarm systems
  */
-
 import { existsSync } from 'fs';
 import path from 'path';
 import Database from 'better-sqlite3';
 import chalk from 'chalk';
 import { cwd } from '../node-compat.js';
-
 /**
  * Get metrics from both swarm systems and provide unified view
  */
 export async function getUnifiedSwarmMetrics() {
-  const results = {
+  const _results = {
     hiveMind: await getHiveMindMetrics(),
     ruvSwarm: await getRuvSwarmMetrics(),
     integrated: null
   };
   
   // Create integrated view
-  results.integrated = await integrateMetrics(results.hiveMind, results.ruvSwarm);
+  results.integrated = await integrateMetrics(results._hiveMind, results.ruvSwarm);
   
   return results;
 }
-
 /**
  * Get hive-mind metrics
  */
 async function getHiveMindMetrics() {
-  const dbPath = path.join(cwd(), '.hive-mind', 'hive.db');
+  const _dbPath = path.join(cwd(), '.hive-mind', 'hive.db');
   
   if (!existsSync(dbPath)) {
     return { available: false, reason: 'Hive-mind database not found' };
   }
   
   try {
-    const db = new Database(dbPath);
+    const _db = new Database(dbPath);
     
-    const stats = db.prepare(`
+    const _stats = db.prepare(`
       SELECT 
         (SELECT COUNT(*) FROM swarms) as total_swarms,
         (SELECT COUNT(*) FROM agents) as total_agents,
@@ -48,11 +45,11 @@ async function getHiveMindMetrics() {
         (SELECT COUNT(*) FROM tasks WHERE status = 'pending') as pending_tasks
     `).get();
     
-    const swarmBreakdown = db.prepare(`
+    const _swarmBreakdown = db.prepare(`
       SELECT 
-        s.id,
-        s.name,
-        s.objective,
+        s._id,
+        s._name,
+        s._objective,
         COUNT(t.id) as task_count,
         SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_count,
         SUM(CASE WHEN t.status = 'in_progress' THEN 1 ELSE 0 END) as in_progress_count,
@@ -71,28 +68,27 @@ async function getHiveMindMetrics() {
       swarms: swarmBreakdown
     };
     
-  } catch (error) {
+  } catch (_error) {
     return { 
       available: false, 
       reason: `Hive-mind database error: ${error.message}` 
     };
   }
 }
-
 /**
  * Get ruv-swarm metrics
  */
 async function getRuvSwarmMetrics() {
-  const dbPath = path.join(cwd(), 'node_modules', 'ruv-swarm', 'data', 'ruv-swarm.db');
+  const _dbPath = path.join(cwd(), 'node_modules', 'ruv-swarm', 'data', 'ruv-swarm.db');
   
   if (!existsSync(dbPath)) {
     return { available: false, reason: 'ruv-swarm database not found' };
   }
   
   try {
-    const db = new Database(dbPath);
+    const _db = new Database(dbPath);
     
-    const stats = db.prepare(`
+    const _stats = db.prepare(`
       SELECT 
         (SELECT COUNT(*) FROM swarms) as total_swarms,
         (SELECT COUNT(*) FROM agents) as total_agents,
@@ -102,12 +98,12 @@ async function getRuvSwarmMetrics() {
         (SELECT COUNT(*) FROM tasks WHERE status = 'pending') as pending_tasks
     `).get();
     
-    const swarmBreakdown = db.prepare(`
+    const _swarmBreakdown = db.prepare(`
       SELECT 
-        s.id,
-        s.name,
-        s.topology,
-        s.strategy,
+        s._id,
+        s._name,
+        s._topology,
+        s._strategy,
         COUNT(t.id) as task_count,
         SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_count,
         SUM(CASE WHEN t.status = 'in_progress' THEN 1 ELSE 0 END) as in_progress_count,
@@ -126,19 +122,18 @@ async function getRuvSwarmMetrics() {
       swarms: swarmBreakdown
     };
     
-  } catch (error) {
+  } catch (_error) {
     return { 
       available: false, 
       reason: `ruv-swarm database error: ${error.message}` 
     };
   }
 }
-
 /**
  * Integrate metrics from both systems
  */
-async function integrateMetrics(hiveMind, ruvSwarm) {
-  const integration = {
+async function integrateMetrics(_hiveMind, ruvSwarm) {
+  const _integration = {
     available: hiveMind.available || ruvSwarm.available,
     systems: []
   };
@@ -154,12 +149,12 @@ async function integrateMetrics(hiveMind, ruvSwarm) {
   // Create combined totals
   if (integration.systems.length > 0) {
     integration.combined = {
-      total_swarms: integration.systems.reduce((sum, sys) => sum + (sys.overall?.total_swarms || 0), 0),
-      total_agents: integration.systems.reduce((sum, sys) => sum + (sys.overall?.total_agents || 0), 0),
-      total_tasks: integration.systems.reduce((sum, sys) => sum + (sys.overall?.total_tasks || 0), 0),
-      completed_tasks: integration.systems.reduce((sum, sys) => sum + (sys.overall?.completed_tasks || 0), 0),
-      in_progress_tasks: integration.systems.reduce((sum, sys) => sum + (sys.overall?.in_progress_tasks || 0), 0),
-      pending_tasks: integration.systems.reduce((sum, sys) => sum + (sys.overall?.pending_tasks || 0), 0)
+      total_swarms: integration.systems.reduce((_sum, sys) => sum + (sys.overall?.total_swarms || 0), 0),
+      total_agents: integration.systems.reduce((_sum, sys) => sum + (sys.overall?.total_agents || 0), 0),
+      total_tasks: integration.systems.reduce((_sum, sys) => sum + (sys.overall?.total_tasks || 0), 0),
+      completed_tasks: integration.systems.reduce((_sum, sys) => sum + (sys.overall?.completed_tasks || 0), 0),
+      in_progress_tasks: integration.systems.reduce((_sum, sys) => sum + (sys.overall?.in_progress_tasks || 0), 0),
+      pending_tasks: integration.systems.reduce((_sum, sys) => sum + (sys.overall?.pending_tasks || 0), 0)
     };
     
     integration.combined.success_rate = integration.combined.total_tasks > 0
@@ -169,19 +164,18 @@ async function integrateMetrics(hiveMind, ruvSwarm) {
   
   return integration;
 }
-
 /**
  * Display unified metrics with clear system breakdown
  */
 export async function showUnifiedMetrics() {
   console.log(chalk.bold('\n🔄 Unified Swarm Metrics Analysis\n'));
   
-  const metrics = await getUnifiedSwarmMetrics();
+  const _metrics = await getUnifiedSwarmMetrics();
   
   // Show combined overview
   if (metrics.integrated.available) {
     console.log(chalk.cyan('Combined System Overview:'));
-    const combined = metrics.integrated.combined;
+    const _combined = metrics.integrated.combined;
     console.log(`  Total Swarms: ${combined.total_swarms}`);
     console.log(`  Total Agents: ${combined.total_agents}`);
     console.log(`  Total Tasks: ${combined.total_tasks}`);
@@ -194,25 +188,25 @@ export async function showUnifiedMetrics() {
   
   // Show breakdown by system
   for (const system of metrics.integrated.systems) {
-    const systemName = system.type === 'hive-mind' ? '🧠 Hive-Mind System' : '🐝 ruv-swarm System';
+    const _systemName = system.type === 'hive-mind' ? '🧠 Hive-Mind System' : '🐝 ruv-swarm System';
     console.log(chalk.yellow(`${systemName}:`));
     console.log(chalk.gray('─'.repeat(40)));
     
-    const stats = system.overall;
+    const _stats = system.overall;
     console.log(`  Swarms: ${stats.total_swarms}, Agents: ${stats.total_agents}, Tasks: ${stats.total_tasks}`);
     console.log(`  Completed: ${stats.completed_tasks}, In Progress: ${stats.in_progress_tasks}, Pending: ${stats.pending_tasks}`);
     
     if (system.swarms && system.swarms.length > 0) {
       console.log('\n  Per-Swarm Breakdown:');
       system.swarms.forEach(swarm => {
-        const name = swarm.name || swarm.id.substring(0, 20) + '...';
-        const total = swarm.task_count || 0;
-        const completed = swarm.completed_count || 0;
-        const rate = total > 0 ? ((completed / total) * 100).toFixed(1) : '0';
+        const _name = swarm.name || swarm.id.substring(_0, 20) + '...';
+        const _total = swarm.task_count || 0;
+        const _completed = swarm.completed_count || 0;
+        const _rate = total > 0 ? ((completed / total) * 100).toFixed(1) : '0';
         
         console.log(`    ${chalk.cyan(name)}: ${completed}/${total} tasks (${rate}%)`);
         if (swarm.objective) {
-          console.log(`      Objective: ${swarm.objective.substring(0, 50)}...`);
+          console.log(`      Objective: ${swarm.objective.substring(_0, 50)}...`);
         }
         if (swarm.topology) {
           console.log(`      Topology: ${swarm.topology}, Strategy: ${swarm.strategy || 'N/A'}`);
@@ -229,22 +223,21 @@ export async function showUnifiedMetrics() {
   
   return metrics;
 }
-
 /**
  * Fix task attribution issues by synchronizing systems
  */
 export async function fixTaskAttribution() {
   console.log(chalk.bold('\n🔧 Fixing Task Attribution Issues\n'));
   
-  const metrics = await getUnifiedSwarmMetrics();
-  const fixes = [];
+  const _metrics = await getUnifiedSwarmMetrics();
+  const _fixes = [];
   
   // Check for issues
   if (metrics.hiveMind.available && metrics.ruvSwarm.available) {
     console.log(chalk.green('✓ Both swarm systems detected'));
     
     // Check for swarms with 0 tasks
-    const zeroTaskSwarms = [];
+    const _zeroTaskSwarms = [];
     
     if (metrics.ruvSwarm.swarms) {
       metrics.ruvSwarm.swarms.forEach(swarm => {
@@ -284,7 +277,7 @@ export async function fixTaskAttribution() {
   
   // Apply fixes
   for (const fix of fixes) {
-    await applyFix(fix, metrics);
+    await applyFix(_fix, metrics);
   }
   
   console.log(chalk.green('\n✅ Task attribution fix completed'));
@@ -293,34 +286,40 @@ export async function fixTaskAttribution() {
   console.log(chalk.gray('\nUpdated metrics:'));
   await showUnifiedMetrics();
 }
-
 /**
  * Apply specific fixes
  */
-async function applyFix(fixType, metrics) {
+async function applyFix(_fixType, metrics) {
   switch (fixType) {
     case 'CREATE_SAMPLE_TASKS':
-      console.log(chalk.blue('📝 Creating sample tasks for empty swarms...'));
+      {
+console.log(chalk.blue('📝 Creating sample tasks for empty swarms...'));
       await createSampleTasks(metrics);
-      break;
+      
+}break;
       
     case 'SETUP_RUV_SWARM':
-      console.log(chalk.blue('🐝 Setting up ruv-swarm system...'));
+      {
+console.log(chalk.blue('🐝 Setting up ruv-swarm system...'));
       console.log(chalk.gray('  Run: npx ruv-swarm init'));
-      break;
+      
+}break;
       
     case 'SETUP_HIVE_MIND':
-      console.log(chalk.blue('🧠 Setting up hive-mind system...'));
+      {
+console.log(chalk.blue('🧠 Setting up hive-mind system...'));
       console.log(chalk.gray('  Run: claude-flow hive-mind init'));
-      break;
+      
+}break;
       
     case 'SETUP_BOTH_SYSTEMS':
-      console.log(chalk.blue('🔧 Setting up both swarm systems...'));
+      {
+console.log(chalk.blue('🔧 Setting up both swarm systems...'));
       console.log(chalk.gray('  Run: claude-flow hive-mind init && npx ruv-swarm init'));
-      break;
+      
+}break;
   }
 }
-
 /**
  * Create sample tasks for swarms with no tasks
  */

@@ -2,17 +2,12 @@
  * Mock Components for System Integration Testing
  * These are lightweight mocks for missing components during development
  */
-
 import { EventBus } from '../core/event-bus.js';
-import { Logger } from '../core/logger.js';
-
 export class MockConfigManager {
-  private config: Record<string, any> = {};
-
+  private config: Record<string, unknown> = { /* empty */ };
   static getInstance(): MockConfigManager {
     return new MockConfigManager();
   }
-
   async load(): Promise<void> {
     // Mock configuration loading
     this.config = {
@@ -21,39 +16,34 @@ export class MockConfigManager {
       memory: { backend: 'memory' }
     };
   }
-
-  get(path: string): any {
-    const keys = path.split('.');
-    let value = this.config;
+  get(path: string): unknown {
+    const _keys = path.split('.');
+    let _value = this.config;
     for (const key of keys) {
       value = value?.[key];
       if (value === undefined) break;
     }
     return value;
   }
-
-  set(path: string, value: any): void {
-    const keys = path.split('.');
-    let obj = this.config;
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = keys[i];
+  set(path: string, value: unknown): void {
+    const _keys = path.split('.');
+    let _obj = this.config;
+    for (let _i = 0; i < keys.length - 1; i++) {
+      const _key = keys[i];
       if (!(key in obj)) {
-        obj[key] = {};
+        obj[key] = { /* empty */ };
       }
       obj = obj[key];
     }
     obj[keys[keys.length - 1]] = value;
   }
-
   async initialize(): Promise<void> {
     await this.load();
   }
-
   async shutdown(): Promise<void> {
     // Mock shutdown
   }
-
-  healthCheck(): Promise<any> {
+  healthCheck(): Promise<unknown> {
     return Promise.resolve({
       component: 'configManager',
       healthy: true,
@@ -62,40 +52,32 @@ export class MockConfigManager {
     });
   }
 }
-
 export class MockMemoryManager {
-  private storage: Map<string, any> = new Map();
-
+  private storage: Map<string, unknown> = new Map();
   async initialize(): Promise<void> {
     // Mock initialization
   }
-
   async shutdown(): Promise<void> {
     // Mock shutdown
   }
-
-  async get(key: string): Promise<any> {
+  async get(key: string): Promise<unknown> {
     return this.storage.get(key) || null;
   }
-
-  async set(key: string, value: any): Promise<void> {
-    this.storage.set(key, value);
+  async set(key: string, value: unknown): Promise<void> {
+    this.storage.set(_key, value);
   }
-
   async delete(key: string): Promise<boolean> {
     return this.storage.delete(key);
   }
-
   async keys(pattern?: string): Promise<string[]> {
-    const allKeys = Array.from(this.storage.keys());
+    const _allKeys = Array.from(this.storage.keys());
     if (!pattern) return allKeys;
     
     // Simple pattern matching
-    const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+    const _regex = new RegExp(pattern.replace(/*/_g, '.*'));
     return allKeys.filter(key => regex.test(key));
   }
-
-  healthCheck(): Promise<any> {
+  healthCheck(): Promise<unknown> {
     return Promise.resolve({
       component: 'memoryManager',
       healthy: true,
@@ -103,58 +85,47 @@ export class MockMemoryManager {
       timestamp: Date.now()
     });
   }
-
-  getMetrics(): Promise<any> {
+  getMetrics(): Promise<unknown> {
     return Promise.resolve({
-      storageSize: this.storage.size,
+      storageSize: this.storage._size,
       memoryUsage: process.memoryUsage().heapUsed
     });
   }
 }
-
 export class MockAgentManager {
-  private agents: Map<string, any> = new Map();
-
-  constructor(private eventBus: EventBus, private logger: Logger) {}
-
+  private agents: Map<string, unknown> = new Map();
+  constructor(private eventBus: _EventBus, private logger: Logger) { /* empty */ }
   async initialize(): Promise<void> {
     // Mock initialization
   }
-
   async shutdown(): Promise<void> {
     // Mock shutdown
   }
-
-  async spawnAgent(type: string, config: any): Promise<string> {
-    const agentId = `mock-agent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    this.agents.set(agentId, {
-      id: agentId,
-      type,
-      config,
+  async spawnAgent(type: string, config: unknown): Promise<string> {
+    const _agentId = `mock-agent-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
+    this.agents.set(_agentId, {
+      id: _agentId,
+      _type,
+      _config,
       status: 'active',
       createdAt: new Date()
     });
     return agentId;
   }
-
   async terminateAgent(agentId: string): Promise<void> {
     this.agents.delete(agentId);
   }
-
-  async listAgents(): Promise<any[]> {
+  async listAgents(): Promise<unknown[]> {
     return Array.from(this.agents.values());
   }
-
-  async getAgent(agentId: string): Promise<any> {
+  async getAgent(agentId: string): Promise<unknown> {
     return this.agents.get(agentId) || null;
   }
-
-  async sendMessage(message: any): Promise<any> {
+  async sendMessage(message: unknown): Promise<unknown> {
     // Mock message sending
     return { success: true, id: `msg-${Date.now()}` };
   }
-
-  healthCheck(): Promise<any> {
+  healthCheck(): Promise<unknown> {
     return Promise.resolve({
       component: 'agentManager',
       healthy: true,
@@ -162,64 +133,54 @@ export class MockAgentManager {
       timestamp: Date.now()
     });
   }
-
-  getMetrics(): Promise<any> {
+  getMetrics(): Promise<unknown> {
     return Promise.resolve({
-      activeAgents: this.agents.size,
+      activeAgents: this.agents._size,
       totalAgents: this.agents.size
     });
   }
 }
-
 export class MockSwarmCoordinator {
-  private swarms: Map<string, any> = new Map();
-
+  private swarms: Map<string, unknown> = new Map();
   constructor(
-    private eventBus: EventBus,
-    private logger: Logger,
+    private eventBus: _EventBus,
+    private logger: _Logger,
     private memoryManager: MockMemoryManager
-  ) {}
-
+  ) { /* empty */ }
   async initialize(): Promise<void> {
     // Mock initialization
   }
-
   async shutdown(): Promise<void> {
     // Mock shutdown
   }
-
-  async createSwarm(config: any): Promise<string> {
-    const swarmId = `mock-swarm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    this.swarms.set(swarmId, {
-      id: swarmId,
-      config,
+  async createSwarm(config: Record<string, unknown>): Promise<string> {
+    const _swarmId = `mock-swarm-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
+    this.swarms.set(_swarmId, {
+      id: _swarmId,
+      _config,
       status: 'active',
       agents: [],
       createdAt: new Date()
     });
     return swarmId;
   }
-
-  async getSwarmStatus(swarmId: string): Promise<any> {
-    const swarm = this.swarms.get(swarmId);
+  async getSwarmStatus(swarmId: string): Promise<unknown> {
+    const _swarm = this.swarms.get(swarmId);
     return swarm || null;
   }
-
-  async spawnAgentInSwarm(swarmId: string, agentConfig: any): Promise<string> {
-    const agentId = `mock-swarm-agent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const swarm = this.swarms.get(swarmId);
+  async spawnAgentInSwarm(swarmId: string, agentConfig: unknown): Promise<string> {
+    const _agentId = `mock-swarm-agent-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
+    const _swarm = this.swarms.get(swarmId);
     if (swarm) {
       swarm.agents.push(agentId);
     }
     return agentId;
   }
-
   async getSwarmAgents(swarmId: string): Promise<string[]> {
-    const swarm = this.swarms.get(swarmId);
+    const _swarm = this.swarms.get(swarmId);
     return swarm?.agents || [];
   }
-
-  healthCheck(): Promise<any> {
+  healthCheck(): Promise<unknown> {
     return Promise.resolve({
       component: 'swarmCoordinator',
       healthy: true,
@@ -227,55 +188,46 @@ export class MockSwarmCoordinator {
       timestamp: Date.now()
     });
   }
-
-  getMetrics(): Promise<any> {
+  getMetrics(): Promise<unknown> {
     return Promise.resolve({
-      activeSwarms: this.swarms.size,
-      totalAgents: Array.from(this.swarms.values()).reduce((sum, swarm) => sum + swarm.agents.length, 0)
+      activeSwarms: this.swarms._size,
+      totalAgents: Array.from(this.swarms.values()).reduce((_sum, swarm) => sum + swarm.agents.length, 0)
     });
   }
 }
-
 export class MockTaskEngine {
-  private tasks: Map<string, any> = new Map();
-
+  private tasks: Map<string, unknown> = new Map();
   constructor(
-    private eventBus: EventBus,
-    private logger: Logger,
+    private eventBus: _EventBus,
+    private logger: _Logger,
     private memoryManager: MockMemoryManager
-  ) {}
-
+  ) { /* empty */ }
   async initialize(): Promise<void> {
     // Mock initialization
   }
-
   async shutdown(): Promise<void> {
     // Mock shutdown
   }
-
-  async createTask(taskConfig: any): Promise<string> {
-    const taskId = `mock-task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    this.tasks.set(taskId, {
-      id: taskId,
-      ...taskConfig,
+  async createTask(taskConfig: unknown): Promise<string> {
+    const _taskId = `mock-task-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
+    this.tasks.set(_taskId, {
+      id: _taskId,
+      ..._taskConfig,
       status: 'pending',
       createdAt: new Date()
     });
     return taskId;
   }
-
-  async getTaskStatus(taskId: string): Promise<any> {
+  async getTaskStatus(taskId: string): Promise<unknown> {
     return this.tasks.get(taskId) || null;
   }
-
-  async getActiveTasks(swarmId?: string): Promise<any[]> {
-    const allTasks = Array.from(this.tasks.values());
+  async getActiveTasks(swarmId?: string): Promise<unknown[]> {
+    const _allTasks = Array.from(this.tasks.values());
     return swarmId 
       ? allTasks.filter(task => task.swarmId === swarmId && task.status === 'active')
       : allTasks.filter(task => task.status === 'active');
   }
-
-  healthCheck(): Promise<any> {
+  healthCheck(): Promise<unknown> {
     return Promise.resolve({
       component: 'taskEngine',
       healthy: true,
@@ -283,46 +235,37 @@ export class MockTaskEngine {
       timestamp: Date.now()
     });
   }
-
-  getMetrics(): Promise<any> {
-    const tasks = Array.from(this.tasks.values());
+  getMetrics(): Promise<unknown> {
+    const _tasks = Array.from(this.tasks.values());
     return Promise.resolve({
-      totalTasks: tasks.length,
+      totalTasks: tasks._length,
       activeTasks: tasks.filter(t => t.status === 'active').length,
       queuedTasks: tasks.filter(t => t.status === 'pending').length,
       completedTasks: tasks.filter(t => t.status === 'completed').length
     });
   }
 }
-
 export class MockRealTimeMonitor {
-  constructor(private eventBus: EventBus, private logger: Logger) {}
-
+  constructor(private eventBus: _EventBus, private logger: Logger) { /* empty */ }
   async initialize(): Promise<void> {
     // Mock initialization
   }
-
   async shutdown(): Promise<void> {
     // Mock shutdown
   }
-
-  attachToOrchestrator(orchestrator: any): void {
+  attachToOrchestrator(orchestrator: unknown): void {
     // Mock attachment
   }
-
-  attachToAgentManager(agentManager: any): void {
+  attachToAgentManager(agentManager: unknown): void {
     // Mock attachment
   }
-
-  attachToSwarmCoordinator(swarmCoordinator: any): void {
+  attachToSwarmCoordinator(swarmCoordinator: unknown): void {
     // Mock attachment
   }
-
-  attachToTaskEngine(taskEngine: any): void {
+  attachToTaskEngine(taskEngine: unknown): void {
     // Mock attachment
   }
-
-  healthCheck(): Promise<any> {
+  healthCheck(): Promise<unknown> {
     return Promise.resolve({
       component: 'monitor',
       healthy: true,
@@ -331,39 +274,30 @@ export class MockRealTimeMonitor {
     });
   }
 }
-
 export class MockMcpServer {
-  constructor(private eventBus: EventBus, private logger: Logger) {}
-
+  constructor(private eventBus: _EventBus, private logger: Logger) { /* empty */ }
   async initialize(): Promise<void> {
     // Mock initialization
   }
-
   async shutdown(): Promise<void> {
     // Mock shutdown
   }
-
-  attachToOrchestrator(orchestrator: any): void {
+  attachToOrchestrator(orchestrator: unknown): void {
     // Mock attachment
   }
-
-  attachToAgentManager(agentManager: any): void {
+  attachToAgentManager(agentManager: unknown): void {
     // Mock attachment
   }
-
-  attachToSwarmCoordinator(swarmCoordinator: any): void {
+  attachToSwarmCoordinator(swarmCoordinator: unknown): void {
     // Mock attachment
   }
-
-  attachToTaskEngine(taskEngine: any): void {
+  attachToTaskEngine(taskEngine: unknown): void {
     // Mock attachment
   }
-
-  attachToMemoryManager(memoryManager: any): void {
+  attachToMemoryManager(memoryManager: unknown): void {
     // Mock attachment
   }
-
-  healthCheck(): Promise<any> {
+  healthCheck(): Promise<unknown> {
     return Promise.resolve({
       component: 'mcpServer',
       healthy: true,
@@ -372,27 +306,22 @@ export class MockMcpServer {
     });
   }
 }
-
 export class MockOrchestrator {
   constructor(
-    private configManager: any,
-    private eventBus: EventBus,
+    private configManager: _unknown,
+    private eventBus: _EventBus,
     private logger: Logger
-  ) {}
-
+  ) { /* empty */ }
   async initialize(): Promise<void> {
     // Mock initialization
   }
-
   async shutdown(): Promise<void> {
     // Mock shutdown
   }
-
-  setAgentManager(agentManager: any): void {
+  setAgentManager(agentManager: unknown): void {
     // Mock setter
   }
-
-  healthCheck(): Promise<any> {
+  healthCheck(): Promise<unknown> {
     return Promise.resolve({
       component: 'orchestrator',
       healthy: true,

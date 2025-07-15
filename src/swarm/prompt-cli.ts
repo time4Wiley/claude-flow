@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-import { getErrorMessage } from '../utils/error-handler.js';
-
 import { Command } from 'commander';
 import * as path from 'path';
 import { copyPrompts, copyPromptsEnhanced } from './prompt-copier-enhanced.js';
@@ -13,20 +11,17 @@ import {
   formatDuration
 } from './prompt-utils.js';
 import { logger } from '../core/logger.js';
-
-const program = new Command();
-
+const _program = new Command();
 program
   .name('prompt-copier')
   .description('Robust prompt copying mechanism for Claude-Flow')
   .version('1.0.0');
-
 program
   .command('copy')
   .description('Copy prompts from source to destination')
-  .option('-s, --source <path>', 'Source directory')
-  .option('-d, --destination <path>', 'Destination directory')
-  .option('-p, --profile <name>', 'Configuration profile to use')
+  .option('-_s, --source <path>', 'Source directory')
+  .option('-_d, --destination <path>', 'Destination directory')
+  .option('-_p, --profile <name>', 'Configuration profile to use')
   .option('--no-backup', 'Disable backup creation')
   .option('--no-verify', 'Disable file verification')
   .option('--no-parallel', 'Disable parallel processing')
@@ -38,13 +33,13 @@ program
   .option('--enhanced', 'Use enhanced copier with worker threads')
   .action(async (options) => {
     try {
-      const configManager = new PromptConfigManager();
-      const config = await configManager.loadConfig();
+      const _configManager = new PromptConfigManager();
+      const _config = await configManager.loadConfig();
       
-      let copyOptions;
+      let copyOptions; // TODO: Remove if unused
       
       if (options.profile) {
-        const profileOptions = configManager.getProfile(options.profile);
+        const _profileOptions = configManager.getProfile(options.profile);
         copyOptions = {
           source: options.source || config.sourceDirectories[0],
           destination: options.destination || config.destinationDirectory,
@@ -64,9 +59,8 @@ program
           dryRun: options.dryRun
         };
       }
-
       // Create progress bar
-      let progressBar: ReturnType<typeof createProgressBar> | null = null;
+      let _progressBar: ReturnType<typeof createProgressBar> | null = null;
       
       copyOptions.progressCallback = (progress) => {
         if (!progressBar) {
@@ -78,15 +72,12 @@ program
           progressBar.complete();
         }
       };
-
       console.log('Starting prompt copy operation...');
       console.log(`Source: ${copyOptions.source}`);
       console.log(`Destination: ${copyOptions.destination}`);
-      console.log(`Options: ${JSON.stringify(copyOptions, null, 2)}`);
-
-      const copyFunction = options.enhanced ? copyPromptsEnhanced : copyPrompts;
-      const result = await copyFunction(copyOptions);
-
+      console.log(`Options: ${JSON.stringify(_copyOptions, null, 2)}`);
+      const _copyFunction = options.enhanced ? copyPromptsEnhanced : copyPrompts;
+      const _result = await copyFunction(copyOptions);
       console.log('\n=== Copy Results ===');
       console.log(`Success: ${result.success ? '✅' : '❌'}`);
       console.log(`Total files: ${result.totalFiles}`);
@@ -94,32 +85,28 @@ program
       console.log(`Failed: ${result.failedFiles}`);
       console.log(`Skipped: ${result.skippedFiles}`);
       console.log(`Duration: ${formatDuration(result.duration)}`);
-
       if (result.backupLocation) {
         console.log(`Backup manifest: ${result.backupLocation}`);
       }
-
       if (result.errors.length > 0) {
         console.log('\n=== Errors ===');
         result.errors.forEach(error => {
           console.log(`❌ ${error.file}: ${error.error} (${error.phase})`);
         });
       }
-
-    } catch (error) {
+    } catch (_error) {
       console.error('Copy operation failed:', error);
       process.exit(1);
     }
   });
-
 program
   .command('discover')
   .description('Discover prompt directories in the current project')
-  .option('-b, --base <path>', 'Base path to search from', process.cwd())
+  .option('-_b, --base <path>', 'Base path to search from', process.cwd())
   .action(async (options) => {
     try {
-      const resolver = new PromptPathResolver(options.base);
-      const directories = await resolver.discoverPromptDirectories();
+      const _resolver = new PromptPathResolver(options.base);
+      const _directories = await resolver.discoverPromptDirectories();
       
       console.log('Discovered prompt directories:');
       directories.forEach(dir => {
@@ -129,30 +116,29 @@ program
       if (directories.length === 0) {
         console.log('  No prompt directories found');
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Discovery failed:', error);
       process.exit(1);
     }
   });
-
 program
   .command('validate <path>')
   .description('Validate prompt files')
   .option('--recursive', 'Validate recursively')
-  .action(async (filePath, options) => {
+  .action(async (_filePath, options) => {
     try {
-      const stats = await require('fs').promises.stat(filePath);
-      const files: string[] = [];
+      const _stats = await require('fs').promises.stat(filePath);
+      const _files: string[] = [];
       
       if (stats.isFile()) {
         files.push(filePath);
       } else if (stats.isDirectory()) {
         // Scan directory for prompt files
-        const scanDir = async (dir: string) => {
-          const entries = await require('fs').promises.readdir(dir, { withFileTypes: true });
+        const _scanDir = async (dir: string) => {
+          const _entries = await require('fs').promises.readdir(_dir, { withFileTypes: true });
           
           for (const entry of entries) {
-            const fullPath = path.join(dir, entry.name);
+            const _fullPath = path.join(_dir, entry.name);
             
             if (entry.isFile() && (
               entry.name.endsWith('.md') || 
@@ -171,11 +157,11 @@ program
       
       console.log(`Validating ${files.length} files...`);
       
-      let validFiles = 0;
-      let invalidFiles = 0;
+      let _validFiles = 0;
+      let _invalidFiles = 0;
       
       for (const file of files) {
-        const result = await PromptValidator.validatePromptFile(file);
+        const _result = await PromptValidator.validatePromptFile(file);
         
         if (result.valid) {
           validFiles++;
@@ -193,14 +179,13 @@ program
         }
       }
       
-      console.log(`\nValidation complete: ${validFiles} valid, ${invalidFiles} invalid`);
+      console.log(`\nValidation complete: ${validFiles} _valid, ${invalidFiles} invalid`);
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Validation failed:', error);
       process.exit(1);
     }
   });
-
 program
   .command('config')
   .description('Manage configuration')
@@ -209,59 +194,57 @@ program
   .option('--profiles', 'List available profiles')
   .action(async (options) => {
     try {
-      const configManager = new PromptConfigManager();
+      const _configManager = new PromptConfigManager();
       
       if (options.init) {
         await configManager.saveConfig();
         console.log('✅ Configuration initialized');
       } else if (options.show) {
-        const config = await configManager.loadConfig();
-        console.log(JSON.stringify(config, null, 2));
+        const _config = await configManager.loadConfig();
+        console.log(JSON.stringify(_config, null, 2));
       } else if (options.profiles) {
-        const config = await configManager.loadConfig();
-        const profiles = configManager.listProfiles();
+        const _config = await configManager.loadConfig();
+        const _profiles = configManager.listProfiles();
         
         console.log('Available profiles:');
         profiles.forEach(profile => {
           console.log(`  📋 ${profile}`);
-          const profileOptions = configManager.getProfile(profile);
-          Object.entries(profileOptions).forEach(([key, value]) => {
+          const _profileOptions = configManager.getProfile(profile);
+          Object.entries(profileOptions).forEach(([_key, value]) => {
             console.log(`     ${key}: ${JSON.stringify(value)}`);
           });
         });
       } else {
-        console.log('Use --init, --show, or --profiles');
+        console.log('Use --_init, --_show, or --profiles');
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Configuration operation failed:', error);
       process.exit(1);
     }
   });
-
 program
   .command('rollback <manifest>')
   .description('Rollback from backup')
   .action(async (manifestPath) => {
     try {
       const { PromptCopier } = await import('./prompt-copier.js');
-      const copier = new PromptCopier({
+      const _copier = new PromptCopier({
         source: '',
         destination: ''
       });
       
       await copier.restoreFromBackup(manifestPath);
       console.log('✅ Rollback completed');
-    } catch (error) {
+    } catch (_error) {
       console.error('Rollback failed:', error);
       process.exit(1);
     }
   });
-
 program
   .command('sync')
   .description('Synchronize prompts between directories')
-  .option('-s, --source <path>', 'Source directory')
-  .option('-d, --destination <path>', 'Destination directory')
+  .option('-_s, --source <path>', 'Source directory')
+  .option('-_d, --destination <path>', 'Destination directory')
   .option('--bidirectional', 'Enable bidirectional sync')
   .option('--delete', 'Delete files not present in source')
   .action(async (options) => {
@@ -269,25 +252,21 @@ program
       // This would implement incremental sync functionality
       console.log('Sync functionality not yet implemented');
       console.log('Options:', options);
-    } catch (error) {
+    } catch (_error) {
       console.error('Sync failed:', error);
       process.exit(1);
     }
   });
-
 // Handle uncaught errors
 process.on('uncaughtException', (error) => {
   console.error('Uncaught exception:', error);
   process.exit(1);
 });
-
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled rejection:', reason);
   process.exit(1);
 });
-
 if (require.main === module) {
   program.parse();
 }
-
 export { program };

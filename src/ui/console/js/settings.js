@@ -3,7 +3,6 @@
  * Settings Manager for Claude Code Console
  * Handles configuration and preferences
  */
-
 export class SettingsManager {
   constructor() {
     this.settings = this.loadSettings();
@@ -60,13 +59,13 @@ export class SettingsManager {
    */
   setupSettingsPanel() {
     // Toggle button
-    const settingsToggle = document.getElementById('settingsToggle');
+    const _settingsToggle = document.getElementById('settingsToggle');
     if (settingsToggle) {
       settingsToggle.addEventListener('click', () => this.toggle());
     }
     
     // Close button
-    const closeButton = document.getElementById('closeSettings');
+    const _closeButton = document.getElementById('closeSettings');
     if (closeButton) {
       closeButton.addEventListener('click', () => this.hide());
     }
@@ -127,7 +126,7 @@ export class SettingsManager {
     this.bindSetting('enableSounds', 'change');
     
     this.bindSetting('maxLines', 'input', (value) => {
-      const maxLines = parseInt(value);
+      const _maxLines = parseInt(value);
       if (maxLines >= 100 && maxLines <= 10000) {
         this.emit('max_lines_changed', maxLines);
       }
@@ -143,8 +142,8 @@ export class SettingsManager {
    * Setup action buttons
    */
   setupActionButtons() {
-    const connectButton = document.getElementById('connectButton');
-    const disconnectButton = document.getElementById('disconnectButton');
+    const _connectButton = document.getElementById('connectButton');
+    const _disconnectButton = document.getElementById('disconnectButton');
     
     if (connectButton) {
       connectButton.addEventListener('click', () => {
@@ -162,7 +161,7 @@ export class SettingsManager {
     }
     
     // Add reset button
-    const resetButton = document.createElement('button');
+    const _resetButton = document.createElement('button');
     resetButton.className = 'reset-settings';
     resetButton.textContent = 'Reset to Defaults';
     resetButton.addEventListener('click', () => {
@@ -171,7 +170,7 @@ export class SettingsManager {
       }
     });
     
-    const settingsContent = document.querySelector('.settings-content');
+    const _settingsContent = document.querySelector('.settings-content');
     if (settingsContent) {
       settingsContent.appendChild(resetButton);
     }
@@ -180,12 +179,12 @@ export class SettingsManager {
   /**
    * Bind setting to form element
    */
-  bindSetting(settingName, eventType, callback) {
-    const element = document.getElementById(settingName);
+  bindSetting(_settingName, _eventType, _callback) {
+    const _element = document.getElementById(settingName);
     if (!element) return;
     
     // Set initial value
-    const value = this.get(settingName);
+    const _value = this.get(settingName);
     if (element.type === 'checkbox') {
       element.checked = value;
     } else {
@@ -193,8 +192,8 @@ export class SettingsManager {
     }
     
     // Listen for changes
-    element.addEventListener(eventType, (event) => {
-      let newValue;
+    element.addEventListener(_eventType, (event) => {
+      let newValue; // TODO: Remove if unused
       
       if (element.type === 'checkbox') {
         newValue = element.checked;
@@ -204,9 +203,9 @@ export class SettingsManager {
         newValue = element.value;
       }
       
-      this.set(settingName, newValue);
+      this.set(_settingName, newValue);
       
-      if (callback) {
+      if (_callback) {
         callback(newValue);
       }
     });
@@ -221,7 +220,7 @@ export class SettingsManager {
       this.isVisible = true;
       
       // Focus first input
-      const firstInput = this.settingsPanel.querySelector('input, select');
+      const _firstInput = this.settingsPanel.querySelector('_input, select');
       if (firstInput) {
         firstInput.focus();
       }
@@ -259,10 +258,10 @@ export class SettingsManager {
   /**
    * Set setting value
    */
-  set(key, value) {
+  set(_key, value) {
     this.settings[key] = value;
     this.saveSettings();
-    this.emit('setting_changed', { key, value });
+    this.emit('setting_changed', { _key, value });
   }
   
   /**
@@ -298,11 +297,11 @@ export class SettingsManager {
    */
   loadSettings() {
     try {
-      const stored = localStorage.getItem('claude_console_settings');
-      return stored ? JSON.parse(stored) : {};
-    } catch (error) {
+      const _stored = localStorage.getItem('claude_console_settings');
+      return stored ? JSON.parse(stored) : { /* empty */ };
+    } catch (_error) {
       console.error('Failed to load settings:', error);
-      return {};
+      return { /* empty */ };
     }
   }
   
@@ -312,7 +311,7 @@ export class SettingsManager {
   saveSettings() {
     try {
       localStorage.setItem('claude_console_settings', JSON.stringify(this.settings));
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to save settings:', error);
     }
   }
@@ -357,7 +356,7 @@ export class SettingsManager {
    */
   updateFormElements() {
     Object.keys(this.settings).forEach(key => {
-      const element = document.getElementById(key);
+      const _element = document.getElementById(key);
       if (element) {
         if (element.type === 'checkbox') {
           element.checked = this.get(key);
@@ -372,18 +371,18 @@ export class SettingsManager {
    * Export settings
    */
   exportSettings() {
-    const exportData = {
+    const _exportData = {
       timestamp: new Date().toISOString(),
       version: '1.0.0',
       settings: this.getAll()
     };
     
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+    const _blob = new Blob([JSON.stringify(_exportData, _null, 2)], {
       type: 'application/json'
     });
     
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const _url = URL.createObjectURL(blob);
+    const _a = document.createElement('a');
     a.href = url;
     a.download = `claude-console-settings-${Date.now()}.json`;
     document.body.appendChild(a);
@@ -397,8 +396,8 @@ export class SettingsManager {
    */
   async importSettings(file) {
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
+      const _text = await file.text();
+      const _data = JSON.parse(text);
       
       if (data.settings) {
         this.setAll(data.settings);
@@ -406,7 +405,7 @@ export class SettingsManager {
       } else {
         throw new Error('Invalid settings file format');
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to import settings:', error);
       return false;
     }
@@ -415,8 +414,8 @@ export class SettingsManager {
   /**
    * Validate setting value
    */
-  validateSetting(key, value) {
-    const validators = {
+  validateSetting(_key, value) {
+    const _validators = {
       fontSize: (v) => v >= 10 && v <= 24,
       lineHeight: (v) => v >= 1.0 && v <= 2.0,
       maxLines: (v) => v >= 100 && v <= 10000,
@@ -429,7 +428,7 @@ export class SettingsManager {
                               'mesh', 'hybrid'].includes(v)
     };
     
-    const validator = validators[key];
+    const _validator = validators[key];
     return validator ? validator(value) : true;
   }
   
@@ -437,8 +436,8 @@ export class SettingsManager {
    * Update connection status in settings
    */
   updateConnectionStatus(status) {
-    const connectButton = document.getElementById('connectButton');
-    const disconnectButton = document.getElementById('disconnectButton');
+    const _connectButton = document.getElementById('connectButton');
+    const _disconnectButton = document.getElementById('disconnectButton');
     
     if (connectButton && disconnectButton) {
       if (status.connected) {
@@ -458,28 +457,28 @@ export class SettingsManager {
    * Update connection info display
    */
   updateConnectionInfo(status) {
-    let infoElement = document.getElementById('connectionInfo');
+    let _infoElement = document.getElementById('connectionInfo');
     
     if (!infoElement) {
       infoElement = document.createElement('div');
       infoElement.id = 'connectionInfo';
       infoElement.className = 'connection-info';
       
-      const connectionSection = document.querySelector('.setting-group');
+      const _connectionSection = document.querySelector('.setting-group');
       if (connectionSection) {
         connectionSection.appendChild(infoElement);
       }
     }
     
-    const statusClass = status.connected ? 'connected' : 
+    const _statusClass = status.connected ? 'connected' : 
                        status.connecting ? 'connecting' : 'disconnected';
     
     infoElement.className = `connection-info ${statusClass}`;
     
-    const title = status.connected ? 'Connected' : 
+    const _title = status.connected ? 'Connected' : 
                  status.connecting ? 'Connecting...' : 'Disconnected';
     
-    const details = status.connected 
+    const _details = status.connected 
       ? `Connected to ${status.url}\nPending requests: ${status.pendingRequests}\nQueued messages: ${status.queuedMessages}`
       : status.connecting 
         ? `Attempting to connect to ${status.url}`
@@ -499,7 +498,7 @@ export class SettingsManager {
   setupEventListeners() {
     // Listen for theme changes from system
     if (window.matchMedia) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const _mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       mediaQuery.addEventListener('change', (e) => {
         if (this.get('theme') === 'auto') {
           this.applyTheme(e.matches ? 'dark' : 'light');
@@ -516,13 +515,13 @@ export class SettingsManager {
   /**
    * Event emitter functionality
    */
-  on(event, callback) {
+  on(_event, _callback) {
     if (!this.eventListeners) {
       this.eventListeners = new Map();
     }
     
     if (!this.eventListeners.has(event)) {
-      this.eventListeners.set(event, []);
+      this.eventListeners.set(_event, []);
     }
     
     this.eventListeners.get(event).push(callback);
@@ -531,7 +530,7 @@ export class SettingsManager {
   /**
    * Emit event
    */
-  emit(event, data) {
+  emit(_event, data) {
     if (!this.eventListeners || !this.eventListeners.has(event)) {
       return;
     }
@@ -539,7 +538,7 @@ export class SettingsManager {
     this.eventListeners.get(event).forEach(callback => {
       try {
         callback(data);
-      } catch (error) {
+      } catch (_error) {
         console.error('Error in settings event listener:', error);
       }
     });

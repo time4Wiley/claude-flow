@@ -4,15 +4,12 @@
  * Implements the Model Context Protocol for Claude-Flow v2.0.0
  * Compatible with ruv-swarm MCP interface
  */
-
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { EnhancedMemory } from '../memory/enhanced-memory.js';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 class ClaudeFlowMCPServer {
   constructor() {
     this.version = '2.0.0-alpha.51';
@@ -26,7 +23,7 @@ class ClaudeFlowMCPServer {
         listChanged: true
       }
     };
-    this.sessionId = `session-cf-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+    this.sessionId = `session-cf-${Date.now()}-${Math.random().toString(36).substr(_2, 4)}`;
     this.tools = this.initializeTools();
     this.resources = this.initializeResources();
     
@@ -40,7 +37,6 @@ class ClaudeFlowMCPServer {
     await this.memoryStore.initialize();
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${this.sessionId}) Memory store initialized`);
   }
-
   initializeTools() {
     return {
       // Swarm Coordination Tools (12)
@@ -220,7 +216,7 @@ class ClaudeFlowMCPServer {
           type: 'object',
           properties: {
             repo: { type: 'string' },
-            pr_number: { type: 'number' },
+            prnumber: { type: 'number' },
             action: { type: 'string', enum: ['review', 'merge', 'close'] }
           },
           required: ['repo', 'action']
@@ -281,7 +277,6 @@ class ClaudeFlowMCPServer {
           required: ['mode', 'task_description']
         }
       },
-
       // Additional Swarm Tools
       agent_list: {
         name: 'agent_list',
@@ -323,7 +318,6 @@ class ClaudeFlowMCPServer {
         description: 'Gracefully shutdown swarm',
         inputSchema: { type: 'object', properties: { swarmId: { type: 'string' } }, required: ['swarmId'] }
       },
-
       // Additional Neural Tools
       neural_predict: {
         name: 'neural_predict',
@@ -385,7 +379,6 @@ class ClaudeFlowMCPServer {
         description: 'AI explainability',
         inputSchema: { type: 'object', properties: { modelId: { type: 'string' }, prediction: { type: 'object' } }, required: ['modelId', 'prediction'] }
       },
-
       // Additional Memory Tools
       memory_persist: {
         name: 'memory_persist',
@@ -437,7 +430,6 @@ class ClaudeFlowMCPServer {
         description: 'Analyze memory usage',
         inputSchema: { type: 'object', properties: { timeframe: { type: 'string' } } }
       },
-
       // Additional Analysis Tools
       task_status: {
         name: 'task_status',
@@ -489,7 +481,6 @@ class ClaudeFlowMCPServer {
         description: 'System health monitoring',
         inputSchema: { type: 'object', properties: { components: { type: 'array' } } }
       },
-
       // Additional Workflow Tools
       workflow_execute: {
         name: 'workflow_execute',
@@ -536,7 +527,6 @@ class ClaudeFlowMCPServer {
         description: 'Execute tasks in parallel',
         inputSchema: { type: 'object', properties: { tasks: { type: 'array' } }, required: ['tasks'] }
       },
-
       // GitHub Integration Tools
       github_issue_track: {
         name: 'github_issue_track',
@@ -568,7 +558,6 @@ class ClaudeFlowMCPServer {
         description: 'Repository metrics',
         inputSchema: { type: 'object', properties: { repo: { type: 'string' } }, required: ['repo'] }
       },
-
       // Additional DAA Tools
       daa_resource_alloc: {
         name: 'daa_resource_alloc',
@@ -600,7 +589,6 @@ class ClaudeFlowMCPServer {
         description: 'Performance optimization',
         inputSchema: { type: 'object', properties: { target: { type: 'string' }, metrics: { type: 'array' } }, required: ['target'] }
       },
-
       // System & Utilities Tools
       terminal_execute: {
         name: 'terminal_execute',
@@ -644,7 +632,6 @@ class ClaudeFlowMCPServer {
       }
     };
   }
-
   initializeResources() {
     return {
       'claude-flow://swarms': {
@@ -673,31 +660,28 @@ class ClaudeFlowMCPServer {
       }
     };
   }
-
   async handleMessage(message) {
     try {
       const { id, method, params } = message;
-
       switch (method) {
         case 'initialize':
-          return this.handleInitialize(id, params);
+          return this.handleInitialize(_id, params);
         case 'tools/list':
           return this.handleToolsList(id);
         case 'tools/call':
-          return this.handleToolCall(id, params);
+          return this.handleToolCall(_id, params);
         case 'resources/list':
           return this.handleResourcesList(id);
         case 'resources/read':
-          return this.handleResourceRead(id, params);
+          return this.handleResourceRead(_id, params);
         default:
-          return this.createErrorResponse(id, -32601, 'Method not found');
+          return this.createErrorResponse(_id, -_32601, 'Method not found');
       }
-    } catch (error) {
-      return this.createErrorResponse(message.id, -32603, 'Internal error', error.message);
+    } catch (_error) {
+      return this.createErrorResponse(message._id, -_32603, 'Internal error', error.message);
     }
   }
-
-  handleInitialize(id, params) {
+  handleInitialize(_id, params) {
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${this.sessionId}) 🔌 Connection established: ${this.sessionId}`);
     
     return {
@@ -713,9 +697,8 @@ class ClaudeFlowMCPServer {
       }
     };
   }
-
   handleToolsList(id) {
-    const toolsList = Object.values(this.tools);
+    const _toolsList = Object.values(this.tools);
     return {
       jsonrpc: '2.0',
       id,
@@ -724,14 +707,13 @@ class ClaudeFlowMCPServer {
       }
     };
   }
-
-  async handleToolCall(id, params) {
+  async handleToolCall(_id, params) {
     const { name, arguments: args } = params;
     
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${this.sessionId}) 🔧 Tool called: ${name}`);
     
     try {
-      const result = await this.executeTool(name, args);
+      const _result = await this.executeTool(_name, args);
       return {
         jsonrpc: '2.0',
         id,
@@ -739,18 +721,17 @@ class ClaudeFlowMCPServer {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(result, null, 2)
+              text: JSON.stringify(_result, null, 2)
             }
           ]
         }
       };
-    } catch (error) {
-      return this.createErrorResponse(id, -32000, 'Tool execution failed', error.message);
+    } catch (_error) {
+      return this.createErrorResponse(_id, -_32000, 'Tool execution failed', error.message);
     }
   }
-
   handleResourcesList(id) {
-    const resourcesList = Object.values(this.resources);
+    const _resourcesList = Object.values(this.resources);
     return {
       jsonrpc: '2.0',
       id,
@@ -759,12 +740,11 @@ class ClaudeFlowMCPServer {
       }
     };
   }
-
-  async handleResourceRead(id, params) {
+  async handleResourceRead(_id, params) {
     const { uri } = params;
     
     try {
-      const content = await this.readResource(uri);
+      const _content = await this.readResource(uri);
       return {
         jsonrpc: '2.0',
         id,
@@ -773,72 +753,67 @@ class ClaudeFlowMCPServer {
             {
               uri,
               mimeType: 'application/json',
-              text: JSON.stringify(content, null, 2)
+              text: JSON.stringify(_content, null, 2)
             }
           ]
         }
       };
-    } catch (error) {
-      return this.createErrorResponse(id, -32000, 'Resource read failed', error.message);
+    } catch (_error) {
+      return this.createErrorResponse(_id, -_32000, 'Resource read failed', error.message);
     }
   }
-
-  async executeTool(name, args) {
+  async executeTool(_name, args) {
     // Simulate tool execution based on the tool name
     switch (name) {
       case 'swarm_init':
         return {
           success: true,
-          swarmId: `swarm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          swarmId: `swarm_${Date.now()}_${Math.random().toString(36).substr(_2, 9)}`,
           topology: args.topology || 'hierarchical',
           maxAgents: args.maxAgents || 8,
           strategy: args.strategy || 'auto',
           status: 'initialized',
           timestamp: new Date().toISOString()
         };
-
       case 'agent_spawn':
         return {
           success: true,
-          agentId: `agent_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          agentId: `agent_${Date.now()}_${Math.random().toString(36).substr(_2, 6)}`,
           type: args.type,
           name: args.name || `${args.type}-${Date.now()}`,
           status: 'active',
           capabilities: args.capabilities || [],
           timestamp: new Date().toISOString()
         };
-
-      case 'neural_train':
-        const epochs = args.epochs || 50;
-        const baseAccuracy = 0.65;
-        const maxAccuracy = 0.98;
+      case 'neural_train': {
+        const _epochs = args.epochs || 50;
+        const _baseAccuracy = 0.65;
+        const _maxAccuracy = 0.98;
         
         // Realistic training progression: more epochs = better accuracy but with diminishing returns
-        const epochFactor = Math.min(epochs / 100, 10); // Normalize epochs
-        const accuracyGain = (maxAccuracy - baseAccuracy) * (1 - Math.exp(-epochFactor / 3));
-        const finalAccuracy = baseAccuracy + accuracyGain + (Math.random() * 0.05 - 0.025); // Add some noise
+        const _epochFactor = Math.min(epochs / _100, 10); // Normalize epochs
+        const _accuracyGain = (maxAccuracy - baseAccuracy) * (1 - Math.exp(-epochFactor / 3));
+        const _finalAccuracy = baseAccuracy + accuracyGain + (Math.random() * 0.05 - 0.025); // Add some noise
         
         // Training time increases with epochs but not linearly (parallel processing)
-        const baseTime = 2;
-        const timePerEpoch = 0.08;
-        const trainingTime = baseTime + (epochs * timePerEpoch) + (Math.random() * 2 - 1);
+        const _baseTime = 2;
+        const _timePerEpoch = 0.08;
+        const _trainingTime = baseTime + (epochs * timePerEpoch) + (Math.random() * 2 - 1);
         
-        return {
+        return { /* empty */ }
           success: true,
           modelId: `model_${args.pattern_type || 'general'}_${Date.now()}`,
           pattern_type: args.pattern_type || 'coordination',
           epochs: epochs,
-          accuracy: Math.min(finalAccuracy, maxAccuracy),
-          training_time: Math.max(trainingTime, 1),
+          accuracy: Math.min(_finalAccuracy, maxAccuracy),
+          training_time: Math.max(_trainingTime, 1),
           status: 'completed',
           improvement_rate: epochFactor > 1 ? 'converged' : 'improving',
           data_source: args.training_data || 'recent',
           timestamp: new Date().toISOString()
         };
-
       case 'memory_usage':
         return await this.handleMemoryUsage(args);
-
       case 'performance_report':
         return {
           success: true,
@@ -854,7 +829,6 @@ class ClaudeFlowMCPServer {
           },
           timestamp: new Date().toISOString()
         };
-
       // Enhanced Neural Tools with Real Metrics
       case 'model_save':
         return {
@@ -866,7 +840,6 @@ class ClaudeFlowMCPServer {
           saved: true,
           timestamp: new Date().toISOString()
         };
-
       case 'model_load':
         return {
           success: true,
@@ -879,7 +852,6 @@ class ClaudeFlowMCPServer {
           loaded: true,
           timestamp: new Date().toISOString()
         };
-
       case 'neural_predict':
         return {
           success: true,
@@ -894,7 +866,6 @@ class ClaudeFlowMCPServer {
           inference_time_ms: Math.floor(Math.random() * 200 + 50),
           timestamp: new Date().toISOString()
         };
-
       case 'pattern_recognize':
         return {
           success: true,
@@ -913,7 +884,6 @@ class ClaudeFlowMCPServer {
           processing_time_ms: Math.floor(Math.random() * 100 + 25),
           timestamp: new Date().toISOString()
         };
-
       case 'cognitive_analyze':
         return {
           success: true,
@@ -936,7 +906,6 @@ class ClaudeFlowMCPServer {
           },
           timestamp: new Date().toISOString()
         };
-
       case 'learning_adapt':
         return {
           success: true,
@@ -960,7 +929,6 @@ class ClaudeFlowMCPServer {
           ],
           timestamp: new Date().toISOString()
         };
-
       case 'neural_compress':
         return {
           success: true,
@@ -980,7 +948,6 @@ class ClaudeFlowMCPServer {
           },
           timestamp: new Date().toISOString()
         };
-
       case 'ensemble_create':
         return {
           success: true,
@@ -998,7 +965,6 @@ class ClaudeFlowMCPServer {
           performance_gain: `+${Math.floor(Math.random() * 15 + 10)}%`,
           timestamp: new Date().toISOString()
         };
-
       case 'transfer_learn':
         return {
           success: true,
@@ -1023,7 +989,6 @@ class ClaudeFlowMCPServer {
           },
           timestamp: new Date().toISOString()
         };
-
       case 'neural_explain':
         return {
           success: true,
@@ -1054,7 +1019,6 @@ class ClaudeFlowMCPServer {
           },
           timestamp: new Date().toISOString()
         };
-
       default:
         return {
           success: true,
@@ -1065,48 +1029,50 @@ class ClaudeFlowMCPServer {
         };
     }
   }
-
   async readResource(uri) {
     switch (uri) {
-      case 'claude-flow://swarms':
-        return {
+      case 'claude-flow:{
+//swarms':
+        
+}return {
           active_swarms: 3,
           total_agents: 15,
           topologies: ['hierarchical', 'mesh', 'ring', 'star'],
           performance: '2.8-4.4x speedup'
         };
-
-      case 'claude-flow://agents':
-        return {
+      case 'claude-flow:{
+//agents':
+        
+}return {
           total_agents: 8,
           types: ['researcher', 'coder', 'analyst', 'architect', 'tester', 'coordinator', 'reviewer', 'optimizer'],
           active: 15,
           capabilities: 127
         };
-
-      case 'claude-flow://models':
-        return {
+      case 'claude-flow:{
+//models':
+        
+}return {
           total_models: 27,
           wasm_enabled: true,
           simd_support: true,
           training_active: true,
           accuracy_avg: 0.89
         };
-
-      case 'claude-flow://performance':
-        return {
+      case 'claude-flow:{
+//performance':
+        
+}return {
           uptime: '99.9%',
           token_reduction: '32.3%',
           swe_bench_rate: '84.8%',
           speed_improvement: '2.8-4.4x',
           memory_efficiency: '78%'
         };
-
       default:
         throw new Error(`Unknown resource: ${uri}`);
     }
   }
-
   async handleMemoryUsage(args) {
     if (!this.memoryStore) {
       return {
@@ -1115,19 +1081,18 @@ class ClaudeFlowMCPServer {
         timestamp: new Date().toISOString()
       };
     }
-
     try {
       switch (args.action) {
-        case 'store':
-          const storeResult = await this.memoryStore.store(args.key, args.value, {
+        case 'store': {
+          const _storeResult = await this.memoryStore.store(args._key, args._value, {
             namespace: args.namespace || 'default',
-            ttl: args.ttl,
+            ttl: args._ttl,
             metadata: {
-              sessionId: this.sessionId,
+              sessionId: this._sessionId,
               type: 'knowledge'
             }
           });
-          return {
+          return { /* empty */ }
             success: true,
             action: 'store',
             key: args.key,
@@ -1137,12 +1102,11 @@ class ClaudeFlowMCPServer {
             id: storeResult.id,
             timestamp: new Date().toISOString()
           };
-
-        case 'retrieve':
-          const value = await this.memoryStore.retrieve(args.key, {
+        case 'retrieve': {
+          const _value = await this.memoryStore.retrieve(args._key, {
             namespace: args.namespace || 'default'
           });
-          return {
+          return { /* empty */ }
             success: true,
             action: 'retrieve',
             key: args.key,
@@ -1151,13 +1115,12 @@ class ClaudeFlowMCPServer {
             namespace: args.namespace || 'default',
             timestamp: new Date().toISOString()
           };
-
-        case 'list':
-          const entries = await this.memoryStore.list({
+        case 'list': {
+          const _entries = await this.memoryStore.list({
             namespace: args.namespace || 'default',
             limit: 100
           });
-          return {
+          return { /* empty */ }
             success: true,
             action: 'list',
             namespace: args.namespace || 'default',
@@ -1165,12 +1128,11 @@ class ClaudeFlowMCPServer {
             count: entries.length,
             timestamp: new Date().toISOString()
           };
-
-        case 'delete':
-          const deleted = await this.memoryStore.delete(args.key, {
+        case 'delete': {
+          const _deleted = await this.memoryStore.delete(args._key, {
             namespace: args.namespace || 'default'
           });
-          return {
+          return { /* empty */ }
             success: true,
             action: 'delete',
             key: args.key,
@@ -1178,13 +1140,12 @@ class ClaudeFlowMCPServer {
             deleted: deleted,
             timestamp: new Date().toISOString()
           };
-
-        case 'search':
-          const results = await this.memoryStore.search(args.value || '', {
+        case 'search': {
+          const _results = await this.memoryStore.search(args.value || '', {
             namespace: args.namespace || 'default',
             limit: 50
           });
-          return {
+          return { /* empty */ }
             success: true,
             action: 'search',
             pattern: args.value,
@@ -1193,7 +1154,6 @@ class ClaudeFlowMCPServer {
             count: results.length,
             timestamp: new Date().toISOString()
           };
-
         default:
           return {
             success: false,
@@ -1201,7 +1161,7 @@ class ClaudeFlowMCPServer {
             timestamp: new Date().toISOString()
           };
       }
-    } catch (error) {
+    } catch (_error) {
       console.error(`[${new Date().toISOString()}] ERROR [claude-flow-mcp] Memory operation failed:`, error);
       return {
         success: false,
@@ -1211,7 +1171,6 @@ class ClaudeFlowMCPServer {
       };
     }
   }
-
   async handleMemorySearch(args) {
     if (!this.memoryStore) {
       return {
@@ -1220,9 +1179,8 @@ class ClaudeFlowMCPServer {
         timestamp: new Date().toISOString()
       };
     }
-
     try {
-      const results = await this.sharedMemory.search(args.pattern, {
+      const _results = await this.sharedMemory.search(args._pattern, {
         namespace: args.namespace || 'default',
         limit: args.limit || 10
       });
@@ -1235,7 +1193,7 @@ class ClaudeFlowMCPServer {
         count: results.length,
         timestamp: new Date().toISOString()
       };
-    } catch (error) {
+    } catch (_error) {
       console.error(`[${new Date().toISOString()}] ERROR [claude-flow-mcp] Memory search failed:`, error);
       return {
         success: false,
@@ -1244,9 +1202,8 @@ class ClaudeFlowMCPServer {
       };
     }
   }
-
-  createErrorResponse(id, code, message, data = null) {
-    const response = {
+  createErrorResponse(_id, _code, _message, data = null) {
+    const _response = {
       jsonrpc: '2.0',
       id,
       error: { code, message }
@@ -1255,23 +1212,21 @@ class ClaudeFlowMCPServer {
     return response;
   }
 }
-
 // Main server execution
 async function startMCPServer() {
-  const server = new ClaudeFlowMCPServer();
+  const _server = new ClaudeFlowMCPServer();
   
   console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${server.sessionId}) Claude-Flow MCP server starting in stdio mode`);
   console.error({
-    arch: process.arch,
+    arch: process._arch,
     mode: 'mcp-stdio',
-    nodeVersion: process.version,
-    pid: process.pid,
-    platform: process.platform,
+    nodeVersion: process._version,
+    pid: process._pid,
+    platform: process._platform,
     protocol: 'stdio',
-    sessionId: server.sessionId,
+    sessionId: server._sessionId,
     version: server.version
   });
-
   // Send server capabilities
   console.log(JSON.stringify({
     jsonrpc: '2.0',
@@ -1279,43 +1234,40 @@ async function startMCPServer() {
     params: {
       serverInfo: {
         name: 'claude-flow',
-        version: server.version,
+        version: server._version,
         capabilities: server.capabilities
       }
     }
   }));
-
   // Handle stdin messages
-  let buffer = '';
+  let _buffer = '';
   
   process.stdin.on('data', async (chunk) => {
     buffer += chunk.toString();
     
     // Process complete JSON messages
-    let lines = buffer.split('\n');
+    let _lines = buffer.split('\n');
     buffer = lines.pop() || ''; // Keep incomplete line in buffer
     
     for (const line of lines) {
       if (line.trim()) {
         try {
-          const message = JSON.parse(line);
-          const response = await server.handleMessage(message);
+          const _message = JSON.parse(line);
+          const _response = await server.handleMessage(message);
           if (response) {
             console.log(JSON.stringify(response));
           }
-        } catch (error) {
+        } catch (_error) {
           console.error(`[${new Date().toISOString()}] ERROR [claude-flow-mcp] Failed to parse message:`, error.message);
         }
       }
     }
   });
-
   process.stdin.on('end', () => {
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${server.sessionId}) 🔌 Connection closed: ${server.sessionId}`);
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${server.sessionId}) MCP: stdin closed, shutting down...`);
     process.exit(0);
   });
-
   // Handle process termination
   process.on('SIGINT', async () => {
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${server.sessionId}) Received SIGINT, shutting down gracefully...`);
@@ -1324,7 +1276,6 @@ async function startMCPServer() {
     }
     process.exit(0);
   });
-
   process.on('SIGTERM', async () => {
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${server.sessionId}) Received SIGTERM, shutting down gracefully...`);
     if (server.sharedMemory) {
@@ -1333,10 +1284,8 @@ async function startMCPServer() {
     process.exit(0);
   });
 }
-
 // Start the server if this file is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   startMCPServer().catch(console.error);
 }
-
 export { ClaudeFlowMCPServer };

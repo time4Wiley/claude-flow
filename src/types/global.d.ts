@@ -1,6 +1,4 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 // Global type definitions and environment compatibility
-
 // Node.js global augmentations
 declare global {
   namespace NodeJS {
@@ -12,26 +10,21 @@ declare global {
     }
   }
 }
-
 // Deno compatibility shims (when running in Node)
 declare global {
-  var Deno: any | undefined;
+  var _Deno: unknown | undefined;
 }
-
 // Commander.js types extension
 import type { Command as CommanderCommand } from 'commander';
-
 declare module 'commander' {
   interface Command {
     showHelp(): void;
   }
 }
-
 // Table types
 declare module 'cli-table3' {
   interface Table {
-    push(...rows: any[]): void;
+    push(...rows: unknown[]): void;
   }
 }
-
-export {};
+export { /* empty */ };

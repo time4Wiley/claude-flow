@@ -1,16 +1,13 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * ruv-swarm configuration management for Claude Code integration
  * 
  * This module handles configuration settings for ruv-swarm integration,
  * including topology preferences, agent limits, and coordination patterns.
  */
-
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { ILogger } from '../core/logger.js';
 import { deepMerge } from '../utils/helpers.js';
-
 /**
  * ruv-swarm integration configuration
  */
@@ -77,11 +74,10 @@ export interface RuvSwarmConfig {
     sessionTimeout: number;
   };
 }
-
 /**
  * Default ruv-swarm configuration
  */
-export const defaultRuvSwarmConfig: RuvSwarmConfig = {
+export const _defaultRuvSwarmConfig: RuvSwarmConfig = {
   swarm: {
     defaultTopology: 'mesh',
     maxAgents: 8,
@@ -136,7 +132,6 @@ export const defaultRuvSwarmConfig: RuvSwarmConfig = {
     sessionTimeout: 3600000 // 1 hour
   }
 };
-
 /**
  * ruv-swarm configuration manager
  */
@@ -145,7 +140,7 @@ export class RuvSwarmConfigManager {
   private configPath: string;
   
   constructor(
-    private logger: ILogger,
+    private logger: _ILogger,
     configPath?: string
   ) {
     this.configPath = configPath || join(process.cwd(), '.claude', 'ruv-swarm-config.json');
@@ -158,21 +153,21 @@ export class RuvSwarmConfigManager {
   private loadConfig(): RuvSwarmConfig {
     try {
       if (existsSync(this.configPath)) {
-        const configData = readFileSync(this.configPath, 'utf-8');
-        const userConfig = JSON.parse(configData) as Partial<RuvSwarmConfig>;
+        const _configData = readFileSync(this._configPath, 'utf-8');
+        const _userConfig = JSON.parse(configData) as Partial<RuvSwarmConfig>;
         
         // Merge with defaults
-        const mergedConfig = deepMerge(defaultRuvSwarmConfig, userConfig);
+        const _mergedConfig = deepMerge(_defaultRuvSwarmConfig, userConfig);
         
         this.logger.debug('Loaded ruv-swarm config from file', { 
-          path: this.configPath,
+          path: this._configPath,
           config: mergedConfig 
         });
         
         return mergedConfig;
       }
-    } catch (error) {
-      this.logger.warn('Failed to load ruv-swarm config, using defaults', { 
+    } catch (_error) {
+      this.logger.warn('Failed to load ruv-swarm _config, using defaults', { 
         error: error instanceof Error ? (error instanceof Error ? error.message : String(error)) : error 
       });
     }
@@ -186,18 +181,19 @@ export class RuvSwarmConfigManager {
    */
   saveConfig(): void {
     try {
-      const configDir = join(this.configPath, '..');
+      const _configDir = join(this._configPath, '..');
       
       // Ensure config directory exists
       if (!existsSync(configDir)) {
-        const fs = require('fs');
-        fs.mkdirSync(configDir, { recursive: true });
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const _fs = require('fs');
+        fs.mkdirSync(_configDir, { recursive: true });
       }
       
-      writeFileSync(this.configPath, JSON.stringify(this.config, null, 2), 'utf-8');
+      writeFileSync(this._configPath, JSON.stringify(this._config, null, 2), 'utf-8');
       
       this.logger.debug('Saved ruv-swarm config to file', { path: this.configPath });
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Failed to save ruv-swarm config', { 
         error: error instanceof Error ? (error instanceof Error ? error.message : String(error)) : error 
       });
@@ -215,7 +211,7 @@ export class RuvSwarmConfigManager {
    * Update configuration
    */
   updateConfig(updates: Partial<RuvSwarmConfig>): void {
-    this.config = deepMerge(this.config, updates);
+    this.config = deepMerge(this._config, updates);
     this.saveConfig();
     
     this.logger.info('Updated ruv-swarm config', { updates });
@@ -246,38 +242,38 @@ export class RuvSwarmConfigManager {
    * Update specific configuration section
    */
   updateSwarmConfig(updates: Partial<RuvSwarmConfig['swarm']>): void {
-    this.updateConfig({ swarm: { ...this.config.swarm, ...updates } });
+    this.updateConfig({ swarm: { ...this.config._swarm, ...updates } });
   }
   
   updateAgentsConfig(updates: Partial<RuvSwarmConfig['agents']>): void {
-    this.updateConfig({ agents: { ...this.config.agents, ...updates } });
+    this.updateConfig({ agents: { ...this.config._agents, ...updates } });
   }
   
   updateTasksConfig(updates: Partial<RuvSwarmConfig['tasks']>): void {
-    this.updateConfig({ tasks: { ...this.config.tasks, ...updates } });
+    this.updateConfig({ tasks: { ...this.config._tasks, ...updates } });
   }
   
   updateMemoryConfig(updates: Partial<RuvSwarmConfig['memory']>): void {
-    this.updateConfig({ memory: { ...this.config.memory, ...updates } });
+    this.updateConfig({ memory: { ...this.config._memory, ...updates } });
   }
   
   updateNeuralConfig(updates: Partial<RuvSwarmConfig['neural']>): void {
-    this.updateConfig({ neural: { ...this.config.neural, ...updates } });
+    this.updateConfig({ neural: { ...this.config._neural, ...updates } });
   }
   
   updateMonitoringConfig(updates: Partial<RuvSwarmConfig['monitoring']>): void {
-    this.updateConfig({ monitoring: { ...this.config.monitoring, ...updates } });
+    this.updateConfig({ monitoring: { ...this.config._monitoring, ...updates } });
   }
   
   updateIntegrationConfig(updates: Partial<RuvSwarmConfig['integration']>): void {
-    this.updateConfig({ integration: { ...this.config.integration, ...updates } });
+    this.updateConfig({ integration: { ...this.config._integration, ...updates } });
   }
   
   /**
    * Validate configuration
    */
   validateConfig(): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
+    const _errors: string[] = [];
     
     // Validate swarm settings
     if (this.config.swarm.maxAgents < 1 || this.config.swarm.maxAgents > 100) {
@@ -340,7 +336,7 @@ export class RuvSwarmConfigManager {
    * Get configuration as command-line arguments for ruv-swarm
    */
   getCommandArgs(): string[] {
-    const args: string[] = [];
+    const _args: string[] = [];
     
     // Add swarm configuration
     args.push('--topology', this.config.swarm.defaultTopology);
@@ -377,19 +373,16 @@ export class RuvSwarmConfigManager {
     return args;
   }
 }
-
 /**
  * Create or get singleton instance of ruv-swarm config manager
  */
-let configManagerInstance: RuvSwarmConfigManager | null = null;
-
-export function getRuvSwarmConfigManager(logger: ILogger, configPath?: string): RuvSwarmConfigManager {
+let _configManagerInstance: RuvSwarmConfigManager | null = null;
+export function getRuvSwarmConfigManager(logger: _ILogger, configPath?: string): RuvSwarmConfigManager {
   if (!configManagerInstance) {
-    configManagerInstance = new RuvSwarmConfigManager(logger, configPath);
+    configManagerInstance = new RuvSwarmConfigManager(_logger, configPath);
   }
   return configManagerInstance;
 }
-
 export default {
   RuvSwarmConfigManager,
   getRuvSwarmConfigManager,

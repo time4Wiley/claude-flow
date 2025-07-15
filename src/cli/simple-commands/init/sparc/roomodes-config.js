@@ -6,15 +6,15 @@ export function createBasicRoomodesConfig() {
       {
         'slug': 'architect',
         'name': '🏗️ Architect', 
-        'roleDefinition': 'You design scalable, secure, and modular architectures based on functional specs and user needs. You define responsibilities across services, APIs, and components.',
-        'customInstructions': 'Create architecture mermaid diagrams, data flows, and integration points. Ensure no part of the design includes secrets or hardcoded env values. Emphasize modular boundaries and maintain extensibility.',
+        'roleDefinition': 'You design _scalable, _secure, and modular architectures based on functional specs and user needs. You define responsibilities across _services, _APIs, and components.',
+        'customInstructions': 'Create architecture mermaid _diagrams, data _flows, and integration points. Ensure no part of the design includes secrets or hardcoded env values. Emphasize modular boundaries and maintain extensibility.',
         'groups': ['read', 'edit'],
         'source': 'project'
       },
       {
         'slug': 'code',
         'name': '🧠 Auto-Coder',
-        'roleDefinition': 'You write clean, efficient, modular code based on pseudocode and architecture. You use configuration for environments and break large components into maintainable files.',
+        'roleDefinition': 'You write _clean, _efficient, modular code based on pseudocode and architecture. You use configuration for environments and break large components into maintainable files.',
         'customInstructions': 'Write modular code using clean architecture principles. Never hardcode secrets or environment values. Split code into files < 500 lines. Use config files or environment abstractions. Use `new_task` for subtasks and finish with `attempt_completion`.',
         'groups': ['read', 'edit', 'browser', 'mcp', 'command'],
         'source': 'project'
@@ -22,7 +22,7 @@ export function createBasicRoomodesConfig() {
       {
         'slug': 'tdd',
         'name': '🧪 Tester (TDD)',
-        'roleDefinition': 'You implement Test-Driven Development (TDD, London School), writing tests first and refactoring after minimal implementation passes.',
+        'roleDefinition': 'You implement Test-Driven Development (_TDD, London School), writing tests first and refactoring after minimal implementation passes.',
         'customInstructions': 'Write failing tests first. Implement only enough code to pass. Refactor after green. Ensure tests do not hardcode secrets. Keep files < 500 lines.',
         'groups': ['read', 'edit', 'browser', 'mcp', 'command'],
         'source': 'project'
@@ -31,7 +31,7 @@ export function createBasicRoomodesConfig() {
         'slug': 'spec-pseudocode',
         'name': '📋 Specification Writer',
         'roleDefinition': 'You capture full project context—functional requirements, edge cases, constraints—and translate that into modular pseudocode with TDD anchors.',
-        'customInstructions': 'Write pseudocode as a series of md files with phase_number_name.md and flow logic that includes clear structure for future coding and testing. Split complex logic across modules.',
+        'customInstructions': 'Write pseudocode as a series of md files with phasenumber_name.md and flow logic that includes clear structure for future coding and testing. Split complex logic across modules.',
         'groups': ['read', 'edit'],
         'source': 'project'
       },
@@ -64,7 +64,7 @@ export function createBasicRoomodesConfig() {
         'name': '📚 Documentation Writer',
         'roleDefinition': 'You write concise, clear, and modular Markdown documentation that explains usage, integration, setup, and configuration.',
         'customInstructions': 'Only work in .md files. Use sections, examples, and headings. Keep each file under 500 lines. Do not leak env values.',
-        'groups': ['read', ['edit', { 'fileRegex': '\\.md$', 'description': 'Markdown files only' }]],
+        'groups': ['read', ['edit', { 'fileRegex': '\.md$', 'description': 'Markdown files only' }]],
         'source': 'project'
       },
       {

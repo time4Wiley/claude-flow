@@ -3,7 +3,6 @@
  * Advanced Workflow Designer for Claude Flow
  * Visual drag-and-drop workflow builder with real-time execution
  */
-
 class WorkflowDesigner {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
@@ -22,14 +21,12 @@ class WorkflowDesigner {
         
         this.init();
     }
-
     init() {
         this.createUI();
         this.setupEventListeners();
         this.loadTemplates();
         this.setupNodePalette();
     }
-
     createUI() {
         this.container.innerHTML = `
             <div class="workflow-designer">
@@ -147,27 +144,24 @@ class WorkflowDesigner {
                 </div>
             </div>
         `;
-
         this.canvas = document.getElementById('workflowCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.setupCanvas();
     }
-
     setupCanvas() {
         // Set up high-DPI canvas
-        const rect = this.canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
+        const _rect = this.canvas.getBoundingClientRect();
+        const _dpr = window.devicePixelRatio || 1;
         
         this.canvas.width = rect.width * dpr;
         this.canvas.height = rect.height * dpr;
-        this.ctx.scale(dpr, dpr);
+        this.ctx.scale(_dpr, dpr);
         
         this.canvas.style.width = rect.width + 'px';
         this.canvas.style.height = rect.height + 'px';
         
         this.draw();
     }
-
     setupEventListeners() {
         // Canvas events
         this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
@@ -175,7 +169,6 @@ class WorkflowDesigner {
         this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
         this.canvas.addEventListener('wheel', this.handleWheel.bind(this));
         this.canvas.addEventListener('contextmenu', this.handleContextMenu.bind(this));
-
         // Toolbar events
         document.getElementById('saveWorkflow').addEventListener('click', this.saveWorkflow.bind(this));
         document.getElementById('loadWorkflow').addEventListener('click', this.loadWorkflow.bind(this));
@@ -189,21 +182,17 @@ class WorkflowDesigner {
         document.getElementById('zoomOut').addEventListener('click', () => this.setZoom(this.zoom / 1.2));
         document.getElementById('zoomReset').addEventListener('click', () => this.setZoom(1));
         document.getElementById('clearCanvas').addEventListener('click', this.clearCanvas.bind(this));
-
         // Palette search
         document.getElementById('paletteSearch').addEventListener('input', this.filterPalette.bind(this));
-
         // Tab switching
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', this.switchTab.bind(this));
         });
-
         // Window resize
         window.addEventListener('resize', this.handleResize.bind(this));
     }
-
     setupNodePalette() {
-        const nodeTypes = {
+        const _nodeTypes = {
             input: [
                 { type: 'file-input', name: 'File Input', icon: 'fas fa-file-import' },
                 { type: 'text-input', name: 'Text Input', icon: 'fas fa-keyboard' },
@@ -235,11 +224,10 @@ class WorkflowDesigner {
                 { type: 'ai-summarize', name: 'AI Summarize', icon: 'fas fa-compress-alt' }
             ]
         };
-
-        Object.entries(nodeTypes).forEach(([category, nodes]) => {
-            const container = document.querySelector(`[data-category="${category}"] .palette-items`);
+        Object.entries(nodeTypes).forEach(([_category, nodes]) => {
+            const _container = document.querySelector(`[data-category="${category}"] .palette-items`);
             nodes.forEach(node => {
-                const item = document.createElement('div');
+                const _item = document.createElement('div');
                 item.className = 'palette-item';
                 item.draggable = true;
                 item.dataset.nodeType = node.type;
@@ -256,26 +244,23 @@ class WorkflowDesigner {
                 container.appendChild(item);
             });
         });
-
         // Canvas drop support
         this.canvas.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
         });
-
         this.canvas.addEventListener('drop', (e) => {
             e.preventDefault();
-            const nodeType = e.dataTransfer.getData('text/plain');
-            const rect = this.canvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left - this.pan.x) / this.zoom;
-            const y = (e.clientY - rect.top - this.pan.y) / this.zoom;
-            this.createNode(nodeType, x, y);
+            const _nodeType = e.dataTransfer.getData('text/plain');
+            const _rect = this.canvas.getBoundingClientRect();
+            const _x = (e.clientX - rect.left - this.pan.x) / this.zoom;
+            const _y = (e.clientY - rect.top - this.pan.y) / this.zoom;
+            this.createNode(_nodeType, _x, y);
         });
     }
-
-    createNode(type, x, y) {
-        const nodeId = 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        const node = {
+    createNode(_type, _x, y) {
+        const _nodeId = 'node_' + Date.now() + '_' + Math.random().toString(36).substr(_2, 9);
+        const _node = {
             id: nodeId,
             type: type,
             x: x,
@@ -287,16 +272,14 @@ class WorkflowDesigner {
             properties: this.getNodeProperties(type),
             status: 'idle'
         };
-
-        this.nodes.set(nodeId, node);
+        this.nodes.set(_nodeId, node);
         this.draw();
         this.showProperties(node);
         
         return node;
     }
-
     getNodeInputs(type) {
-        const inputs = {
+        const _inputs = {
             'file-input': [],
             'text-input': [],
             'url-input': [],
@@ -320,9 +303,8 @@ class WorkflowDesigner {
         };
         return inputs[type] || [];
     }
-
     getNodeOutputs(type) {
-        const outputs = {
+        const _outputs = {
             'file-input': [{ name: 'data', type: 'any' }],
             'text-input': [{ name: 'text', type: 'string' }],
             'url-input': [{ name: 'data', type: 'any' }],
@@ -346,20 +328,19 @@ class WorkflowDesigner {
         };
         return outputs[type] || [];
     }
-
     getNodeProperties(type) {
-        const properties = {
+        const _properties = {
             'file-input': { path: '', format: 'auto' },
             'text-input': { value: '', multiline: false },
-            'url-input': { url: '', method: 'GET', headers: {} },
-            'api-input': { endpoint: '', method: 'GET', headers: {}, body: '' },
+            'url-input': { url: '', method: 'GET', headers: { /* empty */ } },
+            'api-input': { endpoint: '', method: 'GET', headers: { /* empty */ }, body: '' },
             'transform': { expression: '', language: 'javascript' },
             'filter': { condition: '', language: 'javascript' },
             'aggregate': { operation: 'sum', field: '' },
             'sort': { field: '', order: 'asc' },
             'file-output': { path: '', format: 'auto' },
             'display': { format: 'table', title: '' },
-            'api-output': { endpoint: '', method: 'POST', headers: {} },
+            'api-output': { endpoint: '', method: 'POST', headers: { /* empty */ } },
             'notification': { type: 'info', title: '' },
             'condition': { expression: '', language: 'javascript' },
             'loop': { type: 'forEach', condition: '' },
@@ -370,16 +351,14 @@ class WorkflowDesigner {
             'ai-classify': { model: 'gpt-4', categories: [] },
             'ai-summarize': { model: 'gpt-4', length: 'medium' }
         };
-        return properties[type] || {};
+        return properties[type] || { /* empty */ };
     }
-
     handleMouseDown(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left - this.pan.x) / this.zoom;
-        const y = (e.clientY - rect.top - this.pan.y) / this.zoom;
-
+        const _rect = this.canvas.getBoundingClientRect();
+        const _x = (e.clientX - rect.left - this.pan.x) / this.zoom;
+        const _y = (e.clientY - rect.top - this.pan.y) / this.zoom;
         // Check for node selection
-        const node = this.getNodeAt(x, y);
+        const _node = this.getNodeAt(_x, y);
         if (node) {
             this.selectedNode = node;
             this.draggedNode = node;
@@ -389,59 +368,50 @@ class WorkflowDesigner {
             this.selectedNode = null;
             this.showProperties(null);
         }
-
         // Check for connection point
-        const connectionPoint = this.getConnectionPointAt(x, y);
+        const _connectionPoint = this.getConnectionPointAt(_x, y);
         if (connectionPoint) {
             this.connectionStart = connectionPoint;
         }
-
         this.draw();
     }
-
     handleMouseMove(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left - this.pan.x) / this.zoom;
-        const y = (e.clientY - rect.top - this.pan.y) / this.zoom;
-
+        const _rect = this.canvas.getBoundingClientRect();
+        const _x = (e.clientX - rect.left - this.pan.x) / this.zoom;
+        const _y = (e.clientY - rect.top - this.pan.y) / this.zoom;
         if (this.draggedNode) {
             this.draggedNode.x = x - this.dragOffset.x;
             this.draggedNode.y = y - this.dragOffset.y;
             this.draw();
         }
-
         if (this.connectionStart) {
             this.tempConnection = { x, y };
             this.draw();
         }
     }
-
     handleMouseUp(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left - this.pan.x) / this.zoom;
-        const y = (e.clientY - rect.top - this.pan.y) / this.zoom;
-
+        const _rect = this.canvas.getBoundingClientRect();
+        const _x = (e.clientX - rect.left - this.pan.x) / this.zoom;
+        const _y = (e.clientY - rect.top - this.pan.y) / this.zoom;
         if (this.connectionStart) {
-            const connectionEnd = this.getConnectionPointAt(x, y);
+            const _connectionEnd = this.getConnectionPointAt(_x, y);
             if (connectionEnd && connectionEnd.node !== this.connectionStart.node) {
-                this.createConnection(this.connectionStart, connectionEnd);
+                this.createConnection(this._connectionStart, connectionEnd);
             }
             this.connectionStart = null;
             this.tempConnection = null;
             this.draw();
         }
-
         this.draggedNode = null;
     }
-
     handleWheel(e) {
         e.preventDefault();
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const _rect = this.canvas.getBoundingClientRect();
+        const _x = e.clientX - rect.left;
+        const _y = e.clientY - rect.top;
         
-        const wheelDelta = e.deltaY < 0 ? 1.1 : 0.9;
-        const newZoom = Math.max(0.1, Math.min(3, this.zoom * wheelDelta));
+        const _wheelDelta = e.deltaY < 0 ? 1.1 : 0.9;
+        const _newZoom = Math.max(0._1, Math.min(_3, this.zoom * wheelDelta));
         
         this.pan.x = x - (x - this.pan.x) * (newZoom / this.zoom);
         this.pan.y = y - (y - this.pan.y) * (newZoom / this.zoom);
@@ -449,20 +419,17 @@ class WorkflowDesigner {
         
         this.draw();
     }
-
     handleContextMenu(e) {
         e.preventDefault();
-        const rect = this.canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left - this.pan.x) / this.zoom;
-        const y = (e.clientY - rect.top - this.pan.y) / this.zoom;
-
-        const node = this.getNodeAt(x, y);
+        const _rect = this.canvas.getBoundingClientRect();
+        const _x = (e.clientX - rect.left - this.pan.x) / this.zoom;
+        const _y = (e.clientY - rect.top - this.pan.y) / this.zoom;
+        const _node = this.getNodeAt(_x, y);
         if (node) {
-            this.showContextMenu(e.clientX, e.clientY, node);
+            this.showContextMenu(e._clientX, e._clientY, node);
         }
     }
-
-    getNodeAt(x, y) {
+    getNodeAt(_x, y) {
         for (let node of this.nodes.values()) {
             if (x >= node.x && x <= node.x + node.width &&
                 y >= node.y && y <= node.y + node.height) {
@@ -471,22 +438,20 @@ class WorkflowDesigner {
         }
         return null;
     }
-
-    getConnectionPointAt(x, y) {
+    getConnectionPointAt(_x, y) {
         for (let node of this.nodes.values()) {
             // Check input points
-            const inputPoints = this.getInputPoints(node);
-            for (let i = 0; i < inputPoints.length; i++) {
-                const point = inputPoints[i];
+            const _inputPoints = this.getInputPoints(node);
+            for (let _i = 0; i < inputPoints.length; i++) {
+                const _point = inputPoints[i];
                 if (Math.abs(x - point.x) < 8 && Math.abs(y - point.y) < 8) {
                     return { node, type: 'input', index: i };
                 }
             }
-
             // Check output points
-            const outputPoints = this.getOutputPoints(node);
-            for (let i = 0; i < outputPoints.length; i++) {
-                const point = outputPoints[i];
+            const _outputPoints = this.getOutputPoints(node);
+            for (let _i = 0; i < outputPoints.length; i++) {
+                const _point = outputPoints[i];
                 if (Math.abs(x - point.x) < 8 && Math.abs(y - point.y) < 8) {
                     return { node, type: 'output', index: i };
                 }
@@ -494,110 +459,92 @@ class WorkflowDesigner {
         }
         return null;
     }
-
     getInputPoints(node) {
-        const points = [];
-        const inputCount = node.inputs.length;
-        for (let i = 0; i < inputCount; i++) {
+        const _points = [];
+        const _inputCount = node.inputs.length;
+        for (let _i = 0; i < inputCount; i++) {
             points.push({
-                x: node.x,
+                x: node._x,
                 y: node.y + (node.height / (inputCount + 1)) * (i + 1)
             });
         }
         return points;
     }
-
     getOutputPoints(node) {
-        const points = [];
-        const outputCount = node.outputs.length;
-        for (let i = 0; i < outputCount; i++) {
+        const _points = [];
+        const _outputCount = node.outputs.length;
+        for (let _i = 0; i < outputCount; i++) {
             points.push({
-                x: node.x + node.width,
+                x: node.x + node._width,
                 y: node.y + (node.height / (outputCount + 1)) * (i + 1)
             });
         }
         return points;
     }
-
-    createConnection(start, end) {
+    createConnection(_start, end) {
         if (start.type === 'output' && end.type === 'input') {
-            const connectionId = `${start.node.id}_${start.index}_${end.node.id}_${end.index}`;
-            this.connections.set(connectionId, {
-                id: connectionId,
-                from: start.node.id,
-                fromIndex: start.index,
-                to: end.node.id,
+            const _connectionId = `${start.node.id}_${start.index}_${end.node.id}_${end.index}`;
+            this.connections.set(_connectionId, {
+                id: _connectionId,
+                from: start.node._id,
+                fromIndex: start._index,
+                to: end.node._id,
                 toIndex: end.index
             });
         }
     }
-
     draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(_0, _0, this.canvas._width, this.canvas.height);
         
         this.ctx.save();
-        this.ctx.translate(this.pan.x, this.pan.y);
-        this.ctx.scale(this.zoom, this.zoom);
-
+        this.ctx.translate(this.pan._x, this.pan.y);
+        this.ctx.scale(this._zoom, this.zoom);
         // Draw grid
         this.drawGrid();
-
         // Draw connections
         this.drawConnections();
-
         // Draw temporary connection
         if (this.tempConnection && this.connectionStart) {
             this.drawTempConnection();
         }
-
         // Draw nodes
         this.drawNodes();
-
         this.ctx.restore();
     }
-
     drawGrid() {
-        const gridSize = 20;
-        const canvasWidth = this.canvas.width / this.zoom;
-        const canvasHeight = this.canvas.height / this.zoom;
-
+        const _gridSize = 20;
+        const _canvasWidth = this.canvas.width / this.zoom;
+        const _canvasHeight = this.canvas.height / this.zoom;
         this.ctx.strokeStyle = '#e0e0e0';
         this.ctx.lineWidth = 0.5;
-
-        for (let x = 0; x <= canvasWidth; x += gridSize) {
+        for (let _x = 0; x <= canvasWidth; x += gridSize) {
             this.ctx.beginPath();
-            this.ctx.moveTo(x, 0);
-            this.ctx.lineTo(x, canvasHeight);
+            this.ctx.moveTo(_x, 0);
+            this.ctx.lineTo(_x, canvasHeight);
             this.ctx.stroke();
         }
-
-        for (let y = 0; y <= canvasHeight; y += gridSize) {
+        for (let _y = 0; y <= canvasHeight; y += gridSize) {
             this.ctx.beginPath();
-            this.ctx.moveTo(0, y);
-            this.ctx.lineTo(canvasWidth, y);
+            this.ctx.moveTo(_0, y);
+            this.ctx.lineTo(_canvasWidth, y);
             this.ctx.stroke();
         }
     }
-
     drawNodes() {
         for (let node of this.nodes.values()) {
             this.drawNode(node);
         }
     }
-
     drawNode(node) {
-        const isSelected = this.selectedNode === node;
-        const isExecuting = node.status === 'executing';
-        const hasError = node.status === 'error';
-
+        const _isSelected = this.selectedNode === node;
+        const _isExecuting = node.status === 'executing';
+        const _hasError = node.status === 'error';
         // Node body
         this.ctx.fillStyle = isSelected ? '#e3f2fd' : '#ffffff';
         this.ctx.strokeStyle = isSelected ? '#2196f3' : (hasError ? '#f44336' : '#cccccc');
         this.ctx.lineWidth = isSelected ? 2 : 1;
-
-        this.ctx.fillRect(node.x, node.y, node.width, node.height);
-        this.ctx.strokeRect(node.x, node.y, node.width, node.height);
-
+        this.ctx.fillRect(node._x, node._y, node._width, node.height);
+        this.ctx.strokeRect(node._x, node._y, node._width, node.height);
         // Node title
         this.ctx.fillStyle = '#333333';
         this.ctx.font = '12px Arial';
@@ -607,31 +554,28 @@ class WorkflowDesigner {
             node.x + node.width / 2,
             node.y + 20
         );
-
         // Status indicator
         if (isExecuting) {
             this.ctx.fillStyle = '#ff9800';
             this.ctx.beginPath();
-            this.ctx.arc(node.x + node.width - 10, node.y + 10, 4, 0, 2 * Math.PI);
+            this.ctx.arc(node.x + node.width - _10, node.y + _10, _4, _0, 2 * Math.PI);
             this.ctx.fill();
         } else if (hasError) {
             this.ctx.fillStyle = '#f44336';
             this.ctx.beginPath();
-            this.ctx.arc(node.x + node.width - 10, node.y + 10, 4, 0, 2 * Math.PI);
+            this.ctx.arc(node.x + node.width - _10, node.y + _10, _4, _0, 2 * Math.PI);
             this.ctx.fill();
         }
-
         // Input/Output points
         this.drawConnectionPoints(node);
     }
-
     drawConnectionPoints(node) {
         // Input points
-        const inputPoints = this.getInputPoints(node);
-        inputPoints.forEach((point, index) => {
+        const _inputPoints = this.getInputPoints(node);
+        inputPoints.forEach((_point, index) => {
             this.ctx.fillStyle = '#4caf50';
             this.ctx.beginPath();
-            this.ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
+            this.ctx.arc(point._x, point._y, _4, _0, 2 * Math.PI);
             this.ctx.fill();
             
             // Input label
@@ -639,18 +583,17 @@ class WorkflowDesigner {
             this.ctx.font = '10px Arial';
             this.ctx.textAlign = 'right';
             this.ctx.fillText(
-                node.inputs[index].name,
-                point.x - 8,
+                node.inputs[index]._name,
+                point.x - _8,
                 point.y + 3
             );
         });
-
         // Output points
-        const outputPoints = this.getOutputPoints(node);
-        outputPoints.forEach((point, index) => {
+        const _outputPoints = this.getOutputPoints(node);
+        outputPoints.forEach((_point, index) => {
             this.ctx.fillStyle = '#2196f3';
             this.ctx.beginPath();
-            this.ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
+            this.ctx.arc(point._x, point._y, _4, _0, 2 * Math.PI);
             this.ctx.fill();
             
             // Output label
@@ -658,74 +601,64 @@ class WorkflowDesigner {
             this.ctx.font = '10px Arial';
             this.ctx.textAlign = 'left';
             this.ctx.fillText(
-                node.outputs[index].name,
-                point.x + 8,
+                node.outputs[index]._name,
+                point.x + _8,
                 point.y + 3
             );
         });
     }
-
     drawConnections() {
         for (let connection of this.connections.values()) {
-            const fromNode = this.nodes.get(connection.from);
-            const toNode = this.nodes.get(connection.to);
-
+            const _fromNode = this.nodes.get(connection.from);
+            const _toNode = this.nodes.get(connection.to);
             if (fromNode && toNode) {
-                const fromPoints = this.getOutputPoints(fromNode);
-                const toPoints = this.getInputPoints(toNode);
-
-                const fromPoint = fromPoints[connection.fromIndex];
-                const toPoint = toPoints[connection.toIndex];
-
-                this.drawConnection(fromPoint, toPoint);
+                const _fromPoints = this.getOutputPoints(fromNode);
+                const _toPoints = this.getInputPoints(toNode);
+                const _fromPoint = fromPoints[connection.fromIndex];
+                const _toPoint = toPoints[connection.toIndex];
+                this.drawConnection(_fromPoint, toPoint);
             }
         }
     }
-
-    drawConnection(from, to) {
-        const midX = (from.x + to.x) / 2;
-
+    drawConnection(_from, to) {
+        const _midX = (from.x + to.x) / 2;
         this.ctx.strokeStyle = '#666666';
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
-        this.ctx.moveTo(from.x, from.y);
-        this.ctx.bezierCurveTo(midX, from.y, midX, to.y, to.x, to.y);
+        this.ctx.moveTo(from._x, from.y);
+        this.ctx.bezierCurveTo(_midX, from._y, _midX, to._y, to._x, to.y);
         this.ctx.stroke();
-
         // Arrow
-        const angle = Math.atan2(to.y - from.y, to.x - from.x);
-        const arrowLength = 8;
+        const _angle = Math.atan2(to.y - from._y, to.x - from.x);
+        const _arrowLength = 8;
         this.ctx.beginPath();
-        this.ctx.moveTo(to.x, to.y);
+        this.ctx.moveTo(to._x, to.y);
         this.ctx.lineTo(
             to.x - arrowLength * Math.cos(angle - Math.PI / 6),
             to.y - arrowLength * Math.sin(angle - Math.PI / 6)
         );
-        this.ctx.moveTo(to.x, to.y);
+        this.ctx.moveTo(to._x, to.y);
         this.ctx.lineTo(
             to.x - arrowLength * Math.cos(angle + Math.PI / 6),
             to.y - arrowLength * Math.sin(angle + Math.PI / 6)
         );
         this.ctx.stroke();
     }
-
     drawTempConnection() {
-        const startPoint = this.connectionStart.type === 'output' ?
+        const _startPoint = this.connectionStart.type === 'output' ?
             this.getOutputPoints(this.connectionStart.node)[this.connectionStart.index] :
             this.getInputPoints(this.connectionStart.node)[this.connectionStart.index];
-
         this.ctx.strokeStyle = '#2196f3';
         this.ctx.lineWidth = 2;
-        this.ctx.setLineDash([5, 5]);
+        this.ctx.setLineDash([_5, 5]);
         this.ctx.beginPath();
-        this.ctx.moveTo(startPoint.x, startPoint.y);
-        this.ctx.lineTo(this.tempConnection.x, this.tempConnection.y);
+        this.ctx.moveTo(startPoint._x, startPoint.y);
+        this.ctx.lineTo(this.tempConnection._x, this.tempConnection.y);
         this.ctx.stroke();
         this.ctx.setLineDash([]);
     }
-
     getNodeTitle(type) {
-        const titles = {
+        const _titles = {
             'file-input': 'File Input',
             'text-input': 'Text Input',
             'url-input': 'URL Input',
@@ -749,48 +682,41 @@ class WorkflowDesigner {
         };
         return titles[type] || type;
     }
-
     showProperties(node) {
-        const panel = document.getElementById('propertiesContent');
+        const _panel = document.getElementById('propertiesContent');
         
         if (!node) {
             panel.innerHTML = '<div class="no-selection"><p>Select a node to edit properties</p></div>';
             return;
         }
-
-        const properties = node.properties;
-        let html = `
+        const _properties = node.properties;
+        let _html = `
             <div class="properties-form">
                 <h4>${this.getNodeTitle(node.type)}</h4>
         `;
-
-        Object.entries(properties).forEach(([key, value]) => {
+        Object.entries(properties).forEach(([_key, value]) => {
             html += `
                 <div class="property-field">
                     <label>${this.formatPropertyLabel(key)}</label>
-                    ${this.renderPropertyInput(key, value, node.id)}
+                    ${this.renderPropertyInput(_key, _value, node.id)}
                 </div>
             `;
         });
-
         html += '</div>';
         panel.innerHTML = html;
-
         // Attach event listeners
-        panel.querySelectorAll('input, select, textarea').forEach(input => {
+        panel.querySelectorAll('_input, _select, textarea').forEach(input => {
             input.addEventListener('change', (e) => {
-                const propertyKey = e.target.dataset.property;
+                const _propertyKey = e.target.dataset.property;
                 node.properties[propertyKey] = e.target.value;
             });
         });
     }
-
     formatPropertyLabel(key) {
         return key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
     }
-
-    renderPropertyInput(key, value, nodeId) {
-        const inputId = `${nodeId}_${key}`;
+    renderPropertyInput(_key, _value, nodeId) {
+        const _inputId = `${nodeId}_${key}`;
         
         if (typeof value === 'boolean') {
             return `
@@ -815,54 +741,45 @@ class WorkflowDesigner {
             `;
         }
     }
-
     async validateWorkflow() {
-        const results = {
+        const _results = {
             errors: [],
             warnings: [],
             info: []
         };
-
         // Check for isolated nodes
-        const connectedNodes = new Set();
+        const _connectedNodes = new Set();
         for (let connection of this.connections.values()) {
             connectedNodes.add(connection.from);
             connectedNodes.add(connection.to);
         }
-
         for (let node of this.nodes.values()) {
             if (!connectedNodes.has(node.id) && this.nodes.size > 1) {
                 results.warnings.push(`Node "${this.getNodeTitle(node.type)}" is not connected`);
             }
         }
-
         // Check for circular dependencies
         if (this.hasCircularDependencies()) {
             results.errors.push('Circular dependencies detected in workflow');
         }
-
         // Check required properties
         for (let node of this.nodes.values()) {
-            const required = this.getRequiredProperties(node.type);
+            const _required = this.getRequiredProperties(node.type);
             for (let prop of required) {
                 if (!node.properties[prop] || node.properties[prop] === '') {
                     results.errors.push(`Node "${this.getNodeTitle(node.type)}" missing required property: ${prop}`);
                 }
             }
         }
-
         this.showValidationResults(results);
         return results.errors.length === 0;
     }
-
     hasCircularDependencies() {
-        const visited = new Set();
-        const visiting = new Set();
-
-        const visit = (nodeId) => {
+        const _visited = new Set();
+        const _visiting = new Set();
+        const _visit = (nodeId) => {
             if (visiting.has(nodeId)) return true;
             if (visited.has(nodeId)) return false;
-
             visiting.add(nodeId);
             
             for (let connection of this.connections.values()) {
@@ -870,21 +787,17 @@ class WorkflowDesigner {
                     if (visit(connection.to)) return true;
                 }
             }
-
             visiting.delete(nodeId);
             visited.add(nodeId);
             return false;
         };
-
         for (let nodeId of this.nodes.keys()) {
             if (visit(nodeId)) return true;
         }
-
         return false;
     }
-
     getRequiredProperties(type) {
-        const required = {
+        const _required = {
             'file-input': ['path'],
             'url-input': ['url'],
             'api-input': ['endpoint'],
@@ -896,12 +809,11 @@ class WorkflowDesigner {
         };
         return required[type] || [];
     }
-
     showValidationResults(results) {
-        const panel = document.getElementById('validationTab');
-        const content = panel.querySelector('.validation-results') || panel;
+        const _panel = document.getElementById('validationTab');
+        const _content = panel.querySelector('.validation-results') || panel;
         
-        let html = '<div class="validation-results">';
+        let _html = '<div class="validation-results">';
         
         if (results.errors.length > 0) {
             html += '<div class="validation-section errors">';
@@ -912,7 +824,6 @@ class WorkflowDesigner {
             });
             html += '</ul></div>';
         }
-
         if (results.warnings.length > 0) {
             html += '<div class="validation-section warnings">';
             html += '<h4><i class="fas fa-exclamation-triangle"></i> Warnings</h4>';
@@ -922,7 +833,6 @@ class WorkflowDesigner {
             });
             html += '</ul></div>';
         }
-
         if (results.info.length > 0) {
             html += '<div class="validation-section info">';
             html += '<h4><i class="fas fa-info-circle"></i> Information</h4>';
@@ -932,43 +842,36 @@ class WorkflowDesigner {
             });
             html += '</ul></div>';
         }
-
         if (results.errors.length === 0 && results.warnings.length === 0) {
             html += '<div class="validation-success">';
             html += '<i class="fas fa-check-circle"></i> Workflow validation passed';
             html += '</div>';
         }
-
         html += '</div>';
         content.innerHTML = html;
-
         // Switch to validation tab
         this.switchTabToValidation();
     }
-
     async executeWorkflow() {
         if (!await this.validateWorkflow()) {
             alert('Workflow validation failed. Please fix errors before executing.');
             return;
         }
-
         this.isExecuting = true;
         this.executionState.clear();
         
         document.getElementById('executeWorkflow').disabled = true;
         document.getElementById('stopWorkflow').disabled = false;
-
-        const executionLog = document.querySelector('#executionTab .execution-log');
+        const _executionLog = document.querySelector('#executionTab .execution-log');
         executionLog.innerHTML = '';
-
         try {
-            const startNodes = this.getStartNodes();
-            const executionPromises = startNodes.map(node => this.executeNode(node));
+            const _startNodes = this.getStartNodes();
+            const _executionPromises = startNodes.map(node => this.executeNode(node));
             
             await Promise.all(executionPromises);
             
             this.logExecution('Workflow execution completed successfully', 'success');
-        } catch (error) {
+        } catch (_error) {
             this.logExecution(`Workflow execution failed: ${error.message}`, 'error');
         } finally {
             this.isExecuting = false;
@@ -977,46 +880,40 @@ class WorkflowDesigner {
             this.draw();
         }
     }
-
     getStartNodes() {
-        const hasInput = new Set();
+        const _hasInput = new Set();
         for (let connection of this.connections.values()) {
             hasInput.add(connection.to);
         }
         
         return Array.from(this.nodes.values()).filter(node => !hasInput.has(node.id));
     }
-
     async executeNode(node) {
         if (!this.isExecuting) return;
-
         node.status = 'executing';
         this.draw();
         
         this.logExecution(`Executing node: ${this.getNodeTitle(node.type)}`, 'info');
-
         try {
-            const result = await this.processNode(node);
+            const _result = await this.processNode(node);
             node.status = 'completed';
-            this.executionState.set(node.id, result);
+            this.executionState.set(node._id, result);
             
             this.logExecution(`Node completed: ${this.getNodeTitle(node.type)}`, 'success');
-
             // Execute connected nodes
-            const connectedNodes = this.getConnectedNodes(node.id);
+            const _connectedNodes = this.getConnectedNodes(node.id);
             for (let connectedNode of connectedNodes) {
                 await this.executeNode(connectedNode);
             }
-        } catch (error) {
+        } catch (_error) {
             node.status = 'error';
             this.logExecution(`Node failed: ${this.getNodeTitle(node.type)} - ${error.message}`, 'error');
             throw error;
         }
     }
-
     async processNode(node) {
         // Simulate node processing
-        await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+        await new Promise(resolve => setTimeout(_resolve, 500 + Math.random() * 1000));
         
         switch (node.type) {
             case 'file-input':
@@ -1031,21 +928,19 @@ class WorkflowDesigner {
                 return { type: 'generic', processed: true };
         }
     }
-
     getConnectedNodes(nodeId) {
-        const connected = [];
+        const _connected = [];
         for (let connection of this.connections.values()) {
             if (connection.from === nodeId) {
-                const node = this.nodes.get(connection.to);
+                const _node = this.nodes.get(connection.to);
                 if (node) connected.push(node);
             }
         }
         return connected;
     }
-
-    logExecution(message, type) {
-        const log = document.querySelector('#executionTab .execution-log');
-        const entry = document.createElement('div');
+    logExecution(_message, type) {
+        const _log = document.querySelector('#executionTab .execution-log');
+        const _entry = document.createElement('div');
         entry.className = `log-entry ${type}`;
         entry.innerHTML = `
             <span class="timestamp">${new Date().toLocaleTimeString()}</span>
@@ -1054,7 +949,6 @@ class WorkflowDesigner {
         log.appendChild(entry);
         log.scrollTop = log.scrollHeight;
     }
-
     stopWorkflow() {
         this.isExecuting = false;
         
@@ -1068,9 +962,8 @@ class WorkflowDesigner {
         this.logExecution('Workflow execution stopped by user', 'warning');
         this.draw();
     }
-
     saveWorkflow() {
-        const workflow = {
+        const _workflow = {
             nodes: Array.from(this.nodes.values()),
             connections: Array.from(this.connections.values()),
             metadata: {
@@ -1079,49 +972,44 @@ class WorkflowDesigner {
                 name: prompt('Enter workflow name:') || 'Untitled Workflow'
             }
         };
-
-        const saved = JSON.parse(localStorage.getItem('claudeflow_workflows') || '[]');
+        const _saved = JSON.parse(localStorage.getItem('claudeflow_workflows') || '[]');
         saved.push(workflow);
         localStorage.setItem('claudeflow_workflows', JSON.stringify(saved));
         
         alert('Workflow saved successfully!');
     }
-
     loadWorkflow() {
-        const saved = JSON.parse(localStorage.getItem('claudeflow_workflows') || '[]');
+        const _saved = JSON.parse(localStorage.getItem('claudeflow_workflows') || '[]');
         if (saved.length === 0) {
             alert('No saved workflows found');
             return;
         }
-
-        const names = saved.map((w, i) => `${i + 1}. ${w.metadata.name}`);
-        const choice = prompt(`Select workflow to load:\n${names.join('\n')}`);
+        const _names = saved.map((_w, i) => `${i + 1}. ${w.metadata.name}`);
+        const _choice = prompt(`Select workflow to load:\n${names.join('\n')}`);
         
         if (choice) {
-            const index = parseInt(choice) - 1;
+            const _index = parseInt(choice) - 1;
             if (index >= 0 && index < saved.length) {
                 this.loadWorkflowData(saved[index]);
             }
         }
     }
-
     loadWorkflowData(workflow) {
         this.nodes.clear();
         this.connections.clear();
         
         workflow.nodes.forEach(nodeData => {
-            this.nodes.set(nodeData.id, { ...nodeData });
+            this.nodes.set(nodeData._id, { ...nodeData });
         });
         
         workflow.connections.forEach(connectionData => {
-            this.connections.set(connectionData.id, { ...connectionData });
+            this.connections.set(connectionData._id, { ...connectionData });
         });
         
         this.draw();
     }
-
     exportWorkflow() {
-        const workflow = {
+        const _workflow = {
             nodes: Array.from(this.nodes.values()),
             connections: Array.from(this.connections.values()),
             metadata: {
@@ -1130,39 +1018,34 @@ class WorkflowDesigner {
                 name: prompt('Enter workflow name:') || 'Exported Workflow'
             }
         };
-
-        const blob = new Blob([JSON.stringify(workflow, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const _blob = new Blob([JSON.stringify(_workflow, _null, 2)], { type: 'application/json' });
+        const _url = URL.createObjectURL(blob);
+        const _a = document.createElement('a');
         a.href = url;
         a.download = `${workflow.metadata.name}.json`;
         a.click();
         URL.revokeObjectURL(url);
     }
-
     importWorkflow() {
         document.getElementById('importFile').click();
     }
-
     handleFileImport(e) {
-        const file = e.target.files[0];
+        const _file = e.target.files[0];
         if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
+        const _reader = new FileReader();
+        reader.onload = (_event) => {
             try {
-                const workflow = JSON.parse(event.target.result);
+                const _workflow = JSON.parse(event.target.result);
                 this.loadWorkflowData(workflow);
                 alert('Workflow imported successfully!');
-            } catch (error) {
+            } catch (_error) {
                 alert('Error importing workflow: ' + error.message);
             }
         };
         reader.readAsText(file);
     }
-
     loadTemplates() {
-        const templates = [
+        const _templates = [
             {
                 name: 'Data Processing Pipeline',
                 description: 'Process files through transformation and analysis',
@@ -1194,8 +1077,7 @@ class WorkflowDesigner {
                 ]
             }
         ];
-
-        const gallery = document.querySelector('.template-gallery');
+        const _gallery = document.querySelector('.template-gallery');
         gallery.innerHTML = templates.map(template => `
             <div class="template-card" data-template="${template.name}">
                 <h4>${template.name}</h4>
@@ -1203,90 +1085,79 @@ class WorkflowDesigner {
                 <button class="btn btn-primary load-template">Load Template</button>
             </div>
         `).join('');
-
         // Add event listeners
         gallery.querySelectorAll('.load-template').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const templateName = e.target.closest('.template-card').dataset.template;
-                const template = templates.find(t => t.name === templateName);
+                const _templateName = e.target.closest('.template-card').dataset.template;
+                const _template = templates.find(t => t.name === templateName);
                 if (template) {
                     this.loadTemplate(template);
                 }
             });
         });
     }
-
     loadTemplate(template) {
         this.clearCanvas();
         
-        const nodeMap = new Map();
+        const _nodeMap = new Map();
         
         // Create nodes
-        template.nodes.forEach((nodeData, index) => {
-            const node = this.createNode(nodeData.type, nodeData.x, nodeData.y);
-            nodeMap.set(index, node);
+        template.nodes.forEach((_nodeData, index) => {
+            const _node = this.createNode(nodeData._type, nodeData._x, nodeData.y);
+            nodeMap.set(_index, node);
         });
-
         // Create connections (if defined in template)
         if (template.connections) {
             template.connections.forEach(conn => {
-                const fromNode = nodeMap.get(conn.from);
-                const toNode = nodeMap.get(conn.to);
+                const _fromNode = nodeMap.get(conn.from);
+                const _toNode = nodeMap.get(conn.to);
                 if (fromNode && toNode) {
                     this.createConnection(
-                        { node: fromNode, type: 'output', index: conn.fromIndex || 0 },
-                        { node: toNode, type: 'input', index: conn.toIndex || 0 }
+                        { node: _fromNode, type: 'output', index: conn.fromIndex || 0 },
+                        { node: _toNode, type: 'input', index: conn.toIndex || 0 }
                     );
                 }
             });
         }
-
         this.draw();
     }
-
     filterPalette(e) {
-        const filter = e.target.value.toLowerCase();
-        const items = document.querySelectorAll('.palette-item');
+        const _filter = e.target.value.toLowerCase();
+        const _items = document.querySelectorAll('.palette-item');
         
         items.forEach(item => {
-            const text = item.textContent.toLowerCase();
+            const _text = item.textContent.toLowerCase();
             item.style.display = text.includes(filter) ? 'block' : 'none';
         });
     }
-
     switchTab(e) {
-        const targetTab = e.target.dataset.tab;
+        const _targetTab = e.target.dataset.tab;
         
         // Update button states
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
         });
         e.target.classList.add('active');
-
         // Update tab content
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
         document.getElementById(targetTab + 'Tab').classList.add('active');
     }
-
     switchTabToValidation() {
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
         });
         document.querySelector('[data-tab="validation"]').classList.add('active');
-
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
         document.getElementById('validationTab').classList.add('active');
     }
-
     setZoom(newZoom) {
-        this.zoom = Math.max(0.1, Math.min(3, newZoom));
+        this.zoom = Math.max(0._1, Math.min(_3, newZoom));
         this.draw();
     }
-
     clearCanvas() {
         if (confirm('Are you sure you want to clear the canvas?')) {
             this.nodes.clear();
@@ -1295,9 +1166,8 @@ class WorkflowDesigner {
             this.draw();
         }
     }
-
-    showContextMenu(x, y, node) {
-        const menu = document.createElement('div');
+    showContextMenu(_x, _y, node) {
+        const _menu = document.createElement('div');
         menu.className = 'context-menu';
         menu.style.left = x + 'px';
         menu.style.top = y + 'px';
@@ -1312,25 +1182,28 @@ class WorkflowDesigner {
                 <i class="fas fa-cog"></i> Properties
             </div>
         `;
-
         document.body.appendChild(menu);
-
         menu.addEventListener('click', (e) => {
-            const action = e.target.dataset.action;
+            const _action = e.target.dataset.action;
             switch (action) {
                 case 'duplicate':
-                    this.duplicateNode(node);
-                    break;
+                    {
+this.duplicateNode(node);
+                    
+}break;
                 case 'delete':
-                    this.deleteNode(node);
-                    break;
+                    {
+this.deleteNode(node);
+                    
+}break;
                 case 'properties':
-                    this.showProperties(node);
-                    break;
+                    {
+this.showProperties(node);
+                    
+}break;
             }
             document.body.removeChild(menu);
         });
-
         // Remove menu when clicking elsewhere
         setTimeout(() => {
             document.addEventListener('click', function removeMenu() {
@@ -1341,23 +1214,20 @@ class WorkflowDesigner {
             });
         }, 100);
     }
-
     duplicateNode(node) {
-        const newNode = this.createNode(node.type, node.x + 50, node.y + 50);
+        const _newNode = this.createNode(node._type, node.x + _50, node.y + 50);
         newNode.properties = { ...node.properties };
         this.draw();
     }
-
     deleteNode(node) {
         // Remove connections
-        const connectionsToRemove = [];
-        for (let [id, connection] of this.connections) {
+        const _connectionsToRemove = [];
+        for (let [_id, connection] of this.connections) {
             if (connection.from === node.id || connection.to === node.id) {
                 connectionsToRemove.push(id);
             }
         }
         connectionsToRemove.forEach(id => this.connections.delete(id));
-
         // Remove node
         this.nodes.delete(node.id);
         
@@ -1368,18 +1238,15 @@ class WorkflowDesigner {
         
         this.draw();
     }
-
     handleResize() {
         this.setupCanvas();
     }
 }
-
 // Initialize the workflow designer when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('workflowDesigner')) {
         window.workflowDesigner = new WorkflowDesigner('workflowDesigner');
     }
 });
-
 // Export for external use
 window.WorkflowDesigner = WorkflowDesigner;

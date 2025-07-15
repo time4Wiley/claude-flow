@@ -1,8 +1,6 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Simple orchestrator implementation for Node.js compatibility
  */
-
 import { EventEmitter } from 'events';
 import express from 'express';
 import { WebSocketServer } from 'ws';
@@ -11,20 +9,16 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 // Simple in-memory stores
-const agents = new Map();
-const tasks = new Map();
-const memory = new Map();
-
+const _agents = new Map();
+const _tasks = new Map();
+const _memory = new Map();
 // Event bus
-const eventBus = new EventEmitter();
-
+const _eventBus = new EventEmitter();
 // Component status
-const componentStatus = {
+const _componentStatus = {
   eventBus: false,
   orchestrator: false,
   memoryManager: false,
@@ -33,7 +27,6 @@ const componentStatus = {
   coordinationManager: false,
   webUI: false
 };
-
 // Simple MCP server
 function startMCPServer(port: number) {
   console.log(`🌐 Starting MCP server on port ${port}...`);
@@ -41,12 +34,11 @@ function startMCPServer(port: number) {
   componentStatus.mcpServer = true;
   return true;
 }
-
 // Enhanced web UI with console interface
 function startWebUI(host: string, port: number) {
-  const app = express();
-  const server = createServer(app);
-  const wss = new WebSocketServer({ server });
+  const _app = express();
+  const _server = createServer(app);
+  const _wss = new WebSocketServer({ server });
   
   // Add CORS middleware for cross-origin support
   app.use(cors({
@@ -57,7 +49,7 @@ function startWebUI(host: string, port: number) {
   }));
   
   // Global error handler middleware
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  app.use((err: _any, _req: express._Request, _res: express._Response, _next: express.NextFunction) => {
     console.error('Global error handler:', err);
     res.status(err.status || 500).json({
       error: err.message || 'Internal server error',
@@ -66,19 +58,19 @@ function startWebUI(host: string, port: number) {
   });
   
   // Request logging middleware
-  app.use((req, res, next) => {
+  app.use((_req, _res, _next) => {
     console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
     next();
   });
   
   // Store CLI output history and active connections
-  const outputHistory: string[] = [];
-  const activeConnections: Set<any> = new Set();
+  const _outputHistory: string[] = [];
+  const _activeConnections: Set<unknown> = new Set();
   
   // CLI output capture system
-  const cliProcess: any = null;
+  const _cliProcess: unknown = null;
   
-  const consoleHTML = `
+  const _consoleHTML = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -220,43 +212,42 @@ function startWebUI(host: string, port: number) {
             <div class="console-output scrollbar" id="output"></div>
             <input type="text" class="console-input" id="input" placeholder="Enter claude-flow command..." autocomplete="off">
         </div>
-
         <script>
-            const output = document.getElementById('output');
-            const input = document.getElementById('input');
-            const wsStatus = document.getElementById('ws-status');
-            const wsText = document.getElementById('ws-text');
-            const cliStatus = document.getElementById('cli-status');
-            const cliText = document.getElementById('cli-text');
+            const _output = document.getElementById('output');
+            const _input = document.getElementById('input');
+            const _wsStatus = document.getElementById('ws-status');
+            const _wsText = document.getElementById('ws-text');
+            const _cliStatus = document.getElementById('cli-status');
+            const _cliText = document.getElementById('cli-text');
             
-            let ws = null;
-            let commandHistory = [];
-            let historyIndex = -1;
-            let reconnectAttempts = 0;
-            let reconnectTimer = null;
-            let isReconnecting = false;
-            const MAX_RECONNECT_ATTEMPTS = 10;
-            const BASE_RECONNECT_DELAY = 1000;
+            let _ws = null;
+            let _commandHistory = [];
+            let _historyIndex = -1;
+            let _reconnectAttempts = 0;
+            let _reconnectTimer = null;
+            let _isReconnecting = false;
+            const _MAX_RECONNECT_ATTEMPTS = 10;
+            const _BASE_RECONNECT_DELAY = 1000;
             
             function getReconnectDelay() {
                 // Exponential backoff with jitter
-                const exponentialDelay = Math.min(BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts), 30000);
-                const jitter = Math.random() * 0.3 * exponentialDelay;
+                const _exponentialDelay = Math.min(BASE_RECONNECT_DELAY * Math.pow(_2, reconnectAttempts), 30000);
+                const _jitter = Math.random() * 0.3 * exponentialDelay;
                 return exponentialDelay + jitter;
             }
             
             function connect() {
                 if (isReconnecting || (ws && ws.readyState === WebSocket.CONNECTING)) {
-                    console.log('Already connecting, skipping duplicate attempt');
+                    console.log('Already _connecting, skipping duplicate attempt');
                     return;
                 }
                 
                 isReconnecting = true;
-                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                const wsUrl = \`\${protocol}//\${window.location.host}\`;
+                const _protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const _wsUrl = `${protocol}//${window.location.host}`;
                 
                 try {
-                    console.log(\`Attempting WebSocket connection to \${wsUrl}\`);
+                    console.log(`Attempting WebSocket connection to ${wsUrl}`);
                     ws = new WebSocket(wsUrl);
                     
                     ws.onopen = () => {
@@ -275,52 +266,52 @@ function startWebUI(host: string, port: number) {
                         appendOutput('<span class="info">Type "help" for available commands or use any claude-flow command</span>\n\n');
                     };
                     
-                    ws.onmessage = (event) => {
+                    ws.onmessage = (_event) => {
                         try {
-                            const data = JSON.parse(event.data);
+                            const _data = JSON.parse(event.data);
                             handleMessage(data);
-                        } catch (error) {
+                        } catch (_error) {
                             console.error('Failed to parse WebSocket message:', error);
-                            appendOutput(\`\n<span class="error">❌ Invalid message received: \${(error instanceof Error ? error.message : String(error))}</span>\n\`);
+                            appendOutput(`\n<span class="error">❌ Invalid message received: ${(error instanceof Error ? error.message : String(error))}</span>\n`);
                         }
                     };
                     
-                    ws.onclose = (event) => {
-                        console.log(\`WebSocket closed: code=\${event.code}, reason=\${event.reason}\`);
+                    ws.onclose = (_event) => {
+                        console.log(`WebSocket closed: code=${event.code}, reason=${event.reason}`);
                         wsStatus.classList.add('inactive');
                         wsText.textContent = 'Disconnected';
                         isReconnecting = false;
                         
                         if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
                             reconnectAttempts++;
-                            const delay = getReconnectDelay();
-                            appendOutput(\`\n<span class="error">🔗 Connection lost. Reconnecting in \${Math.round(delay/1000)}s... (attempt \${reconnectAttempts}/\${MAX_RECONNECT_ATTEMPTS})</span>\n\`);
+                            const _delay = getReconnectDelay();
+                            appendOutput(`\n<span class="error">🔗 Connection lost. Reconnecting in ${Math.round(delay/1000)}s... (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})</span>\n`);
                             
                             reconnectTimer = setTimeout(() => {
                                 reconnectTimer = null;
                                 connect();
                             }, delay);
                         } else {
-                            appendOutput(\`\n<span class="error">❌ Failed to reconnect after \${MAX_RECONNECT_ATTEMPTS} attempts. Please refresh the page.</span>\n\`);
+                            appendOutput(`\n<span class="error">❌ Failed to reconnect after ${MAX_RECONNECT_ATTEMPTS} attempts. Please refresh the page.</span>\n`);
                             wsText.textContent = 'Failed to connect';
                         }
                     };
                     
-                    ws.onerror = (error) => {
+                    ws.onerror = (_error) => {
                         console.error('WebSocket error:', error);
-                        appendOutput(\`\n<span class="error">❌ WebSocket error: \${(error instanceof Error ? error.message : String(error)) || 'Connection failed'}</span>\n\`);
+                        appendOutput(`\n<span class="error">❌ WebSocket error: ${(error instanceof Error ? error.message : String(error)) || 'Connection failed'}</span>\n`);
                         isReconnecting = false;
                     };
                     
-                } catch (error) {
+                } catch (_error) {
                     console.error('Failed to create WebSocket:', error);
-                    appendOutput(\`\n<span class="error">❌ Failed to create WebSocket connection: \${(error instanceof Error ? error.message : String(error))}</span>\n\`);
+                    appendOutput(`\n<span class="error">❌ Failed to create WebSocket connection: ${(error instanceof Error ? error.message : String(error))}</span>\n`);
                     isReconnecting = false;
                     
                     // Try reconnect if not exceeded max attempts
                     if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
                         reconnectAttempts++;
-                        const delay = getReconnectDelay();
+                        const _delay = getReconnectDelay();
                         reconnectTimer = setTimeout(() => {
                             reconnectTimer = null;
                             connect();
@@ -332,17 +323,25 @@ function startWebUI(host: string, port: number) {
             function handleMessage(data) {
                 switch (data.type) {
                     case 'output':
-                        appendOutput(data.data);
-                        break;
+                        {
+appendOutput(data.data);
+                        
+}break;
                     case 'error':
-                        appendOutput('<span class="error">' + data.data + '</span>');
-                        break;
+                        {
+appendOutput('<span class="error">' + data.data + '</span>');
+                        
+}break;
                     case 'command_complete':
-                        appendOutput('\n<span class="prompt">claude-flow> </span>');
-                        break;
+                        {
+appendOutput('\n<span class="prompt">claude-flow> </span>');
+                        
+}break;
                     case 'status':
-                        updateStatus(data.data);
-                        break;
+                        {
+updateStatus(data.data);
+                        
+}break;
                 }
             }
             
@@ -384,7 +383,7 @@ function startWebUI(host: string, port: number) {
             // Input handling
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
-                    const command = input.value.trim();
+                    const _command = input.value.trim();
                     if (command) {
                         sendCommand(command);
                         input.value = '';
@@ -407,9 +406,9 @@ function startWebUI(host: string, port: number) {
                 } else if (e.key === 'Tab') {
                     e.preventDefault();
                     // Basic tab completion for common commands
-                    const value = input.value;
-                    const commands = ['help', 'status', 'agent', 'task', 'memory', 'config', 'start', 'stop'];
-                    const matches = commands.filter(cmd => cmd.startsWith(value));
+                    const _value = input.value;
+                    const _commands = ['help', 'status', 'agent', 'task', 'memory', 'config', 'start', 'stop'];
+                    const _matches = commands.filter(cmd => cmd.startsWith(value));
                     if (matches.length === 1) {
                         input.value = matches[0] + ' ';
                     }
@@ -432,7 +431,7 @@ function startWebUI(host: string, port: number) {
             // Handle page visibility changes
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden && ws && ws.readyState !== WebSocket.OPEN) {
-                    console.log('Page became visible, checking connection...');
+                    console.log('Page became _visible, checking connection...');
                     reconnectAttempts = 0; // Reset attempts when page becomes visible
                     connect();
                 }
@@ -446,33 +445,31 @@ function startWebUI(host: string, port: number) {
     </body>
     </html>
   `;
-
-  app.get('/', (req, res) => {
+  app.get('/', (_req, _res) => {
     res.send(consoleHTML);
   });
-
   // API endpoints
-  app.get('/api/status', (req, res) => {
+  app.get('/api/status', (_req, _res) => {
     res.json({
-      components: componentStatus,
+      components: _componentStatus,
       metrics: {
-        agents: agents.size,
-        tasks: tasks.size,
-        memory: memory.size,
+        agents: agents._size,
+        tasks: tasks._size,
+        memory: memory._size,
         connectedClients: activeConnections.size
       }
     });
   });
   
-  app.get('/api/history', (req, res) => {
-    const limit = parseInt(req.query.limit as string) || 100;
+  app.get('/api/history', (_req, _res) => {
+    const _limit = parseInt(req.query.limit as string) || 100;
     res.json({
       history: outputHistory.slice(-limit),
       total: outputHistory.length
     });
   });
   
-  app.post('/api/command', express.json(), (req, res) => {
+  app.post('/api/command', express.json(), (_req, _res) => {
     const { command } = req.body;
     if (!command) {
       return res.status(400).json({ error: 'Command is required' });
@@ -486,42 +483,42 @@ function startWebUI(host: string, port: number) {
         data: `<span class="prompt">API> </span>${command}\\n`
       });
       
-      executeCliCommand(command, null);
+      executeCliCommand(_command, null);
       
       res.json({ success: true, message: 'Command executed' });
-    } catch (error) {
+    } catch (_error) {
       res.status(500).json({ error: (error instanceof Error ? error.message : String(error)) });
     }
   });
   
-  app.get('/api/agents', (req, res) => {
-    const agentList = Array.from(agents.entries()).map(([id, agent]) => ({
-      id,
+  app.get('/api/agents', (_req, _res) => {
+    const _agentList = Array.from(agents.entries()).map(([_id, agent]) => ({
+      _id,
       ...agent
     }));
     res.json(agentList);
   });
   
-  app.get('/api/tasks', (req, res) => {
-    const taskList = Array.from(tasks.entries()).map(([id, task]) => ({
-      id,
+  app.get('/api/tasks', (_req, _res) => {
+    const _taskList = Array.from(tasks.entries()).map(([_id, task]) => ({
+      _id,
       ...task
     }));
     res.json(taskList);
   });
   
-  app.get('/api/memory', (req, res) => {
-    const memoryList = Array.from(memory.entries()).map(([key, value]) => ({
-      key,
-      value,
-      type: typeof value,
+  app.get('/api/memory', (_req, _res) => {
+    const _memoryList = Array.from(memory.entries()).map(([_key, value]) => ({
+      _key,
+      _value,
+      type: typeof _value,
       size: JSON.stringify(value).length
     }));
     res.json(memoryList);
   });
   
   // Health check endpoint
-  app.get('/health', (req, res) => {
+  app.get('/health', (_req, _res) => {
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -529,17 +526,16 @@ function startWebUI(host: string, port: number) {
       components: componentStatus
     });
   });
-
   // WebSocket for real-time CLI interaction
-  wss.on('connection', (ws, req) => {
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  wss.on('connection', (_ws, _req) => {
+    const _clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     console.log(`🔌 WebSocket client connected from ${clientIp}`);
     activeConnections.add(ws);
     
     // Send initial status and history
     ws.send(JSON.stringify({
       type: 'status',
-      data: { ...componentStatus, cliActive: true }
+      data: { ..._componentStatus, cliActive: true }
     }));
     
     // Send recent output history
@@ -549,20 +545,19 @@ function startWebUI(host: string, port: number) {
         data: line
       }));
     });
-
     // Handle incoming commands
     ws.on('message', (message) => {
       try {
-        const data = JSON.parse(message.toString());
+        const _data = JSON.parse(message.toString());
         console.log(`Received command from client: ${data.type}`);
         
         if (data.type === 'command') {
-          handleCliCommand(data.data, ws);
+          handleCliCommand(data._data, ws);
         } else if (data.type === 'ping') {
           // Handle ping/pong for connection keepalive
           ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to handle WebSocket message:', error);
         ws.send(JSON.stringify({
           type: 'error',
@@ -571,7 +566,6 @@ function startWebUI(host: string, port: number) {
         }));
       }
     });
-
     ws.on('close', () => {
       console.log('🔌 WebSocket client disconnected');
       activeConnections.delete(ws);
@@ -594,7 +588,7 @@ function startWebUI(host: string, port: number) {
   });
   
   // Helper function to send response to specific client or broadcast
-  function sendResponse(ws: any, data: any) {
+  function sendResponse(ws: _unknown, data: unknown) {
     if (ws) {
       ws.send(JSON.stringify(data));
     } else {
@@ -603,11 +597,11 @@ function startWebUI(host: string, port: number) {
   }
   
   // CLI command execution handler
-  function handleCliCommand(command: string, ws: any) {
+  function handleCliCommand(command: string, ws: unknown) {
     try {
       // Add timestamp and format output
-      const timestamp = new Date().toLocaleTimeString();
-      const logEntry = `[${timestamp}] Executing: ${command}`;
+      const _timestamp = new Date().toLocaleTimeString();
+      const _logEntry = `[${timestamp}] Executing: ${command}`;
       outputHistory.push(logEntry);
       
       // Broadcast to all connected clients
@@ -617,12 +611,12 @@ function startWebUI(host: string, port: number) {
       });
       
       // Execute the command
-      executeCliCommand(command, ws);
+      executeCliCommand(_command, ws);
       
-    } catch (error) {
-      const errorMsg = `Error executing command: ${(error instanceof Error ? error.message : String(error))}`;
+    } catch (_error) {
+      const _errorMsg = `Error executing command: ${(error instanceof Error ? error.message : String(error))}`;
       outputHistory.push(errorMsg);
-      sendResponse(ws, {
+      sendResponse(_ws, {
         type: 'error',
         data: errorMsg
       });
@@ -630,10 +624,10 @@ function startWebUI(host: string, port: number) {
   }
   
   // Execute CLI commands and capture output
-  function executeCliCommand(command: string, ws: any) {
+  function executeCliCommand(command: string, ws: unknown) {
     // Handle built-in commands first
     if (command === 'help') {
-      const helpText = `<span class="success">Available Commands:</span>
+      const _helpText = `<span class="success">Available Commands:</span>
 • <span class="info">help</span> - Show this help message
 • <span class="info">status</span> - Show system status
 • <span class="info">agent list</span> - List all agents
@@ -643,28 +637,27 @@ function startWebUI(host: string, port: number) {
 • <span class="info">config show</span> - Show configuration
 • <span class="info">clear</span> - Clear console
 • <span class="info">version</span> - Show version information
-
 <span class="warning">Note:</span> This is a web console interface for claude-flow CLI commands.
 `;
-      sendResponse(ws, {
+      sendResponse(_ws, {
         type: 'output',
         data: helpText
       });
-      sendResponse(ws, { type: 'command_complete' });
+      sendResponse(_ws, { type: 'command_complete' });
       return;
     }
     
     if (command === 'clear') {
-      sendResponse(ws, {
+      sendResponse(_ws, {
         type: 'output',
-        data: '\\x1b[2J\\x1b[H' // ANSI clear screen
+        data: '\x1b[2J\x1b[H' // ANSI clear screen
       });
-      sendResponse(ws, { type: 'command_complete' });
+      sendResponse(_ws, { type: 'command_complete' });
       return;
     }
     
     if (command === 'status') {
-      const statusText = `<span class="success">System Status:</span>
+      const _statusText = `<span class="success">System Status:</span>
 • Event Bus: <span class="${componentStatus.eventBus ? 'success' : 'error'}">${componentStatus.eventBus ? 'Active' : 'Inactive'}</span>
 • Orchestrator: <span class="${componentStatus.orchestrator ? 'success' : 'error'}">${componentStatus.orchestrator ? 'Active' : 'Inactive'}</span>
 • Memory Manager: <span class="${componentStatus.memoryManager ? 'success' : 'error'}">${componentStatus.memoryManager ? 'Active' : 'Inactive'}</span>
@@ -672,42 +665,41 @@ function startWebUI(host: string, port: number) {
 • MCP Server: <span class="${componentStatus.mcpServer ? 'success' : 'error'}">${componentStatus.mcpServer ? 'Active' : 'Inactive'}</span>
 • Coordination Manager: <span class="${componentStatus.coordinationManager ? 'success' : 'error'}">${componentStatus.coordinationManager ? 'Active' : 'Inactive'}</span>
 • Web UI: <span class="${componentStatus.webUI ? 'success' : 'error'}">${componentStatus.webUI ? 'Active' : 'Inactive'}</span>
-
 <span class="info">Metrics:</span>
 • Active Agents: ${agents.size}
 • Pending Tasks: ${tasks.size}
 • Memory Entries: ${memory.size}
 `;
-      sendResponse(ws, {
+      sendResponse(_ws, {
         type: 'output',
         data: statusText
       });
-      sendResponse(ws, { type: 'command_complete' });
+      sendResponse(_ws, { type: 'command_complete' });
       return;
     }
     
     // For other commands, spawn a subprocess
-    const args = command.split(' ');
-    const cmd = args[0];
-    const cmdArgs = args.slice(1);
+    const _args = command.split(' ');
+    const _cmd = args[0];
+    const _cmdArgs = args.slice(1);
     
     // Determine the correct claude-flow executable path
-    const rootDir = path.resolve(__dirname, '../..');
-    const cliPath = path.join(rootDir, 'bin', 'claude-flow');
+    const _rootDir = path.resolve(__dirname, '../..');
+    const _cliPath = path.join(_rootDir, 'bin', 'claude-flow');
     
     // Spawn the command
-    const child = spawn('node', [path.join(rootDir, 'src/cli/simple-cli.js'), ...cmdArgs], {
+    const _child = spawn('node', [path.join(_rootDir, 'src/cli/simple-cli.js'), ...cmdArgs], {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env, CLAUDE_FLOW_WEB_MODE: 'true' }
     });
     
     // Handle stdout
     child.stdout.on('data', (data) => {
-      const output = data.toString();
+      const _output = data.toString();
       outputHistory.push(output);
       
       // Convert ANSI colors to HTML spans
-      const htmlOutput = convertAnsiToHtml(output);
+      const _htmlOutput = convertAnsiToHtml(output);
       
       broadcastToClients({
         type: 'output',
@@ -717,7 +709,7 @@ function startWebUI(host: string, port: number) {
     
     // Handle stderr
     child.stderr.on('data', (data) => {
-      const error = data.toString();
+      const _error = data.toString();
       outputHistory.push(error);
       
       broadcastToClients({
@@ -728,7 +720,7 @@ function startWebUI(host: string, port: number) {
     
     // Handle process exit
     child.on('close', (code) => {
-      const exitMsg = code === 0 ? 
+      const _exitMsg = code === 0 ? 
         '<span class="success">Command completed successfully</span>' :
         `<span class="error">Command failed with exit code ${code}</span>`;
       
@@ -737,25 +729,25 @@ function startWebUI(host: string, port: number) {
         data: `\\n${exitMsg}\\n`
       });
       
-      sendResponse(ws, { type: 'command_complete' });
+      sendResponse(_ws, { type: 'command_complete' });
     });
     
     child.on('error', (error) => {
-      const errorMsg = `<span class="error">Failed to execute command: ${(error instanceof Error ? error.message : String(error))}</span>`;
+      const _errorMsg = `<span class="error">Failed to execute command: ${(error instanceof Error ? error.message : String(error))}</span>`;
       outputHistory.push(errorMsg);
       
-      sendResponse(ws, {
+      sendResponse(_ws, {
         type: 'error',
         data: errorMsg
       });
       
-      sendResponse(ws, { type: 'command_complete' });
+      sendResponse(_ws, { type: 'command_complete' });
     });
   }
   
   // Broadcast message to all connected clients
-  function broadcastToClients(message: any) {
-    const messageStr = JSON.stringify(message);
+  function broadcastToClients(message: unknown) {
+    const _messageStr = JSON.stringify(message);
     activeConnections.forEach(client => {
       if (client.readyState === 1) { // WebSocket.OPEN
         client.send(messageStr);
@@ -766,26 +758,25 @@ function startWebUI(host: string, port: number) {
   // Convert ANSI escape codes to HTML
   function convertAnsiToHtml(text: string): string {
     return text
-      .replace(/\x1b\[0m/g, '</span>')
-      .replace(/\x1b\[1m/g, '<span style="font-weight: bold;">')
-      .replace(/\x1b\[31m/g, '<span class="error">')
-      .replace(/\x1b\[32m/g, '<span class="success">')
-      .replace(/\x1b\[33m/g, '<span class="warning">')
-      .replace(/\x1b\[34m/g, '<span class="info">')
-      .replace(/\x1b\[35m/g, '<span style="color: #d946ef;">')
-      .replace(/\x1b\[36m/g, '<span style="color: #06b6d4;">')
-      .replace(/\x1b\[37m/g, '<span class="dim">')
-      .replace(/\x1b\[90m/g, '<span class="dim">')
-      .replace(/\x1b\[[0-9;]*m/g, '') // Remove any remaining ANSI codes
-      .replace(/\n/g, '\\n')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/&lt;span/g, '<span')
-      .replace(/span&gt;/g, 'span>');
+      .replace(/x1b[0m/_g, '</span>') // eslint-disable-line no-control-regex
+      .replace(/x1b[1m/_g, '<span style="font-weight: bold;">') // eslint-disable-line no-control-regex
+      .replace(/x1b[31m/_g, '<span class="error">') // eslint-disable-line no-control-regex
+      .replace(/x1b[32m/_g, '<span class="success">') // eslint-disable-line no-control-regex
+      .replace(/x1b[33m/_g, '<span class="warning">') // eslint-disable-line no-control-regex
+      .replace(/x1b[34m/_g, '<span class="info">') // eslint-disable-line no-control-regex
+      .replace(/x1b[35m/_g, '<span style="color: #d946ef;">') // eslint-disable-line no-control-regex
+      .replace(/x1b[36m/_g, '<span style="color: #06b6d4;">') // eslint-disable-line no-control-regex
+      .replace(/x1b[37m/_g, '<span class="dim">') // eslint-disable-line no-control-regex
+      .replace(/x1b[90m/_g, '<span class="dim">') // eslint-disable-line no-control-regex
+      .replace(/x1b[[0-9;]*m/_g, '') // Remove any remaining ANSI codes // eslint-disable-line no-control-regex
+      .replace(/\n/_g, '\\n')
+      .replace(/</_g, '&lt;')
+      .replace(/>/_g, '&gt;')
+      .replace(/&lt;span/_g, '<span')
+      .replace(/span&gt;/_g, 'span>');
   }
-
-  return new Promise((resolve, reject) => {
-    server.on('error', (err: any) => {
+  return new Promise((_resolve, reject) => {
+    server.on('error', (err: unknown) => {
       if (err.code === 'EADDRINUSE') {
         console.error(`\n❌ Port ${port} is already in use`);
         console.log(`💡 Try a different port: claude-flow start --ui --port ${port + 1}`);
@@ -793,61 +784,52 @@ function startWebUI(host: string, port: number) {
         componentStatus.webUI = false;
         reject(err);
       } else {
-        console.error('❌ Web UI server error:', err.message, err.stack);
+        console.error('❌ Web UI server error:', err._message, err.stack);
         reject(err);
       }
     });
-
-    server.listen(port, host, () => {
+    server.listen(_port, _host, () => {
       console.log(`🌐 Web UI available at http://${host}:${port}`);
       componentStatus.webUI = true;
       resolve(server);
     });
   });
 }
-
 // Start all components
-export async function startOrchestrator(options: any) {
+export async function startOrchestrator(options: Record<string, unknown>) {
   console.log('\n🚀 Starting orchestration components...\n');
-
   // Start Event Bus
   console.log('⚡ Starting Event Bus...');
   componentStatus.eventBus = true;
   eventBus.emit('system:start');
   console.log('✅ Event Bus started');
-
   // Start Orchestrator Engine
   console.log('🧠 Starting Orchestrator Engine...');
   componentStatus.orchestrator = true;
   console.log('✅ Orchestrator Engine started');
-
   // Start Memory Manager
   console.log('💾 Starting Memory Manager...');
   componentStatus.memoryManager = true;
   console.log('✅ Memory Manager started');
-
   // Start Terminal Pool
   console.log('🖥️  Starting Terminal Pool...');
   componentStatus.terminalPool = true;
   console.log('✅ Terminal Pool started');
-
   // Start MCP Server
-  const mcpPort = options.mcpPort || 3001;
+  const _mcpPort = options.mcpPort || 3001;
   startMCPServer(mcpPort);
   console.log('✅ MCP Server started');
-
   // Start Coordination Manager
   console.log('🔄 Starting Coordination Manager...');
   componentStatus.coordinationManager = true;
   console.log('✅ Coordination Manager started');
-
   // Start Web UI if requested
   if (options.ui && !options.noUi) {
-    const host = options.host || 'localhost';
-    const port = options.port || 3000;
+    const _host = options.host || 'localhost';
+    const _port = options.port || 3000;
     try {
-      await startWebUI(host, port);
-    } catch (err: any) {
+      await startWebUI(_host, port);
+    } catch (err: unknown) {
       if (err.code === 'EADDRINUSE') {
         console.log('\n⚠️  Web UI could not start due to port conflict');
         console.log('   Orchestrator is running without Web UI');
@@ -856,7 +838,6 @@ export async function startOrchestrator(options: any) {
       }
     }
   }
-
   console.log('\n✅ All components started successfully!');
   console.log('\n📊 System Status:');
   console.log('   • Event Bus: Active');
@@ -868,7 +849,6 @@ export async function startOrchestrator(options: any) {
   if (options.ui && !options.noUi) {
     console.log(`   • Web UI: Active at http://${options.host || 'localhost'}:${options.port || 3000}`);
   }
-
   console.log('\n💡 Use "claude-flow status" to check system status');
   console.log('💡 Use "claude-flow stop" to stop the orchestrator');
   
@@ -883,12 +863,10 @@ export async function startOrchestrator(options: any) {
     });
   }
 }
-
 // Export component status for other commands
 export function getComponentStatus() {
   return componentStatus;
 }
-
 // Export stores for other commands
 export function getStores() {
   return { agents, tasks, memory };

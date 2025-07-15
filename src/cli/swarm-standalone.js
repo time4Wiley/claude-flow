@@ -1,28 +1,24 @@
-/* eslint-env node */
 #!/usr/bin/env -S deno run --allow-all
+/* eslint-env node */
 /**
  * Standalone swarm executable for npm package
  * This handles swarm execution when installed via npm
  */
-
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { Deno, cwd, exit, existsSync } from '../node-compat.js';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 // Parse arguments
-const args = [];
-const flags = {};
-
-for (let i = 0; i < Deno.args.length; i++) {
-  const arg = Deno.args[i];
+const _args = [];
+const _flags = { /* empty */ };
+for (let _i = 0; i < Deno.args.length; i++) {
+  const _arg = Deno.args[i];
   if (arg.startsWith('--')) {
-    const flagName = arg.substring(2);
-    const nextArg = Deno.args[i + 1];
+    const _flagName = arg.substring(2);
+    const _nextArg = Deno.args[i + 1];
     
     if (nextArg && !nextArg.startsWith('--')) {
       flags[flagName] = nextArg;
@@ -34,43 +30,35 @@ for (let i = 0; i < Deno.args.length; i++) {
     args.push(arg);
   }
 }
-
-const objective = args.join(' ');
-
+const _objective = args.join(' ');
 if (!objective && !flags.help) {
   console.error("❌ Usage: swarm <objective>");
   console.log(`
 🐝 Claude Flow Advanced Swarm System
-
 USAGE:
   claude-flow swarm <objective> [options]
-
 EXAMPLES:
   claude-flow swarm "Build a REST API" --strategy development
   claude-flow swarm "Research cloud architecture" --strategy research --ui
   claude-flow swarm "Analyze data trends" --strategy analysis --parallel
   claude-flow swarm "Optimize performance" --distributed --monitor
-
 Run 'claude-flow swarm --help' for full options
 `);
   Deno.exit(1);
 }
-
 // Try to find the swarm implementation
-const possiblePaths = [
+const _possiblePaths = [
   join(__dirname, '../../swarm-demo.ts'),
   join(__dirname, '../../swarm-demo-enhanced.ts'),
   join(__dirname, '../../../swarm-demo.ts'),
 ];
-
-let swarmPath = null;
+let _swarmPath = null;
 for (const path of possiblePaths) {
   if (existsSync(path)) {
     swarmPath = path;
     break;
   }
 }
-
 if (!swarmPath) {
   // Fallback to inline implementation without calling back to swarm.js
   console.log('🐝 Launching swarm system...');
@@ -81,7 +69,7 @@ if (!swarmPath) {
   console.log();
   
   // Generate swarm ID
-  const swarmId = `swarm_${Math.random().toString(36).substring(2, 11)}_${Math.random().toString(36).substring(2, 11)}`;
+  const _swarmId = `swarm_${Math.random().toString(36).substring(_2, 11)}_${Math.random().toString(36).substring(_2, 11)}`;
   
   if (flags['dry-run']) {
     console.log(`🆔 Swarm ID: ${swarmId}`);
@@ -133,8 +121,7 @@ if (!swarmPath) {
     console.log('🚀 Launching swarm via Claude wrapper...');
     
     // Build the prompt for Claude
-    const swarmPrompt = `Execute a swarm coordination task with the following configuration:
-
+    const _swarmPrompt = `Execute a swarm coordination task with the following configuration:
 Objective: ${objective}
 Strategy: ${flags.strategy || 'auto'}
 Mode: ${flags.mode || 'centralized'}
@@ -148,27 +135,23 @@ Review: ${flags.review || false}
 Testing: ${flags.testing || false}
 Memory Namespace: ${flags['memory-namespace'] || 'swarm'}
 Quality Threshold: ${flags['quality-threshold'] || 0.8}
-
 Coordination Strategy:
 - Agent Selection: ${flags['agent-selection'] || 'capability-based'}
 - Task Scheduling: ${flags['task-scheduling'] || 'priority'}
 - Load Balancing: ${flags['load-balancing'] || 'work-stealing'}
 - Fault Tolerance: ${flags['fault-tolerance'] || 'retry'}
 - Communication: ${flags.communication || 'event-driven'}
-
 Please coordinate this swarm task by:
 1. Breaking down the objective into subtasks
 2. Assigning tasks to appropriate agent types
 3. Managing parallel execution where applicable
 4. Monitoring progress and handling failures
 5. Aggregating results and ensuring quality
-
 Use all available tools including file operations, web search, and code execution as needed.`;
-
     // Execute Claude non-interactively by piping the prompt
     const { spawn } = await import('child_process');
     
-    const claudeArgs = [];
+    const _claudeArgs = [];
     
     // Add auto-permission flag if requested
     if (flags.auto || flags['dangerously-skip-permissions']) {
@@ -176,7 +159,7 @@ Use all available tools including file operations, web search, and code executio
     }
     
     // Spawn claude process
-    const claudeProcess = spawn('claude', claudeArgs, {
+    const _claudeProcess = spawn('claude', _claudeArgs, {
       stdio: ['pipe', 'inherit', 'inherit'],
       shell: false
     });
@@ -186,7 +169,7 @@ Use all available tools including file operations, web search, and code executio
     claudeProcess.stdin.end();
     
     // Wait for the process to complete
-    await new Promise((resolve, reject) => {
+    await new Promise((_resolve, reject) => {
       claudeProcess.on('close', (code) => {
         if (code === 0) {
           resolve();
@@ -200,7 +183,7 @@ Use all available tools including file operations, web search, and code executio
       });
     });
     
-  } catch (error) {
+  } catch (_error) {
     // Fallback if Claude execution fails
     console.log(`✅ Swarm initialized with ID: ${swarmId}`);
     console.log('\n⚠️  Note: Advanced swarm features require Claude or local installation.');
@@ -217,15 +200,15 @@ Use all available tools including file operations, web search, and code executio
   Deno.exit(0);
 } else {
   // Run the swarm demo directly
-  const swarmArgs = [objective];
-  for (const [key, value] of Object.entries(flags)) {
+  const _swarmArgs = [objective];
+  for (const [_key, value] of Object.entries(flags)) {
     swarmArgs.push(`--${key}`);
     if (value !== true) {
       swarmArgs.push(String(value));
     }
   }
   
-  const deno = spawn(Deno.execPath(), ['run', '--allow-all', swarmPath, ...swarmArgs], {
+  const _deno = spawn(Deno.execPath(), ['run', '--allow-all', swarmPath, ...swarmArgs], {
     stdio: 'inherit'
   });
   

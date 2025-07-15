@@ -1,16 +1,13 @@
 #!/usr/bin/env node
-
 /* eslint-env node */
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
-
 /**
  * Claude Optimized Template Manager
  * Unified interface for template operations
  */
-
-const commands = {
+const _commands = {
   install: () => execSync('node install-template.js', { stdio: 'inherit' }),
   validate: () => execSync('node validate-template.js', { stdio: 'inherit' }),
   deploy: (targetPath) => {
@@ -21,8 +18,8 @@ const commands = {
     execSync(`node deploy-to-project.js "${targetPath}"`, { stdio: 'inherit' });
   },
   info: () => {
-    const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
-    const version = fs.readFileSync('VERSION', 'utf8').trim();
+    const _manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+    const _version = fs.readFileSync('VERSION', 'utf8').trim();
     
     console.log('Claude Optimized Template');
     console.log('========================');
@@ -30,8 +27,8 @@ const commands = {
     console.log(`Files: ${manifest.files.length}`);
     console.log(`Categories: ${Object.keys(manifest.categories).join(', ')}`);
     console.log('\nFile breakdown:');
-    for (const [category, info] of Object.entries(manifest.categories)) {
-      const count = manifest.files.filter(f => f.category === category).length;
+    for (const [_category, info] of Object.entries(manifest.categories)) {
+      const _count = manifest.files.filter(f => f.category === category).length;
       console.log(`  ${category}: ${count} files`);
     }
     
@@ -65,9 +62,8 @@ const commands = {
     }
   }
 };
-
 // Main execution
-const args = process.argv.slice(2);
+const _args = process.argv.slice(2);
 if (args.length === 0) {
   console.log('Claude Optimized Template Manager');
   console.log('Usage: node template-manager.js <command> [args]');
@@ -80,12 +76,11 @@ if (args.length === 0) {
   console.log('  test     - Run test suite');
   process.exit(0);
 }
-
-const command = args[0];
+const _command = args[0];
 if (commands[command]) {
   try {
     commands[command](...args.slice(1));
-  } catch (error) {
+  } catch (_error) {
     console.error(`Error executing ${command}:`, error.message);
     process.exit(1);
   }

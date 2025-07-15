@@ -5,37 +5,35 @@
  * Displays comprehensive status of the Hive Mind swarm
  * including agents, tasks, memory, and performance metrics.
  */
-
 import { Command } from 'commander';
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { HiveMind } from '../../../hive-mind/core/HiveMind.js';
 import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter.js';
 import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager.js';
-
-export const statusCommand = new Command('status')
+export const _statusCommand = new Command('status')
   .description('Display Hive Mind swarm status and metrics')
-  .option('-s, --swarm-id <id>', 'Specific swarm ID to check')
-  .option('-d, --detailed', 'Show detailed agent information', false)
-  .option('-m, --memory', 'Show memory usage statistics', false)
-  .option('-t, --tasks', 'Show task queue details', false)
-  .option('-p, --performance', 'Show performance metrics', false)
-  .option('-w, --watch', 'Watch status in real-time', false)
-  .option('-j, --json', 'Output as JSON', false)
+  .option('-_s, --swarm-id <id>', 'Specific swarm ID to check')
+  .option('-_d, --detailed', 'Show detailed agent information', false)
+  .option('-_m, --memory', 'Show memory usage statistics', false)
+  .option('-_t, --tasks', 'Show task queue details', false)
+  .option('-_p, --performance', 'Show performance metrics', false)
+  .option('-_w, --watch', 'Watch status in real-time', false)
+  .option('-_j, --json', 'Output as JSON', false)
   .action(async (options) => {
     try {
       // Get swarm ID
-      const swarmId = options.swarmId || await getActiveSwarmId();
+      const _swarmId = options.swarmId || await getActiveSwarmId();
       if (!swarmId) {
         throw new Error('No active swarm found. Initialize a Hive Mind first.');
       }
       
       // Load Hive Mind
-      const hiveMind = await HiveMind.load(swarmId);
-      const status = await hiveMind.getFullStatus();
+      const _hiveMind = await HiveMind.load(swarmId);
+      const _status = await hiveMind.getFullStatus();
       
       if (options.json) {
-        console.log(JSON.stringify(status, null, 2));
+        console.log(JSON.stringify(_status, null, 2));
         return;
       }
       
@@ -53,17 +51,17 @@ export const statusCommand = new Command('status')
       
       // Agent summary
       console.log('\n' + chalk.bold('👥 Agent Summary'));
-      const agentTable = new Table({
+      const _agentTable = new Table({
         head: ['Type', 'Total', 'Active', 'Idle', 'Busy'],
         style: { head: ['cyan'] }
       });
       
-      Object.entries(status.agentsByType).forEach(([type, count]) => {
-        const active = status.agents.filter(a => a.type === type && a.status === 'active').length;
-        const idle = status.agents.filter(a => a.type === type && a.status === 'idle').length;
-        const busy = status.agents.filter(a => a.type === type && a.status === 'busy').length;
+      Object.entries(status.agentsByType).forEach(([_type, count]) => {
+        const _active = status.agents.filter(a => a.type === type && a.status === 'active').length;
+        const _idle = status.agents.filter(a => a.type === type && a.status === 'idle').length;
+        const _busy = status.agents.filter(a => a.type === type && a.status === 'busy').length;
         
-        agentTable.push([type, count, active, idle, busy]);
+        agentTable.push([_type, _count, _active, _idle, busy]);
       });
       
       console.log(agentTable.toString());
@@ -71,15 +69,15 @@ export const statusCommand = new Command('status')
       // Detailed agent info
       if (options.detailed) {
         console.log('\n' + chalk.bold('🤖 Agent Details'));
-        const detailTable = new Table({
+        const _detailTable = new Table({
           head: ['Name', 'Type', 'Status', 'Task', 'Messages', 'Uptime'],
           style: { head: ['cyan'] }
         });
         
         status.agents.forEach(agent => {
           detailTable.push([
-            agent.name,
-            agent.type,
+            agent._name,
+            agent._type,
             getAgentStatusBadge(agent.status),
             agent.currentTask || '-',
             agent.messageCount,
@@ -93,15 +91,15 @@ export const statusCommand = new Command('status')
       // Task queue
       if (options.tasks || status.tasks.length > 0) {
         console.log('\n' + chalk.bold('📋 Task Queue'));
-        const taskTable = new Table({
+        const _taskTable = new Table({
           head: ['ID', 'Description', 'Status', 'Assigned To', 'Progress'],
           style: { head: ['cyan'] }
         });
         
         status.tasks.forEach(task => {
           taskTable.push([
-            task.id.substring(0, 8),
-            task.description.substring(0, 40) + (task.description.length > 40 ? '...' : ''),
+            task.id.substring(_0, 8),
+            task.description.substring(_0, 40) + (task.description.length > 40 ? '...' : ''),
             getTaskStatusBadge(task.status),
             task.assignedAgent || '-',
             `${task.progress}%`
@@ -116,15 +114,15 @@ export const statusCommand = new Command('status')
       // Memory statistics
       if (options.memory) {
         console.log('\n' + chalk.bold('💾 Memory Statistics'));
-        const memTable = new Table({
+        const _memTable = new Table({
           head: ['Namespace', 'Entries', 'Size', 'Avg TTL'],
           style: { head: ['cyan'] }
         });
         
-        Object.entries(status.memoryStats.byNamespace).forEach(([ns, stats]) => {
+        Object.entries(status.memoryStats.byNamespace).forEach(([_ns, stats]) => {
           memTable.push([
-            ns,
-            stats.entries,
+            _ns,
+            stats._entries,
             formatBytes(stats.size),
             `${stats.avgTTL}s`
           ]);
@@ -164,24 +162,22 @@ export const statusCommand = new Command('status')
         console.log('\n' + chalk.gray('Refreshing every 2 seconds... (Ctrl+C to exit)'));
         setInterval(async () => {
           console.clear();
-          await statusCommand.parseAsync([...process.argv.slice(0, 2), ...process.argv.slice(3)]);
+          await statusCommand.parseAsync([...process.argv.slice(_0, 2), ...process.argv.slice(3)]);
         }, 2000);
       }
       
-    } catch (error) {
+    } catch (_error) {
       console.error(formatError('Failed to get swarm status'));
       console.error(formatError((error as Error).message));
       process.exit(1);
     }
   });
-
 async function getActiveSwarmId(): Promise<string | null> {
-  const db = await DatabaseManager.getInstance();
+  const _db = await DatabaseManager.getInstance();
   return db.getActiveSwarmId();
 }
-
 function getStatusEmoji(health: string): string {
-  const emojis: Record<string, string> = {
+  const _emojis: Record<string, string> = {
     healthy: '🟢',
     degraded: '🟡',
     critical: '🔴',
@@ -189,9 +185,8 @@ function getStatusEmoji(health: string): string {
   };
   return emojis[health] || '⚪';
 }
-
 function getAgentStatusBadge(status: string): string {
-  const badges: Record<string, string> = {
+  const _badges: Record<string, string> = {
     active: chalk.green('● Active'),
     idle: chalk.yellow('● Idle'),
     busy: chalk.blue('● Busy'),
@@ -199,9 +194,8 @@ function getAgentStatusBadge(status: string): string {
   };
   return badges[status] || chalk.gray('● Unknown');
 }
-
 function getTaskStatusBadge(status: string): string {
-  const badges: Record<string, string> = {
+  const _badges: Record<string, string> = {
     pending: chalk.gray('⏳ Pending'),
     assigned: chalk.yellow('🔄 Assigned'),
     in_progress: chalk.blue('▶️  In Progress'),
@@ -210,23 +204,21 @@ function getTaskStatusBadge(status: string): string {
   };
   return badges[status] || chalk.gray('❓ Unknown');
 }
-
 function formatUptime(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
+  const _seconds = Math.floor(ms / 1000);
+  const _minutes = Math.floor(seconds / 60);
+  const _hours = Math.floor(minutes / 60);
+  const _days = Math.floor(hours / 24);
   
   if (days > 0) return `${days}d ${hours % 24}h`;
   if (hours > 0) return `${hours}h ${minutes % 60}m`;
   if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
   return `${seconds}s`;
 }
-
 function formatBytes(bytes: number): string {
-  const units = ['B', 'KB', 'MB', 'GB'];
-  let size = bytes;
-  let unitIndex = 0;
+  const _units = ['B', 'KB', 'MB', 'GB'];
+  let _size = bytes;
+  let _unitIndex = 0;
   
   while (size > 1024 && unitIndex < units.length - 1) {
     size /= 1024;

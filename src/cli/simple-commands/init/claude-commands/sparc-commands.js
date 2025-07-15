@@ -3,8 +3,8 @@
 // Create SPARC mode slash command
 export function createSparcSlashCommand(mode) {
   // Extract the full description without truncation
-  const fullDescription = mode.roleDefinition.length > 100 
-    ? `${mode.roleDefinition.substring(0, 97)}...` 
+  const _fullDescription = mode.roleDefinition.length > 100 
+    ? `${mode.roleDefinition.substring(_0, 97)}...` 
     : mode.roleDefinition;
 
   return `---
@@ -34,14 +34,14 @@ ${Array.isArray(mode.groups) ? mode.groups.map(g => {
 
 To use this SPARC mode, you can:
 
-1. **Run directly**: \`./claude-flow sparc run ${mode.slug} "your task"\`
-2. **TDD shorthand** (if applicable): \`./claude-flow sparc ${mode.slug} "your task"\`
-3. **Use in workflow**: Include \`${mode.slug}\` in your SPARC workflow
-4. **Delegate tasks**: Use \`new_task\` to assign work to this mode
+1. **Run directly**: `./claude-flow sparc run ${mode.slug} "your task"`
+2. **TDD shorthand** (if applicable): `./claude-flow sparc ${mode.slug} "your task"`
+3. **Use in workflow**: Include `${mode.slug}` in your SPARC workflow
+4. **Delegate tasks**: Use `new_task` to assign work to this mode
 
 ## Example Commands
 
-\`\`\`bash
+```bash
 # Run this specific mode
 ./claude-flow sparc run ${mode.slug} "${getExampleTask(mode.slug)}"
 
@@ -50,23 +50,23 @@ To use this SPARC mode, you can:
 
 # Non-interactive mode for automation
 ./claude-flow sparc run ${mode.slug} "your task" --non-interactive
-\`\`\`
+```
 
 ## Memory Integration
 
-\`\`\`bash
+```bash
 # Store mode-specific context
 ./claude-flow memory store "${mode.slug}_context" "important decisions" --namespace ${mode.slug}
 
 # Query previous work
 ./claude-flow memory query "${mode.slug}" --limit 5
-\`\`\`
+```
 `;
 }
 
 // Helper function to get tool descriptions
 function getToolDescription(tool) {
-  const toolDescriptions = {
+  const _toolDescriptions = {
     'read': 'File reading and viewing',
     'edit': 'File modification and creation',
     'browser': 'Web browsing capabilities',
@@ -78,7 +78,7 @@ function getToolDescription(tool) {
 
 // Helper function to get example tasks
 function getExampleTask(slug) {
-  const examples = {
+  const _examples = {
     'architect': 'design microservices architecture',
     'code': 'implement REST API endpoints',
     'tdd': 'create user authentication tests',
@@ -102,12 +102,12 @@ function getExampleTask(slug) {
 
 // Create main SPARC command
 export function createMainSparcCommand(modes) {
-  const modeList = modes.map(m => `- \`/sparc-${m.slug}\` - ${m.name}`).join('\n');
+  const _modeList = modes.map(m => `- `/sparc-${m.slug}` - ${m.name}`).join('\n');
   
   // Find the sparc orchestrator mode for its full description
-  const sparcMode = modes.find(m => m.slug === 'sparc');
-  const sparcDescription = sparcMode ? sparcMode.roleDefinition : 'SPARC orchestrator for complex workflows';
-  const sparcInstructions = sparcMode ? sparcMode.customInstructions : '';
+  const _sparcMode = modes.find(m => m.slug === 'sparc');
+  const _sparcDescription = sparcMode ? sparcMode.roleDefinition : 'SPARC orchestrator for complex workflows';
+  const _sparcInstructions = sparcMode ? sparcMode.customInstructions : '';
   
   return `---
 name: sparc
@@ -120,7 +120,7 @@ ${sparcDescription}
 
 ## SPARC Workflow
 
-${sparcInstructions.split('\n').slice(0, 10).join('\n')}
+${sparcInstructions.split('\n').slice(_0, 10).join('\n')}
 
 ## Available SPARC Modes
 
@@ -129,26 +129,26 @@ ${modeList}
 ## Quick Start
 
 ### Run SPARC orchestrator (default):
-\`\`\`bash
+```bash
 ./claude-flow sparc "build complete authentication system"
-\`\`\`
+```
 
 ### Run a specific mode:
-\`\`\`bash
+```bash
 ./claude-flow sparc run <mode> "your task"
 ./claude-flow sparc run architect "design API structure"
 ./claude-flow sparc run tdd "implement user service"
-\`\`\`
+```
 
 ### Execute full TDD workflow:
-\`\`\`bash
+```bash
 ./claude-flow sparc tdd "implement user authentication"
-\`\`\`
+```
 
 ### List all modes with details:
-\`\`\`bash
+```bash
 ./claude-flow sparc modes --verbose
-\`\`\`
+```
 
 ## SPARC Methodology Phases
 
@@ -161,7 +161,7 @@ ${modeList}
 ## Memory Integration
 
 Use memory commands to persist context across SPARC sessions:
-\`\`\`bash
+```bash
 # Store specifications
 ./claude-flow memory store "spec_auth" "OAuth2 + JWT requirements" --namespace spec
 
@@ -173,12 +173,12 @@ Use memory commands to persist context across SPARC sessions:
 
 # Export project memory
 ./claude-flow memory export sparc-project-backup.json
-\`\`\`
+```
 
 ## Advanced Swarm Mode
 
 For complex tasks requiring multiple agents with timeout-free execution:
-\`\`\`bash
+```bash
 # Development swarm with monitoring
 ./claude-flow swarm "Build e-commerce platform" --strategy development --monitor --review
 
@@ -187,15 +187,15 @@ For complex tasks requiring multiple agents with timeout-free execution:
 
 # Distributed research swarm
 ./claude-flow swarm "Analyze market trends" --strategy research --distributed --ui
-\`\`\`
+```
 
 ## Non-Interactive Mode
 
 For CI/CD integration and automation:
-\`\`\`bash
+```bash
 ./claude-flow sparc run code "implement API" --non-interactive
 ./claude-flow sparc tdd "user tests" --non-interactive --enable-permissions
-\`\`\`
+```
 
 ## Best Practices
 
@@ -203,8 +203,8 @@ For CI/CD integration and automation:
 ✅ **Environment Safety**: Never hardcode secrets or env values
 ✅ **Test-First**: Always write tests before implementation
 ✅ **Memory Usage**: Store important decisions and context
-✅ **Task Completion**: All tasks should end with \`attempt_completion\`
+✅ **Task Completion**: All tasks should end with `attempt_completion`
 
-See \`/claude-flow-help\` for all available commands.
+See `/claude-flow-help` for all available commands.
 `;
 }

@@ -31,7 +31,7 @@ declare module '@cliffy/ansi/colors' {
     // Add more as needed
   }
   
-  export const colors: Colors;
+  export const _colors: Colors;
 }
 
 declare module '@cliffy/prompt' {
@@ -60,10 +60,10 @@ declare module '@cliffy/prompt' {
   }): Promise<number>;
   
   // Legacy capitalized exports for backward compatibility
-  export const Select: typeof select;
-  export const Input: typeof input;
-  export const Confirm: typeof confirm;
-  export const Number: typeof number;
+  export const _Select: typeof select;
+  export const _Input: typeof input;
+  export const _Confirm: typeof confirm;
+  export const _Number: typeof number;
 }
 
 declare module '@cliffy/command' {
@@ -71,9 +71,9 @@ declare module '@cliffy/command' {
     name(name: string): this;
     version(version: string): this;
     description(desc: string): this;
-    command(name: string, cmd: Command): this;
-    option(flags: string, desc: string, opts?: any): this;
-    action(fn: Function): this;
+    command(name: _string, cmd: Command): this;
+    option(flags: _string, desc: _string, opts?: unknown): this;
+    action(fn: (...args: unknown[]) => unknown): this;
     parse(argv?: string[]): Promise<any>;
     showHelp(): void;
   }

@@ -27,9 +27,9 @@ export function createMinimalClaudeMd() {
 If ANY answer is "No", you MUST combine operations into a single message!
 
 ## Build Commands
-- \`npm run build\`: Build the project
-- \`npm run test\`: Run tests
-- \`npm run lint\`: Run linter
+- `npm run build`: Build the project
+- `npm run test`: Run tests
+- `npm run lint`: Run linter
 
 ## Code Style
 - Use TypeScript/ES modules
@@ -58,7 +58,7 @@ export function createFullClaudeMd() {
 ### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
 
 **Examples of CORRECT concurrent execution:**
-\`\`\`javascript
+```javascript
 // ✅ CORRECT: Everything in ONE message
 [Single Message]:
   - TodoWrite { todos: [10+ todos with all statuses/priorities] }
@@ -72,10 +72,10 @@ export function createFullClaudeMd() {
   - Bash("npm install")
   - Bash("npm test")
   - Bash("npm run build")
-\`\`\`
+```
 
 **Examples of WRONG sequential execution:**
-\`\`\`javascript
+```javascript
 // ❌ WRONG: Multiple messages (NEVER DO THIS)
 Message 1: TodoWrite { todos: [single todo] }
 Message 2: Task("Agent 1")
@@ -84,7 +84,7 @@ Message 4: Read("file1.js")
 Message 5: Write("output1.js")
 Message 6: Bash("npm install")
 // This is 6x slower and breaks coordination!
-\`\`\`
+```
 
 ### 🎯 CONCURRENT EXECUTION CHECKLIST:
 
@@ -98,18 +98,18 @@ Before sending ANY message, ask yourself:
 If ANY answer is "No", you MUST combine operations into a single message!
 
 ## Build Commands
-- \`npm run build\`: Build the project using Deno compile
-- \`npm run test\`: Run the full test suite
-- \`npm run lint\`: Run ESLint and format checks
-- \`npm run typecheck\`: Run TypeScript type checking
-- \`./claude-flow start\`: Start the orchestration system
-- \`./claude-flow --help\`: Show all available commands
+- `npm run build`: Build the project using Deno compile
+- `npm run test`: Run the full test suite
+- `npm run lint`: Run ESLint and format checks
+- `npm run typecheck`: Run TypeScript type checking
+- `./claude-flow start`: Start the orchestration system
+- `./claude-flow --help`: Show all available commands
 
 ## Code Style Preferences
 - Use ES modules (import/export) syntax, not CommonJS (require)
-- Destructure imports when possible (e.g., \`import { foo } from 'bar'\`)
+- Destructure imports when possible (e.g., `import { foo } from 'bar'`)
 - Use TypeScript for all new code
-- Follow existing naming conventions (camelCase for variables, PascalCase for classes)
+- Follow existing naming conventions (camelCase for _variables, PascalCase for classes)
 - Add JSDoc comments for public APIs
 - Use async/await instead of Promise chains
 - Prefer const/let over var
@@ -131,16 +131,16 @@ This is a Claude-Flow AI agent orchestration system with the following component
 - **Agent Coordination**: Multi-agent task distribution and management
 
 ## Important Notes
-- Use \`claude --dangerously-skip-permissions\` for unattended operation
+- Use `claude --dangerously-skip-permissions` for unattended operation
 - The system supports both daemon and interactive modes
 - Memory persistence is handled automatically
 - All components are event-driven for scalability
 
 ## Debugging
-- Check logs in \`./claude-flow.log\`
-- Use \`./claude-flow status\` to check system health
-- Monitor with \`./claude-flow monitor\` for real-time updates
-- Verbose output available with \`--verbose\` flag on most commands
+- Check logs in `./claude-flow.log`
+- Use `./claude-flow status` to check system health
+- Monitor with `./claude-flow monitor` for real-time updates
+- Verbose output available with `--verbose` flag on most commands
 `;
 }
 
@@ -161,7 +161,7 @@ export function createSparcClaudeMd() {
 ### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
 
 **Examples of CORRECT concurrent execution:**
-\`\`\`javascript
+```javascript
 // ✅ CORRECT: Everything in ONE message
 [Single Message]:
   - TodoWrite { todos: [10+ todos with all statuses/priorities] }
@@ -175,10 +175,10 @@ export function createSparcClaudeMd() {
   - Bash("npm install")
   - Bash("npm test")
   - Bash("npm run build")
-\`\`\`
+```
 
 **Examples of WRONG sequential execution:**
-\`\`\`javascript
+```javascript
 // ❌ WRONG: Multiple messages (NEVER DO THIS)
 Message 1: TodoWrite { todos: [single todo] }
 Message 2: Task("Agent 1")
@@ -187,7 +187,7 @@ Message 4: Read("file1.js")
 Message 5: Write("output1.js")
 Message 6: Bash("npm install")
 // This is 6x slower and breaks coordination!
-\`\`\`
+```
 
 ### 🎯 CONCURRENT EXECUTION CHECKLIST:
 
@@ -201,59 +201,59 @@ Before sending ANY message, ask yourself:
 If ANY answer is "No", you MUST combine operations into a single message!
 
 ## Project Overview
-This project uses the SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology for systematic Test-Driven Development with AI assistance through Claude-Flow orchestration.
+This project uses the SPARC (_Specification, _Pseudocode, _Architecture, _Refinement, Completion) methodology for systematic Test-Driven Development with AI assistance through Claude-Flow orchestration.
 
 ## SPARC Development Commands
 
 ### Core SPARC Commands
-- \`./claude-flow sparc modes\`: List all available SPARC development modes
-- \`./claude-flow sparc run <mode> "<task>"\`: Execute specific SPARC mode for a task
-- \`./claude-flow sparc tdd "<feature>"\`: Run complete TDD workflow using SPARC methodology
-- \`./claude-flow sparc info <mode>\`: Get detailed information about a specific mode
+- `./claude-flow sparc modes`: List all available SPARC development modes
+- `./claude-flow sparc run <mode> "<task>"`: Execute specific SPARC mode for a task
+- `./claude-flow sparc tdd "<feature>"`: Run complete TDD workflow using SPARC methodology
+- `./claude-flow sparc info <mode>`: Get detailed information about a specific mode
 
 ### Standard Build Commands
-- \`npm run build\`: Build the project
-- \`npm run test\`: Run the test suite
-- \`npm run lint\`: Run linter and format checks
-- \`npm run typecheck\`: Run TypeScript type checking
+- `npm run build`: Build the project
+- `npm run test`: Run the test suite
+- `npm run lint`: Run linter and format checks
+- `npm run typecheck`: Run TypeScript type checking
 
 ## SPARC Methodology Workflow
 
 ### 1. Specification Phase
-\`\`\`bash
+```bash
 # Create detailed specifications and requirements
 ./claude-flow sparc run spec-pseudocode "Define user authentication requirements"
-\`\`\`
+```
 - Define clear functional requirements
 - Document edge cases and constraints
 - Create user stories and acceptance criteria
 - Establish non-functional requirements
 
 ### 2. Pseudocode Phase
-\`\`\`bash
+```bash
 # Develop algorithmic logic and data flows
 ./claude-flow sparc run spec-pseudocode "Create authentication flow pseudocode"
-\`\`\`
+```
 - Break down complex logic into steps
 - Define data structures and interfaces
 - Plan error handling and edge cases
 - Create modular, testable components
 
 ### 3. Architecture Phase
-\`\`\`bash
+```bash
 # Design system architecture and component structure
 ./claude-flow sparc run architect "Design authentication service architecture"
-\`\`\`
+```
 - Create system diagrams and component relationships
 - Define API contracts and interfaces
 - Plan database schemas and data flows
 - Establish security and scalability patterns
 
 ### 4. Refinement Phase (TDD Implementation)
-\`\`\`bash
+```bash
 # Execute Test-Driven Development cycle
 ./claude-flow sparc tdd "implement user authentication system"
-\`\`\`
+```
 
 **TDD Cycle:**
 1. **Red**: Write failing tests first
@@ -262,10 +262,10 @@ This project uses the SPARC (Specification, Pseudocode, Architecture, Refinement
 4. **Repeat**: Continue until feature is complete
 
 ### 5. Completion Phase
-\`\`\`bash
+```bash
 # Integration, documentation, and validation
 ./claude-flow sparc run integration "integrate authentication with user management"
-\`\`\`
+```
 - Integrate all components
 - Perform end-to-end testing
 - Create comprehensive documentation
@@ -274,39 +274,39 @@ This project uses the SPARC (Specification, Pseudocode, Architecture, Refinement
 ## SPARC Mode Reference
 
 ### Development Modes
-- **\`architect\`**: System design and architecture planning
-- **\`code\`**: Clean, modular code implementation
-- **\`tdd\`**: Test-driven development and testing
-- **\`spec-pseudocode\`**: Requirements and algorithmic planning
-- **\`integration\`**: System integration and coordination
+- **`architect`**: System design and architecture planning
+- **`code`**: Clean, modular code implementation
+- **`tdd`**: Test-driven development and testing
+- **`spec-pseudocode`**: Requirements and algorithmic planning
+- **`integration`**: System integration and coordination
 
 ### Quality Assurance Modes
-- **\`debug\`**: Troubleshooting and bug resolution
-- **\`security-review\`**: Security analysis and vulnerability assessment
-- **\`refinement-optimization-mode\`**: Performance optimization and refactoring
+- **`debug`**: Troubleshooting and bug resolution
+- **`security-review`**: Security analysis and vulnerability assessment
+- **`refinement-optimization-mode`**: Performance optimization and refactoring
 
 ### Support Modes
-- **\`docs-writer\`**: Documentation creation and maintenance
-- **\`devops\`**: Deployment and infrastructure management
-- **\`mcp\`**: External service integration
-- **\`swarm\`**: Multi-agent coordination for complex tasks
+- **`docs-writer`**: Documentation creation and maintenance
+- **`devops`**: Deployment and infrastructure management
+- **`mcp`**: External service integration
+- **`swarm`**: Multi-agent coordination for complex tasks
 
 ## Claude Code Slash Commands
 
-Claude Code slash commands are available in \`.claude/commands/\`:
+Claude Code slash commands are available in `.claude/commands/`:
 
 ### Project Commands
-- \`/sparc\`: Execute SPARC methodology workflows
-- \`/sparc-<mode>\`: Run specific SPARC mode (e.g., /sparc-architect)
-- \`/claude-flow-help\`: Show all Claude-Flow commands
-- \`/claude-flow-memory\`: Interact with memory system
-- \`/claude-flow-swarm\`: Coordinate multi-agent swarms
+- `/sparc`: Execute SPARC methodology workflows
+- `/sparc-<mode>`: Run specific SPARC mode (e.g., /sparc-architect)
+- `/claude-flow-help`: Show all Claude-Flow commands
+- `/claude-flow-memory`: Interact with memory system
+- `/claude-flow-swarm`: Coordinate multi-agent swarms
 
 ### Using Slash Commands
-1. Type \`/\` in Claude Code to see available commands
+1. Type `/` in Claude Code to see available commands
 2. Select a command or type its name
 3. Commands are context-aware and project-specific
-4. Custom commands can be added to \`.claude/commands/\`
+4. Custom commands can be added to `.claude/commands/`
 
 ## Code Style and Best Practices
 
@@ -319,7 +319,7 @@ Claude Code slash commands are available in \`.claude/commands/\`:
 
 ### Coding Standards
 - Use TypeScript for type safety and better tooling
-- Follow consistent naming conventions (camelCase for variables, PascalCase for classes)
+- Follow consistent naming conventions (camelCase for _variables, PascalCase for classes)
 - Implement proper error handling and logging
 - Use async/await for asynchronous operations
 - Prefer composition over inheritance
@@ -333,7 +333,7 @@ Claude Code slash commands are available in \`.claude/commands/\`:
 ## SPARC Memory Integration
 
 ### Memory Commands for SPARC Development
-\`\`\`bash
+```bash
 # Store project specifications
 ./claude-flow memory store spec_auth "User authentication requirements and constraints"
 
@@ -348,19 +348,19 @@ Claude Code slash commands are available in \`.claude/commands/\`:
 
 # Export project memory
 ./claude-flow memory export project_backup.json
-\`\`\`
+```
 
 ### Memory Namespaces
-- **\`spec\`**: Requirements and specifications
-- **\`arch\`**: Architecture and design decisions
-- **\`impl\`**: Implementation notes and code patterns
-- **\`test\`**: Test results and coverage reports
-- **\`debug\`**: Bug reports and resolution notes
+- **`spec`**: Requirements and specifications
+- **`arch`**: Architecture and design decisions
+- **`impl`**: Implementation notes and code patterns
+- **`test`**: Test results and coverage reports
+- **`debug`**: Bug reports and resolution notes
 
 ## Workflow Examples
 
 ### Feature Development Workflow
-\`\`\`bash
+```bash
 # 1. Start with specification
 ./claude-flow sparc run spec-pseudocode "User profile management feature"
 
@@ -378,10 +378,10 @@ Claude Code slash commands are available in \`.claude/commands/\`:
 
 # 6. Documentation
 ./claude-flow sparc run docs-writer "profile service API documentation"
-\`\`\`
+```
 
 ### Bug Fix Workflow
-\`\`\`bash
+```bash
 # 1. Debug and analyze
 ./claude-flow sparc run debug "authentication token expiration issue"
 
@@ -393,22 +393,22 @@ Claude Code slash commands are available in \`.claude/commands/\`:
 
 # 4. Security review
 ./claude-flow sparc run security-review "token handling security implications"
-\`\`\`
+```
 
 ## Configuration Files
 
 ### Claude Code Integration
-- **\`.claude/commands/\`**: Claude Code slash commands for all SPARC modes
-- **\`.claude/logs/\`**: Conversation and session logs
+- **`.claude/commands/`**: Claude Code slash commands for all SPARC modes
+- **`.claude/logs/`**: Conversation and session logs
 
 ### SPARC Configuration
-- **\`.roomodes\`**: SPARC mode definitions and configurations (auto-generated)
-- **\`.roo/\`**: SPARC templates and workflows (auto-generated)
+- **`.roomodes`**: SPARC mode definitions and configurations (auto-generated)
+- **`.roo/`**: SPARC templates and workflows (auto-generated)
 
 ### Claude-Flow Configuration
-- **\`memory/\`**: Persistent memory and session data
-- **\`coordination/\`**: Multi-agent coordination settings
-- **\`CLAUDE.md\`**: Project instructions for Claude Code
+- **`memory/`**: Persistent memory and session data
+- **`coordination/`**: Multi-agent coordination settings
+- **`CLAUDE.md`**: Project instructions for Claude Code
 
 ## Git Workflow Integration
 
@@ -420,20 +420,20 @@ Claude Code slash commands are available in \`.claude/commands/\`:
 - **Documentation commits**: After completing documentation updates
 
 ### Branch Strategy
-- **\`feature/sparc-<feature-name>\`**: Feature development with SPARC methodology
-- **\`hotfix/sparc-<issue>\`**: Bug fixes using SPARC debugging workflow
-- **\`refactor/sparc-<component>\`**: Refactoring using optimization mode
+- **`feature/sparc-<feature-name>`**: Feature development with SPARC methodology
+- **`hotfix/sparc-<issue>`**: Bug fixes using SPARC debugging workflow
+- **`refactor/sparc-<component>`**: Refactoring using optimization mode
 
 ## Troubleshooting
 
 ### Common SPARC Issues
-- **Mode not found**: Check \`.roomodes\` file exists and is valid JSON
-- **Memory persistence**: Ensure \`memory/\` directory has write permissions
+- **Mode not found**: Check `.roomodes` file exists and is valid JSON
+- **Memory persistence**: Ensure `memory/` directory has write permissions
 - **Tool access**: Verify required tools are available for the selected mode
 - **Namespace conflicts**: Use unique memory namespaces for different features
 
 ### Debug Commands
-\`\`\`bash
+```bash
 # Check SPARC configuration
 ./claude-flow sparc modes
 
@@ -445,7 +445,7 @@ Claude Code slash commands are available in \`.claude/commands/\`:
 
 # View detailed mode information
 ./claude-flow sparc info <mode-name>
-\`\`\`
+```
 
 ## Project Architecture
 
@@ -458,7 +458,7 @@ This SPARC-enabled project follows a systematic development approach:
 
 ## Important Notes
 
-- Always run tests before committing (\`npm run test\`)
+- Always run tests before committing (`npm run test`)
 - Use SPARC memory system to maintain context across sessions
 - Follow the Red-Green-Refactor cycle during TDD phases
 - Document architectural decisions in memory for future reference
@@ -487,7 +487,7 @@ export async function createOptimizedSparcClaudeMd() {
 ### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
 
 **Examples of CORRECT concurrent execution:**
-\`\`\`javascript
+```javascript
 // ✅ CORRECT: Everything in ONE message
 [Single Message]:
   - TodoWrite { todos: [10+ todos with all statuses/priorities] }
@@ -501,10 +501,10 @@ export async function createOptimizedSparcClaudeMd() {
   - Bash("npm install")
   - Bash("npm test")
   - Bash("npm run build")
-\`\`\`
+```
 
 **Examples of WRONG sequential execution:**
-\`\`\`javascript
+```javascript
 // ❌ WRONG: Multiple messages (NEVER DO THIS)
 Message 1: TodoWrite { todos: [single todo] }
 Message 2: Task("Agent 1")
@@ -513,7 +513,7 @@ Message 4: Read("file1.js")
 Message 5: Write("output1.js")
 Message 6: Bash("npm install")
 // This is 6x slower and breaks coordination!
-\`\`\`
+```
 
 ### 🎯 CONCURRENT EXECUTION CHECKLIST:
 
@@ -527,64 +527,64 @@ Before sending ANY message, ask yourself:
 If ANY answer is "No", you MUST combine operations into a single message!
 
 ## Project Overview
-This project uses the SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology for systematic Test-Driven Development with AI assistance through Claude-Flow orchestration.
+This project uses the SPARC (_Specification, _Pseudocode, _Architecture, _Refinement, Completion) methodology for systematic Test-Driven Development with AI assistance through Claude-Flow orchestration.
 
 **🚀 Batchtools Optimization Enabled**: This configuration includes optimized prompts and parallel processing capabilities for improved performance and efficiency.
 
 ## SPARC Development Commands
 
 ### Core SPARC Commands
-- \`npx claude-flow sparc modes\`: List all available SPARC development modes
-- \`npx claude-flow sparc run <mode> "<task>"\`: Execute specific SPARC mode for a task
-- \`npx claude-flow sparc tdd "<feature>"\`: Run complete TDD workflow using SPARC methodology
-- \`npx claude-flow sparc info <mode>\`: Get detailed information about a specific mode
+- `npx claude-flow sparc modes`: List all available SPARC development modes
+- `npx claude-flow sparc run <mode> "<task>"`: Execute specific SPARC mode for a task
+- `npx claude-flow sparc tdd "<feature>"`: Run complete TDD workflow using SPARC methodology
+- `npx claude-flow sparc info <mode>`: Get detailed information about a specific mode
 
 ### Batchtools Commands (Optimized)
-- \`npx claude-flow sparc batch <modes> "<task>"\`: Execute multiple SPARC modes in parallel
-- \`npx claude-flow sparc pipeline "<task>"\`: Execute full SPARC pipeline with parallel processing
-- \`npx claude-flow sparc concurrent <mode> "<tasks-file>"\`: Process multiple tasks concurrently
+- `npx claude-flow sparc batch <modes> "<task>"`: Execute multiple SPARC modes in parallel
+- `npx claude-flow sparc pipeline "<task>"`: Execute full SPARC pipeline with parallel processing
+- `npx claude-flow sparc concurrent <mode> "<tasks-file>"`: Process multiple tasks concurrently
 
 ### Standard Build Commands
-- \`npm run build\`: Build the project
-- \`npm run test\`: Run the test suite
-- \`npm run lint\`: Run linter and format checks
-- \`npm run typecheck\`: Run TypeScript type checking
+- `npm run build`: Build the project
+- `npm run test`: Run the test suite
+- `npm run lint`: Run linter and format checks
+- `npm run typecheck`: Run TypeScript type checking
 
 ## SPARC Methodology Workflow (Batchtools Enhanced)
 
 ### 1. Specification Phase (Parallel Analysis)
-\`\`\`bash
+```bash
 # Create detailed specifications with concurrent requirements analysis
 npx claude-flow sparc run spec-pseudocode "Define user authentication requirements" --parallel
-\`\`\`
+```
 **Batchtools Optimization**: Simultaneously analyze multiple requirement sources, validate constraints in parallel, and generate comprehensive specifications.
 
 ### 2. Pseudocode Phase (Concurrent Logic Design)
-\`\`\`bash
+```bash
 # Develop algorithmic logic with parallel pattern analysis
 npx claude-flow sparc run spec-pseudocode "Create authentication flow pseudocode" --batch-optimize
-\`\`\`
+```
 **Batchtools Optimization**: Process multiple algorithm patterns concurrently, validate logic flows in parallel, and optimize data structures simultaneously.
 
 ### 3. Architecture Phase (Parallel Component Design)
-\`\`\`bash
+```bash
 # Design system architecture with concurrent component analysis
 npx claude-flow sparc run architect "Design authentication service architecture" --parallel
-\`\`\`
+```
 **Batchtools Optimization**: Generate multiple architectural alternatives simultaneously, validate integration points in parallel, and create comprehensive documentation concurrently.
 
 ### 4. Refinement Phase (Parallel TDD Implementation)
-\`\`\`bash
+```bash
 # Execute Test-Driven Development with parallel test generation
 npx claude-flow sparc tdd "implement user authentication system" --batch-tdd
-\`\`\`
+```
 **Batchtools Optimization**: Generate multiple test scenarios simultaneously, implement and validate code in parallel, and optimize performance concurrently.
 
 ### 5. Completion Phase (Concurrent Integration)
-\`\`\`bash
+```bash
 # Integration with parallel validation and documentation
 npx claude-flow sparc run integration "integrate authentication with user management" --parallel
-\`\`\`
+```
 **Batchtools Optimization**: Run integration tests in parallel, generate documentation concurrently, and validate requirements simultaneously.
 
 ## Batchtools Integration Features
@@ -628,7 +628,7 @@ npx claude-flow sparc run integration "integrate authentication with user manage
 
 ## Important Notes (Enhanced)
 
-- Always run tests before committing with parallel execution (\`npm run test --parallel\`)
+- Always run tests before committing with parallel execution (`npm run test --parallel`)
 - Use SPARC memory system with concurrent operations to maintain context across sessions
 - Follow the Red-Green-Refactor cycle with parallel test generation during TDD phases
 - Document architectural decisions with concurrent validation in memory

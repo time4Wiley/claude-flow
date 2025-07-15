@@ -1,11 +1,8 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 import { EventEmitter } from 'events';
 import { writeFile, readFile, mkdir, readdir } from 'fs/promises';
 import { join } from 'path';
 import { spawn, ChildProcess } from 'child_process';
-import { Logger } from '../core/logger.js';
 import { ConfigManager } from '../core/config.js';
-
 export interface DeploymentEnvironment {
   id: string;
   name: string;
@@ -56,7 +53,6 @@ export interface DeploymentEnvironment {
   createdAt: Date;
   updatedAt: Date;
 }
-
 export interface DeploymentStrategy {
   id: string;
   name: string;
@@ -82,7 +78,6 @@ export interface DeploymentStrategy {
     events: string[];
   };
 }
-
 export interface DeploymentStage {
   id: string;
   name: string;
@@ -109,7 +104,6 @@ export interface DeploymentStage {
   duration?: number;
   logs: DeploymentLog[];
 }
-
 export interface DeploymentCommand {
   id: string;
   command: string;
@@ -124,15 +118,13 @@ export interface DeploymentCommand {
     outputNotContains?: string[];
   };
 }
-
 export interface DeploymentLog {
   timestamp: Date;
   level: 'debug' | 'info' | 'warn' | 'error';
   message: string;
   source: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
-
 export interface RollbackCondition {
   metric: string;
   threshold: number;
@@ -140,7 +132,6 @@ export interface RollbackCondition {
   duration: number;
   description: string;
 }
-
 export interface DeploymentAlert {
   id: string;
   name: string;
@@ -149,7 +140,6 @@ export interface DeploymentAlert {
   channels: string[];
   enabled: boolean;
 }
-
 export interface Deployment {
   id: string;
   name: string;
@@ -195,7 +185,6 @@ export interface Deployment {
   createdAt: Date;
   updatedAt: Date;
 }
-
 export interface DeploymentApproval {
   id: string;
   stage: string;
@@ -209,7 +198,6 @@ export interface DeploymentApproval {
   status: 'pending' | 'approved' | 'rejected' | 'expired';
   expiresAt: Date;
 }
-
 export interface DeploymentNotification {
   id: string;
   type: 'email' | 'slack' | 'teams' | 'webhook' | 'sms';
@@ -219,17 +207,15 @@ export interface DeploymentNotification {
   timestamp: Date;
   status: 'sent' | 'failed' | 'pending';
 }
-
 export interface DeploymentAuditEntry {
   id: string;
   timestamp: Date;
   userId: string;
   action: string;
   target: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   ipAddress?: string;
 }
-
 export interface DeploymentPipeline {
   id: string;
   name: string;
@@ -243,7 +229,7 @@ export interface DeploymentPipeline {
   }[];
   triggers: {
     type: 'webhook' | 'schedule' | 'manual' | 'git';
-    configuration: Record<string, any>;
+    configuration: Record<string, unknown>;
   }[];
   configuration: {
     parallelDeployments: boolean;
@@ -262,7 +248,6 @@ export interface DeploymentPipeline {
   createdAt: Date;
   updatedAt: Date;
 }
-
 export interface DeploymentMetrics {
   totalDeployments: number;
   successfulDeployments: number;
@@ -284,7 +269,6 @@ export interface DeploymentMetrics {
     rollbackRate: number;
   }>;
 }
-
 export class DeploymentManager extends EventEmitter {
   private deployments: Map<string, Deployment> = new Map();
   private environments: Map<string, DeploymentEnvironment> = new Map();
@@ -294,10 +278,9 @@ export class DeploymentManager extends EventEmitter {
   private deploymentsPath: string;
   private logger: Logger;
   private config: ConfigManager;
-
   constructor(
     deploymentsPath: string = './deployments',
-    logger?: Logger,
+    logger?: _Logger,
     config?: ConfigManager
   ) {
     super();
@@ -305,27 +288,25 @@ export class DeploymentManager extends EventEmitter {
     this.logger = logger || new Logger({ level: 'info', format: 'text', destination: 'console' });
     this.config = config || ConfigManager.getInstance();
   }
-
   async initialize(): Promise<void> {
     try {
-      await mkdir(this.deploymentsPath, { recursive: true });
-      await mkdir(join(this.deploymentsPath, 'environments'), { recursive: true });
-      await mkdir(join(this.deploymentsPath, 'strategies'), { recursive: true });
-      await mkdir(join(this.deploymentsPath, 'pipelines'), { recursive: true });
+      await mkdir(this._deploymentsPath, { recursive: true });
+      await mkdir(join(this._deploymentsPath, 'environments'), { recursive: true });
+      await mkdir(join(this._deploymentsPath, 'strategies'), { recursive: true });
+      await mkdir(join(this._deploymentsPath, 'pipelines'), { recursive: true });
       
       await this.loadConfigurations();
       await this.initializeDefaultStrategies();
       
       this.logger.info('Deployment Manager initialized successfully');
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Failed to initialize Deployment Manager', { error });
       throw error;
     }
   }
-
   async createEnvironment(environmentData: Partial<DeploymentEnvironment>): Promise<DeploymentEnvironment> {
-    const environment: DeploymentEnvironment = {
-      id: environmentData.id || `env-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    const _environment: DeploymentEnvironment = {
+      id: environmentData.id || `env-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
       name: environmentData.name || 'Unnamed Environment',
       type: environmentData.type || 'development',
       status: 'inactive',
@@ -333,8 +314,8 @@ export class DeploymentManager extends EventEmitter {
         region: 'us-east-1',
         provider: 'aws',
         endpoints: [],
-        secrets: {},
-        environment_variables: {},
+        secrets: { /* empty */ },
+        environment_variables: { /* empty */ },
         resources: {
           cpu: '1',
           memory: '1Gi',
@@ -378,16 +359,12 @@ export class DeploymentManager extends EventEmitter {
       createdAt: new Date(),
       updatedAt: new Date()
     };
-
-    this.environments.set(environment.id, environment);
+    this.environments.set(environment._id, environment);
     await this.saveEnvironment(environment);
-
     this.emit('environment:created', environment);
     this.logger.info(`Environment created: ${environment.name} (${environment.id})`);
-
     return environment;
   }
-
   async createDeployment(deploymentData: {
     name: string;
     version: string;
@@ -398,18 +375,16 @@ export class DeploymentManager extends EventEmitter {
     source: Deployment['source'];
     artifacts?: Partial<Deployment['artifacts']>;
   }): Promise<Deployment> {
-    const environment = this.environments.get(deploymentData.environmentId);
+    const _environment = this.environments.get(deploymentData.environmentId);
     if (!environment) {
       throw new Error(`Environment not found: ${deploymentData.environmentId}`);
     }
-
-    const strategy = this.strategies.get(deploymentData.strategyId);
+    const _strategy = this.strategies.get(deploymentData.strategyId);
     if (!strategy) {
       throw new Error(`Strategy not found: ${deploymentData.strategyId}`);
     }
-
-    const deployment: Deployment = {
-      id: `deploy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    const _deployment: Deployment = {
+      id: `deploy-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
       name: deploymentData.name,
       version: deploymentData.version,
       projectId: deploymentData.projectId,
@@ -427,10 +402,10 @@ export class DeploymentManager extends EventEmitter {
         deploymentSize: 0,
         successRate: 0,
         errorRate: 0,
-        performanceMetrics: {}
+        performanceMetrics: { /* empty */ }
       },
       stages: strategy.stages.map(stage => ({
-        ...stage,
+        ..._stage,
         status: 'pending',
         logs: []
       })),
@@ -440,125 +415,107 @@ export class DeploymentManager extends EventEmitter {
       createdAt: new Date(),
       updatedAt: new Date()
     };
-
-    this.addAuditEntry(deployment, deploymentData.initiatedBy, 'deployment_created', 'deployment', {
-      deploymentId: deployment.id,
-      environment: environment.name,
+    this.addAuditEntry(_deployment, deploymentData._initiatedBy, 'deployment_created', 'deployment', {
+      deploymentId: deployment._id,
+      environment: environment._name,
       strategy: strategy.name
     });
-
-    this.deployments.set(deployment.id, deployment);
+    this.deployments.set(deployment._id, deployment);
     await this.saveDeployment(deployment);
-
     this.emit('deployment:created', deployment);
     this.logger.info(`Deployment created: ${deployment.name} (${deployment.id})`);
-
     return deployment;
   }
-
   async executeDeployment(deploymentId: string): Promise<void> {
-    const deployment = this.deployments.get(deploymentId);
+    const _deployment = this.deployments.get(deploymentId);
     if (!deployment) {
       throw new Error(`Deployment not found: ${deploymentId}`);
     }
-
     if (deployment.status !== 'pending') {
       throw new Error(`Deployment ${deploymentId} is not in pending status`);
     }
-
     deployment.status = 'running';
     deployment.metrics.startTime = new Date();
     deployment.updatedAt = new Date();
-
-    this.addAuditEntry(deployment, 'system', 'deployment_started', 'deployment', {
+    this.addAuditEntry(_deployment, 'system', 'deployment_started', 'deployment', {
       deploymentId
     });
-
     await this.saveDeployment(deployment);
     this.emit('deployment:started', deployment);
-
     try {
       for (const stage of deployment.stages) {
-        await this.executeStage(deployment, stage);
+        await this.executeStage(_deployment, stage);
         
         if (stage.status === 'failed') {
-          await this.handleDeploymentFailure(deployment, stage);
+          await this.handleDeploymentFailure(_deployment, stage);
           return;
         }
       }
-
       await this.completeDeployment(deployment);
-    } catch (error) {
-      await this.handleDeploymentError(deployment, error);
+    } catch (_error) {
+      await this.handleDeploymentError(_deployment, error);
     }
   }
-
-  private async executeStage(deployment: Deployment, stage: DeploymentStage): Promise<void> {
+  private async executeStage(deployment: _Deployment, stage: DeploymentStage): Promise<void> {
     stage.status = 'running';
     stage.startTime = new Date();
     
-    this.addLog(stage, 'info', `Starting stage: ${stage.name}`, 'system');
+    this.addLog(_stage, 'info', `Starting stage: ${stage.name}`, 'system');
     
     try {
       // Check conditions
-      if (!this.evaluateStageConditions(deployment, stage)) {
+      if (!this.evaluateStageConditions(_deployment, stage)) {
         stage.status = 'skipped';
-        this.addLog(stage, 'info', 'Stage skipped due to conditions', 'system');
+        this.addLog(_stage, 'info', 'Stage skipped due to conditions', 'system');
         return;
       }
-
       // Handle approvals
-      if (stage.type === 'deploy' && await this.requiresApproval(deployment, stage)) {
-        await this.requestApproval(deployment, stage);
+      if (stage.type === 'deploy' && await this.requiresApproval(_deployment, stage)) {
+        await this.requestApproval(_deployment, stage);
         
         // Wait for approval
-        while (await this.isPendingApproval(deployment, stage)) {
-          await new Promise(resolve => setTimeout(resolve, 10000)); // Check every 10 seconds
+        while (await this.isPendingApproval(_deployment, stage)) {
+          await new Promise(resolve => setTimeout(_resolve, 10000)); // Check every 10 seconds
         }
-
-        if (!(await this.isApproved(deployment, stage))) {
+        if (!(await this.isApproved(_deployment, stage))) {
           stage.status = 'failed';
-          this.addLog(stage, 'error', 'Stage rejected by approver', 'system');
+          this.addLog(_stage, 'error', 'Stage rejected by approver', 'system');
           return;
         }
       }
-
       // Execute commands
       for (const command of stage.commands) {
-        await this.executeCommand(deployment, stage, command);
+        await this.executeCommand(_deployment, _stage, command);
       }
-
       stage.status = 'success';
       stage.endTime = new Date();
       stage.duration = stage.endTime.getTime() - stage.startTime!.getTime();
       
-      this.addLog(stage, 'info', `Stage completed successfully in ${stage.duration}ms`, 'system');
+      this.addLog(_stage, 'info', `Stage completed successfully in ${stage.duration}ms`, 'system');
       
-    } catch (error) {
+    } catch (_error) {
       stage.status = 'failed';
       stage.endTime = new Date();
       
-      this.addLog(stage, 'error', `Stage failed: ${(error instanceof Error ? error.message : String(error))}`, 'system');
+      this.addLog(_stage, 'error', `Stage failed: ${(error instanceof Error ? error.message : String(error))}`, 'system');
       
       // Retry logic
       if (stage.retryPolicy.maxRetries > 0) {
-        await this.retryStage(deployment, stage);
+        await this.retryStage(_deployment, stage);
       }
     }
-
     await this.saveDeployment(deployment);
-    this.emit('stage:completed', { deployment, stage });
+    this.emit('stage:completed', { _deployment, stage });
   }
-
   private async executeCommand(
-    deployment: Deployment,
-    stage: DeploymentStage,
+    deployment: _Deployment,
+    stage: _DeploymentStage,
     command: DeploymentCommand
   ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const environment = this.environments.get(deployment.environmentId);
+    return new Promise((_resolve, reject) => {
+      const _environment = this.environments.get(deployment.environmentId);
       
-      const processEnv = {
+      const _processEnv = {
         ...process.env,
         ...environment?.configuration.environment_variables,
         ...command.environment,
@@ -566,85 +523,70 @@ export class DeploymentManager extends EventEmitter {
         DEPLOYMENT_VERSION: deployment.version,
         ENVIRONMENT_ID: deployment.environmentId
       };
-
-      this.addLog(stage, 'info', `Executing: ${command.command} ${command.args.join(' ')}`, 'command');
-
-      const childProcess = spawn(command.command, command.args, {
+      this.addLog(_stage, 'info', `Executing: ${command.command} ${command.args.join(' ')}`, 'command');
+      const _childProcess = spawn(command._command, command._args, {
         cwd: command.workingDirectory || process.cwd(),
         env: processEnv,
         stdio: ['pipe', 'pipe', 'pipe']
       });
-
       this.activeProcesses.set(`${deployment.id}-${stage.id}-${command.id}`, childProcess);
-
-      let stdout = '';
-      let stderr = '';
-
+      let _stdout = '';
+      let _stderr = '';
       childProcess.stdout?.on('data', (data) => {
-        const output = data.toString();
+        const _output = data.toString();
         stdout += output;
-        this.addLog(stage, 'info', output.trim(), 'stdout');
+        this.addLog(_stage, 'info', output.trim(), 'stdout');
       });
-
       childProcess.stderr?.on('data', (data) => {
-        const output = data.toString();
+        const _output = data.toString();
         stderr += output;
-        this.addLog(stage, 'error', output.trim(), 'stderr');
+        this.addLog(_stage, 'error', output.trim(), 'stderr');
       });
-
-      const timeout = setTimeout(() => {
+      const _timeout = setTimeout(() => {
         childProcess.kill('SIGTERM');
         reject(new Error(`Command timed out after ${command.timeout}ms`));
       }, command.timeout);
-
       childProcess.on('close', (code) => {
         clearTimeout(timeout);
         this.activeProcesses.delete(`${deployment.id}-${stage.id}-${command.id}`);
-
         // Check success criteria
-        const success = this.evaluateCommandSuccess(command, code, stdout, stderr);
+        const _success = this.evaluateCommandSuccess(_command, _code, _stdout, stderr);
         
         if (success) {
-          this.addLog(stage, 'info', `Command completed successfully (exit code: ${code})`, 'command');
+          this.addLog(_stage, 'info', `Command completed successfully (exit code: ${code})`, 'command');
           resolve();
         } else {
-          this.addLog(stage, 'error', `Command failed (exit code: ${code})`, 'command');
+          this.addLog(_stage, 'error', `Command failed (exit code: ${code})`, 'command');
           reject(new Error(`Command failed with exit code ${code}`));
         }
       });
-
       childProcess.on('error', (error) => {
         clearTimeout(timeout);
         this.activeProcesses.delete(`${deployment.id}-${stage.id}-${command.id}`);
-        this.addLog(stage, 'error', `Command error: ${(error instanceof Error ? error.message : String(error))}`, 'command');
+        this.addLog(_stage, 'error', `Command error: ${(error instanceof Error ? error.message : String(error))}`, 'command');
         reject(error);
       });
     });
   }
-
   async rollbackDeployment(
     deploymentId: string,
     reason: string,
     userId: string = 'system'
   ): Promise<void> {
-    const deployment = this.deployments.get(deploymentId);
+    const _deployment = this.deployments.get(deploymentId);
     if (!deployment) {
       throw new Error(`Deployment not found: ${deploymentId}`);
     }
-
     // Find previous successful deployment
-    const previousDeployment = await this.getPreviousSuccessfulDeployment(
-      deployment.projectId,
-      deployment.environmentId,
+    const _previousDeployment = await this.getPreviousSuccessfulDeployment(
+      deployment._projectId,
+      deployment._environmentId,
       deploymentId
     );
-
     if (!previousDeployment) {
       throw new Error('No previous successful deployment found for rollback');
     }
-
-    const rollbackStartTime = new Date();
-
+    const _rollbackStartTime = new Date();
     deployment.rollback = {
       triggered: true,
       reason,
@@ -652,43 +594,35 @@ export class DeploymentManager extends EventEmitter {
       previousDeploymentId: previousDeployment.id,
       rollbackDuration: 0
     };
-
     deployment.status = 'rolled-back';
     deployment.updatedAt = new Date();
-
-    this.addAuditEntry(deployment, userId, 'rollback_initiated', 'deployment', {
-      deploymentId,
-      previousDeploymentId: previousDeployment.id,
+    this.addAuditEntry(_deployment, _userId, 'rollback_initiated', 'deployment', {
+      _deploymentId,
+      previousDeploymentId: previousDeployment._id,
       reason
     });
-
     try {
       // Execute rollback strategy
-      await this.executeRollbackStrategy(deployment, previousDeployment);
+      await this.executeRollbackStrategy(_deployment, previousDeployment);
       
       deployment.rollback.rollbackDuration = Date.now() - rollbackStartTime.getTime();
       
-      this.addAuditEntry(deployment, userId, 'rollback_completed', 'deployment', {
-        deploymentId,
+      this.addAuditEntry(_deployment, _userId, 'rollback_completed', 'deployment', {
+        _deploymentId,
         rollbackDuration: deployment.rollback.rollbackDuration
       });
-
       this.emit('deployment:rolled-back', deployment);
       this.logger.info(`Deployment rolled back: ${deploymentId}`);
-
-    } catch (error) {
-      this.addAuditEntry(deployment, userId, 'rollback_failed', 'deployment', {
-        deploymentId,
+    } catch (_error) {
+      this.addAuditEntry(_deployment, _userId, 'rollback_failed', 'deployment', {
+        _deploymentId,
         error: (error instanceof Error ? error.message : String(error))
       });
-
       this.logger.error(`Rollback failed for deployment ${deploymentId}`, { error });
       throw error;
     }
-
     await this.saveDeployment(deployment);
   }
-
   async getDeploymentMetrics(
     filters?: {
       projectId?: string;
@@ -697,8 +631,7 @@ export class DeploymentManager extends EventEmitter {
       timeRange?: { start: Date; end: Date };
     }
   ): Promise<DeploymentMetrics> {
-    let deployments = Array.from(this.deployments.values());
-
+    let _deployments = Array.from(this.deployments.values());
     // Apply filters
     if (filters) {
       if (filters.projectId) {
@@ -717,43 +650,38 @@ export class DeploymentManager extends EventEmitter {
         );
       }
     }
-
-    const totalDeployments = deployments.length;
-    const successfulDeployments = deployments.filter(d => d.status === 'success').length;
-    const failedDeployments = deployments.filter(d => d.status === 'failed').length;
-    const rolledBackDeployments = deployments.filter(d => d.status === 'rolled-back').length;
-
-    const completedDeployments = deployments.filter(d => 
+    const _totalDeployments = deployments.length;
+    const _successfulDeployments = deployments.filter(d => d.status === 'success').length;
+    const _failedDeployments = deployments.filter(d => d.status === 'failed').length;
+    const _rolledBackDeployments = deployments.filter(d => d.status === 'rolled-back').length;
+    const _completedDeployments = deployments.filter(d => 
       d.metrics.endTime && d.metrics.startTime
     );
-
-    const averageDeploymentTime = completedDeployments.length > 0 ?
-      completedDeployments.reduce((sum, d) => 
+    const _averageDeploymentTime = completedDeployments.length > 0 ?
+      completedDeployments.reduce((_sum, d) => 
         sum + (d.metrics.endTime!.getTime() - d.metrics.startTime.getTime()), 0
       ) / completedDeployments.length : 0;
-
     // Calculate environment metrics
-    const environmentMetrics: Record<string, any> = {};
+    const _environmentMetrics: Record<string, unknown> = { /* empty */ };
     for (const env of this.environments.values()) {
-      const envDeployments = deployments.filter(d => d.environmentId === env.id);
-      const envSuccessful = envDeployments.filter(d => d.status === 'success').length;
+      const _envDeployments = deployments.filter(d => d.environmentId === env.id);
+      const _envSuccessful = envDeployments.filter(d => d.status === 'success').length;
       
       environmentMetrics[env.id] = {
         deployments: envDeployments.length,
         successRate: envDeployments.length > 0 ? (envSuccessful / envDeployments.length) * 100 : 0,
         averageTime: envDeployments.length > 0 ? 
-          envDeployments.reduce((sum, d) => 
+          envDeployments.reduce((_sum, d) => 
             sum + (d.metrics.duration || 0), 0
           ) / envDeployments.length : 0
       };
     }
-
     // Calculate strategy metrics
-    const strategyMetrics: Record<string, any> = {};
+    const _strategyMetrics: Record<string, unknown> = { /* empty */ };
     for (const strategy of this.strategies.values()) {
-      const strategyDeployments = deployments.filter(d => d.strategyId === strategy.id);
-      const strategySuccessful = strategyDeployments.filter(d => d.status === 'success').length;
-      const strategyRolledBack = strategyDeployments.filter(d => d.status === 'rolled-back').length;
+      const _strategyDeployments = deployments.filter(d => d.strategyId === strategy.id);
+      const _strategySuccessful = strategyDeployments.filter(d => d.status === 'success').length;
+      const _strategyRolledBack = strategyDeployments.filter(d => d.status === 'rolled-back').length;
       
       strategyMetrics[strategy.id] = {
         deployments: strategyDeployments.length,
@@ -763,7 +691,6 @@ export class DeploymentManager extends EventEmitter {
           (strategyRolledBack / strategyDeployments.length) * 100 : 0
       };
     }
-
     return {
       totalDeployments,
       successfulDeployments,
@@ -772,46 +699,41 @@ export class DeploymentManager extends EventEmitter {
       averageDeploymentTime,
       deploymentFrequency: this.calculateDeploymentFrequency(deployments),
       meanTimeToRecovery: this.calculateMTTR(deployments),
-      changeFailureRate: (failedDeployments + rolledBackDeployments) / Math.max(totalDeployments, 1) * 100,
+      changeFailureRate: (failedDeployments + rolledBackDeployments) / Math.max(_totalDeployments, 1) * 100,
       leadTime: this.calculateLeadTime(deployments),
       environmentMetrics,
       strategyMetrics
     };
   }
-
   // Private helper methods
   private async loadConfigurations(): Promise<void> {
     // Load environments, strategies, and pipelines from disk
     try {
-      const envFiles = await readdir(join(this.deploymentsPath, 'environments'));
+      const _envFiles = await readdir(join(this._deploymentsPath, 'environments'));
       for (const file of envFiles.filter(f => f.endsWith('.json'))) {
-        const content = await readFile(join(this.deploymentsPath, 'environments', file), 'utf-8');
-        const env: DeploymentEnvironment = JSON.parse(content);
-        this.environments.set(env.id, env);
+        const _content = await readFile(join(this._deploymentsPath, 'environments', file), 'utf-8');
+        const _env: DeploymentEnvironment = JSON.parse(content);
+        this.environments.set(env._id, env);
       }
-
-      const strategyFiles = await readdir(join(this.deploymentsPath, 'strategies'));
+      const _strategyFiles = await readdir(join(this._deploymentsPath, 'strategies'));
       for (const file of strategyFiles.filter(f => f.endsWith('.json'))) {
-        const content = await readFile(join(this.deploymentsPath, 'strategies', file), 'utf-8');
-        const strategy: DeploymentStrategy = JSON.parse(content);
-        this.strategies.set(strategy.id, strategy);
+        const _content = await readFile(join(this._deploymentsPath, 'strategies', file), 'utf-8');
+        const _strategy: DeploymentStrategy = JSON.parse(content);
+        this.strategies.set(strategy._id, strategy);
       }
-
-      const pipelineFiles = await readdir(join(this.deploymentsPath, 'pipelines'));
+      const _pipelineFiles = await readdir(join(this._deploymentsPath, 'pipelines'));
       for (const file of pipelineFiles.filter(f => f.endsWith('.json'))) {
-        const content = await readFile(join(this.deploymentsPath, 'pipelines', file), 'utf-8');
-        const pipeline: DeploymentPipeline = JSON.parse(content);
-        this.pipelines.set(pipeline.id, pipeline);
+        const _content = await readFile(join(this._deploymentsPath, 'pipelines', file), 'utf-8');
+        const _pipeline: DeploymentPipeline = JSON.parse(content);
+        this.pipelines.set(pipeline._id, pipeline);
       }
-
-      this.logger.info(`Loaded ${this.environments.size} environments, ${this.strategies.size} strategies, ${this.pipelines.size} pipelines`);
-    } catch (error) {
+      this.logger.info(`Loaded ${this.environments.size} _environments, ${this.strategies.size} _strategies, ${this.pipelines.size} pipelines`);
+    } catch (_error) {
       this.logger.warn('Failed to load some configurations', { error });
     }
   }
-
   private async initializeDefaultStrategies(): Promise<void> {
-    const defaultStrategies: Partial<DeploymentStrategy>[] = [
+    const _defaultStrategies: Partial<DeploymentStrategy>[] = [
       {
         name: 'Blue-Green Deployment',
         type: 'blue-green',
@@ -1029,111 +951,95 @@ export class DeploymentManager extends EventEmitter {
         }
       }
     ];
-
     for (const strategyData of defaultStrategies) {
       if (!Array.from(this.strategies.values()).some(s => s.name === strategyData.name)) {
-        const strategy: DeploymentStrategy = {
-          id: `strategy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        const _strategy: DeploymentStrategy = {
+          id: `strategy-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
           notifications: {
             channels: [],
             events: ['deployment:started', 'deployment:completed', 'deployment:failed']
           },
           ...strategyData
         } as DeploymentStrategy;
-
-        this.strategies.set(strategy.id, strategy);
+        this.strategies.set(strategy._id, strategy);
         await this.saveStrategy(strategy);
       }
     }
   }
-
   private async saveEnvironment(environment: DeploymentEnvironment): Promise<void> {
-    const filePath = join(this.deploymentsPath, 'environments', `${environment.id}.json`);
-    await writeFile(filePath, JSON.stringify(environment, null, 2));
+    const _filePath = join(this._deploymentsPath, 'environments', `${environment.id}.json`);
+    await writeFile(_filePath, JSON.stringify(_environment, null, 2));
   }
-
   private async saveStrategy(strategy: DeploymentStrategy): Promise<void> {
-    const filePath = join(this.deploymentsPath, 'strategies', `${strategy.id}.json`);
-    await writeFile(filePath, JSON.stringify(strategy, null, 2));
+    const _filePath = join(this._deploymentsPath, 'strategies', `${strategy.id}.json`);
+    await writeFile(_filePath, JSON.stringify(_strategy, null, 2));
   }
-
   private async saveDeployment(deployment: Deployment): Promise<void> {
-    const filePath = join(this.deploymentsPath, `${deployment.id}.json`);
-    await writeFile(filePath, JSON.stringify(deployment, null, 2));
+    const _filePath = join(this._deploymentsPath, `${deployment.id}.json`);
+    await writeFile(_filePath, JSON.stringify(_deployment, null, 2));
   }
-
   private addAuditEntry(
-    deployment: Deployment,
+    deployment: _Deployment,
     userId: string,
     action: string,
     target: string,
-    details: Record<string, any>
+    details: Record<string, unknown>
   ): void {
-    const entry: DeploymentAuditEntry = {
-      id: `audit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    const _entry: DeploymentAuditEntry = {
+      id: `audit-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
       timestamp: new Date(),
       userId,
       action,
       target,
       details
     };
-
     deployment.auditLog.push(entry);
   }
-
   private addLog(
-    stage: DeploymentStage,
+    stage: _DeploymentStage,
     level: DeploymentLog['level'],
     message: string,
     source: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): void {
-    const log: DeploymentLog = {
+    const _log: DeploymentLog = {
       timestamp: new Date(),
       level,
       message,
       source,
       metadata
     };
-
     stage.logs.push(log);
   }
-
-  private evaluateStageConditions(deployment: Deployment, stage: DeploymentStage): boolean {
+  private evaluateStageConditions(deployment: _Deployment, stage: DeploymentStage): boolean {
     // Implement condition evaluation logic
     return true; // Simplified for now
   }
-
-  private async requiresApproval(deployment: Deployment, stage: DeploymentStage): Promise<boolean> {
-    const strategy = this.strategies.get(deployment.strategyId);
+  private async requiresApproval(deployment: _Deployment, stage: DeploymentStage): Promise<boolean> {
+    const _strategy = this.strategies.get(deployment.strategyId);
     return strategy?.configuration.approvalRequired || false;
   }
-
-  private async requestApproval(deployment: Deployment, stage: DeploymentStage): Promise<void> {
+  private async requestApproval(deployment: _Deployment, stage: DeploymentStage): Promise<void> {
     // Implement approval request logic
-    this.emit('approval:requested', { deployment, stage });
+    this.emit('approval:requested', { _deployment, stage });
   }
-
-  private async isPendingApproval(deployment: Deployment, stage: DeploymentStage): Promise<boolean> {
+  private async isPendingApproval(deployment: _Deployment, stage: DeploymentStage): Promise<boolean> {
     // Check if there are pending approvals for this stage
     return false; // Simplified for now
   }
-
-  private async isApproved(deployment: Deployment, stage: DeploymentStage): Promise<boolean> {
+  private async isApproved(deployment: _Deployment, stage: DeploymentStage): Promise<boolean> {
     // Check if stage is approved
     return true; // Simplified for now
   }
-
   private evaluateCommandSuccess(
-    command: DeploymentCommand,
-    exitCode: number | null,
+    command: _DeploymentCommand,
+    exitCode: number | _null,
     stdout: string,
     stderr: string
   ): boolean {
     if (command.successCriteria.exitCode !== undefined && exitCode !== command.successCriteria.exitCode) {
       return false;
     }
-
     if (command.successCriteria.outputContains) {
       for (const pattern of command.successCriteria.outputContains) {
         if (!stdout.includes(pattern)) {
@@ -1141,7 +1047,6 @@ export class DeploymentManager extends EventEmitter {
         }
       }
     }
-
     if (command.successCriteria.outputNotContains) {
       for (const pattern of command.successCriteria.outputNotContains) {
         if (stdout.includes(pattern) || stderr.includes(pattern)) {
@@ -1149,88 +1054,71 @@ export class DeploymentManager extends EventEmitter {
         }
       }
     }
-
     return true;
   }
-
-  private async retryStage(deployment: Deployment, stage: DeploymentStage): Promise<void> {
+  private async retryStage(deployment: _Deployment, stage: DeploymentStage): Promise<void> {
     // Implement retry logic
     this.logger.info(`Retrying stage: ${stage.name}`);
   }
-
-  private async handleDeploymentFailure(deployment: Deployment, failedStage: DeploymentStage): Promise<void> {
+  private async handleDeploymentFailure(deployment: _Deployment, failedStage: DeploymentStage): Promise<void> {
     deployment.status = 'failed';
     deployment.metrics.endTime = new Date();
     deployment.updatedAt = new Date();
-
-    this.addAuditEntry(deployment, 'system', 'deployment_failed', 'deployment', {
-      deploymentId: deployment.id,
-      failedStage: failedStage.name,
+    this.addAuditEntry(_deployment, 'system', 'deployment_failed', 'deployment', {
+      deploymentId: deployment._id,
+      failedStage: failedStage._name,
       reason: 'Stage execution failed'
     });
-
     await this.saveDeployment(deployment);
-    this.emit('deployment:failed', { deployment, failedStage });
-
+    this.emit('deployment:failed', { _deployment, failedStage });
     // Check if automatic rollback is enabled
-    const strategy = this.strategies.get(deployment.strategyId);
+    const _strategy = this.strategies.get(deployment.strategyId);
     if (strategy?.rollbackStrategy.automatic) {
-      await this.rollbackDeployment(deployment.id, 'Automatic rollback due to deployment failure');
+      await this.rollbackDeployment(deployment._id, 'Automatic rollback due to deployment failure');
     }
   }
-
-  private async handleDeploymentError(deployment: Deployment, error: any): Promise<void> {
+  private async handleDeploymentError(deployment: _Deployment, _error: unknown): Promise<void> {
     deployment.status = 'failed';
     deployment.metrics.endTime = new Date();
     deployment.updatedAt = new Date();
-
-    this.addAuditEntry(deployment, 'system', 'deployment_error', 'deployment', {
-      deploymentId: deployment.id,
+    this.addAuditEntry(_deployment, 'system', 'deployment_error', 'deployment', {
+      deploymentId: deployment._id,
       error: (error instanceof Error ? error.message : String(error))
     });
-
     await this.saveDeployment(deployment);
-    this.emit('deployment:error', { deployment, error });
-
+    this.emit('deployment:error', { _deployment, error });
     this.logger.error(`Deployment error: ${deployment.id}`, { error });
   }
-
   private async completeDeployment(deployment: Deployment): Promise<void> {
     deployment.status = 'success';
     deployment.metrics.endTime = new Date();
     deployment.metrics.duration = deployment.metrics.endTime.getTime() - deployment.metrics.startTime.getTime();
     deployment.updatedAt = new Date();
-
-    this.addAuditEntry(deployment, 'system', 'deployment_completed', 'deployment', {
-      deploymentId: deployment.id,
+    this.addAuditEntry(_deployment, 'system', 'deployment_completed', 'deployment', {
+      deploymentId: deployment._id,
       duration: deployment.metrics.duration
     });
-
     await this.saveDeployment(deployment);
     this.emit('deployment:completed', deployment);
-
     this.logger.info(`Deployment completed: ${deployment.id} in ${deployment.metrics.duration}ms`);
   }
-
   private async getPreviousSuccessfulDeployment(
     projectId: string,
     environmentId: string,
     currentDeploymentId: string
   ): Promise<Deployment | null> {
-    const deployments = Array.from(this.deployments.values())
+    const _deployments = Array.from(this.deployments.values())
       .filter(d => 
         d.projectId === projectId &&
         d.environmentId === environmentId &&
         d.status === 'success' &&
         d.id !== currentDeploymentId
       )
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
+      .sort((_a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     return deployments[0] || null;
   }
-
   private async executeRollbackStrategy(
-    deployment: Deployment,
+    deployment: _Deployment,
     previousDeployment: Deployment
   ): Promise<void> {
     // Implement rollback execution logic
@@ -1243,49 +1131,46 @@ export class DeploymentManager extends EventEmitter {
     // 4. Reverting database migrations if needed
     // 5. Updating DNS records
     
-    this.emit('rollback:executed', { deployment, previousDeployment });
+    this.emit('rollback:executed', { _deployment, previousDeployment });
   }
-
   private calculateDeploymentFrequency(deployments: Deployment[]): number {
     if (deployments.length === 0) return 0;
     
-    const sortedDeployments = deployments.sort((a, b) => 
+    const _sortedDeployments = deployments.sort((_a, b) => 
       a.createdAt.getTime() - b.createdAt.getTime()
     );
     
-    const firstDeployment = sortedDeployments[0];
-    const lastDeployment = sortedDeployments[sortedDeployments.length - 1];
+    const _firstDeployment = sortedDeployments[0];
+    const _lastDeployment = sortedDeployments[sortedDeployments.length - 1];
     
-    const timeSpan = lastDeployment.createdAt.getTime() - firstDeployment.createdAt.getTime();
-    const days = timeSpan / (1000 * 60 * 60 * 24);
+    const _timeSpan = lastDeployment.createdAt.getTime() - firstDeployment.createdAt.getTime();
+    const _days = timeSpan / (1000 * 60 * 60 * 24);
     
-    return deployments.length / Math.max(days, 1);
+    return deployments.length / Math.max(_days, 1);
   }
-
   private calculateMTTR(deployments: Deployment[]): number {
-    const failedDeployments = deployments.filter(d => 
+    const _failedDeployments = deployments.filter(d => 
       d.status === 'failed' || d.status === 'rolled-back'
     );
     
     if (failedDeployments.length === 0) return 0;
     
-    const recoveryTimes = failedDeployments
+    const _recoveryTimes = failedDeployments
       .map(d => d.rollback?.rollbackDuration || 0)
       .filter(time => time > 0);
     
     if (recoveryTimes.length === 0) return 0;
     
-    return recoveryTimes.reduce((sum, time) => sum + time, 0) / recoveryTimes.length;
+    return recoveryTimes.reduce((_sum, time) => sum + time, 0) / recoveryTimes.length;
   }
-
   private calculateLeadTime(deployments: Deployment[]): number {
     // This would typically calculate from commit to production
     // For now, return average deployment time
-    const completedDeployments = deployments.filter(d => d.metrics.duration);
+    const _completedDeployments = deployments.filter(d => d.metrics.duration);
     
     if (completedDeployments.length === 0) return 0;
     
-    return completedDeployments.reduce((sum, d) => 
+    return completedDeployments.reduce((_sum, d) => 
       sum + (d.metrics.duration || 0), 0
     ) / completedDeployments.length;
   }

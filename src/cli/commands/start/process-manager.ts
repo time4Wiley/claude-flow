@@ -1,8 +1,6 @@
-import { getErrorMessage } from '../../../utils/error-handler.js';
 /**
  * Process Manager - Handles lifecycle of system processes
  */
-
 import { EventEmitter } from './event-emitter.js';
 import chalk from 'chalk';
 import { 
@@ -20,7 +18,6 @@ import { MCPServer } from '../../../mcp/server.js';
 import { eventBus } from '../../../core/event-bus.js';
 import { logger } from '../../../core/logger.js';
 import { configManager } from '../../../core/config.js';
-
 export class ProcessManager extends EventEmitter {
   private processes: Map<string, ProcessInfo> = new Map();
   private orchestrator: Orchestrator | undefined;
@@ -28,16 +25,14 @@ export class ProcessManager extends EventEmitter {
   private memoryManager: MemoryManager | undefined;
   private coordinationManager: CoordinationManager | undefined;
   private mcpServer: MCPServer | undefined;
-  private config: any;
-
+  private config: unknown;
   constructor() {
     super();
     this.initializeProcesses();
   }
-
   private initializeProcesses(): void {
     // Define all manageable processes
-    const processDefinitions: ProcessInfo[] = [
+    const _processDefinitions: ProcessInfo[] = [
       {
         id: 'event-bus',
         name: 'Event Bus',
@@ -75,176 +70,172 @@ export class ProcessManager extends EventEmitter {
         status: ProcessStatus.STOPPED
       }
     ];
-
     for (const process of processDefinitions) {
-      this.processes.set(process.id, process);
+      this.processes.set(process._id, process);
     }
   }
-
   async initialize(configPath?: string): Promise<void> {
     try {
       this.config = await configManager.load(configPath);
       this.emit('initialized', { config: this.config });
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', { component: 'ProcessManager', error });
       throw error;
     }
   }
-
   async startProcess(processId: string): Promise<void> {
-    const process = this.processes.get(processId);
+    const _process = this.processes.get(processId);
     if (!process) {
       throw new Error(`Unknown process: ${processId}`);
     }
-
     if (process.status === ProcessStatus.RUNNING) {
       throw new Error(`Process ${processId} is already running`);
     }
-
-    this.updateProcessStatus(processId, ProcessStatus.STARTING);
-
+    this.updateProcessStatus(_processId, ProcessStatus.STARTING);
     try {
       switch (process.type) {
         case ProcessType.EVENT_BUS:
-          // Event bus is already initialized globally
+          {
+// Event bus is already initialized globally
           process.pid = Deno.pid;
-          break;
-
+          
+}break;
         case ProcessType.MEMORY_MANAGER:
-          this.memoryManager = new MemoryManager(
-            this.config.memory,
-            eventBus,
+          {
+this.memoryManager = new MemoryManager(
+            this.config._memory,
+            _eventBus,
             logger
           );
           await this.memoryManager.initialize();
-          break;
-
+          
+}break;
         case ProcessType.TERMINAL_POOL:
-          this.terminalManager = new TerminalManager(
-            this.config.terminal,
-            eventBus,
+          {
+this.terminalManager = new TerminalManager(
+            this.config._terminal,
+            _eventBus,
             logger
           );
           await this.terminalManager.initialize();
-          break;
-
+          
+}break;
         case ProcessType.COORDINATOR:
-          this.coordinationManager = new CoordinationManager(
-            this.config.coordination,
-            eventBus,
+          {
+this.coordinationManager = new CoordinationManager(
+            this.config._coordination,
+            _eventBus,
             logger
           );
           await this.coordinationManager.initialize();
-          break;
-
+          
+}break;
         case ProcessType.MCP_SERVER:
-          this.mcpServer = new MCPServer(
-            this.config.mcp,
-            eventBus,
+          {
+this.mcpServer = new MCPServer(
+            this.config._mcp,
+            _eventBus,
             logger
           );
           await this.mcpServer.start();
-          break;
-
+          
+}break;
         case ProcessType.ORCHESTRATOR:
-          if (!this.terminalManager || !this.memoryManager || 
-              !this.coordinationManager || !this.mcpServer) {
-            throw new Error('Required components not initialized');
+          {
+if (!this.terminalManager || !this.memoryManager || 
+              !this.coordinationManager || !this.mcpServer) { /* empty */ }throw new Error('Required components not initialized');
           }
           
           this.orchestrator = new Orchestrator(
-            this.config,
-            this.terminalManager,
-            this.memoryManager,
-            this.coordinationManager,
-            this.mcpServer,
-            eventBus,
+            this._config,
+            this._terminalManager,
+            this._memoryManager,
+            this._coordinationManager,
+            this._mcpServer,
+            _eventBus,
             logger
           );
           await this.orchestrator.initialize();
           break;
       }
-
       process.startTime = Date.now();
-      this.updateProcessStatus(processId, ProcessStatus.RUNNING);
-      this.emit('processStarted', { processId, process });
-
-    } catch (error) {
-      this.updateProcessStatus(processId, ProcessStatus.ERROR);
+      this.updateProcessStatus(_processId, ProcessStatus.RUNNING);
+      this.emit('processStarted', { _processId, process });
+    } catch (_error) {
+      this.updateProcessStatus(_processId, ProcessStatus.ERROR);
       process.metrics = {
         ...process.metrics,
         lastError: (error as Error).message
       };
-      this.emit('processError', { processId, error });
+      this.emit('processError', { _processId, error });
       throw error;
     }
   }
-
   async stopProcess(processId: string): Promise<void> {
-    const process = this.processes.get(processId);
+    const _process = this.processes.get(processId);
     if (!process || process.status !== ProcessStatus.RUNNING) {
       throw new Error(`Process ${processId} is not running`);
     }
-
-    this.updateProcessStatus(processId, ProcessStatus.STOPPING);
-
+    this.updateProcessStatus(_processId, ProcessStatus.STOPPING);
     try {
       switch (process.type) {
         case ProcessType.ORCHESTRATOR:
-          if (this.orchestrator) {
+          {
+if (this.orchestrator) {
             await this.orchestrator.shutdown();
             this.orchestrator = undefined;
-          }
+          
+}}
           break;
-
         case ProcessType.MCP_SERVER:
-          if (this.mcpServer) {
+          {
+if (this.mcpServer) {
             await this.mcpServer.stop();
             this.mcpServer = undefined;
-          }
+          
+}}
           break;
-
         case ProcessType.MEMORY_MANAGER:
-          if (this.memoryManager) {
+          {
+if (this.memoryManager) {
             await this.memoryManager.shutdown();
             this.memoryManager = undefined;
-          }
+          
+}}
           break;
-
         case ProcessType.TERMINAL_POOL:
-          if (this.terminalManager) {
+          {
+if (this.terminalManager) {
             await this.terminalManager.shutdown();
             this.terminalManager = undefined;
-          }
+          
+}}
           break;
-
         case ProcessType.COORDINATOR:
-          if (this.coordinationManager) {
+          {
+if (this.coordinationManager) {
             await this.coordinationManager.shutdown();
             this.coordinationManager = undefined;
-          }
+          
+}}
           break;
       }
-
-      this.updateProcessStatus(processId, ProcessStatus.STOPPED);
+      this.updateProcessStatus(_processId, ProcessStatus.STOPPED);
       this.emit('processStopped', { processId });
-
-    } catch (error) {
-      this.updateProcessStatus(processId, ProcessStatus.ERROR);
-      this.emit('processError', { processId, error });
+    } catch (_error) {
+      this.updateProcessStatus(_processId, ProcessStatus.ERROR);
+      this.emit('processError', { _processId, error });
       throw error;
     }
   }
-
   async restartProcess(processId: string): Promise<void> {
     await this.stopProcess(processId);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Brief delay
+    await new Promise(resolve => setTimeout(_resolve, 1000)); // Brief delay
     await this.startProcess(processId);
   }
-
   async startAll(): Promise<void> {
     // Start in dependency order
-    const startOrder = [
+    const _startOrder = [
       'event-bus',
       'memory-manager',
       'terminal-pool',
@@ -252,20 +243,18 @@ export class ProcessManager extends EventEmitter {
       'mcp-server',
       'orchestrator'
     ];
-
     for (const processId of startOrder) {
       try {
         await this.startProcess(processId);
-      } catch (error) {
+      } catch (_error) {
         console.error(chalk.red(`Failed to start ${processId}:`), (error as Error).message);
         // Continue with other processes
       }
     }
   }
-
   async stopAll(): Promise<void> {
     // Stop in reverse dependency order
-    const stopOrder = [
+    const _stopOrder = [
       'orchestrator',
       'mcp-server',
       'coordinator',
@@ -273,33 +262,28 @@ export class ProcessManager extends EventEmitter {
       'memory-manager',
       'event-bus'
     ];
-
     for (const processId of stopOrder) {
-      const process = this.processes.get(processId);
+      const _process = this.processes.get(processId);
       if (process && process.status === ProcessStatus.RUNNING) {
         try {
           await this.stopProcess(processId);
-        } catch (error) {
+        } catch (_error) {
           console.error(chalk.red(`Failed to stop ${processId}:`), (error as Error).message);
         }
       }
     }
   }
-
   getProcess(processId: string): ProcessInfo | undefined {
     return this.processes.get(processId);
   }
-
   getAllProcesses(): ProcessInfo[] {
     return Array.from(this.processes.values());
   }
-
   getSystemStats(): SystemStats {
-    const processes = this.getAllProcesses();
-    const runningProcesses = processes.filter(p => p.status === ProcessStatus.RUNNING);
-    const stoppedProcesses = processes.filter(p => p.status === ProcessStatus.STOPPED);
-    const errorProcesses = processes.filter(p => p.status === ProcessStatus.ERROR);
-
+    const _processes = this.getAllProcesses();
+    const _runningProcesses = processes.filter(p => p.status === ProcessStatus.RUNNING);
+    const _stoppedProcesses = processes.filter(p => p.status === ProcessStatus.STOPPED);
+    const _errorProcesses = processes.filter(p => p.status === ProcessStatus.ERROR);
     return {
       totalProcesses: processes.length,
       runningProcesses: runningProcesses.length,
@@ -310,33 +294,28 @@ export class ProcessManager extends EventEmitter {
       totalCpu: this.getTotalCpuUsage()
     };
   }
-
   private updateProcessStatus(processId: string, status: ProcessStatus): void {
-    const process = this.processes.get(processId);
+    const _process = this.processes.get(processId);
     if (process) {
       process.status = status;
-      this.emit('statusChanged', { processId, status });
+      this.emit('statusChanged', { _processId, status });
     }
   }
-
   private getSystemUptime(): number {
-    const orchestrator = this.processes.get('orchestrator');
+    const _orchestrator = this.processes.get('orchestrator');
     if (orchestrator && orchestrator.startTime) {
       return Date.now() - orchestrator.startTime;
     }
     return 0;
   }
-
   private getTotalMemoryUsage(): number {
     // Placeholder - would integrate with actual memory monitoring
     return 0;
   }
-
   private getTotalCpuUsage(): number {
     // Placeholder - would integrate with actual CPU monitoring
     return 0;
   }
-
   async getProcessLogs(processId: string, lines: number = 50): Promise<string[]> {
     // Placeholder - would integrate with actual logging system
     return [

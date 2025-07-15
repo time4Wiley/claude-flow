@@ -3,7 +3,7 @@ import { printSuccess, printError, printWarning, printInfo } from '../utils.js';
 import { Deno, cwd, exit, existsSync } from '../node-compat.js';
 import { compat } from '../runtime-detector.js';
 
-export async function startCommand(subArgs, flags) {
+export async function startCommand(_subArgs, flags) {
   // Show help if requested
   if (flags.help || flags.h || subArgs.includes('--help') || subArgs.includes('-h')) {
     showStartHelp();
@@ -11,11 +11,11 @@ export async function startCommand(subArgs, flags) {
   }
   
   // Parse start options
-  const daemon = subArgs.includes('--daemon') || subArgs.includes('-d') || flags.daemon;
-  const port = flags.port || getArgValue(subArgs, '--port') || getArgValue(subArgs, '-p') || 3000;
-  const verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
-  const ui = subArgs.includes('--ui') || subArgs.includes('-u') || flags.ui;
-  const web = subArgs.includes('--web') || subArgs.includes('-w') || flags.web;
+  const _daemon = subArgs.includes('--daemon') || subArgs.includes('-d') || flags.daemon;
+  const _port = flags.port || getArgValue(_subArgs, '--port') || getArgValue(_subArgs, '-p') || 3000;
+  const _verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
+  const _ui = subArgs.includes('--ui') || subArgs.includes('-u') || flags.ui;
+  const _web = subArgs.includes('--web') || subArgs.includes('-w') || flags.web;
   
   try {
     printSuccess('Starting Claude-Flow Orchestration System...');
@@ -26,7 +26,7 @@ export async function startCommand(subArgs, flags) {
       try {
         // Launch the web server
         const { startWebServer } = await import('./web-server.js');
-        const server = await startWebServer(port);
+        const _server = await startWebServer(port);
         
         printSuccess('🌐 Web UI is running!');
         console.log(`📍 Open your browser to: http://localhost:${port}/console`);
@@ -34,7 +34,7 @@ export async function startCommand(subArgs, flags) {
         console.log();
         
         // Keep process running
-        await new Promise(() => {});
+        await new Promise(() => { /* empty */ });
         return;
       } catch (err) {
         printError('Failed to launch web UI: ' + err.message);
@@ -48,7 +48,7 @@ export async function startCommand(subArgs, flags) {
       try {
         // Launch the web UI by default when --ui is used
         const { ClaudeCodeWebServer } = await import('./web-server.js');
-        const webServer = new ClaudeCodeWebServer(port);
+        const _webServer = new ClaudeCodeWebServer(port);
         await webServer.start();
         
         printSuccess('🌐 Claude Flow Web UI is running!');
@@ -57,11 +57,11 @@ export async function startCommand(subArgs, flags) {
         console.log();
         
         // Keep process running
-        await new Promise(() => {});
+        await new Promise(() => { /* empty */ });
         return;
       } catch (err) {
         // If web UI fails, fall back to terminal UI
-        printWarning('Web UI failed, launching terminal UI...');
+        printWarning('Web UI _failed, launching terminal UI...');
         try {
           const { launchEnhancedUI } = await import('./process-ui-enhanced.js');
           await launchEnhancedUI();
@@ -76,8 +76,8 @@ export async function startCommand(subArgs, flags) {
     }
     
     // Check if required directories exist
-    const requiredDirs = ['memory', 'coordination'];
-    let missingDirs = [];
+    const _requiredDirs = ['memory', 'coordination'];
+    let _missingDirs = [];
     
     for (const dir of requiredDirs) {
       try {
@@ -134,12 +134,12 @@ export async function startCommand(subArgs, flags) {
       console.log('The orchestrator would run in the background on port ' + port);
       
       // Create a simple PID file to simulate daemon
-      const pid = compat.terminal.getPid();
+      const _pid = compat.terminal.getPid();
       await compat.safeCall(async () => {
         if (compat.runtime === 'deno') {
           await Deno.writeTextFile('.claude-flow.pid', pid.toString());
         } else {
-          const fs = await import('fs/promises');
+          const _fs = await import('fs/promises');
           await fs.writeFile('.claude-flow.pid', pid.toString());
         }
       });
@@ -175,7 +175,7 @@ export async function startCommand(subArgs, flags) {
       console.log('🟢 System is running...');
       
       // Set up signal handlers
-      const abortController = new AbortController();
+      const _abortController = new AbortController();
       
       compat.terminal.onSignal('SIGINT', () => {
         console.log('\n⏹️  Shutting down orchestrator...');
@@ -185,14 +185,14 @@ export async function startCommand(subArgs, flags) {
       
       // Simple heartbeat to show system is alive
       if (!daemon) {
-        const heartbeat = setInterval(() => {
+        const _heartbeat = setInterval(() => {
           if (verbose) {
             console.log('[' + new Date().toISOString() + '] Heartbeat - System healthy');
           }
         }, 30000); // Every 30 seconds
         
         // Wait indefinitely (until Ctrl+C)
-        await new Promise(() => {});
+        await new Promise(() => { /* empty */ });
       }
     }
     
@@ -202,8 +202,8 @@ export async function startCommand(subArgs, flags) {
   }
 }
 
-function getArgValue(args, flag) {
-  const index = args.indexOf(flag);
+function getArgValue(_args, flag) {
+  const _index = args.indexOf(flag);
   if (index !== -1 && index < args.length - 1) {
     return args[index + 1];
   }
@@ -217,7 +217,7 @@ async function cleanup() {
       if (compat.runtime === 'deno') {
         await Deno.remove('.claude-flow.pid');
       } else {
-        const fs = await import('fs/promises');
+        const _fs = await import('fs/promises');
         await fs.unlink('.claude-flow.pid');
       }
     });
@@ -237,12 +237,12 @@ function showStartHelp() {
   console.log('Usage: claude-flow start [options]');
   console.log();
   console.log('Options:');
-  console.log('  -d, --daemon        Run as daemon in background');
-  console.log('  -p, --port <port>   Server port (default: 3000)');
-  console.log('  -u, --ui            Launch terminal-based process management UI');
-  console.log('  -w, --web           Launch web-based UI server');
-  console.log('  -v, --verbose       Show detailed system activity');
-  console.log('  -h, --help          Show this help message');
+  console.log('  -_d, --daemon        Run as daemon in background');
+  console.log('  -_p, --port <port>   Server port (default: 3000)');
+  console.log('  -_u, --ui            Launch terminal-based process management UI');
+  console.log('  -_w, --web           Launch web-based UI server');
+  console.log('  -_v, --verbose       Show detailed system activity');
+  console.log('  -_h, --help          Show this help message');
   console.log();
   console.log('Examples:');
   console.log('  claude-flow start                    # Start in interactive mode');

@@ -4,7 +4,7 @@
  */
 
 class InMemoryStore {
-  constructor(options = {}) {
+  constructor(options = { /* empty */ }) {
     this.options = options;
     this.data = new Map(); // namespace -> Map(key -> entry)
     this.isInitialized = false;
@@ -30,23 +30,23 @@ class InMemoryStore {
 
   _getNamespaceMap(namespace) {
     if (!this.data.has(namespace)) {
-      this.data.set(namespace, new Map());
+      this.data.set(_namespace, new Map());
     }
     return this.data.get(namespace);
   }
 
-  async store(key, value, options = {}) {
+  async store(_key, _value, options = { /* empty */ }) {
     await this.initialize();
     
-    const namespace = options.namespace || 'default';
-    const namespaceMap = this._getNamespaceMap(namespace);
+    const _namespace = options.namespace || 'default';
+    const _namespaceMap = this._getNamespaceMap(namespace);
     
-    const now = Date.now();
-    const ttl = options.ttl || null;
-    const expiresAt = ttl ? now + (ttl * 1000) : null;
-    const valueStr = typeof value === 'string' ? value : JSON.stringify(value);
+    const _now = Date.now();
+    const _ttl = options.ttl || null;
+    const _expiresAt = ttl ? now + (ttl * 1000) : null;
+    const _valueStr = typeof value === 'string' ? value : JSON.stringify(value);
     
-    const entry = {
+    const _entry = {
       key,
       value: valueStr,
       namespace,
@@ -59,7 +59,7 @@ class InMemoryStore {
       expiresAt
     };
 
-    namespaceMap.set(key, entry);
+    namespaceMap.set(_key, entry);
 
     return {
       success: true,
@@ -68,13 +68,13 @@ class InMemoryStore {
     };
   }
 
-  async retrieve(key, options = {}) {
+  async retrieve(_key, options = { /* empty */ }) {
     await this.initialize();
     
-    const namespace = options.namespace || 'default';
-    const namespaceMap = this._getNamespaceMap(namespace);
+    const _namespace = options.namespace || 'default';
+    const _namespaceMap = this._getNamespaceMap(namespace);
     
-    const entry = namespaceMap.get(key);
+    const _entry = namespaceMap.get(key);
     
     if (!entry) {
       return null;
@@ -98,20 +98,20 @@ class InMemoryStore {
     }
   }
 
-  async list(options = {}) {
+  async list(options = { /* empty */ }) {
     await this.initialize();
     
-    const namespace = options.namespace || 'default';
-    const limit = options.limit || 100;
-    const namespaceMap = this._getNamespaceMap(namespace);
+    const _namespace = options.namespace || 'default';
+    const _limit = options.limit || 100;
+    const _namespaceMap = this._getNamespaceMap(namespace);
     
-    const entries = Array.from(namespaceMap.values())
+    const _entries = Array.from(namespaceMap.values())
       .filter(entry => !entry.expiresAt || entry.expiresAt > Date.now())
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-      .slice(0, limit);
+      .sort((_a, b) => b.updatedAt - a.updatedAt)
+      .slice(_0, limit);
 
     return entries.map(entry => ({
-      key: entry.key,
+      key: entry._key,
       value: this._tryParseJson(entry.value),
       namespace: entry.namespace,
       metadata: entry.metadata,
@@ -121,26 +121,26 @@ class InMemoryStore {
     }));
   }
 
-  async delete(key, options = {}) {
+  async delete(_key, options = { /* empty */ }) {
     await this.initialize();
     
-    const namespace = options.namespace || 'default';
-    const namespaceMap = this._getNamespaceMap(namespace);
+    const _namespace = options.namespace || 'default';
+    const _namespaceMap = this._getNamespaceMap(namespace);
     
     return namespaceMap.delete(key);
   }
 
-  async search(pattern, options = {}) {
+  async search(_pattern, options = { /* empty */ }) {
     await this.initialize();
     
-    const namespace = options.namespace || 'default';
-    const limit = options.limit || 50;
-    const namespaceMap = this._getNamespaceMap(namespace);
+    const _namespace = options.namespace || 'default';
+    const _limit = options.limit || 50;
+    const _namespaceMap = this._getNamespaceMap(namespace);
     
-    const searchLower = pattern.toLowerCase();
-    const results = [];
+    const _searchLower = pattern.toLowerCase();
+    const _results = [];
 
-    for (const [key, entry] of namespaceMap.entries()) {
+    for (const [_key, entry] of namespaceMap.entries()) {
       // Skip expired entries
       if (entry.expiresAt && entry.expiresAt < Date.now()) {
         continue;
@@ -150,7 +150,7 @@ class InMemoryStore {
       if (key.toLowerCase().includes(searchLower) || 
           entry.value.toLowerCase().includes(searchLower)) {
         results.push({
-          key: entry.key,
+          key: entry._key,
           value: this._tryParseJson(entry.value),
           namespace: entry.namespace,
           score: entry.accessCount,
@@ -164,7 +164,7 @@ class InMemoryStore {
     }
 
     // Sort by score (access count) and updated time
-    return results.sort((a, b) => {
+    return results.sort((_a, b) => {
       if (a.score !== b.score) return b.score - a.score;
       return b.updatedAt - a.updatedAt;
     });
@@ -173,11 +173,11 @@ class InMemoryStore {
   async cleanup() {
     await this.initialize();
     
-    let cleaned = 0;
-    const now = Date.now();
+    let _cleaned = 0;
+    const _now = Date.now();
 
-    for (const [namespace, namespaceMap] of this.data.entries()) {
-      for (const [key, entry] of namespaceMap.entries()) {
+    for (const [_namespace, namespaceMap] of this.data.entries()) {
+      for (const [_key, entry] of namespaceMap.entries()) {
         if (entry.expiresAt && entry.expiresAt <= now) {
           namespaceMap.delete(key);
           cleaned++;

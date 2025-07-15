@@ -1,13 +1,11 @@
 /**
  * Architect Agent - Specialized in system design and architecture
  */
-
 import { BaseAgent } from './base-agent.js';
 import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
-
 // Type definitions for architect analysis
 interface ArchitectureIssue {
   category: string;
@@ -16,7 +14,6 @@ interface ArchitectureIssue {
   component: string;
   recommendation: string;
 }
-
 interface ArchitectureRecommendation {
   category: string;
   priority: string;
@@ -24,7 +21,6 @@ interface ArchitectureRecommendation {
   benefits: string[];
   implementation: string;
 }
-
 interface ApiEndpoint {
   method: string;
   path: string;
@@ -32,8 +28,6 @@ interface ApiEndpoint {
   auth: boolean;
   rateLimit: string;
 }
-
-
 interface ServiceComponent {
   name: string;
   responsibility: string;
@@ -41,28 +35,25 @@ interface ServiceComponent {
   api: string;
   dependencies: string[];
 }
-
 interface DatabaseComponent {
   name: string;
   type: string;
   purpose: string;
   size: string;
 }
-
-interface _InfrastructureComponent {
-  name: string;
-  type: string;
-  purpose: string;
-  specifications: Record<string, unknown>;
-}
-
+// TODO: Implement infrastructure components when needed
+// interface _InfrastructureComponent {
+//   name: string;
+//   type: string;
+//   purpose: string;
+//   specifications: Record<string, unknown>;
+// }
 interface SystemComponent {
   name: string;
   type: string;
   purpose: string;
   technology: string;
 }
-
 interface ArchitectureDesign {
   requirements: unknown;
   scale: string;
@@ -96,7 +87,6 @@ interface ArchitectureDesign {
   recommendations: unknown[];
   timestamp: Date;
 }
-
 interface ArchitectureReview {
   architecture: unknown;
   focus: string[];
@@ -124,19 +114,17 @@ interface ArchitectureReview {
   report: string;
   timestamp: Date;
 }
-
 export class ArchitectAgent extends BaseAgent {
   constructor(
     id: string,
-    config: AgentConfig,
-    environment: AgentEnvironment,
-    logger: ILogger,
-    eventBus: IEventBus,
+    config: _AgentConfig,
+    environment: _AgentEnvironment,
+    logger: _ILogger,
+    eventBus: _IEventBus,
     memory: DistributedMemorySystem
   ) {
-    super(id, 'architect', config, environment, logger, eventBus, memory);
+    super(_id, 'architect', _config, _environment, _logger, _eventBus, memory);
   }
-
   protected getDefaultCapabilities(): AgentCapabilities {
     return {
       codeGeneration: false,
@@ -198,7 +186,6 @@ export class ArchitectAgent extends BaseAgent {
       quality: 0.98
     };
   }
-
   protected getDefaultConfig(): Partial<AgentConfig> {
     return {
       autonomyLevel: 0.6,
@@ -234,14 +221,12 @@ export class ArchitectAgent extends BaseAgent {
       }
     };
   }
-
   override async executeTask(task: TaskDefinition): Promise<unknown> {
     this.logger.info('Architect executing task', {
-      agentId: this.id,
-      taskType: task.type,
+      agentId: this._id,
+      taskType: task._type,
       taskId: task.id
     });
-
     try {
       switch (task.type) {
         case 'system-design':
@@ -263,29 +248,26 @@ export class ArchitectAgent extends BaseAgent {
         default:
           return await this.performGeneralDesign(task);
       }
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Architecture task failed', {
-        agentId: this.id,
-        taskId: task.id,
+        agentId: this._id,
+        taskId: task._id,
         error: error instanceof Error ? error.message : String(error)
       });
       throw error;
     }
   }
-
   private async designSystem(task: TaskDefinition): Promise<ArchitectureDesign> {
-    const requirements = task.input?.requirements;
-    const scale = task.input?.scale || 'medium';
-    const constraints = task.input?.constraints || [];
-    const style = task.input?.style || 'microservices';
-
+    const _requirements = task.input?.requirements;
+    const _scale = task.input?.scale || 'medium';
+    const _constraints = task.input?.constraints || [];
+    const _style = task.input?.style || 'microservices';
     this.logger.info('Designing system', {
-      requirements: requirements?.length || 0,
-      scale,
+      requirements: requirements?.length || _0,
+      _scale,
       style
     });
-
-    const design = {
+    const _design = {
       requirements,
       scale,
       style,
@@ -318,7 +300,6 @@ export class ArchitectAgent extends BaseAgent {
       recommendations: [],
       timestamp: new Date()
     };
-
     // Store design progress
     await this.memory.store(`design:${task.id}:progress`, {
       status: 'designing',
@@ -329,7 +310,6 @@ export class ArchitectAgent extends BaseAgent {
       tags: ['architecture', this.id, style],
       partition: 'tasks'
     });
-
     // Simulate system design
     await this.delay(5000);
     
@@ -370,32 +350,27 @@ export class ArchitectAgent extends BaseAgent {
       infrastructure: ['Kubernetes', 'Docker', 'AWS'] as string[],
       monitoring: ['Prometheus', 'Grafana', 'Jaeger'] as string[]
     };
-
     // Store final design
-    await this.memory.store(`design:${task.id}:results`, design, {
+    await this.memory.store(`design:${task.id}:results`, _design, {
       type: 'design-results',
-      tags: ['architecture', 'completed', this.id, style],
+      tags: ['architecture', 'completed', this._id, style],
       partition: 'tasks'
     });
-
     return design;
   }
-
   private async reviewArchitecture(task: TaskDefinition): Promise<ArchitectureReview> {
-    const architecture = task.parameters?.architecture;
-    const focus = task.parameters?.focus || ['scalability', 'security', 'maintainability'];
-    const standards = task.parameters?.standards || 'enterprise';
-
+    const _architecture = task.parameters?.architecture;
+    const _focus = task.parameters?.focus || ['scalability', 'security', 'maintainability'];
+    const _standards = task.parameters?.standards || 'enterprise';
     this.logger.info('Reviewing architecture', {
-      focus,
+      _focus,
       standards
     });
-
-    const review = {
+    const _review = {
       architecture,
       focus,
       standards,
-      scores: {},
+      scores: { /* empty */ },
       issues: [] as ArchitectureIssue[],
       recommendations: [] as ArchitectureRecommendation[],
       compliance: {
@@ -416,10 +391,8 @@ export class ArchitectAgent extends BaseAgent {
       },
       timestamp: new Date()
     };
-
     // Simulate architecture review
     await this.delay(4000);
-
     review.scores = {
       scalability: 0.85,
       security: 0.78,
@@ -444,24 +417,20 @@ export class ArchitectAgent extends BaseAgent {
         recommendation: 'Add redundancy and load balancing'
       }
     ];
-
     return review;
   }
-
   private async designAPI(task: TaskDefinition): Promise<Record<string, unknown>> {
-    const domain = task.parameters?.domain;
-    const style = task.parameters?.style || 'REST';
-    const version = task.parameters?.version || 'v1';
-    const auth = task.parameters?.auth || 'JWT';
-
+    const _domain = task.parameters?.domain;
+    const _style = task.parameters?.style || 'REST';
+    const _version = task.parameters?.version || 'v1';
+    const _auth = task.parameters?.auth || 'JWT';
     this.logger.info('Designing API', {
-      domain,
-      style,
-      version,
+      _domain,
+      _style,
+      _version,
       auth
     });
-
-    const apiDesign = {
+    const _apiDesign = {
       domain,
       style,
       version,
@@ -498,10 +467,8 @@ export class ArchitectAgent extends BaseAgent {
       },
       timestamp: new Date()
     };
-
     // Simulate API design
     await this.delay(3000);
-
     apiDesign.endpoints = [
       {
         method: 'GET',
@@ -518,23 +485,19 @@ export class ArchitectAgent extends BaseAgent {
         rateLimit: '100/hour'
       }
     ];
-
     return apiDesign;
   }
-
   private async designCloudArchitecture(task: TaskDefinition): Promise<Record<string, unknown>> {
-    const provider = task.parameters?.provider || 'AWS';
-    const regions = task.parameters?.regions || ['us-east-1'];
-    const budget = task.parameters?.budget;
-    const compliance = task.parameters?.compliance || [];
-
+    const _provider = task.parameters?.provider || 'AWS';
+    const _regions = task.parameters?.regions || ['us-east-1'];
+    const _budget = task.parameters?.budget;
+    const _compliance = task.parameters?.compliance || [];
     this.logger.info('Designing cloud architecture', {
-      provider,
-      regions,
+      _provider,
+      _regions,
       compliance
     });
-
-    const cloudDesign = {
+    const _cloudDesign = {
       provider,
       regions,
       budget,
@@ -571,35 +534,29 @@ export class ArchitectAgent extends BaseAgent {
       },
       timestamp: new Date()
     };
-
     // Simulate cloud architecture design
     await this.delay(4500);
-
     cloudDesign.infrastructure.compute = [
-      { name: 'EKS', type: 'container', purpose: 'Container orchestration', specifications: {} },
-      { name: 'Lambda', type: 'serverless', purpose: 'Serverless functions', specifications: {} },
-      { name: 'EC2', type: 'compute', purpose: 'Virtual machines', specifications: {} }
+      { name: 'EKS', type: 'container', purpose: 'Container orchestration', specifications: { /* empty */ } },
+      { name: 'Lambda', type: 'serverless', purpose: 'Serverless functions', specifications: { /* empty */ } },
+      { name: 'EC2', type: 'compute', purpose: 'Virtual machines', specifications: { /* empty */ } }
     ];
     
     cloudDesign.cost.estimated = 2500; // monthly USD
-
     return cloudDesign;
   }
-
   private async designMicroservices(task: TaskDefinition): Promise<Record<string, unknown>> {
-    const domain = task.parameters?.domain;
-    const services = task.parameters?.services || [];
-    const communication = task.parameters?.communication || 'async';
-    const dataConsistency = task.parameters?.dataConsistency || 'eventual';
-
+    const _domain = task.parameters?.domain;
+    const _services = task.parameters?.services || [];
+    const _communication = task.parameters?.communication || 'async';
+    const _dataConsistency = task.parameters?.dataConsistency || 'eventual';
     this.logger.info('Designing microservices', {
-      domain,
-      servicesCount: services.length,
-      communication,
+      _domain,
+      servicesCount: services._length,
+      _communication,
       dataConsistency
     });
-
-    const microservicesDesign = {
+    const _microservicesDesign = {
       domain,
       communication,
       dataConsistency,
@@ -626,10 +583,8 @@ export class ArchitectAgent extends BaseAgent {
       solutions: [] as string[],
       timestamp: new Date()
     };
-
     // Simulate microservices design
     await this.delay(4000);
-
     microservicesDesign.services = [
       {
         name: 'User Service',
@@ -646,23 +601,19 @@ export class ArchitectAgent extends BaseAgent {
         dependencies: ['User Service', 'Payment Service'] as string[]
       }
     ];
-
     return microservicesDesign;
   }
-
   private async designSecurity(task: TaskDefinition): Promise<Record<string, unknown>> {
-    const system = task.parameters?.system;
-    const threats = task.parameters?.threats || [];
-    const compliance = task.parameters?.compliance || [];
-    const sensitivity = task.parameters?.sensitivity || 'medium';
-
+    const _system = task.parameters?.system;
+    const _threats = task.parameters?.threats || [];
+    const _compliance = task.parameters?.compliance || [];
+    const _sensitivity = task.parameters?.sensitivity || 'medium';
     this.logger.info('Designing security architecture', {
-      threats: threats.length,
-      compliance,
+      threats: threats._length,
+      _compliance,
       sensitivity
     });
-
-    const securityDesign = {
+    const _securityDesign = {
       system,
       sensitivity,
       compliance,
@@ -696,10 +647,8 @@ export class ArchitectAgent extends BaseAgent {
       },
       timestamp: new Date()
     };
-
     // Simulate security design
     await this.delay(3500);
-
     securityDesign.controls.preventive = [
       'Multi-factor Authentication',
       'API Rate Limiting',
@@ -707,23 +656,19 @@ export class ArchitectAgent extends BaseAgent {
       'Access Controls',
       'Encryption at Rest'
     ];
-
     return securityDesign;
   }
-
   private async designScalability(task: TaskDefinition): Promise<Record<string, unknown>> {
-    const currentLoad = task.parameters?.currentLoad;
-    const targetLoad = task.parameters?.targetLoad;
-    const constraints = task.parameters?.constraints || [];
-    const budget = task.parameters?.budget;
-
+    const _currentLoad = task.parameters?.currentLoad;
+    const _targetLoad = task.parameters?.targetLoad;
+    const _constraints = task.parameters?.constraints || [];
+    const _budget = task.parameters?.budget;
     this.logger.info('Designing scalability', {
-      currentLoad,
-      targetLoad,
+      _currentLoad,
+      _targetLoad,
       constraints
     });
-
-    const scalabilityDesign = {
+    const _scalabilityDesign = {
       currentLoad,
       targetLoad,
       constraints,
@@ -758,32 +703,26 @@ export class ArchitectAgent extends BaseAgent {
       },
       timestamp: new Date()
     };
-
     // Simulate scalability design
     await this.delay(3000);
-
     scalabilityDesign.strategies.horizontal = [
       'Kubernetes HPA',
       'Database Sharding',
       'Microservices Decomposition'
     ];
-
     return scalabilityDesign;
   }
-
   private async designDatabase(task: TaskDefinition): Promise<Record<string, unknown>> {
-    const requirements = task.parameters?.requirements;
-    const dataTypes = task.parameters?.dataTypes || ['relational'];
-    const scale = task.parameters?.scale || 'medium';
-    const consistency = task.parameters?.consistency || 'strong';
-
+    const _requirements = task.parameters?.requirements;
+    const _dataTypes = task.parameters?.dataTypes || ['relational'];
+    const _scale = task.parameters?.scale || 'medium';
+    const _consistency = task.parameters?.consistency || 'strong';
     this.logger.info('Designing database architecture', {
-      dataTypes,
-      scale,
+      _dataTypes,
+      _scale,
       consistency
     });
-
-    const databaseDesign = {
+    const _databaseDesign = {
       requirements,
       dataTypes,
       scale,
@@ -814,10 +753,8 @@ export class ArchitectAgent extends BaseAgent {
       },
       timestamp: new Date()
     };
-
     // Simulate database design
     await this.delay(2500);
-
     databaseDesign.databases = [
       {
         name: 'Primary DB',
@@ -832,23 +769,18 @@ export class ArchitectAgent extends BaseAgent {
         size: '50GB'
       }
     ];
-
     return databaseDesign;
   }
-
   private async performGeneralDesign(task: TaskDefinition): Promise<ArchitectureDesign> {
     this.logger.info('Performing general design', {
       description: task.description
     });
-
     // Default to system design
     return await this.designSystem(task);
   }
-
   private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(_resolve, ms));
   }
-
   override getAgentStatus(): Record<string, unknown> {
     return {
       ...super.getAgentStatus(),
@@ -863,16 +795,15 @@ export class ArchitectAgent extends BaseAgent {
     };
   }
 }
-
-export const createArchitectAgent = (
+export const _createArchitectAgent = (
   id: string,
   config: Partial<AgentConfig>,
   environment: Partial<AgentEnvironment>,
-  logger: ILogger,
-  eventBus: IEventBus,
+  logger: _ILogger,
+  eventBus: _IEventBus,
   memory: DistributedMemorySystem
 ): ArchitectAgent => {
-  const defaultConfig = {
+  const _defaultConfig = {
     autonomyLevel: 0.8,
     learningEnabled: true,
     adaptationEnabled: true,
@@ -904,14 +835,14 @@ export const createArchitectAgent = (
       reviewThoroughness: 'detailed'
     }
   };
-  const defaultEnv = {
+  const _defaultEnv = {
     runtime: 'deno' as const,
     version: '1.40.0',
     workingDirectory: './agents/architect',
     tempDirectory: './tmp/architect',
     logDirectory: './logs/architect',
-    apiEndpoints: {},
-    credentials: {},
+    apiEndpoints: { /* empty */ },
+    credentials: { /* empty */ },
     availableTools: [
       'architecture-diagrams',
       'system-modeler',
@@ -923,13 +854,12 @@ export const createArchitectAgent = (
       cloudDesigner: { provider: 'multi', compliance: true }
     }
   };
-
   return new ArchitectAgent(
-    id,
-    { ...defaultConfig, ...config } as AgentConfig,
-    { ...defaultEnv, ...environment } as AgentEnvironment,
-    logger,
-    eventBus,
+    _id,
+    { ..._defaultConfig, ...config } as _AgentConfig,
+    { ..._defaultEnv, ...environment } as _AgentEnvironment,
+    _logger,
+    _eventBus,
     memory
   );
 };

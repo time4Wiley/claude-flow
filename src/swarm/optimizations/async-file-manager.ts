@@ -1,17 +1,13 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Async File Manager
  * Handles non-blocking file operations with queuing
  */
-
 import { promises as fs } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream, createReadStream } from 'node:fs';
 import { Readable } from 'node:stream';
 import { join, dirname } from 'node:path';
 import PQueue from 'p-queue';
-import { Logger } from '../../core/logger.js';
-
 export interface FileOperationResult {
   path: string;
   operation: 'read' | 'write' | 'delete' | 'mkdir';
@@ -20,7 +16,6 @@ export interface FileOperationResult {
   size?: number;
   error?: Error;
 }
-
 export class AsyncFileManager {
   private writeQueue: PQueue;
   private readQueue: PQueue;
@@ -41,18 +36,18 @@ export class AsyncFileManager {
     this.readQueue = new PQueue({ concurrency: this.concurrency.read });
     
     // Use test-safe logger configuration
-    const loggerConfig = process.env.CLAUDE_FLOW_ENV === 'test' 
+    const _loggerConfig = process.env.CLAUDE_FLOW_ENV === 'test' 
       ? { level: 'error' as const, format: 'json' as const, destination: 'console' as const }
       : { level: 'info' as const, format: 'json' as const, destination: 'console' as const };
     
     this.logger = new Logger(
-      loggerConfig,
+      _loggerConfig,
       { component: 'AsyncFileManager' }
     );
   }
   
   async writeFile(path: string, data: string | Buffer): Promise<FileOperationResult> {
-    const start = Date.now();
+    const _start = Date.now();
     
     return await this.writeQueue.add(async () => {
       try {
@@ -61,13 +56,13 @@ export class AsyncFileManager {
         
         // Use streaming for large files
         if (data.length > 1024 * 1024) { // > 1MB
-          await this.streamWrite(path, data);
+          await this.streamWrite(_path, data);
         } else {
-          await fs.writeFile(path, data, 'utf8');
+          await fs.writeFile(_path, _data, 'utf8');
         }
         
-        const duration = Date.now() - start;
-        const size = Buffer.byteLength(data);
+        const _duration = Date.now() - start;
+        const _size = Buffer.byteLength(data);
         
         this.trackOperation('write', size);
         
@@ -78,9 +73,9 @@ export class AsyncFileManager {
           duration,
           size
         };
-      } catch (error) {
+      } catch (_error) {
         this.metrics.errors++;
-        this.logger.error('Failed to write file', { path, error });
+        this.logger.error('Failed to write file', { _path, error });
         
         return {
           path,
@@ -94,13 +89,13 @@ export class AsyncFileManager {
   }
   
   async readFile(path: string): Promise<FileOperationResult & { data?: string }> {
-    const start = Date.now();
+    const _start = Date.now();
     
     return await this.readQueue.add(async () => {
       try {
-        const data = await fs.readFile(path, 'utf8');
-        const duration = Date.now() - start;
-        const size = Buffer.byteLength(data);
+        const _data = await fs.readFile(_path, 'utf8');
+        const _duration = Date.now() - start;
+        const _size = Buffer.byteLength(data);
         
         this.trackOperation('read', size);
         
@@ -112,9 +107,9 @@ export class AsyncFileManager {
           size,
           data
         };
-      } catch (error) {
+      } catch (_error) {
         this.metrics.errors++;
-        this.logger.error('Failed to read file', { path, error });
+        this.logger.error('Failed to read file', { _path, error });
         
         return {
           path,
@@ -127,22 +122,22 @@ export class AsyncFileManager {
     });
   }
   
-  async writeJSON(path: string, data: any, pretty = true): Promise<FileOperationResult> {
-    const jsonString = pretty 
-      ? JSON.stringify(data, null, 2)
+  async writeJSON(path: string, data: _any, pretty = true): Promise<FileOperationResult> {
+    const _jsonString = pretty 
+      ? JSON.stringify(_data, null, 2)
       : JSON.stringify(data);
     
-    return this.writeFile(path, jsonString);
+    return this.writeFile(_path, jsonString);
   }
   
-  async readJSON(path: string): Promise<FileOperationResult & { data?: any }> {
-    const result = await this.readFile(path);
+  async readJSON(path: string): Promise<FileOperationResult & { data?: unknown }> {
+    const _result = await this.readFile(path);
     
     if (result.success && result.data) {
       try {
-        const parsed = JSON.parse(result.data);
+        const _parsed = JSON.parse(result.data);
         return { ...result, data: parsed };
-      } catch (error) {
+      } catch (_error) {
         return {
           ...result,
           success: false,
@@ -155,7 +150,7 @@ export class AsyncFileManager {
   }
   
   async deleteFile(path: string): Promise<FileOperationResult> {
-    const start = Date.now();
+    const _start = Date.now();
     
     return this.writeQueue.add(async () => {
       try {
@@ -169,9 +164,9 @@ export class AsyncFileManager {
           success: true,
           duration: Date.now() - start
         };
-      } catch (error) {
+      } catch (_error) {
         this.metrics.errors++;
-        this.logger.error('Failed to delete file', { path, error });
+        this.logger.error('Failed to delete file', { _path, error });
         
         return {
           path,
@@ -185,10 +180,10 @@ export class AsyncFileManager {
   }
   
   async ensureDirectory(path: string): Promise<FileOperationResult> {
-    const start = Date.now();
+    const _start = Date.now();
     
     try {
-      await fs.mkdir(path, { recursive: true });
+      await fs.mkdir(_path, { recursive: true });
       
       this.trackOperation('mkdir', 0);
       
@@ -198,9 +193,9 @@ export class AsyncFileManager {
         success: true,
         duration: Date.now() - start
       };
-    } catch (error) {
+    } catch (_error) {
       this.metrics.errors++;
-      this.logger.error('Failed to create directory', { path, error });
+      this.logger.error('Failed to create directory', { _path, error });
       
       return {
         path,
@@ -217,7 +212,7 @@ export class AsyncFileManager {
   }
   
   private async streamWrite(path: string, data: string | Buffer): Promise<void> {
-    const stream = createWriteStream(path);
+    const _stream = createWriteStream(path);
     await pipeline(
       Readable.from(data),
       stream
@@ -229,14 +224,14 @@ export class AsyncFileManager {
   }
   
   async copyFile(source: string, destination: string): Promise<FileOperationResult> {
-    const start = Date.now();
+    const _start = Date.now();
     
     return this.writeQueue.add(async () => {
       try {
         await this.ensureDirectory(dirname(destination));
-        await fs.copyFile(source, destination);
+        await fs.copyFile(_source, destination);
         
-        const stats = await fs.stat(destination);
+        const _stats = await fs.stat(destination);
         this.trackOperation('write', stats.size);
         
         return {
@@ -246,9 +241,9 @@ export class AsyncFileManager {
           duration: Date.now() - start,
           size: stats.size
         };
-      } catch (error) {
+      } catch (_error) {
         this.metrics.errors++;
-        this.logger.error('Failed to copy file', { source, destination, error });
+        this.logger.error('Failed to copy file', { _source, _destination, error });
         
         return {
           path: destination,
@@ -262,7 +257,7 @@ export class AsyncFileManager {
   }
   
   async moveFile(source: string, destination: string): Promise<FileOperationResult> {
-    const copyResult = await this.copyFile(source, destination);
+    const _copyResult = await this.copyFile(_source, destination);
     if (copyResult.success) {
       await this.deleteFile(source);
     }
@@ -270,8 +265,8 @@ export class AsyncFileManager {
   }
   
   private trackOperation(type: string, bytes: number): void {
-    const count = this.metrics.operations.get(type) || 0;
-    this.metrics.operations.set(type, count + 1);
+    const _count = this.metrics.operations.get(type) || 0;
+    this.metrics.operations.set(_type, count + 1);
     this.metrics.totalBytes += bytes;
   }
   

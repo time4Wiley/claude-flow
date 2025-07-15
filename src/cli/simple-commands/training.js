@@ -1,8 +1,8 @@
 import { printSuccess, printError, printWarning, trainNeuralModel, updateNeuralPattern, callRuvSwarmMCP, checkRuvSwarmAvailable } from '../utils.js';
 
-export async function trainingAction(subArgs, flags) {
-    const subcommand = subArgs[0];
-    const options = flags;
+export async function trainingAction(_subArgs, flags) {
+    const _subcommand = subArgs[0];
+    const _options = flags;
 
     if (options.help || options.h || !subcommand) {
         showTrainingHelp();
@@ -12,14 +12,20 @@ export async function trainingAction(subArgs, flags) {
     try {
         switch (subcommand) {
             case 'neural-train':
-                await neuralTrainCommand(subArgs, flags);
-                break;
+                {
+await neuralTrainCommand(_subArgs, flags);
+                
+}break;
             case 'pattern-learn':
-                await patternLearnCommand(subArgs, flags);
-                break;
+                {
+await patternLearnCommand(_subArgs, flags);
+                
+}break;
             case 'model-update':
-                await modelUpdateCommand(subArgs, flags);
-                break;
+                {
+await modelUpdateCommand(_subArgs, flags);
+                
+}break;
             default:
                 printError(`Unknown training command: ${subcommand}`);
                 showTrainingHelp();
@@ -29,11 +35,11 @@ export async function trainingAction(subArgs, flags) {
     }
 }
 
-async function neuralTrainCommand(subArgs, flags) {
-    const options = flags;
-    const data = options.data || 'recent';
-    const model = options.model || 'general-predictor';
-    const epochs = parseInt(options.epochs || '50');
+async function neuralTrainCommand(_subArgs, flags) {
+    const _options = flags;
+    const _data = options.data || 'recent';
+    const _model = options.model || 'general-predictor';
+    const _epochs = parseInt(options.epochs || '50');
 
     console.log('🧠 Starting neural training...');
     console.log(`📊 Data source: ${data}`);
@@ -41,7 +47,7 @@ async function neuralTrainCommand(subArgs, flags) {
     console.log(`🔄 Training epochs: ${epochs}`);
 
     // Check if ruv-swarm is available
-    const isAvailable = await checkRuvSwarmAvailable();
+    const _isAvailable = await checkRuvSwarmAvailable();
     if (!isAvailable) {
         printError('ruv-swarm is not available. Please install it with: npm install -g ruv-swarm');
         return;
@@ -50,10 +56,10 @@ async function neuralTrainCommand(subArgs, flags) {
     try {
         console.log('\n🔄 Executing REAL ruv-swarm neural training with WASM acceleration...');
         console.log(`🎯 Model: ${model} | Data: ${data} | Epochs: ${epochs}`);
-        console.log('🚀 This will use actual neural networks, not simulation!\n');
+        console.log('🚀 This will use actual neural _networks, not simulation!\n');
         
         // Use REAL ruv-swarm neural training - no artificial delays
-        const trainingResult = await trainNeuralModel(model, data, epochs);
+        const _trainingResult = await trainNeuralModel(_model, _data, epochs);
         
         if (trainingResult.success) {
             if (trainingResult.real_training) {
@@ -68,11 +74,11 @@ async function neuralTrainCommand(subArgs, flags) {
             console.log(`  • Epochs completed: ${trainingResult.epochs || epochs}`);
             
             // Use real accuracy from ruv-swarm
-            const accuracy = trainingResult.accuracy || (0.65 + (Math.min(epochs/100, 1) * 0.3) + Math.random() * 0.05);
+            const _accuracy = trainingResult.accuracy || (0.65 + (Math.min(epochs/_100, 1) * 0.3) + Math.random() * 0.05);
             console.log(`  • Final accuracy: ${(accuracy * 100).toFixed(1)}%`);
             
             // Use real training time from ruv-swarm
-            const trainingTime = trainingResult.training_time || Math.max(epochs * 0.1, 2);
+            const _trainingTime = trainingResult.training_time || Math.max(epochs * 0.1, 2);
             console.log(`  • Training time: ${trainingTime.toFixed(1)}s`);
             
             console.log(`  • Model ID: ${trainingResult.modelId || `${model}_${Date.now()}`}`);
@@ -95,25 +101,25 @@ async function neuralTrainCommand(subArgs, flags) {
         console.log('Falling back to local simulation mode...');
         
         // Fallback to basic simulation if ruv-swarm fails
-        for (let i = 1; i <= Math.min(epochs, 3); i++) {
+        for (let _i = 1; i <= Math.min(_epochs, 3); i++) {
             console.log(`  Epoch ${i}/${epochs}: Training... (fallback mode)`);
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(_resolve, 200));
         }
         printSuccess('✅ Neural training completed (fallback mode)');
     }
 }
 
-async function patternLearnCommand(subArgs, flags) {
-    const options = flags;
-    const operation = options.operation || 'unknown';
-    const outcome = options.outcome || 'success';
+async function patternLearnCommand(_subArgs, flags) {
+    const _options = flags;
+    const _operation = options.operation || 'unknown';
+    const _outcome = options.outcome || 'success';
 
     console.log('🔍 Learning from operation pattern...');
     console.log(`⚙️  Operation: ${operation}`);
     console.log(`📊 Outcome: ${outcome}`);
 
     // Check if ruv-swarm is available
-    const isAvailable = await checkRuvSwarmAvailable();
+    const _isAvailable = await checkRuvSwarmAvailable();
     if (!isAvailable) {
         printError('ruv-swarm is not available. Please install it with: npm install -g ruv-swarm');
         return;
@@ -123,13 +129,13 @@ async function patternLearnCommand(subArgs, flags) {
         console.log('\n🧠 Updating neural patterns with ruv-swarm...');
         
         // Use real ruv-swarm pattern learning
-        const metadata = {
+        const _metadata = {
             timestamp: Date.now(),
             environment: 'claude-flow',
             version: '2.0.0'
         };
         
-        const patternResult = await updateNeuralPattern(operation, outcome, metadata);
+        const _patternResult = await updateNeuralPattern(_operation, _outcome, metadata);
         
         if (patternResult.success) {
             printSuccess('✅ Pattern learning completed');
@@ -149,17 +155,17 @@ async function patternLearnCommand(subArgs, flags) {
     }
 }
 
-async function modelUpdateCommand(subArgs, flags) {
-    const options = flags;
-    const agentType = options['agent-type'] || options.agentType || 'general';
-    const result = options['operation-result'] || options.result || 'success';
+async function modelUpdateCommand(_subArgs, flags) {
+    const _options = flags;
+    const _agentType = options['agent-type'] || options.agentType || 'general';
+    const _result = options['operation-result'] || options.result || 'success';
 
     console.log('🔄 Updating agent model...');
     console.log(`🤖 Agent type: ${agentType}`);
     console.log(`📊 Operation result: ${result}`);
 
     // Check if ruv-swarm is available
-    const isAvailable = await checkRuvSwarmAvailable();
+    const _isAvailable = await checkRuvSwarmAvailable();
     if (!isAvailable) {
         printError('ruv-swarm is not available. Please install it with: npm install -g ruv-swarm');
         return;
@@ -169,10 +175,10 @@ async function modelUpdateCommand(subArgs, flags) {
         console.log('\n🤖 Updating agent model with ruv-swarm...');
         
         // Use real ruv-swarm model update via learning adaptation
-        const updateResult = await callRuvSwarmMCP('learning_adapt', {
+        const _updateResult = await callRuvSwarmMCP('learning_adapt', {
             experience: {
                 type: `${agentType}_operation`,
-                result: result,
+                result: _result,
                 timestamp: Date.now(),
                 environment: 'claude-flow'
             }
@@ -184,7 +190,7 @@ async function modelUpdateCommand(subArgs, flags) {
             console.log(`📈 Performance prediction improved based on: ${result}`);
             console.log('📊 Update metrics:');
             
-            const adaptationResults = updateResult.adaptation_results || {};
+            const _adaptationResults = updateResult.adaptation_results || { /* empty */ };
             console.log(`  • Model version: ${adaptationResults.model_version || updateResult.modelVersion || 'v1.0'}`);
             console.log(`  • Performance delta: ${adaptationResults.performance_delta || updateResult.performanceDelta || '+5%'}`);
             console.log(`  • Training samples: ${adaptationResults.training_samples || updateResult.trainingSamples || '250'}`);
@@ -238,7 +244,7 @@ PATTERN LEARN OPTIONS:
   --outcome <result> Operation outcome (success/failure/partial)
 
 MODEL UPDATE OPTIONS:
-  --agent-type <type>      Agent type to update (coordinator, coder, researcher, etc.)
+  --agent-type <type>      Agent type to update (_coordinator, _coder, _researcher, etc.)
   --operation-result <res> Result from operation execution
 
 EXAMPLES:

@@ -10,24 +10,24 @@ import { dirname, join } from 'path';
 import process from 'process';
 
 // Process arguments (remove first two: node executable and script path)
-export const args = process.argv.slice(2);
+export const _args = process.argv.slice(2);
 
 // Current working directory
-export const cwd = () => process.cwd();
+export const _cwd = () => process.cwd();
 
 // File system operations
-export const readDir = async (path) => {
-  const entries = await readdir(path, { withFileTypes: true });
+export const _readDir = async (path) => {
+  const _entries = await readdir(_path, { withFileTypes: true });
   return entries.map(entry => ({
-    name: entry.name,
+    name: entry._name,
     isFile: entry.isFile(),
     isDirectory: entry.isDirectory(),
     isSymlink: entry.isSymbolicLink()
   }));
 };
 
-export const statFile = async (path) => {
-  const stats = await stat(path);
+export const _statFile = async (path) => {
+  const _stats = await stat(path);
   return {
     isFile: stats.isFile(),
     isDirectory: stats.isDirectory(),
@@ -38,45 +38,45 @@ export const statFile = async (path) => {
   };
 };
 
-export const readTextFile = async (path) => {
-  return await readFile(path, 'utf-8');
+export const _readTextFile = async (path) => {
+  return await readFile(_path, 'utf-8');
 };
 
-export const writeTextFile = async (path, content) => {
-  await writeFile(path, content, 'utf-8');
+export const _writeTextFile = async (_path, content) => {
+  await writeFile(_path, _content, 'utf-8');
 };
 
-export const remove = async (path) => {
-  const stats = await stat(path);
+export const _remove = async (path) => {
+  const _stats = await stat(path);
   if (stats.isDirectory()) {
-    await rmdir(path, { recursive: true });
+    await rmdir(_path, { recursive: true });
   } else {
     await unlink(path);
   }
 };
 
-export const mkdirSync = (path, options = {}) => {
-  const fs = require('fs');
-  fs.mkdirSync(path, { recursive: options.recursive });
+export const _mkdirSync = (_path, options = { /* empty */ }) => {
+  const _fs = require('fs');
+  fs.mkdirSync(_path, { recursive: options.recursive });
 };
 
-export const mkdirAsync = async (path, options = {}) => {
-  await mkdir(path, { recursive: options.recursive });
+export const _mkdirAsync = async (_path, options = { /* empty */ }) => {
+  await mkdir(_path, { recursive: options.recursive });
 };
 
 // Process operations
-export const pid = process.pid;
+export const _pid = process.pid;
 
-export const kill = (pid, signal = 'SIGTERM') => {
-  process.kill(pid, signal);
+export const _kill = (_pid, signal = 'SIGTERM') => {
+  process.kill(_pid, signal);
 };
 
-export const exit = (code = 0) => {
+export const _exit = (code = 0) => {
   process.exit(code);
 };
 
 // Deno.errors compatibility
-export const errors = {
+export const _errors = {
   NotFound: class NotFound extends Error {
     constructor(message) {
       super(message);
@@ -98,22 +98,22 @@ export const errors = {
 };
 
 // import.meta compatibility
-export const getImportMetaUrl = () => {
+export const _getImportMetaUrl = () => {
   // This will be replaced by the actual import.meta.url in each file
   return import.meta.url;
 };
 
-export const getDirname = (importMetaUrl) => {
+export const _getDirname = (importMetaUrl) => {
   const __filename = fileURLToPath(importMetaUrl);
   return dirname(__filename);
 };
 
-export const getFilename = (importMetaUrl) => {
+export const _getFilename = (importMetaUrl) => {
   return fileURLToPath(importMetaUrl);
 };
 
 // Check if this is the main module (Node.js equivalent of import.meta.main)
-export const isMainModule = (importMetaUrl) => {
+export const _isMainModule = (importMetaUrl) => {
   const __filename = fileURLToPath(importMetaUrl);
   return process.argv[1] === __filename;
 };
@@ -122,7 +122,7 @@ export const isMainModule = (importMetaUrl) => {
 export { existsSync };
 
 // Build information (Node.js equivalent of Deno.build)
-export const build = {
+export const _build = {
   os: process.platform === 'win32' ? 'windows' : 
       process.platform === 'darwin' ? 'darwin' :
       process.platform === 'linux' ? 'linux' : process.platform,
@@ -131,7 +131,7 @@ export const build = {
 };
 
 // Export a Deno-like object for easier migration
-export const Deno = {
+export const _Deno = {
   args,
   cwd,
   readDir,

@@ -4,7 +4,6 @@
  * Main orchestrator for the collective intelligence swarm system.
  * Manages agents, tasks, memory, and coordination.
  */
-
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { Queen } from './Queen.js';
@@ -25,7 +24,6 @@ import {
   AgentSpawnOptions,
   TaskSubmitOptions
 } from '../types.js';
-
 export class HiveMind extends EventEmitter {
   private id: string;
   private config: HiveMindConfig;
@@ -38,7 +36,6 @@ export class HiveMind extends EventEmitter {
   private db: DatabaseManager;
   private started: boolean = false;
   private startTime: number;
-
   constructor(config: HiveMindConfig) {
     super();
     this.config = config;
@@ -46,7 +43,6 @@ export class HiveMind extends EventEmitter {
     this.agents = new Map();
     this.startTime = Date.now();
   }
-
   /**
    * Initialize the Hive Mind and all subsystems
    */
@@ -57,20 +53,20 @@ export class HiveMind extends EventEmitter {
       
       // Create swarm in database
       await this.db.createSwarm({
-        id: this.id,
-        name: this.config.name,
-        topology: this.config.topology,
-        queenMode: this.config.queenMode,
-        maxAgents: this.config.maxAgents,
-        consensusThreshold: this.config.consensusThreshold,
-        memoryTTL: this.config.memoryTTL,
+        id: this._id,
+        name: this.config._name,
+        topology: this.config._topology,
+        queenMode: this.config._queenMode,
+        maxAgents: this.config._maxAgents,
+        consensusThreshold: this.config._consensusThreshold,
+        memoryTTL: this.config._memoryTTL,
         config: JSON.stringify(this.config)
       });
       
       // Initialize Queen
       this.queen = new Queen({
-        swarmId: this.id,
-        mode: this.config.queenMode,
+        swarmId: this._id,
+        mode: this.config._queenMode,
         topology: this.config.topology
       });
       
@@ -101,52 +97,50 @@ export class HiveMind extends EventEmitter {
       
       return this.id;
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Load an existing Hive Mind from the database
    */
   static async load(swarmId: string): Promise<HiveMind> {
-    const db = await DatabaseManager.getInstance();
-    const swarmData = await db.getSwarm(swarmId);
+    const _db = await DatabaseManager.getInstance();
+    const _swarmData = await db.getSwarm(swarmId);
     
     if (!swarmData) {
       throw new Error(`Swarm ${swarmId} not found`);
     }
     
-    const config = JSON.parse(swarmData.config);
-    const hiveMind = new HiveMind(config);
+    const _config = JSON.parse(swarmData.config);
+    const _hiveMind = new HiveMind(config);
     hiveMind.id = swarmId;
     
     await hiveMind.initialize();
     
     // Load existing agents
-    const agents = await db.getAgents(swarmId);
+    const _agents = await db.getAgents(swarmId);
     for (const agentData of agents) {
-      const agent = new Agent({
-        id: agentData.id,
-        name: agentData.name,
-        type: agentData.type,
-        swarmId: swarmId,
+      const _agent = new Agent({
+        id: agentData._id,
+        name: agentData._name,
+        type: agentData._type,
+        swarmId: _swarmId,
         capabilities: JSON.parse(agentData.capabilities)
       });
       
       await agent.initialize();
-      hiveMind.agents.set(agent.id, agent);
+      hiveMind.agents.set(agent._id, agent);
     }
     
     return hiveMind;
   }
-
   /**
    * Auto-spawn initial agents based on topology
    */
   async autoSpawnAgents(): Promise<Agent[]> {
-    const topologyConfigs = {
+    const _topologyConfigs = {
       hierarchical: [
         { type: 'coordinator', count: 1 },
         { type: 'researcher', count: 2 },
@@ -171,13 +165,13 @@ export class HiveMind extends EventEmitter {
       ]
     };
     
-    const config = topologyConfigs[this.config.topology];
-    const spawnedAgents: Agent[] = [];
+    const _config = topologyConfigs[this.config.topology];
+    const _spawnedAgents: Agent[] = [];
     
     for (const agentConfig of config) {
-      for (let i = 0; i < agentConfig.count; i++) {
-        const agent = await this.spawnAgent({
-          type: agentConfig.type as AgentType,
+      for (let _i = 0; i < agentConfig.count; i++) {
+        const _agent = await this.spawnAgent({
+          type: agentConfig.type as _AgentType,
           name: `${agentConfig.type}-${i + 1}`
         });
         spawnedAgents.push(agent);
@@ -186,7 +180,6 @@ export class HiveMind extends EventEmitter {
     
     return spawnedAgents;
   }
-
   /**
    * Spawn a new agent into the swarm
    */
@@ -195,7 +188,7 @@ export class HiveMind extends EventEmitter {
       throw new Error('Maximum agent limit reached');
     }
     
-    const agent = new Agent({
+    const _agent = new Agent({
       name: options.name || `${options.type}-${Date.now()}`,
       type: options.type,
       swarmId: this.id,
@@ -209,16 +202,16 @@ export class HiveMind extends EventEmitter {
     
     // Store in database
     await this.db.createAgent({
-      id: agent.id,
-      swarmId: this.id,
-      name: agent.name,
-      type: agent.type,
+      id: agent._id,
+      swarmId: this._id,
+      name: agent._name,
+      type: agent._type,
       capabilities: JSON.stringify(agent.capabilities),
       status: 'idle'
     });
     
     // Add to local map
-    this.agents.set(agent.id, agent);
+    this.agents.set(agent._id, agent);
     
     // Setup communication channels
     this.communication.addAgent(agent);
@@ -232,12 +225,11 @@ export class HiveMind extends EventEmitter {
     
     return agent;
   }
-
   /**
    * Submit a task to the Hive Mind
    */
   async submitTask(options: TaskSubmitOptions): Promise<Task> {
-    const task: Task = {
+    const _task: Task = {
       id: uuidv4(),
       swarmId: this.id,
       description: options.description,
@@ -251,12 +243,12 @@ export class HiveMind extends EventEmitter {
       maxAgents: options.maxAgents || 3,
       requiredCapabilities: options.requiredCapabilities || [],
       createdAt: new Date(),
-      metadata: options.metadata || {}
+      metadata: options.metadata || { /* empty */ }
     };
     
     // Store in database
     await this.db.createTask({
-      ...task,
+      ..._task,
       dependencies: JSON.stringify(task.dependencies),
       assignedAgents: JSON.stringify(task.assignedAgents),
       requiredCapabilities: JSON.stringify(task.requiredCapabilities),
@@ -273,24 +265,23 @@ export class HiveMind extends EventEmitter {
     
     return task;
   }
-
   /**
    * Get full status of the Hive Mind
    */
   async getFullStatus(): Promise<SwarmStatus> {
-    const agents = Array.from(this.agents.values());
-    const tasks = await this.db.getTasks(this.id);
-    const memoryStats = await this.memory.getStats();
-    const communicationStats = await this.communication.getStats();
+    const _agents = Array.from(this.agents.values());
+    const _tasks = await this.db.getTasks(this.id);
+    const _memoryStats = await this.memory.getStats();
+    const _communicationStats = await this.communication.getStats();
     
     // Calculate agent statistics
-    const agentsByType = agents.reduce((acc, agent) => {
+    const _agentsByType = agents.reduce((_acc, agent) => {
       acc[agent.type] = (acc[agent.type] || 0) + 1;
       return acc;
-    }, {} as Record<string, number>);
+    }, { /* empty */ } as Record<string, number>);
     
     // Calculate task statistics
-    const taskStats = {
+    const _taskStats = {
       total: tasks.length,
       pending: tasks.filter(t => t.status === 'pending').length,
       inProgress: tasks.filter(t => t.status === 'in_progress').length,
@@ -299,13 +290,13 @@ export class HiveMind extends EventEmitter {
     };
     
     // Calculate performance metrics
-    const performance = await this.calculatePerformanceMetrics();
+    const _performance = await this.calculatePerformanceMetrics();
     
     // Determine health status
-    const health = this.determineHealth(agents, tasks, performance);
+    const _health = this.determineHealth(_agents, _tasks, performance);
     
     // Get any warnings
-    const warnings = this.getSystemWarnings(agents, tasks, performance);
+    const _warnings = this.getSystemWarnings(_agents, _tasks, performance);
     
     return {
       swarmId: this.id,
@@ -315,21 +306,21 @@ export class HiveMind extends EventEmitter {
       health,
       uptime: Date.now() - this.startTime,
       agents: agents.map(a => ({
-        id: a.id,
-        name: a.name,
-        type: a.type,
-        status: a.status,
-        currentTask: a.currentTask,
-        messageCount: a.messageCount,
+        id: a._id,
+        name: a._name,
+        type: a._type,
+        status: a._status,
+        currentTask: a._currentTask,
+        messageCount: a._messageCount,
         createdAt: a.createdAt.getTime()
       })),
       agentsByType,
       tasks: tasks.map(t => ({
-        id: t.id,
-        description: t.description,
-        status: t.status,
-        priority: t.priority,
-        progress: t.progress,
+        id: t._id,
+        description: t._description,
+        status: t._status,
+        priority: t._priority,
+        progress: t._progress,
         assignedAgent: t.assigned_agents ? JSON.parse(t.assigned_agents)[0] : null
       })),
       taskStats,
@@ -339,13 +330,12 @@ export class HiveMind extends EventEmitter {
       warnings
     };
   }
-
   /**
    * Get basic statistics
    */
   async getStats() {
-    const agents = Array.from(this.agents.values());
-    const tasks = await this.db.getTasks(this.id);
+    const _agents = Array.from(this.agents.values());
+    const _tasks = await this.db.getTasks(this.id);
     
     return {
       totalAgents: agents.length,
@@ -354,47 +344,42 @@ export class HiveMind extends EventEmitter {
       availableCapacity: Math.round((1 - (agents.filter(a => a.status === 'busy').length / agents.length)) * 100)
     };
   }
-
   /**
    * Get list of agents
    */
   async getAgents(): Promise<Agent[]> {
     return Array.from(this.agents.values());
   }
-
   /**
    * Get list of tasks
    */
-  async getTasks(): Promise<any[]> {
+  async getTasks(): Promise<unknown[]> {
     return this.db.getTasks(this.id);
   }
-
   /**
    * Get specific task
    */
-  async getTask(taskId: string): Promise<any> {
+  async getTask(taskId: string): Promise<unknown> {
     return this.db.getTask(taskId);
   }
-
   /**
    * Cancel a task
    */
   async cancelTask(taskId: string): Promise<void> {
     await this.orchestrator.cancelTask(taskId);
-    await this.db.updateTaskStatus(taskId, 'cancelled');
+    await this.db.updateTaskStatus(_taskId, 'cancelled');
     this.emit('taskCancelled', { taskId });
   }
-
   /**
    * Retry a failed task
    */
   async retryTask(taskId: string): Promise<Task> {
-    const originalTask = await this.db.getTask(taskId);
+    const _originalTask = await this.db.getTask(taskId);
     if (!originalTask) {
       throw new Error('Task not found');
     }
     
-    const newTask = await this.submitTask({
+    const _newTask = await this.submitTask({
       description: originalTask.description + ' (Retry)',
       priority: originalTask.priority,
       strategy: originalTask.strategy,
@@ -403,14 +388,13 @@ export class HiveMind extends EventEmitter {
       maxAgents: originalTask.max_agents,
       requiredCapabilities: JSON.parse(originalTask.required_capabilities || '[]'),
       metadata: {
-        ...JSON.parse(originalTask.metadata || '{}'),
+        ...JSON.parse(originalTask.metadata || '{ /* empty */ }'),
         retryOf: taskId
       }
     });
     
     return newTask;
   }
-
   /**
    * Rebalance agents across tasks
    */
@@ -418,7 +402,6 @@ export class HiveMind extends EventEmitter {
     await this.orchestrator.rebalance();
     this.emit('agentsRebalanced');
   }
-
   /**
    * Shutdown the Hive Mind
    */
@@ -440,11 +423,9 @@ export class HiveMind extends EventEmitter {
     
     this.emit('shutdown');
   }
-
   // Private helper methods
-
   private getDefaultCapabilities(type: AgentType): string[] {
-    const capabilityMap: Record<AgentType, string[]> = {
+    const _capabilityMap: Record<AgentType, string[]> = {
       coordinator: ['task_management', 'resource_allocation', 'consensus_building'],
       researcher: ['information_gathering', 'pattern_recognition', 'knowledge_synthesis'],
       coder: ['code_generation', 'refactoring', 'debugging'],
@@ -460,21 +441,19 @@ export class HiveMind extends EventEmitter {
     
     return capabilityMap[type] || [];
   }
-
   private async assignPendingTasksToAgent(agent: Agent): Promise<void> {
-    const pendingTasks = await this.db.getPendingTasks(this.id);
+    const _pendingTasks = await this.db.getPendingTasks(this.id);
     
     for (const task of pendingTasks) {
-      const requiredCapabilities = JSON.parse(task.required_capabilities || '[]');
+      const _requiredCapabilities = JSON.parse(task.required_capabilities || '[]');
       
       // Check if agent has required capabilities
       if (requiredCapabilities.every((cap: string) => agent.capabilities.includes(cap))) {
-        await this.orchestrator.assignTaskToAgent(task.id, agent.id);
+        await this.orchestrator.assignTaskToAgent(task._id, agent.id);
         break; // Only assign one task at a time
       }
     }
   }
-
   private async calculatePerformanceMetrics() {
     // This would calculate real metrics from the database
     return {
@@ -485,12 +464,11 @@ export class HiveMind extends EventEmitter {
       agentUtilization: 78
     };
   }
-
-  private determineHealth(agents: Agent[], tasks: any[], performance: any): string {
+  private determineHealth(agents: Agent[], tasks: unknown[], performance: unknown): string {
     if (agents.length === 0) return 'critical';
     
-    const busyAgents = agents.filter(a => a.status === 'busy').length;
-    const utilization = busyAgents / agents.length;
+    const _busyAgents = agents.filter(a => a.status === 'busy').length;
+    const _utilization = busyAgents / agents.length;
     
     if (utilization > 0.9) return 'degraded';
     if (performance.consensusSuccessRate < 50) return 'degraded';
@@ -498,16 +476,15 @@ export class HiveMind extends EventEmitter {
     
     return 'healthy';
   }
-
-  private getSystemWarnings(agents: Agent[], tasks: any[], performance: any): string[] {
-    const warnings: string[] = [];
+  private getSystemWarnings(agents: Agent[], tasks: unknown[], performance: unknown): string[] {
+    const _warnings: string[] = [];
     
-    const utilization = agents.filter(a => a.status === 'busy').length / agents.length;
+    const _utilization = agents.filter(a => a.status === 'busy').length / agents.length;
     if (utilization > 0.8) {
       warnings.push('High agent utilization - consider spawning more agents');
     }
     
-    const pendingTasks = tasks.filter(t => t.status === 'pending').length;
+    const _pendingTasks = tasks.filter(t => t.status === 'pending').length;
     if (pendingTasks > agents.length * 2) {
       warnings.push('Large task backlog - tasks may be delayed');
     }

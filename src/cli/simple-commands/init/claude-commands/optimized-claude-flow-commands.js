@@ -1,9 +1,10 @@
+/* global Deno */
 // optimized-claude-flow-commands.js - Batchtools-optimized Claude-Flow specific slash commands
 
 // Create batchtools-optimized Claude-Flow specific commands
 export async function createOptimizedClaudeFlowCommands(workingDir) {
   // Help command with batchtools optimization
-  const helpCommand = `---
+  const _helpCommand = `---
 name: claude-flow-help
 description: Show Claude-Flow commands and usage with batchtools optimization
 ---
@@ -19,112 +20,112 @@ Claude-Flow is the ultimate multi-terminal orchestration platform that revolutio
 ## Core Commands (Enhanced)
 
 ### 🚀 System Management
-- \`./claude-flow start\` - Start orchestration system
-- \`./claude-flow start --ui\` - Start with interactive process management UI
-- \`./claude-flow start --parallel\` - Start with enhanced parallel processing
-- \`./claude-flow status\` - Check system status
-- \`./claude-flow status --concurrent\` - Check status with parallel monitoring
-- \`./claude-flow monitor\` - Real-time monitoring
-- \`./claude-flow monitor --performance\` - Enhanced performance monitoring
-- \`./claude-flow stop\` - Stop orchestration
+- `./claude-flow start` - Start orchestration system
+- `./claude-flow start --ui` - Start with interactive process management UI
+- `./claude-flow start --parallel` - Start with enhanced parallel processing
+- `./claude-flow status` - Check system status
+- `./claude-flow status --concurrent` - Check status with parallel monitoring
+- `./claude-flow monitor` - Real-time monitoring
+- `./claude-flow monitor --performance` - Enhanced performance monitoring
+- `./claude-flow stop` - Stop orchestration
 
 ### 🤖 Agent Management (Parallel)
-- \`./claude-flow agent spawn <type>\` - Create new agent
-- \`./claude-flow agent batch-spawn <config>\` - Create multiple agents in parallel
-- \`./claude-flow agent list\` - List active agents
-- \`./claude-flow agent parallel-status\` - Check all agent status concurrently
-- \`./claude-flow agent info <id>\` - Agent details
-- \`./claude-flow agent terminate <id>\` - Stop agent
-- \`./claude-flow agent batch-terminate <ids>\` - Stop multiple agents in parallel
+- `./claude-flow agent spawn <type>` - Create new agent
+- `./claude-flow agent batch-spawn <config>` - Create multiple agents in parallel
+- `./claude-flow agent list` - List active agents
+- `./claude-flow agent parallel-status` - Check all agent status concurrently
+- `./claude-flow agent info <id>` - Agent details
+- `./claude-flow agent terminate <id>` - Stop agent
+- `./claude-flow agent batch-terminate <ids>` - Stop multiple agents in parallel
 
 ### 📋 Task Management (Concurrent)
-- \`./claude-flow task create <type> "description"\` - Create task
-- \`./claude-flow task batch-create <tasks-file>\` - Create multiple tasks in parallel
-- \`./claude-flow task list\` - List all tasks
-- \`./claude-flow task parallel-status\` - Check all task status concurrently
-- \`./claude-flow task status <id>\` - Task status
-- \`./claude-flow task cancel <id>\` - Cancel task
-- \`./claude-flow task batch-cancel <ids>\` - Cancel multiple tasks in parallel
-- \`./claude-flow task workflow <file>\` - Execute workflow
-- \`./claude-flow task parallel-workflow <files>\` - Execute multiple workflows concurrently
+- `./claude-flow task create <type> "description"` - Create task
+- `./claude-flow task batch-create <tasks-file>` - Create multiple tasks in parallel
+- `./claude-flow task list` - List all tasks
+- `./claude-flow task parallel-status` - Check all task status concurrently
+- `./claude-flow task status <id>` - Task status
+- `./claude-flow task cancel <id>` - Cancel task
+- `./claude-flow task batch-cancel <ids>` - Cancel multiple tasks in parallel
+- `./claude-flow task workflow <file>` - Execute workflow
+- `./claude-flow task parallel-workflow <files>` - Execute multiple workflows concurrently
 
 ### 🧠 Memory Operations (Batch Enhanced)
-- \`./claude-flow memory store "key" "value"\` - Store data
-- \`./claude-flow memory batch-store <entries-file>\` - Store multiple entries in parallel
-- \`./claude-flow memory query "search"\` - Search memory
-- \`./claude-flow memory parallel-query <queries>\` - Execute multiple queries concurrently
-- \`./claude-flow memory stats\` - Memory statistics
-- \`./claude-flow memory stats --concurrent\` - Parallel memory analysis
-- \`./claude-flow memory export <file>\` - Export memory
-- \`./claude-flow memory concurrent-export <namespaces>\` - Export multiple namespaces in parallel
-- \`./claude-flow memory import <file>\` - Import memory
-- \`./claude-flow memory batch-import <files>\` - Import multiple files concurrently
+- `./claude-flow memory store "key" "value"` - Store data
+- `./claude-flow memory batch-store <entries-file>` - Store multiple entries in parallel
+- `./claude-flow memory query "search"` - Search memory
+- `./claude-flow memory parallel-query <queries>` - Execute multiple queries concurrently
+- `./claude-flow memory stats` - Memory statistics
+- `./claude-flow memory stats --concurrent` - Parallel memory analysis
+- `./claude-flow memory export <file>` - Export memory
+- `./claude-flow memory concurrent-export <namespaces>` - Export multiple namespaces in parallel
+- `./claude-flow memory import <file>` - Import memory
+- `./claude-flow memory batch-import <files>` - Import multiple files concurrently
 
 ### ⚡ SPARC Development (Optimized)
-- \`./claude-flow sparc "task"\` - Run SPARC orchestrator
-- \`./claude-flow sparc parallel "tasks"\` - Run multiple SPARC tasks concurrently
-- \`./claude-flow sparc modes\` - List all 17+ SPARC modes
-- \`./claude-flow sparc run <mode> "task"\` - Run specific mode
-- \`./claude-flow sparc batch <modes> "task"\` - Run multiple modes in parallel
-- \`./claude-flow sparc tdd "feature"\` - TDD workflow
-- \`./claude-flow sparc concurrent-tdd <features>\` - Parallel TDD for multiple features
-- \`./claude-flow sparc info <mode>\` - Mode details
+- `./claude-flow sparc "task"` - Run SPARC orchestrator
+- `./claude-flow sparc parallel "tasks"` - Run multiple SPARC tasks concurrently
+- `./claude-flow sparc modes` - List all 17+ SPARC modes
+- `./claude-flow sparc run <mode> "task"` - Run specific mode
+- `./claude-flow sparc batch <modes> "task"` - Run multiple modes in parallel
+- `./claude-flow sparc tdd "feature"` - TDD workflow
+- `./claude-flow sparc concurrent-tdd <features>` - Parallel TDD for multiple features
+- `./claude-flow sparc info <mode>` - Mode details
 
 ### 🐝 Swarm Coordination (Enhanced)
-- \`./claude-flow swarm "task" --strategy <type>\` - Start swarm
-- \`./claude-flow swarm "task" --background\` - Long-running swarm
-- \`./claude-flow swarm "task" --monitor\` - With monitoring
-- \`./claude-flow swarm "task" --ui\` - Interactive UI
-- \`./claude-flow swarm "task" --distributed\` - Distributed coordination
-- \`./claude-flow swarm batch <tasks-config>\` - Multiple swarms in parallel
-- \`./claude-flow swarm concurrent "tasks" --parallel\` - Concurrent swarm execution
+- `./claude-flow swarm "task" --strategy <type>` - Start swarm
+- `./claude-flow swarm "task" --background` - Long-running swarm
+- `./claude-flow swarm "task" --monitor` - With monitoring
+- `./claude-flow swarm "task" --ui` - Interactive UI
+- `./claude-flow swarm "task" --distributed` - Distributed coordination
+- `./claude-flow swarm batch <tasks-config>` - Multiple swarms in parallel
+- `./claude-flow swarm concurrent "tasks" --parallel` - Concurrent swarm execution
 
 ### 🌍 MCP Integration (Parallel)
-- \`./claude-flow mcp status\` - MCP server status
-- \`./claude-flow mcp parallel-status\` - Check all MCP servers concurrently
-- \`./claude-flow mcp tools\` - List available tools
-- \`./claude-flow mcp config\` - Show configuration
-- \`./claude-flow mcp logs\` - View MCP logs
-- \`./claude-flow mcp batch-logs <servers>\` - View multiple server logs in parallel
+- `./claude-flow mcp status` - MCP server status
+- `./claude-flow mcp parallel-status` - Check all MCP servers concurrently
+- `./claude-flow mcp tools` - List available tools
+- `./claude-flow mcp config` - Show configuration
+- `./claude-flow mcp logs` - View MCP logs
+- `./claude-flow mcp batch-logs <servers>` - View multiple server logs in parallel
 
 ### 🤖 Claude Integration (Enhanced)
-- \`./claude-flow claude spawn "task"\` - Spawn Claude with enhanced guidance
-- \`./claude-flow claude batch-spawn <tasks>\` - Spawn multiple Claude instances in parallel
-- \`./claude-flow claude batch <file>\` - Execute workflow configuration
+- `./claude-flow claude spawn "task"` - Spawn Claude with enhanced guidance
+- `./claude-flow claude batch-spawn <tasks>` - Spawn multiple Claude instances in parallel
+- `./claude-flow claude batch <file>` - Execute workflow configuration
 
 ### 🚀 Batchtools Commands (New)
-- \`./claude-flow batchtools status\` - Check batchtools system status
-- \`./claude-flow batchtools monitor\` - Real-time performance monitoring
-- \`./claude-flow batchtools optimize\` - System optimization recommendations
-- \`./claude-flow batchtools benchmark\` - Performance benchmarking
-- \`./claude-flow batchtools config\` - Batchtools configuration management
+- `./claude-flow batchtools status` - Check batchtools system status
+- `./claude-flow batchtools monitor` - Real-time performance monitoring
+- `./claude-flow batchtools optimize` - System optimization recommendations
+- `./claude-flow batchtools benchmark` - Performance benchmarking
+- `./claude-flow batchtools config` - Batchtools configuration management
 
 ## 🌟 Quick Examples (Optimized)
 
 ### Initialize with enhanced SPARC:
-\`\`\`bash
+```bash
 npx -y claude-flow@latest init --sparc --force
-\`\`\`
+```
 
 ### Start a parallel development swarm:
-\`\`\`bash
+```bash
 ./claude-flow swarm "Build REST API" --strategy development --monitor --review --parallel
-\`\`\`
+```
 
 ### Run concurrent TDD workflow:
-\`\`\`bash
+```bash
 ./claude-flow sparc concurrent-tdd "user authentication,payment processing,notification system"
-\`\`\`
+```
 
 ### Store project context with batch operations:
-\`\`\`bash
+```bash
 ./claude-flow memory batch-store "project-contexts.json" --namespace project --parallel
-\`\`\`
+```
 
 ### Spawn specialized agents in parallel:
-\`\`\`bash
+```bash
 ./claude-flow agent batch-spawn agents-config.json --parallel --validate
-\`\`\`
+```
 
 ## 🎯 Performance Features
 
@@ -149,14 +150,14 @@ npx -y claude-flow@latest init --sparc --force
 ## 🎯 Best Practices (Enhanced)
 
 ### Performance Optimization
-- Use \`./claude-flow\` instead of \`npx claude-flow\` after initialization
-- Enable parallel processing for independent operations (\`--parallel\` flag)
-- Use batch operations for multiple related tasks (\`batch-*\` commands)
-- Monitor system resources during concurrent operations (\`--monitor\` flag)
+- Use `./claude-flow` instead of `npx claude-flow` after initialization
+- Enable parallel processing for independent operations (`--parallel` flag)
+- Use batch operations for multiple related tasks (`batch-*` commands)
+- Monitor system resources during concurrent operations (`--monitor` flag)
 - Store important context in memory for cross-session persistence
 - Use swarm mode for complex tasks requiring multiple agents
-- Enable monitoring for real-time progress tracking (\`--monitor\`)
-- Use background mode for tasks > 30 minutes (\`--background\`)
+- Enable monitoring for real-time progress tracking (`--monitor`)
+- Use background mode for tasks > 30 minutes (`--background`)
 - Implement concurrent processing for optimal performance
 
 ### Resource Management
@@ -183,7 +184,7 @@ npx -y claude-flow@latest init --sparc --force
 ## 🔧 Advanced Configuration
 
 ### Batchtools Configuration
-\`\`\`json
+```json
 {
   "batchtools": {
     "enabled": true,
@@ -194,7 +195,7 @@ npx -y claude-flow@latest init --sparc --force
     "performanceMonitoring": true
   }
 }
-\`\`\`
+```
 
 ### Performance Tuning
 - **Concurrent Limits**: Adjust based on system resources
@@ -212,7 +213,7 @@ npx -y claude-flow@latest init --sparc --force
 ## 🚨 Troubleshooting (Enhanced)
 
 ### Performance Issues
-\`\`\`bash
+```bash
 # Monitor system performance during operations
 ./claude-flow monitor --performance --real-time
 
@@ -221,10 +222,10 @@ npx -y claude-flow@latest init --sparc --force
 
 # Analyze operation bottlenecks
 ./claude-flow performance analyze --bottlenecks --optimization
-\`\`\`
+```
 
 ### Optimization Commands
-\`\`\`bash
+```bash
 # Auto-optimize system configuration
 ./claude-flow batchtools optimize --auto-tune
 
@@ -233,7 +234,7 @@ npx -y claude-flow@latest init --sparc --force
 
 # System resource analysis
 ./claude-flow performance report --system --recommendations
-\`\`\`
+```
 
 For comprehensive documentation and optimization guides, see the resources above.
 `;
@@ -242,7 +243,7 @@ For comprehensive documentation and optimization guides, see the resources above
   console.log('  ✓ Created optimized slash command: /claude-flow-help (Batchtools enhanced)');
   
   // Memory command with batchtools optimization
-  const memoryCommand = `---
+  const _memoryCommand = `---
 name: claude-flow-memory
 description: Interact with Claude-Flow memory system using batchtools optimization
 ---
@@ -256,16 +257,16 @@ The memory system provides persistent storage for cross-session and cross-agent 
 ## Store Information (Enhanced)
 
 ### Standard Storage
-\`\`\`bash
+```bash
 # Store with default namespace
 ./claude-flow memory store "key" "value"
 
 # Store with specific namespace
 ./claude-flow memory store "architecture_decisions" "microservices with API gateway" --namespace arch
-\`\`\`
+```
 
 ### Batch Storage (Optimized)
-\`\`\`bash
+```bash
 # Store multiple entries in parallel
 ./claude-flow memory batch-store entries.json --parallel
 
@@ -274,21 +275,21 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Bulk storage with optimization
 ./claude-flow memory bulk-store project-data/ --recursive --optimize --parallel
-\`\`\`
+```
 
 ## Query Memory (Enhanced)
 
 ### Standard Queries
-\`\`\`bash
+```bash
 # Search across all namespaces
 ./claude-flow memory query "authentication"
 
 # Search with filters
 ./claude-flow memory query "API design" --namespace arch --limit 10
-\`\`\`
+```
 
 ### Parallel Queries (Optimized)
-\`\`\`bash
+```bash
 # Execute multiple queries concurrently
 ./claude-flow memory parallel-query "auth,api,database" --concurrent
 
@@ -297,21 +298,21 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Batch query processing
 ./claude-flow memory batch-query queries.json --optimize --results-parallel
-\`\`\`
+```
 
 ## Memory Statistics (Enhanced)
 
 ### Standard Statistics
-\`\`\`bash
+```bash
 # Show overall statistics
 ./claude-flow memory stats
 
 # Show namespace-specific stats
 ./claude-flow memory stats --namespace project
-\`\`\`
+```
 
 ### Performance Statistics (Optimized)
-\`\`\`bash
+```bash
 # Real-time performance monitoring
 ./claude-flow memory stats --real-time --performance
 
@@ -320,12 +321,12 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Batch performance analysis
 ./claude-flow memory performance-stats --optimization --benchmarks
-\`\`\`
+```
 
 ## Export/Import (Enhanced)
 
 ### Standard Operations
-\`\`\`bash
+```bash
 # Export all memory
 ./claude-flow memory export full-backup.json
 
@@ -334,10 +335,10 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Import memory
 ./claude-flow memory import backup.json
-\`\`\`
+```
 
 ### Batch Operations (Optimized)
-\`\`\`bash
+```bash
 # Export multiple namespaces in parallel
 ./claude-flow memory concurrent-export namespaces.json --parallel --compress
 
@@ -346,21 +347,21 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Incremental export with optimization
 ./claude-flow memory incremental-export --since yesterday --optimize --concurrent
-\`\`\`
+```
 
 ## Cleanup Operations (Enhanced)
 
 ### Standard Cleanup
-\`\`\`bash
+```bash
 # Clean entries older than 30 days
 ./claude-flow memory cleanup --days 30
 
 # Clean specific namespace
 ./claude-flow memory cleanup --namespace temp --days 7
-\`\`\`
+```
 
 ### Batch Cleanup (Optimized)
-\`\`\`bash
+```bash
 # Parallel cleanup across multiple namespaces
 ./claude-flow memory concurrent-cleanup --namespaces temp,cache --days 7 --parallel
 
@@ -369,7 +370,7 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Batch maintenance operations
 ./claude-flow memory batch-maintenance --compress --reindex --parallel
-\`\`\`
+```
 
 ## 🗂️ Namespaces (Enhanced)
 - **default** - General storage with parallel access
@@ -416,7 +417,7 @@ The memory system provides persistent storage for cross-session and cross-agent 
 ## Examples (Batchtools Enhanced)
 
 ### Store SPARC context with parallel operations:
-\`\`\`bash
+```bash
 # Batch store multiple SPARC contexts
 ./claude-flow memory batch-store sparc-contexts.json --namespace sparc --parallel
 
@@ -425,10 +426,10 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Performance-optimized bulk storage
 ./claude-flow memory bulk-store project-data/ --optimize --concurrent --compress
-\`\`\`
+```
 
 ### Query project decisions with concurrent processing:
-\`\`\`bash
+```bash
 # Parallel queries across multiple namespaces
 ./claude-flow memory parallel-query "authentication" --namespaces arch,impl,test --concurrent
 
@@ -437,10 +438,10 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Real-time search with performance monitoring
 ./claude-flow memory concurrent-search "API design" --real-time --performance
-\`\`\`
+```
 
 ### Backup project memory with parallel processing:
-\`\`\`bash
+```bash
 # Concurrent export with compression
 ./claude-flow memory concurrent-export project-$(date +%Y%m%d).json --namespace project --compress --parallel
 
@@ -449,7 +450,7 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Performance-optimized full backup
 ./claude-flow memory parallel-backup --full --compress --validate --concurrent
-\`\`\`
+```
 
 ## 📊 Performance Features
 
@@ -474,7 +475,7 @@ The memory system provides persistent storage for cross-session and cross-agent 
 ## 🔧 Configuration (Batchtools Enhanced)
 
 ### Memory Configuration with Batchtools
-\`\`\`json
+```json
 {
   "memory": {
     "backend": "json",
@@ -498,12 +499,12 @@ The memory system provides persistent storage for cross-session and cross-agent 
     }
   }
 }
-\`\`\`
+```
 
 ## 🚨 Troubleshooting (Enhanced)
 
 ### Performance Issues
-\`\`\`bash
+```bash
 # Monitor memory operation performance
 ./claude-flow memory debug --performance --concurrent
 
@@ -512,10 +513,10 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Check parallel processing status
 ./claude-flow memory status --parallel --detailed
-\`\`\`
+```
 
 ### Optimization Commands
-\`\`\`bash
+```bash
 # Optimize memory configuration
 ./claude-flow memory optimize --auto-tune --performance
 
@@ -524,7 +525,7 @@ The memory system provides persistent storage for cross-session and cross-agent 
 
 # Performance report generation
 ./claude-flow memory performance-report --detailed --recommendations
-\`\`\`
+```
 
 For comprehensive memory system documentation and optimization guides, see: https://github.com/ruvnet/claude-code-flow/docs/memory-batchtools.md
 `;
@@ -533,7 +534,7 @@ For comprehensive memory system documentation and optimization guides, see: http
   console.log('  ✓ Created optimized slash command: /claude-flow-memory (Batchtools enhanced)');
   
   // Swarm command with batchtools optimization
-  const swarmCommand = `---
+  const _swarmCommand = `---
 name: claude-flow-swarm
 description: Coordinate multi-agent swarms for complex tasks with batchtools optimization
 ---
@@ -545,9 +546,9 @@ Advanced multi-agent coordination system with timeout-free execution, distribute
 **🚀 Batchtools Enhancement**: Enhanced with parallel processing capabilities, batch operations, and concurrent optimization for maximum swarm efficiency.
 
 ## Basic Usage (Enhanced)
-\`\`\`bash
+```bash
 ./claude-flow swarm "your complex task" --strategy <type> [options] --parallel
-\`\`\`
+```
 
 ## 🎯 Swarm Strategies (Optimized)
 - **auto** - Automatic strategy selection with parallel task analysis
@@ -578,96 +579,96 @@ Advanced multi-agent coordination system with timeout-free execution, distribute
 - **hybrid** - Mixed strategies with adaptive parallel processing
 
 ## ⚙️ Common Options (Batchtools Enhanced)
-- \`--strategy <type>\` - Execution strategy with optimization
-- \`--mode <type>\` - Coordination mode with parallel processing
-- \`--max-agents <n>\` - Maximum concurrent agents (default: 10, optimized: 25)
-- \`--timeout <minutes>\` - Timeout in minutes (default: 60)
-- \`--background\` - Run in background with parallel monitoring
-- \`--monitor\` - Enable real-time monitoring with concurrent metrics
-- \`--ui\` - Launch terminal UI with performance dashboard
-- \`--parallel\` - Enable enhanced parallel execution
-- \`--distributed\` - Enable distributed coordination with load balancing
-- \`--review\` - Enable peer review with concurrent validation
-- \`--testing\` - Include automated testing with parallel execution
-- \`--encryption\` - Enable data encryption with concurrent processing
-- \`--verbose\` - Detailed logging with parallel output
-- \`--dry-run\` - Show configuration with parallel analysis
-- \`--batch-optimize\` - Enable batchtools optimization
-- \`--concurrent-agents <n>\` - Maximum concurrent agent operations
-- \`--performance\` - Enable performance monitoring and optimization
+- `--strategy <type>` - Execution strategy with optimization
+- `--mode <type>` - Coordination mode with parallel processing
+- `--max-agents <n>` - Maximum concurrent agents (default: 10, optimized: 25)
+- `--timeout <minutes>` - Timeout in minutes (default: 60)
+- `--background` - Run in background with parallel monitoring
+- `--monitor` - Enable real-time monitoring with concurrent metrics
+- `--ui` - Launch terminal UI with performance dashboard
+- `--parallel` - Enable enhanced parallel execution
+- `--distributed` - Enable distributed coordination with load balancing
+- `--review` - Enable peer review with concurrent validation
+- `--testing` - Include automated testing with parallel execution
+- `--encryption` - Enable data encryption with concurrent processing
+- `--verbose` - Detailed logging with parallel output
+- `--dry-run` - Show configuration with parallel analysis
+- `--batch-optimize` - Enable batchtools optimization
+- `--concurrent-agents <n>` - Maximum concurrent agent operations
+- `--performance` - Enable performance monitoring and optimization
 
 ## 🌟 Examples (Batchtools Enhanced)
 
 ### Development Swarm with Parallel Review
-\`\`\`bash
-./claude-flow swarm "Build e-commerce REST API" \\
-  --strategy development \\
-  --monitor \\
-  --review \\
-  --testing \\
-  --parallel \\
-  --concurrent-agents 15 \\
+```bash
+./claude-flow swarm "Build e-commerce REST API" \
+  --strategy development \
+  --monitor \
+  --review \
+  --testing \
+  --parallel \
+  --concurrent-agents 15 \
   --performance
-\`\`\`
+```
 
 ### Long-Running Research Swarm with Concurrent Processing
-\`\`\`bash
-./claude-flow swarm "Analyze AI market trends 2024-2025" \\
-  --strategy research \\
-  --background \\
-  --distributed \\
-  --max-agents 12 \\
-  --parallel \\
-  --batch-optimize \\
+```bash
+./claude-flow swarm "Analyze AI market trends 2024-2025" \
+  --strategy research \
+  --background \
+  --distributed \
+  --max-agents 12 \
+  --parallel \
+  --batch-optimize \
   --performance
-\`\`\`
+```
 
 ### Performance Optimization Swarm with Parallel Analysis
-\`\`\`bash
-./claude-flow swarm "Optimize database queries and API performance" \\
-  --strategy optimization \\
-  --testing \\
-  --parallel \\
-  --monitor \\
-  --concurrent-agents 10 \\
-  --batch-optimize \\
+```bash
+./claude-flow swarm "Optimize database queries and API performance" \
+  --strategy optimization \
+  --testing \
+  --parallel \
+  --monitor \
+  --concurrent-agents 10 \
+  --batch-optimize \
   --performance
-\`\`\`
+```
 
 ### Enterprise Development Swarm with Full Parallelization
-\`\`\`bash
-./claude-flow swarm "Implement secure payment processing system" \\
-  --strategy development \\
-  --mode distributed \\
-  --max-agents 20 \\
-  --parallel \\
-  --monitor \\
-  --review \\
-  --testing \\
-  --encryption \\
-  --verbose \\
-  --concurrent-agents 15 \\
-  --batch-optimize \\
+```bash
+./claude-flow swarm "Implement secure payment processing system" \
+  --strategy development \
+  --mode distributed \
+  --max-agents 20 \
+  --parallel \
+  --monitor \
+  --review \
+  --testing \
+  --encryption \
+  --verbose \
+  --concurrent-agents 15 \
+  --batch-optimize \
   --performance
-\`\`\`
+```
 
 ### Testing and QA Swarm with Concurrent Validation
-\`\`\`bash
-./claude-flow swarm "Comprehensive security audit and testing" \\
-  --strategy testing \\
-  --review \\
-  --verbose \\
-  --max-agents 8 \\
-  --parallel \\
-  --concurrent-agents 6 \\
-  --batch-optimize \\
+```bash
+./claude-flow swarm "Comprehensive security audit and testing" \
+  --strategy testing \
+  --review \
+  --verbose \
+  --max-agents 8 \
+  --parallel \
+  --concurrent-agents 6 \
+  --batch-optimize \
   --performance
-\`\`\`
+```
 
 ## 📊 Monitoring and Control (Enhanced)
 
 ### Real-time monitoring with parallel metrics:
-\`\`\`bash
+```bash
 # Monitor swarm activity with performance data
 ./claude-flow monitor --parallel --performance --real-time
 
@@ -676,10 +677,10 @@ Advanced multi-agent coordination system with timeout-free execution, distribute
 
 # Performance dashboard with parallel monitoring
 ./claude-flow monitor --ui --performance --all-metrics
-\`\`\`
+```
 
 ### Check swarm status with concurrent analysis:
-\`\`\`bash
+```bash
 # Overall system status with parallel checks
 ./claude-flow status --concurrent --performance
 
@@ -688,10 +689,10 @@ Advanced multi-agent coordination system with timeout-free execution, distribute
 
 # Performance analysis with concurrent processing
 ./claude-flow status --performance --detailed --concurrent
-\`\`\`
+```
 
 ### View agent activity with parallel monitoring:
-\`\`\`bash
+```bash
 # List all agents with concurrent status checks
 ./claude-flow agent list --parallel --performance
 
@@ -700,14 +701,14 @@ Advanced multi-agent coordination system with timeout-free execution, distribute
 
 # Batch agent monitoring
 ./claude-flow agent batch-status --all-agents --parallel
-\`\`\`
+```
 
 ## 💾 Memory Integration (Enhanced)
 
 Swarms automatically use distributed memory with parallel processing for collaboration:
 
 ### Standard Memory Operations
-\`\`\`bash
+```bash
 # Store swarm objectives
 ./claude-flow memory store "swarm_objective" "Build scalable API" --namespace swarm
 
@@ -716,10 +717,10 @@ Swarms automatically use distributed memory with parallel processing for collabo
 
 # Export swarm memory
 ./claude-flow memory export swarm-results.json --namespace swarm
-\`\`\`
+```
 
 ### Batchtools Memory Operations
-\`\`\`bash
+```bash
 # Batch store swarm contexts
 ./claude-flow memory batch-store swarm-contexts.json --namespace swarm --parallel
 
@@ -728,7 +729,7 @@ Swarms automatically use distributed memory with parallel processing for collabo
 
 # Performance-optimized swarm memory export
 ./claude-flow memory concurrent-export swarm-backup.json --namespace swarm --compress --parallel
-\`\`\`
+```
 
 ## 🎯 Key Features (Enhanced)
 
@@ -765,22 +766,22 @@ Swarms automatically use distributed memory with parallel processing for collabo
 ## 🔧 Advanced Configuration (Batchtools Enhanced)
 
 ### Dry run with parallel preview:
-\`\`\`bash
+```bash
 ./claude-flow swarm "Test task" --dry-run --strategy development --parallel --performance
-\`\`\`
+```
 
 ### Custom quality thresholds with concurrent validation:
-\`\`\`bash
-./claude-flow swarm "High quality API" \\
-  --strategy development \\
-  --quality-threshold 0.95 \\
-  --parallel \\
-  --concurrent-validation \\
+```bash
+./claude-flow swarm "High quality API" \
+  --strategy development \
+  --quality-threshold 0.95 \
+  --parallel \
+  --concurrent-validation \
   --performance
-\`\`\`
+```
 
 ### Batchtools Configuration
-\`\`\`json
+```json
 {
   "swarm": {
     "batchtools": {
@@ -800,10 +801,10 @@ Swarms automatically use distributed memory with parallel processing for collabo
     }
   }
 }
-\`\`\`
+```
 
 ### Scheduling algorithms (Enhanced):
-- FIFO (First In, First Out) with parallel processing
+- FIFO (First _In, First Out) with parallel processing
 - Priority-based with concurrent validation
 - Deadline-driven with parallel scheduling
 - Shortest Job First with optimization
@@ -835,7 +836,7 @@ Swarms automatically use distributed memory with parallel processing for collabo
 ## 🚨 Troubleshooting (Enhanced)
 
 ### Performance Issues
-\`\`\`bash
+```bash
 # Monitor swarm performance with concurrent analysis
 ./claude-flow swarm debug --performance --concurrent --verbose
 
@@ -844,10 +845,10 @@ Swarms automatically use distributed memory with parallel processing for collabo
 
 # Check parallel processing status
 ./claude-flow swarm status --parallel --performance --real-time
-\`\`\`
+```
 
 ### Optimization Commands
-\`\`\`bash
+```bash
 # Auto-optimize swarm configuration
 ./claude-flow swarm optimize --auto-tune --performance
 
@@ -856,7 +857,7 @@ Swarms automatically use distributed memory with parallel processing for collabo
 
 # Resource usage analysis
 ./claude-flow swarm resources --concurrent --optimization
-\`\`\`
+```
 
 ## 📈 Performance Benchmarks
 

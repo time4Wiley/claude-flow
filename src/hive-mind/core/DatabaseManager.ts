@@ -4,28 +4,23 @@
  * Manages all database operations for the Hive Mind system
  * using SQLite as the persistence layer.
  */
-
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs/promises';
 import { EventEmitter } from 'events';
 import { fileURLToPath } from 'url';
-
 // ES module compatibility - define __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 export class DatabaseManager extends EventEmitter {
   private static instance: DatabaseManager;
   private db: Database.Database;
   private statements: Map<string, Database.Statement>;
   private dbPath: string;
-
   private constructor() {
     super();
     this.statements = new Map();
   }
-
   /**
    * Get singleton instance
    */
@@ -36,17 +31,16 @@ export class DatabaseManager extends EventEmitter {
     }
     return DatabaseManager.instance;
   }
-
   /**
    * Initialize database
    */
   async initialize(): Promise<void> {
     // Ensure data directory exists
-    const dataDir = path.join(process.cwd(), 'data');
-    await fs.mkdir(dataDir, { recursive: true });
+    const _dataDir = path.join(process.cwd(), 'data');
+    await fs.mkdir(_dataDir, { recursive: true });
     
     // Set database path
-    this.dbPath = path.join(dataDir, 'hive-mind.db');
+    this.dbPath = path.join(_dataDir, 'hive-mind.db');
     
     // Open database
     this.db = new Database(this.dbPath);
@@ -62,26 +56,24 @@ export class DatabaseManager extends EventEmitter {
     
     this.emit('initialized');
   }
-
   /**
    * Load database schema
    */
   private async loadSchema(): Promise<void> {
-    const schemaPath = path.join(__dirname, '..', '..', 'db', 'hive-mind-schema.sql');
-    const schema = await fs.readFile(schemaPath, 'utf-8');
+    const _schemaPath = path.join(__dirname, '..', '..', 'db', 'hive-mind-schema.sql');
+    const _schema = await fs.readFile(_schemaPath, 'utf-8');
     
     // Execute schema
     this.db.exec(schema);
   }
-
   /**
    * Prepare common SQL statements
    */
   private prepareStatements(): void {
     // Swarm statements
     this.statements.set('createSwarm', this.db.prepare(`
-      INSERT INTO swarms (id, name, topology, queen_mode, max_agents, consensus_threshold, memory_ttl, config)
-      VALUES (@id, @name, @topology, @queenMode, @maxAgents, @consensusThreshold, @memoryTTL, @config)
+      INSERT INTO swarms (_id, _name, _topology, _queen_mode, _max_agents, _consensus_threshold, _memory_ttl, config)
+      VALUES (@_id, @_name, @_topology, @_queenMode, @_maxAgents, @_consensusThreshold, @_memoryTTL, @config)
     `));
     
     this.statements.set('getSwarm', this.db.prepare(`
@@ -98,8 +90,8 @@ export class DatabaseManager extends EventEmitter {
     
     // Agent statements
     this.statements.set('createAgent', this.db.prepare(`
-      INSERT INTO agents (id, swarm_id, name, type, status, capabilities, metadata)
-      VALUES (@id, @swarmId, @name, @type, @status, @capabilities, @metadata)
+      INSERT INTO agents (_id, _swarm_id, _name, _type, _status, _capabilities, metadata)
+      VALUES (@_id, @_swarmId, @_name, @_type, @_status, @_capabilities, @metadata)
     `));
     
     this.statements.set('getAgent', this.db.prepare(`
@@ -117,13 +109,13 @@ export class DatabaseManager extends EventEmitter {
     // Task statements
     this.statements.set('createTask', this.db.prepare(`
       INSERT INTO tasks (
-        id, swarm_id, description, priority, strategy, status, 
-        dependencies, assigned_agents, require_consensus, max_agents, 
-        required_capabilities, metadata
+        _id, _swarm_id, _description, _priority, _strategy, _status, 
+        _dependencies, _assigned_agents, _require_consensus, _max_agents, 
+        _required_capabilities, metadata
       ) VALUES (
-        @id, @swarmId, @description, @priority, @strategy, @status,
-        @dependencies, @assignedAgents, @requireConsensus, @maxAgents,
-        @requiredCapabilities, @metadata
+        @_id, @_swarmId, @_description, @_priority, @_strategy, @_status,
+        @_dependencies, @_assignedAgents, @_requireConsensus, @_maxAgents,
+        @_requiredCapabilities, @metadata
       )
     `));
     
@@ -141,8 +133,8 @@ export class DatabaseManager extends EventEmitter {
     
     // Memory statements
     this.statements.set('storeMemory', this.db.prepare(`
-      INSERT OR REPLACE INTO memory (key, namespace, value, ttl, metadata)
-      VALUES (@key, @namespace, @value, @ttl, @metadata)
+      INSERT OR REPLACE INTO memory (_key, _namespace, _value, _ttl, metadata)
+      VALUES (@_key, @_namespace, @_value, @_ttl, @metadata)
     `));
     
     this.statements.set('getMemory', this.db.prepare(`
@@ -159,48 +151,41 @@ export class DatabaseManager extends EventEmitter {
     // Communication statements
     this.statements.set('createCommunication', this.db.prepare(`
       INSERT INTO communications (
-        from_agent_id, to_agent_id, swarm_id, message_type, 
-        content, priority, requires_response
+        _from_agent_id, _to_agent_id, _swarm_id, _message_type, 
+        _content, _priority, requires_response
       ) VALUES (
-        @from_agent_id, @to_agent_id, @swarm_id, @message_type,
-        @content, @priority, @requires_response
+        @_from_agent_id, @_to_agent_id, @_swarm_id, @_message_type,
+        @_content, @_priority, @requires_response
       )
     `));
     
     // Performance statements
     this.statements.set('storeMetric', this.db.prepare(`
-      INSERT INTO performance_metrics (swarm_id, agent_id, metric_type, metric_value, metadata)
-      VALUES (@swarm_id, @agent_id, @metric_type, @metric_value, @metadata)
+      INSERT INTO performance_metrics (_swarm_id, _agent_id, _metric_type, _metric_value, metadata)
+      VALUES (@_swarm_id, @_agent_id, @_metric_type, @_metric_value, @metadata)
     `));
   }
-
   /**
    * Raw SQL helper for complex updates
    */
-  raw(sql: string): any {
+  raw(sql: string): unknown {
     return { _raw: sql };
   }
-
   // Swarm operations
-
-  async createSwarm(data: any): Promise<void> {
+  async createSwarm(data: unknown): Promise<void> {
     this.statements.get('createSwarm')!.run(data);
   }
-
-  async getSwarm(id: string): Promise<any> {
+  async getSwarm(id: string): Promise<unknown> {
     return this.statements.get('getSwarm')!.get(id);
   }
-
   async getActiveSwarmId(): Promise<string | null> {
-    const result = this.statements.get('getActiveSwarm')!.get();
+    const _result = this.statements.get('getActiveSwarm')!.get();
     return result ? result.id : null;
   }
-
   async setActiveSwarm(id: string): Promise<void> {
     this.statements.get('setActiveSwarm')!.run(id);
   }
-
-  async getAllSwarms(): Promise<any[]> {
+  async getAllSwarms(): Promise<unknown[]> {
     return this.db.prepare(`
       SELECT s.*, COUNT(a.id) as agentCount 
       FROM swarms s 
@@ -209,26 +194,21 @@ export class DatabaseManager extends EventEmitter {
       ORDER BY s.created_at DESC
     `).all();
   }
-
   // Agent operations
-
-  async createAgent(data: any): Promise<void> {
+  async createAgent(data: unknown): Promise<void> {
     this.statements.get('createAgent')!.run(data);
   }
-
-  async getAgent(id: string): Promise<any> {
+  async getAgent(id: string): Promise<unknown> {
     return this.statements.get('getAgent')!.get(id);
   }
-
-  async getAgents(swarmId: string): Promise<any[]> {
+  async getAgents(swarmId: string): Promise<unknown[]> {
     return this.statements.get('getAgents')!.all(swarmId);
   }
-
-  async updateAgent(id: string, updates: any): Promise<void> {
-    const setClauses: string[] = [];
-    const values: any[] = [];
+  async updateAgent(id: string, updates: unknown): Promise<void> {
+    const _setClauses: string[] = [];
+    const _values: unknown[] = [];
     
-    for (const [key, value] of Object.entries(updates)) {
+    for (const [_key, value] of Object.entries(updates)) {
       if (value && typeof value === 'object' && value._raw) {
         setClauses.push(`${key} = ${value._raw}`);
       } else {
@@ -239,19 +219,17 @@ export class DatabaseManager extends EventEmitter {
     
     values.push(id);
     
-    const stmt = this.db.prepare(`
+    const _stmt = this.db.prepare(`
       UPDATE agents SET ${setClauses.join(', ')} WHERE id = ?
     `);
     
     stmt.run(...values);
   }
-
   async updateAgentStatus(id: string, status: string): Promise<void> {
-    this.db.prepare('UPDATE agents SET status = ? WHERE id = ?').run(status, id);
+    this.db.prepare('UPDATE agents SET status = ? WHERE id = ?').run(_status, id);
   }
-
-  async getAgentPerformance(agentId: string): Promise<any> {
-    const agent = await this.getAgent(agentId);
+  async getAgentPerformance(agentId: string): Promise<unknown> {
+    const _agent = await this.getAgent(agentId);
     if (!agent) return null;
     
     return {
@@ -260,47 +238,40 @@ export class DatabaseManager extends EventEmitter {
       messageCount: agent.message_count
     };
   }
-
   // Task operations
-
-  async createTask(data: any): Promise<void> {
+  async createTask(data: unknown): Promise<void> {
     this.statements.get('createTask')!.run({
-      ...data,
+      ..._data,
       requireConsensus: data.requireConsensus ? 1 : 0
     });
   }
-
-  async getTask(id: string): Promise<any> {
+  async getTask(id: string): Promise<unknown> {
     return this.statements.get('getTask')!.get(id);
   }
-
-  async getTasks(swarmId: string): Promise<any[]> {
+  async getTasks(swarmId: string): Promise<unknown[]> {
     return this.statements.get('getTasks')!.all(swarmId);
   }
-
-  async updateTask(id: string, updates: any): Promise<void> {
-    const setClauses: string[] = [];
-    const values: any[] = [];
+  async updateTask(id: string, updates: unknown): Promise<void> {
+    const _setClauses: string[] = [];
+    const _values: unknown[] = [];
     
-    for (const [key, value] of Object.entries(updates)) {
+    for (const [_key, value] of Object.entries(updates)) {
       setClauses.push(`${key} = ?`);
       values.push(value);
     }
     
     values.push(id);
     
-    const stmt = this.db.prepare(`
+    const _stmt = this.db.prepare(`
       UPDATE tasks SET ${setClauses.join(', ')} WHERE id = ?
     `);
     
     stmt.run(...values);
   }
-
   async updateTaskStatus(id: string, status: string): Promise<void> {
-    this.statements.get('updateTaskStatus')!.run(status, id);
+    this.statements.get('updateTaskStatus')!.run(_status, id);
   }
-
-  async getPendingTasks(swarmId: string): Promise<any[]> {
+  async getPendingTasks(swarmId: string): Promise<unknown[]> {
     return this.db.prepare(`
       SELECT * FROM tasks 
       WHERE swarm_id = ? AND status = 'pending'
@@ -310,75 +281,65 @@ export class DatabaseManager extends EventEmitter {
           WHEN 'high' THEN 2 
           WHEN 'medium' THEN 3 
           WHEN 'low' THEN 4 
-        END,
+        _END,
         created_at ASC
     `).all(swarmId);
   }
-
-  async getActiveTasks(swarmId: string): Promise<any[]> {
+  async getActiveTasks(swarmId: string): Promise<unknown[]> {
     return this.db.prepare(`
       SELECT * FROM tasks 
       WHERE swarm_id = ? AND status IN ('assigned', 'in_progress')
     `).all(swarmId);
   }
-
   async reassignTask(taskId: string, newAgentId: string): Promise<void> {
-    const task = await this.getTask(taskId);
+    const _task = await this.getTask(taskId);
     if (!task) return;
     
-    const assignedAgents = JSON.parse(task.assigned_agents || '[]');
+    const _assignedAgents = JSON.parse(task.assigned_agents || '[]');
     if (!assignedAgents.includes(newAgentId)) {
       assignedAgents.push(newAgentId);
     }
     
-    await this.updateTask(taskId, {
+    await this.updateTask(_taskId, {
       assigned_agents: JSON.stringify(assignedAgents)
     });
   }
-
   // Memory operations
-
-  async storeMemory(data: any): Promise<void> {
+  async storeMemory(data: unknown): Promise<void> {
     this.statements.get('storeMemory')!.run(data);
   }
-
-  async getMemory(key: string, namespace: string): Promise<any> {
-    return this.statements.get('getMemory')!.get(key, namespace);
+  async getMemory(key: string, namespace: string): Promise<unknown> {
+    return this.statements.get('getMemory')!.get(_key, namespace);
   }
-
   async updateMemoryAccess(key: string, namespace: string): Promise<void> {
     this.db.prepare(`
       UPDATE memory 
-      SET access_count = access_count + 1, last_accessed_at = CURRENT_TIMESTAMP
+      SET access_count = access_count + _1, last_accessed_at = CURRENT_TIMESTAMP
       WHERE key = ? AND namespace = ?
-    `).run(key, namespace);
+    `).run(_key, namespace);
   }
-
-  async searchMemory(options: any): Promise<any[]> {
-    const pattern = `%${options.pattern || ''}%`;
+  async searchMemory(options: Record<string, unknown>): Promise<unknown[]> {
+    const _pattern = `%${options.pattern || ''}%`;
     return this.statements.get('searchMemory')!.all(
       options.namespace || 'default',
-      pattern,
-      pattern,
+      _pattern,
+      _pattern,
       options.limit || 10
     );
   }
-
   async deleteMemory(key: string, namespace: string): Promise<void> {
-    this.db.prepare('DELETE FROM memory WHERE key = ? AND namespace = ?').run(key, namespace);
+    this.db.prepare('DELETE FROM memory WHERE key = ? AND namespace = ?').run(_key, namespace);
   }
-
-  async listMemory(namespace: string, limit: number): Promise<any[]> {
+  async listMemory(namespace: string, limit: number): Promise<unknown[]> {
     return this.db.prepare(`
       SELECT * FROM memory 
       WHERE namespace = ? 
       ORDER BY last_accessed_at DESC 
       LIMIT ?
-    `).all(namespace, limit);
+    `).all(_namespace, limit);
   }
-
-  async getMemoryStats(): Promise<any> {
-    const result = this.db.prepare(`
+  async getMemoryStats(): Promise<unknown> {
+    const _result = this.db.prepare(`
       SELECT 
         COUNT(*) as totalEntries,
         SUM(LENGTH(value)) as totalSize
@@ -387,8 +348,7 @@ export class DatabaseManager extends EventEmitter {
     
     return result || { totalEntries: 0, totalSize: 0 };
   }
-
-  async getNamespaceStats(namespace: string): Promise<any> {
+  async getNamespaceStats(namespace: string): Promise<unknown> {
     return this.db.prepare(`
       SELECT 
         COUNT(*) as entries,
@@ -398,40 +358,35 @@ export class DatabaseManager extends EventEmitter {
       WHERE namespace = ?
     `).get(namespace) || { entries: 0, size: 0, avgTTL: 0 };
   }
-
-  async getAllMemoryEntries(): Promise<any[]> {
+  async getAllMemoryEntries(): Promise<unknown[]> {
     return this.db.prepare('SELECT * FROM memory').all();
   }
-
-  async getRecentMemoryEntries(limit: number): Promise<any[]> {
+  async getRecentMemoryEntries(limit: number): Promise<unknown[]> {
     return this.db.prepare(`
       SELECT * FROM memory 
       ORDER BY last_accessed_at DESC 
       LIMIT ?
     `).all(limit);
   }
-
-  async getOldMemoryEntries(daysOld: number): Promise<any[]> {
+  async getOldMemoryEntries(daysOld: number): Promise<unknown[]> {
     return this.db.prepare(`
       SELECT * FROM memory 
       WHERE created_at < datetime('now', '-' || ? || ' days')
     `).all(daysOld);
   }
-
-  async updateMemoryEntry(entry: any): Promise<void> {
+  async updateMemoryEntry(entry: unknown): Promise<void> {
     this.db.prepare(`
       UPDATE memory 
       SET value = ?, access_count = ?, last_accessed_at = ?
       WHERE key = ? AND namespace = ?
     `).run(
-      entry.value,
-      entry.accessCount,
-      entry.lastAccessedAt,
-      entry.key,
+      entry._value,
+      entry._accessCount,
+      entry._lastAccessedAt,
+      entry._key,
       entry.namespace
     );
   }
-
   async clearMemory(swarmId: string): Promise<void> {
     // Clear memory related to a specific swarm
     this.db.prepare(`
@@ -439,14 +394,12 @@ export class DatabaseManager extends EventEmitter {
       WHERE metadata LIKE '%"swarmId":"${swarmId}"%'
     `).run();
   }
-
   async deleteOldEntries(namespace: string, ttl: number): Promise<void> {
     this.db.prepare(`
       DELETE FROM memory 
       WHERE namespace = ? AND created_at < datetime('now', '-' || ? || ' seconds')
-    `).run(namespace, ttl);
+    `).run(_namespace, ttl);
   }
-
   async trimNamespace(namespace: string, maxEntries: number): Promise<void> {
     this.db.prepare(`
       DELETE FROM memory 
@@ -456,16 +409,13 @@ export class DatabaseManager extends EventEmitter {
         ORDER BY last_accessed_at DESC 
         LIMIT ?
       )
-    `).run(namespace, namespace, maxEntries);
+    `).run(_namespace, _namespace, maxEntries);
   }
-
   // Communication operations
-
-  async createCommunication(data: any): Promise<void> {
+  async createCommunication(data: unknown): Promise<void> {
     this.statements.get('createCommunication')!.run(data);
   }
-
-  async getPendingMessages(agentId: string): Promise<any[]> {
+  async getPendingMessages(agentId: string): Promise<unknown[]> {
     return this.db.prepare(`
       SELECT * FROM communications 
       WHERE to_agent_id = ? AND delivered_at IS NULL
@@ -475,11 +425,10 @@ export class DatabaseManager extends EventEmitter {
           WHEN 'high' THEN 2 
           WHEN 'normal' THEN 3 
           WHEN 'low' THEN 4 
-        END,
+        _END,
         timestamp ASC
     `).all(agentId);
   }
-
   async markMessageDelivered(messageId: string): Promise<void> {
     this.db.prepare(`
       UPDATE communications 
@@ -487,7 +436,6 @@ export class DatabaseManager extends EventEmitter {
       WHERE id = ?
     `).run(messageId);
   }
-
   async markMessageRead(messageId: string): Promise<void> {
     this.db.prepare(`
       UPDATE communications 
@@ -495,47 +443,43 @@ export class DatabaseManager extends EventEmitter {
       WHERE id = ?
     `).run(messageId);
   }
-
-  async getRecentMessages(swarmId: string, timeWindow: number): Promise<any[]> {
+  async getRecentMessages(swarmId: string, timeWindow: number): Promise<unknown[]> {
     return this.db.prepare(`
       SELECT * FROM communications 
       WHERE swarm_id = ? AND timestamp > datetime('now', '-' || ? || ' milliseconds')
-    `).all(swarmId, timeWindow);
+    `).all(_swarmId, timeWindow);
   }
-
   // Consensus operations
-
-  async createConsensusProposal(proposal: any): Promise<void> {
+  async createConsensusProposal(proposal: unknown): Promise<void> {
     this.db.prepare(`
       INSERT INTO consensus (
-        id, swarm_id, task_id, proposal, required_threshold, 
-        status, deadline_at
+        _id, _swarm_id, _task_id, _proposal, _required_threshold, 
+        _status, deadline_at
       ) VALUES (
-        @id, @swarmId, @taskId, @proposal, @requiredThreshold,
+        @_id, @_swarmId, @_taskId, @_proposal, @_requiredThreshold,
         'pending', @deadline
       )
     `).run({
-      id: proposal.id,
-      swarmId: proposal.swarmId,
-      taskId: proposal.taskId || null,
+      id: proposal._id,
+      swarmId: proposal._swarmId,
+      taskId: proposal.taskId || _null,
       proposal: JSON.stringify(proposal.proposal),
       requiredThreshold: proposal.requiredThreshold,
       deadline: proposal.deadline
     });
   }
-
   async submitConsensusVote(proposalId: string, agentId: string, vote: boolean, reason?: string): Promise<void> {
-    const proposal = this.db.prepare('SELECT * FROM consensus WHERE id = ?').get(proposalId);
+    const _proposal = this.db.prepare('SELECT * FROM consensus WHERE id = ?').get(proposalId);
     if (!proposal) return;
     
-    const votes = JSON.parse(proposal.votes || '{}');
+    const _votes = JSON.parse(proposal.votes || '{ /* empty */ }');
     votes[agentId] = { vote, reason: reason || '', timestamp: new Date() };
     
-    const totalVoters = Object.keys(votes).length;
-    const positiveVotes = Object.values(votes).filter((v: any) => v.vote).length;
-    const currentRatio = positiveVotes / totalVoters;
+    const _totalVoters = Object.keys(votes).length;
+    const _positiveVotes = Object.values(votes).filter((v: unknown) => v.vote).length;
+    const _currentRatio = positiveVotes / totalVoters;
     
-    const status = currentRatio >= proposal.required_threshold ? 'achieved' : 'pending';
+    const _status = currentRatio >= proposal.required_threshold ? 'achieved' : 'pending';
     
     this.db.prepare(`
       UPDATE consensus 
@@ -549,18 +493,15 @@ export class DatabaseManager extends EventEmitter {
       proposalId
     );
   }
-
   // Performance operations
-
-  async storePerformanceMetric(data: any): Promise<void> {
+  async storePerformanceMetric(data: unknown): Promise<void> {
     this.statements.get('storeMetric')!.run({
-      ...data,
+      ..._data,
       metadata: data.metadata ? JSON.stringify(data.metadata) : null
     });
   }
-
-  async getSwarmStats(swarmId: string): Promise<any> {
-    const agentStats = this.db.prepare(`
+  async getSwarmStats(swarmId: string): Promise<unknown> {
+    const _agentStats = this.db.prepare(`
       SELECT 
         COUNT(*) as agentCount,
         SUM(CASE WHEN status = 'busy' THEN 1 ELSE 0 END) as busyAgents
@@ -568,7 +509,7 @@ export class DatabaseManager extends EventEmitter {
       WHERE swarm_id = ?
     `).get(swarmId);
     
-    const taskStats = this.db.prepare(`
+    const _taskStats = this.db.prepare(`
       SELECT 
         COUNT(*) as taskBacklog
       FROM tasks 
@@ -583,11 +524,10 @@ export class DatabaseManager extends EventEmitter {
         : 0
     };
   }
-
-  async getStrategyPerformance(swarmId: string): Promise<any> {
-    const results = this.db.prepare(`
+  async getStrategyPerformance(swarmId: string): Promise<unknown> {
+    const _results = this.db.prepare(`
       SELECT 
-        strategy,
+        _strategy,
         COUNT(*) as totalTasks,
         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as successful,
         AVG(JULIANDAY(completed_at) - JULIANDAY(created_at)) * 24 * 60 * 60 * 1000 as avgCompletionTime
@@ -596,7 +536,7 @@ export class DatabaseManager extends EventEmitter {
       GROUP BY strategy
     `).all(swarmId);
     
-    const performance: any = {};
+    const _performance: unknown = { /* empty */ };
     for (const result of results) {
       performance[result.strategy] = {
         successRate: result.successful / result.totalTasks,
@@ -607,8 +547,7 @@ export class DatabaseManager extends EventEmitter {
     
     return performance;
   }
-
-  async getSuccessfulDecisions(swarmId: string): Promise<any[]> {
+  async getSuccessfulDecisions(swarmId: string): Promise<unknown[]> {
     return this.db.prepare(`
       SELECT * FROM memory 
       WHERE namespace = 'queen-decisions' 
@@ -618,36 +557,33 @@ export class DatabaseManager extends EventEmitter {
       LIMIT 100
     `).all();
   }
-
   // Utility operations
-
   async deleteMemoryEntry(key: string, namespace: string): Promise<void> {
-    const startTime = performance.now();
+    const _startTime = performance.now();
     
     try {
-      this.db.prepare('DELETE FROM memory WHERE key = ? AND namespace = ?').run(key, namespace);
+      this.db.prepare('DELETE FROM memory WHERE key = ? AND namespace = ?').run(_key, namespace);
       
-      const duration = performance.now() - startTime;
+      const _duration = performance.now() - startTime;
       this.recordPerformance('delete_memory', duration);
       
-    } catch (error) {
+    } catch (_error) {
       this.recordPerformance('delete_memory_error', performance.now() - startTime);
       throw error;
     }
   }
-
   /**
    * Get database analytics
    */
-  getDatabaseAnalytics(): any {
+  getDatabaseAnalytics(): unknown {
     try {
-      const stats = this.db.prepare('PRAGMA table_info(swarms)').all();
+      const _stats = this.db.prepare('PRAGMA table_info(swarms)').all();
       return {
         fragmentation: 0, // Placeholder - could implement actual fragmentation detection
         tableCount: stats.length,
         schemaVersion: '1.0.0'
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         fragmentation: 0,
         tableCount: 0,
@@ -655,7 +591,6 @@ export class DatabaseManager extends EventEmitter {
       };
     }
   }
-
   /**
    * Record performance metric
    */
@@ -663,7 +598,6 @@ export class DatabaseManager extends EventEmitter {
     // Simple performance tracking - could be expanded
     console.debug(`DB Operation ${operation}: ${duration.toFixed(2)}ms`);
   }
-
   /**
    * Close database connection
    */

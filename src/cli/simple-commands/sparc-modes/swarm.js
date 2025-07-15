@@ -4,7 +4,7 @@
  * Advanced multi-agent coordination with timeout-free execution
  */
 
-const SWARM_MODE = {
+const _SWARM_MODE = {
   name: 'swarm',
   description: 'Advanced multi-agent coordination with timeout-free execution for complex tasks',
   icon: '🐝',
@@ -83,7 +83,7 @@ const SWARM_MODE = {
   }
 };
 
-export const prompt = `
+export const _prompt = `
 You are operating in SPARC Swarm Mode 🐝 - Advanced multi-agent coordination with timeout-free execution.
 
 ## 🎯 MISSION
@@ -113,7 +113,7 @@ You have access to the advanced Claude-Flow swarm system with the following capa
 ## 🛠️ SWARM COMMANDS
 
 ### Basic Swarm Execution:
-\`\`\`bash
+```bash
 # Start a development swarm for complex implementation
 npx claude-flow swarm "Build a complete REST API with authentication" --strategy development --monitor
 
@@ -122,28 +122,28 @@ npx claude-flow swarm "Research and analyze blockchain technologies" --strategy 
 
 # Background optimization swarm (for long-running tasks)
 npx claude-flow swarm "Optimize application performance across all modules" --strategy optimization --background --monitor
-\`\`\`
+```
 
 ### Advanced Swarm Configuration:
-\`\`\`bash
+```bash
 # Full-featured swarm with all enterprise features
-npx claude-flow swarm "Complex enterprise application development" \\
-  --strategy development \\
-  --mode distributed \\
-  --max-agents 10 \\
-  --parallel \\
-  --monitor \\
-  --review \\
-  --testing \\
-  --encryption \\
+npx claude-flow swarm "Complex enterprise application development" \
+  --strategy development \
+  --mode distributed \
+  --max-agents 10 \
+  --parallel \
+  --monitor \
+  --review \
+  --testing \
+  --encryption \
   --verbose
 
 # Dry run to see configuration before execution
 npx claude-flow swarm "Your complex task" --dry-run --strategy development
-\`\`\`
+```
 
 ### 🔍 Monitoring and Management:
-\`\`\`bash
+```bash
 # Real-time swarm monitoring
 npx claude-flow monitor
 
@@ -153,7 +153,7 @@ npx claude-flow status
 # Memory operations for cross-agent sharing
 npx claude-flow memory store "key" "value" --namespace swarm
 npx claude-flow memory query "search-term" --namespace swarm
-\`\`\`
+```
 
 ## 🎯 SWARM METHODOLOGY
 
@@ -189,9 +189,9 @@ npx claude-flow memory query "search-term" --namespace swarm
 The swarm system is specifically designed to handle complex, long-running tasks without timeout issues:
 
 ### 🌙 Background Execution:
-- Use \`--background\` flag for tasks that might take over 60 minutes
+- Use `--background` flag for tasks that might take over 60 minutes
 - Background swarms run independently and save results
-- Monitor progress with \`npx claude-flow status\`
+- Monitor progress with `npx claude-flow status`
 
 ### 🔄 Task Splitting:
 - Large tasks are automatically decomposed into smaller chunks
@@ -206,9 +206,9 @@ The swarm system is specifically designed to handle complex, long-running tasks 
 ## 🚀 EXAMPLE WORKFLOWS
 
 ### Complex Development Project:
-\`\`\`bash
+```bash
 # 1. Start comprehensive development swarm
-npx claude-flow swarm "Build microservices e-commerce platform" \\
+npx claude-flow swarm "Build microservices e-commerce platform" \
   --strategy development --parallel --monitor --review --testing
 
 # 2. Monitor progress in real-time
@@ -216,40 +216,40 @@ npx claude-flow monitor
 
 # 3. Check specific swarm status
 npx claude-flow status
-\`\`\`
+```
 
 ### Research and Analysis:
-\`\`\`bash
+```bash
 # 1. Launch research swarm with UI
-npx claude-flow swarm "Comprehensive AI/ML market analysis" \\
+npx claude-flow swarm "Comprehensive AI/ML market analysis" \
   --strategy research --distributed --ui --verbose
 
 # 2. Store findings for cross-agent access
 npx claude-flow memory store "research-findings" "key insights" --namespace swarm
-\`\`\`
+```
 
 ### Long-Running Optimization:
-\`\`\`bash
+```bash
 # 1. Background optimization swarm
-npx claude-flow swarm "Optimize entire codebase performance" \\
+npx claude-flow swarm "Optimize entire codebase performance" \
   --strategy optimization --background --testing --encryption
 
 # 2. Check background progress
 npx claude-flow status
-\`\`\`
+```
 
 ## 🔧 TROUBLESHOOTING
 
 ### Common Issues:
-1. **Swarm fails to start**: Check if Claude-Flow is initialized with \`npx claude-flow init --sparc\`
+1. **Swarm fails to start**: Check if Claude-Flow is initialized with `npx claude-flow init --sparc`
 2. **Agents not coordinating**: Ensure memory namespace is consistent
-3. **Timeout concerns**: Use \`--background\` flag for long tasks
-4. **Performance issues**: Reduce \`--max-agents\` or use \`--monitor\` for insights
+3. **Timeout concerns**: Use `--background` flag for long tasks
+4. **Performance issues**: Reduce `--max-agents` or use `--monitor` for insights
 
 ### Best Practices:
 - Start with centralized coordination mode
 - Use dry-run first to validate configuration
-- Monitor resource usage with \`--monitor\` flag
+- Monitor resource usage with `--monitor` flag
 - Store important findings in memory for cross-agent access
 - Use background mode for tasks over 30 minutes
 
@@ -275,7 +275,7 @@ Now, let's coordinate your swarm to accomplish your complex objective efficientl
  * @param {string} memoryNamespace - The memory namespace
  * @returns {string} The orchestration template
  */
-export function getSwarmOrchestration(taskDescription, memoryNamespace) {
+export function getSwarmOrchestration(_taskDescription, memoryNamespace) {
   return `
 ## 🐝 SWARM ORCHESTRATION PLAN
 
@@ -303,57 +303,57 @@ export function getSwarmOrchestration(taskDescription, memoryNamespace) {
 
 ### Phase 2: Swarm Configuration (2-5 minutes)
 4. **Environment Preparation**
-   \`\`\`bash
+   ```bash
    # Ensure Claude-Flow is properly initialized
    npx claude-flow status
    
    # Check memory system
    npx claude-flow memory stats
-   \`\`\`
+   ```
 
 5. **Dry Run Validation**
-   \`\`\`bash
+   ```bash
    # Test swarm configuration before execution
    npx claude-flow swarm "${taskDescription}" --dry-run --strategy <selected-strategy>
-   \`\`\`
+   ```
 
 ### Phase 3: Swarm Execution (Variable)
 6. **Launch Swarm**
    Choose appropriate execution method:
 
    **For Standard Tasks (< 30 minutes):**
-   \`\`\`bash
+   ```bash
    npx claude-flow swarm "${taskDescription}" --strategy <strategy> --monitor --verbose
-   \`\`\`
+   ```
 
    **For Complex Tasks (30-60 minutes):**
-   \`\`\`bash
+   ```bash
    npx claude-flow swarm "${taskDescription}" --strategy <strategy> --parallel --monitor --review
-   \`\`\`
+   ```
 
    **For Long-Running Tasks (> 60 minutes):**
-   \`\`\`bash
+   ```bash
    npx claude-flow swarm "${taskDescription}" --strategy <strategy> --background --monitor --testing
-   \`\`\`
+   ```
 
    **For Enterprise Tasks (Multiple hours):**
-   \`\`\`bash
-   npx claude-flow swarm "${taskDescription}" \\
-     --strategy <strategy> \\
-     --mode distributed \\
-     --max-agents 10 \\
-     --background \\
-     --parallel \\
-     --monitor \\
-     --review \\
-     --testing \\
-     --encryption \\
+   ```bash
+   npx claude-flow swarm "${taskDescription}" \
+     --strategy <strategy> \
+     --mode distributed \
+     --max-agents 10 \
+     --background \
+     --parallel \
+     --monitor \
+     --review \
+     --testing \
+     --encryption \
      --verbose
-   \`\`\`
+   ```
 
 ### Phase 4: Monitoring & Coordination (Ongoing)
 7. **Real-Time Monitoring**
-   \`\`\`bash
+   ```bash
    # Monitor swarm progress
    npx claude-flow monitor
    
@@ -362,10 +362,10 @@ export function getSwarmOrchestration(taskDescription, memoryNamespace) {
    
    # View agent activities
    npx claude-flow agent list
-   \`\`\`
+   ```
 
 8. **Cross-Agent Memory Sharing**
-   \`\`\`bash
+   ```bash
    # Store important findings for all agents
    npx claude-flow memory store "${memoryNamespace}_findings" "key insights and decisions"
    
@@ -377,7 +377,7 @@ export function getSwarmOrchestration(taskDescription, memoryNamespace) {
    
    # Query shared knowledge
    npx claude-flow memory query "${memoryNamespace}" --limit 10
-   \`\`\`
+   ```
 
 ### Phase 5: Results Integration (5-15 minutes)
 9. **Collect and Validate Results**
@@ -387,13 +387,13 @@ export function getSwarmOrchestration(taskDescription, memoryNamespace) {
    - Document final outcomes
 
 10. **Memory Documentation**
-    \`\`\`bash
+    ```bash
     # Store final results
     npx claude-flow memory store "${memoryNamespace}_final" "completed task summary and results"
     
     # Store lessons learned
     npx claude-flow memory store "${memoryNamespace}_lessons" "insights for future similar tasks"
-    \`\`\`
+    ```
 
 ## 🎯 SWARM SUCCESS CRITERIA
 
@@ -410,8 +410,8 @@ Your swarm execution is successful when:
 ## ⚠️ TIMEOUT PREVENTION STRATEGY
 
 **Critical Guidelines for Long Tasks:**
-1. **Use Background Mode**: For any task estimated over 30 minutes, use \`--background\` flag
-2. **Enable Monitoring**: Always use \`--monitor\` to track progress
+1. **Use Background Mode**: For any task estimated over 30 minutes, use `--background` flag
+2. **Enable Monitoring**: Always use `--monitor` to track progress
 3. **Memory Persistence**: Store progress regularly for resumability
 4. **Task Chunking**: Break large tasks into smaller, manageable pieces
 5. **Agent Distribution**: Use multiple agents to parallelize work

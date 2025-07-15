@@ -3,9 +3,9 @@
  * Provides clear, actionable command documentation
  */
 
-export const VERSION = '2.0.0-alpha.53';
+export const _VERSION = '2.0.0-alpha.53';
 
-export const MAIN_HELP = `
+export const _MAIN_HELP = `
 🌊 Claude-Flow v${VERSION} - Enterprise-Grade AI Agent Orchestration Platform
 
 🎯 ENTERPRISE FEATURES: Complete ruv-swarm integration with 87 MCP tools, neural networking, and production-ready infrastructure
@@ -38,7 +38,7 @@ USAGE:
   init                     Initialize Claude Flow v2.0.0 (creates CLAUDE.md & .claude/commands)
   start [--ui] [--swarm]   Start orchestration system
   swarm <objective>        Multi-agent swarm coordination
-  agent <action>           Agent management (spawn, list, terminate)
+  agent <action>           Agent management (_spawn, _list, terminate)
   sparc <mode>             SPARC development modes (17 available)
   memory <action>          Persistent memory operations
   github <mode>            GitHub workflow automation (6 modes)
@@ -76,7 +76,7 @@ USAGE:
 🐝 ruv-swarm: https://github.com/ruvnet/ruv-FANN/tree/main/ruv-swarm
 `;
 
-export const COMMAND_HELP = {
+export const _COMMAND_HELP = {
   swarm: `
 🧠 SWARM COMMAND - Multi-Agent AI Coordination
 
@@ -220,7 +220,7 @@ ACTIONS:
 
 OPTIONS:
   --namespace <ns>        Use specific namespace
-  --format <type>         Output format (json, table)
+  --format <type>         Output format (_json, table)
   --verbose               Detailed output
 
 EXAMPLES:
@@ -415,7 +415,7 @@ PATTERN LEARN OPTIONS:
   --outcome <result> Operation outcome (success/failure/partial)
 
 MODEL UPDATE OPTIONS:
-  --agent-type <type>      Agent type to update (coordinator, coder, researcher, etc.)
+  --agent-type <type>      Agent type to update (_coordinator, _coder, _researcher, etc.)
   --operation-result <res> Result from operation execution
 
 EXAMPLES:
@@ -603,7 +603,7 @@ POST-TASK OPTIONS:
 
 PRE-EDIT OPTIONS:
   --file <path>           Target file path
-  --operation <type>      Edit operation type (edit, create, delete)
+  --operation <type>      Edit operation type (_edit, _create, delete)
 
 POST-EDIT OPTIONS:
   --file <path>           Modified file path

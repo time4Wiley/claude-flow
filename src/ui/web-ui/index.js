@@ -29,7 +29,7 @@ export { EnhancedProcessUI, launchEnhancedUI } from './EnhancedProcessUI.js';
  * @param {Object} options Configuration options
  * @returns {Promise<EnhancedWebUI>} Initialized UI system
  */
-export async function initializeEnhancedUI(options = {}) {
+export async function initializeEnhancedUI(options = { /* empty */ }) {
   const {
     mode = 'auto', // 'full', 'enhanced', 'fallback', 'auto'
     existingUI = null,
@@ -40,30 +40,30 @@ export async function initializeEnhancedUI(options = {}) {
     if (mode === 'full' || (mode === 'auto' && typeof window !== 'undefined')) {
       // Browser environment - full UI manager
       const { UIManager } = await import('./core/UIManager.js');
-      const uiManager = new UIManager();
+      const _uiManager = new UIManager();
       await uiManager.initialize();
       return uiManager;
       
     } else if (mode === 'enhanced' || (mode === 'auto' && existingUI)) {
       // Enhanced process UI
       const { EnhancedWebUI } = await import('./EnhancedWebUI.js');
-      const enhancedUI = new EnhancedWebUI();
+      const _enhancedUI = new EnhancedWebUI();
       await enhancedUI.initialize(existingUI);
       return enhancedUI;
       
     } else {
       // Terminal/fallback mode
       const { EnhancedProcessUI } = await import('./EnhancedProcessUI.js');
-      const processUI = new EnhancedProcessUI();
+      const _processUI = new EnhancedProcessUI();
       return processUI;
     }
     
   } catch (error) {
-    console.warn('Enhanced UI initialization failed, using fallback:', error);
+    console.warn('Enhanced UI initialization _failed, using fallback:', error);
     
     // Always provide fallback
     const { EnhancedProcessUI } = await import('./EnhancedProcessUI.js');
-    const processUI = new EnhancedProcessUI();
+    const _processUI = new EnhancedProcessUI();
     return processUI;
   }
 }
@@ -79,7 +79,7 @@ export async function launchTerminalUI() {
 /**
  * Tool Categories and Counts
  */
-export const TOOL_CATEGORIES_INFO = {
+export const _TOOL_CATEGORIES_INFO = {
   neural: {
     name: 'Neural Network Tools',
     count: 15,
@@ -158,7 +158,7 @@ export const TOOL_CATEGORIES_INFO = {
  * Get total tool count
  */
 export function getTotalToolCount() {
-  return Object.values(TOOL_CATEGORIES_INFO).reduce((total, category) => {
+  return Object.values(TOOL_CATEGORIES_INFO).reduce((_total, category) => {
     return total + category.count;
   }, 0);
 }
@@ -207,7 +207,7 @@ if (typeof window !== 'undefined') {
     if (window.claudeFlowProcessUI && !window.claudeFlowEnhanced) {
       try {
         console.log('🎨 Auto-enhancing existing process UI...');
-        const enhancedUI = await initializeEnhancedUI({ 
+        const _enhancedUI = await initializeEnhancedUI({ 
           mode: 'enhanced',
           existingUI: window.claudeFlowProcessUI 
         });

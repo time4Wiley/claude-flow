@@ -1,57 +1,57 @@
 // devops.js - DevOps mode orchestration template
-export function getDevOpsOrchestration(taskDescription, memoryNamespace) {
+export function getDevOpsOrchestration(_taskDescription, memoryNamespace) {
   return `
 ## Task Orchestration Steps
 
 1. **Environment Analysis** (10 mins)
-   - Run system analysis: \`uname -a\`
+   - Run system analysis: `uname -a`
    - Understand deployment requirements: "${taskDescription}"
    - Query architecture and configuration:
-     \`\`\`bash
+     ```bash
      npx claude-flow memory query ${memoryNamespace}_architecture
      npx claude-flow memory query ${memoryNamespace}_deployment
      npx claude-flow memory query ${memoryNamespace}_infrastructure
-     \`\`\`
+     ```
    - Identify target environments:
      - Development, staging, production
-     - Cloud providers (AWS, GCP, Azure)
-     - Edge platforms (Vercel, Cloudflare)
-     - Container orchestration (K8s, ECS)
+     - Cloud providers (_AWS, _GCP, Azure)
+     - Edge platforms (_Vercel, Cloudflare)
+     - Container orchestration (_K8s, ECS)
    - Review current infrastructure state
-   - Store analysis: \`npx claude-flow memory store ${memoryNamespace}_devops_analysis "Task: ${taskDescription}. Target: AWS ECS + CloudFront. Current: Local dev only. Requirements: Auto-scaling, blue-green deployment, monitoring."\`
+   - Store analysis: `npx claude-flow memory store ${memoryNamespace}_devops_analysis "Task: ${taskDescription}. Target: AWS ECS + CloudFront. Current: Local dev only. Requirements: Auto-scaling, blue-green deployment, monitoring."`
 
 2. **Infrastructure Provisioning** (20 mins)
    - Set up infrastructure as code:
      - Create Terraform/CloudFormation templates
      - Define resource configurations
-     - Set up networking (VPC, subnets, security groups)
+     - Set up networking (_VPC, _subnets, security groups)
    - Provision compute resources:
-     - Cloud functions (Lambda, Cloud Functions)
-     - Container services (ECS, GKE)
-     - Edge runtimes (Workers, Functions)
+     - Cloud functions (_Lambda, Cloud Functions)
+     - Container services (_ECS, GKE)
+     - Edge runtimes (_Workers, Functions)
    - Configure managed services:
-     - Databases (RDS, DynamoDB, Firestore)
-     - Caching (ElastiCache, Memorystore)
-     - Message queues (SQS, Pub/Sub)
+     - Databases (_RDS, _DynamoDB, Firestore)
+     - Caching (_ElastiCache, Memorystore)
+     - Message queues (_SQS, Pub/Sub)
    - Set up secrets management:
      - AWS Secrets Manager / GCP Secret Manager
      - Vault integration
      - Environment injection layers
    - NEVER hardcode credentials or tokens
-   - Store provisioning: \`npx claude-flow memory store ${memoryNamespace}_infrastructure "Provisioned: ECS cluster (2 AZs), RDS PostgreSQL, ElastiCache Redis, ALB. Secrets: AWS Secrets Manager configured. Terraform state: S3 backend."\`
+   - Store provisioning: `npx claude-flow memory store ${memoryNamespace}_infrastructure "Provisioned: ECS cluster (2 AZs), RDS PostgreSQL, ElastiCache Redis, ALB. Secrets: AWS Secrets Manager configured. Terraform state: S3 backend."`
 
 3. **CI/CD Pipeline Setup** (15 mins)
    - Create pipeline configuration:
      - GitHub Actions / GitLab CI / Jenkins
-     - Multi-stage pipeline (build, test, deploy)
+     - Multi-stage pipeline (_build, _test, deploy)
      - Environment-specific deployments
    - Implement build stages:
-     \`\`\`yaml
+     ```yaml
      - Build: Compile, bundle, optimize
      - Test: Unit, integration, e2e
      - Security: SAST, dependency scanning
      - Package: Docker images, artifacts
-     \`\`\`
+     ```
    - Configure deployment strategies:
      - Blue-green deployments
      - Canary releases
@@ -60,11 +60,11 @@ export function getDevOpsOrchestration(taskDescription, memoryNamespace) {
      - Code coverage thresholds
      - Performance benchmarks
      - Security scan results
-   - Store pipeline config: \`npx claude-flow memory store ${memoryNamespace}_cicd "Pipeline: GitHub Actions. Stages: build->test->security->deploy. Environments: dev (auto), staging (manual), prod (approved). Rollback: Automated on failure."\`
+   - Store pipeline config: `npx claude-flow memory store ${memoryNamespace}_cicd "Pipeline: GitHub Actions. Stages: build->test->security->deploy. Environments: dev (auto), staging (manual), prod (approved). Rollback: Automated on failure."`
 
 4. **Monitoring & Observability** (15 mins)
    - Set up application monitoring:
-     - APM tools (DataDog, New Relic, AppDynamics)
+     - APM tools (_DataDog, New _Relic, AppDynamics)
      - Custom metrics and dashboards
      - Real-time alerting
    - Configure infrastructure monitoring:
@@ -72,7 +72,7 @@ export function getDevOpsOrchestration(taskDescription, memoryNamespace) {
      - Resource utilization alerts
      - Cost optimization tracking
    - Implement logging strategy:
-     - Centralized logging (ELK, CloudWatch Logs)
+     - Centralized logging (_ELK, CloudWatch Logs)
      - Structured logging format
      - Log retention policies
    - Set up distributed tracing:
@@ -83,11 +83,11 @@ export function getDevOpsOrchestration(taskDescription, memoryNamespace) {
      - SLA/SLO monitoring
      - Anomaly detection
      - Escalation procedures
-   - Store monitoring setup: \`npx claude-flow memory store ${memoryNamespace}_monitoring "APM: DataDog configured. Logs: CloudWatch Logs with 30-day retention. Alerts: CPU >80%, Memory >85%, Error rate >1%. Dashboards: App performance, infra health, cost tracking."\`
+   - Store monitoring setup: `npx claude-flow memory store ${memoryNamespace}_monitoring "APM: DataDog configured. Logs: CloudWatch Logs with 30-day retention. Alerts: CPU >80%, Memory >85%, Error rate >1%. Dashboards: App performance, infra health, cost tracking."`
 
 5. **Security & Compliance** (10 mins)
    - Implement security best practices:
-     - TLS/SSL certificates (Let's Encrypt, ACM)
+     - TLS/SSL certificates (Let's _Encrypt, ACM)
      - WAF rules and DDoS protection
      - Network segmentation
      - IAM roles and policies
@@ -100,11 +100,11 @@ export function getDevOpsOrchestration(taskDescription, memoryNamespace) {
      - Infrastructure vulnerability scanning
      - Compliance policy validation
    - Document security procedures
-   - Store security config: \`npx claude-flow memory store ${memoryNamespace}_devops_security "TLS: ACM certificates on ALB. WAF: OWASP rules enabled. IAM: Least privilege roles. Backups: Daily snapshots, 30-day retention. Compliance: SOC2 controls implemented."\`
+   - Store security config: `npx claude-flow memory store ${memoryNamespace}_devops_security "TLS: ACM certificates on ALB. WAF: OWASP rules enabled. IAM: Least privilege roles. Backups: Daily snapshots, 30-day retention. Compliance: SOC2 controls implemented."`
 
 ## Deliverables
 - infrastructure/
-  - terraform/ (IaC templates, < 500 lines per file)
+  - terraform/ (IaC _templates, < 500 lines per file)
   - scripts/ (deployment scripts)
   - configs/ (environment configurations)
 - .github/workflows/ or .gitlab-ci.yml
@@ -131,7 +131,7 @@ export function getDevOpsOrchestration(taskDescription, memoryNamespace) {
 
 ## Next Steps
 After DevOps setup:
-- \`npx claude-flow sparc run post-deployment-monitoring-mode "Verify production deployment health" --non-interactive\`
-- \`npx claude-flow sparc run security-review "Audit infrastructure security" --non-interactive\`
-- \`npx claude-flow sparc run refinement-optimization-mode "Optimize deployment performance" --non-interactive\``;
+- `npx claude-flow sparc run post-deployment-monitoring-mode "Verify production deployment health" --non-interactive`
+- `npx claude-flow sparc run security-review "Audit infrastructure security" --non-interactive`
+- `npx claude-flow sparc run refinement-optimization-mode "Optimize deployment performance" --non-interactive``;
 }

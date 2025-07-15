@@ -1,30 +1,31 @@
+/* global Deno */
 // optimized-slash-commands.js - Create batchtools-optimized Claude Code slash commands
 
 import { createOptimizedSparcSlashCommand, createOptimizedMainSparcCommand } from './optimized-sparc-commands.js';
 import { createOptimizedClaudeFlowCommands } from './optimized-claude-flow-commands.js';
 
 // Create batchtools-optimized Claude Code slash commands for SPARC modes
-export async function createOptimizedClaudeSlashCommands(workingDir, selectedModes = null) {
+export async function createOptimizedClaudeSlashCommands(_workingDir, selectedModes = null) {
   try {
     console.log('\n🚀 Creating batchtools-optimized Claude Code slash commands...');
     
     // Parse .roomodes to get all SPARC modes
-    const roomodesContent = await Deno.readTextFile(`${workingDir}/.roomodes`);
-    const roomodes = JSON.parse(roomodesContent);
+    const _roomodesContent = await Deno.readTextFile(`${workingDir}/.roomodes`);
+    const _roomodes = JSON.parse(roomodesContent);
     
     // Filter modes if selective initialization is requested
-    const modesToCreate = selectedModes 
+    const _modesToCreate = selectedModes 
       ? roomodes.customModes.filter(mode => selectedModes.includes(mode.slug))
       : roomodes.customModes;
     
     console.log(`  📝 Creating optimized commands for ${modesToCreate.length} modes...`);
     
     // Create slash commands for each SPARC mode with batchtools optimization
-    const commandPromises = modesToCreate.map(async (mode) => {
-      const commandPath = `${workingDir}/.claude/commands/sparc/${mode.slug}.md`;
-      const commandContent = createOptimizedSparcSlashCommand(mode);
+    const _commandPromises = modesToCreate.map(async (mode) => {
+      const _commandPath = `${workingDir}/.claude/commands/sparc/${mode.slug}.md`;
+      const _commandContent = createOptimizedSparcSlashCommand(mode);
       
-      await Deno.writeTextFile(commandPath, commandContent);
+      await Deno.writeTextFile(_commandPath, commandContent);
       console.log(`  ✓ Created optimized slash command: /sparc-${mode.slug} (Batchtools enhanced)`);
     });
     
@@ -32,7 +33,7 @@ export async function createOptimizedClaudeSlashCommands(workingDir, selectedMod
     await Promise.all(commandPromises);
     
     // Create main SPARC command with batchtools optimization
-    const mainSparcCommand = createOptimizedMainSparcCommand(roomodes.customModes);
+    const _mainSparcCommand = createOptimizedMainSparcCommand(roomodes.customModes);
     await Deno.writeTextFile(`${workingDir}/.claude/commands/sparc.md`, mainSparcCommand);
     console.log('  ✅ Created optimized main slash command: /sparc (Batchtools enhanced)');
     
@@ -53,7 +54,7 @@ export async function createOptimizedClaudeSlashCommands(workingDir, selectedMod
 // Create batchtools-specific commands
 async function createBatchtoolsCommands(workingDir) {
   // Batchtools help command
-  const batchtoolsCommand = `---
+  const _batchtoolsCommand = `---
 name: batchtools
 description: Execute operations with parallel processing and batch optimization
 ---
@@ -81,18 +82,18 @@ Group related operations for optimal performance:
 ## Usage Patterns
 
 ### Parallel File Operations
-\`\`\`javascript
+```javascript
 // Read multiple files simultaneously
-const files = await batchtools.parallel([
+const _files = await batchtools.parallel([
   read('/src/controller.ts'),
   read('/src/service.ts'),
   read('/src/model.ts'),
   read('/tests/unit.test.ts')
 ]);
-\`\`\`
+```
 
 ### Batch Code Generation
-\`\`\`javascript
+```javascript
 // Create multiple files in parallel
 await batchtools.createFiles([
   { path: '/src/auth.controller.ts', content: generateController() },
@@ -100,18 +101,18 @@ await batchtools.createFiles([
   { path: '/src/auth.middleware.ts', content: generateMiddleware() },
   { path: '/tests/auth.test.ts', content: generateTests() }
 ]);
-\`\`\`
+```
 
 ### Concurrent Analysis
-\`\`\`javascript
+```javascript
 // Analyze multiple aspects simultaneously
-const analysis = await batchtools.concurrent([
+const _analysis = await batchtools.concurrent([
   analyzeArchitecture(),
   validateSecurity(),
   checkPerformance(),
   reviewCodeQuality()
 ]);
-\`\`\`
+```
 
 ## Performance Benefits
 
@@ -195,7 +196,7 @@ Chain operations with parallel execution at each stage:
 ## Examples
 
 ### Full SPARC Pipeline with Batchtools
-\`\`\`bash
+```bash
 # Execute complete SPARC workflow with parallel processing
 ./claude-flow sparc pipeline "authentication system" --batch-optimize
 
@@ -204,10 +205,10 @@ Chain operations with parallel execution at each stage:
 
 # Concurrent project analysis
 ./claude-flow sparc concurrent-analyze project-requirements.json --parallel
-\`\`\`
+```
 
 ### Performance Monitoring
-\`\`\`bash
+```bash
 # Monitor batch operation performance
 ./claude-flow batchtools monitor --real-time
 
@@ -216,7 +217,7 @@ Chain operations with parallel execution at each stage:
 
 # Check system resource utilization
 ./claude-flow batchtools resources --concurrent --verbose
-\`\`\`
+```
 
 For detailed documentation, see: https://github.com/ruvnet/claude-code-flow/docs/batchtools.md
 `;
@@ -225,7 +226,7 @@ For detailed documentation, see: https://github.com/ruvnet/claude-code-flow/docs
   console.log('  ✓ Created slash command: /batchtools');
   
   // Performance monitoring command
-  const performanceCommand = `---
+  const _performanceCommand = `---
 name: performance
 description: Monitor and optimize system performance with batchtools
 ---
@@ -251,7 +252,7 @@ Real-time performance monitoring and optimization tools for Claude-Flow operatio
 ## Monitoring Commands
 
 ### Real-time Monitoring
-\`\`\`bash
+```bash
 # Monitor all system performance
 ./claude-flow performance monitor --real-time --all
 
@@ -260,10 +261,10 @@ Real-time performance monitoring and optimization tools for Claude-Flow operatio
 
 # Monitor specific components
 ./claude-flow performance monitor --focus sparc --concurrent
-\`\`\`
+```
 
 ### Performance Analysis
-\`\`\`bash
+```bash
 # Generate performance report
 ./claude-flow performance report --detailed --timeframe 24h
 
@@ -272,7 +273,7 @@ Real-time performance monitoring and optimization tools for Claude-Flow operatio
 
 # Compare performance across different modes
 ./claude-flow performance compare --modes architect,code,tdd
-\`\`\`
+```
 
 ## Optimization Recommendations
 
@@ -291,7 +292,7 @@ Real-time performance monitoring and optimization tools for Claude-Flow operatio
 ## Performance Tuning
 
 ### Configuration Optimization
-\`\`\`json
+```json
 {
   "performance": {
     "batchtools": {
@@ -307,7 +308,7 @@ Real-time performance monitoring and optimization tools for Claude-Flow operatio
     }
   }
 }
-\`\`\`
+```
 
 ### Best Practices
 - Monitor performance during development and production

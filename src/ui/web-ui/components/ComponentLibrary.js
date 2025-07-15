@@ -46,7 +46,7 @@ export class ComponentLibrary {
    * Get component by name
    */
   getComponent(name) {
-    const component = this.components.get(name);
+    const _component = this.components.get(name);
     if (!component) {
       throw new Error(`Component not found: ${name}`);
     }
@@ -57,24 +57,24 @@ export class ComponentLibrary {
    * Create tool panel component
    */
   createToolPanel(config) {
-    const panel = document.createElement('div');
+    const _panel = document.createElement('div');
     panel.className = 'claude-tool-panel';
     
-    const header = document.createElement('div');
+    const _header = document.createElement('div');
     header.className = 'claude-tool-panel-header';
     
-    const title = document.createElement('h3');
+    const _title = document.createElement('h3');
     title.textContent = config.title;
     title.className = 'claude-tool-panel-title';
     
-    const subtitle = document.createElement('p');
+    const _subtitle = document.createElement('p');
     subtitle.textContent = config.description;
     subtitle.className = 'claude-tool-panel-subtitle';
     
     header.appendChild(title);
     header.appendChild(subtitle);
     
-    const content = document.createElement('div');
+    const _content = document.createElement('div');
     content.className = 'claude-tool-panel-content';
     
     panel.appendChild(header);
@@ -94,19 +94,19 @@ export class ComponentLibrary {
    * Create metrics chart component
    */
   createMetricsChart(config) {
-    const container = document.createElement('div');
+    const _container = document.createElement('div');
     container.className = 'claude-metrics-chart';
     
-    const title = document.createElement('h4');
+    const _title = document.createElement('h4');
     title.textContent = config.title;
     title.className = 'claude-chart-title';
     
-    const canvas = document.createElement('canvas');
+    const _canvas = document.createElement('canvas');
     canvas.width = config.width || 400;
     canvas.height = config.height || 200;
     canvas.className = 'claude-chart-canvas';
     
-    const legend = document.createElement('div');
+    const _legend = document.createElement('div');
     legend.className = 'claude-chart-legend';
     
     container.appendChild(title);
@@ -116,9 +116,9 @@ export class ComponentLibrary {
     return {
       element: container,
       canvas,
-      updateData: (data) => this.updateChart(canvas, data, config),
+      updateData: (data) => this.updateChart(_canvas, _data, config),
       setTitle: (newTitle) => { title.textContent = newTitle; },
-      addLegendItem: (label, color) => this.addLegendItem(legend, label, color)
+      addLegendItem: (_label, color) => this.addLegendItem(_legend, _label, color)
     };
   }
 
@@ -126,19 +126,19 @@ export class ComponentLibrary {
    * Create command palette component
    */
   createCommandPalette(config) {
-    const overlay = document.createElement('div');
+    const _overlay = document.createElement('div');
     overlay.className = 'claude-command-palette-overlay';
     overlay.style.display = 'none';
     
-    const palette = document.createElement('div');
+    const _palette = document.createElement('div');
     palette.className = 'claude-command-palette';
     
-    const input = document.createElement('input');
+    const _input = document.createElement('input');
     input.type = 'text';
     input.placeholder = 'Type a command...';
     input.className = 'claude-command-input';
     
-    const results = document.createElement('div');
+    const _results = document.createElement('div');
     results.className = 'claude-command-results';
     
     palette.appendChild(input);
@@ -151,7 +151,7 @@ export class ComponentLibrary {
       results,
       show: () => { overlay.style.display = 'flex'; input.focus(); },
       hide: () => { overlay.style.display = 'none'; },
-      updateResults: (commands) => this.updateCommandResults(results, commands),
+      updateResults: (commands) => this.updateCommandResults(_results, commands),
       onCommand: null // Set by user
     };
   }
@@ -160,21 +160,21 @@ export class ComponentLibrary {
    * Create progress bar component
    */
   createProgressBar(config) {
-    const container = document.createElement('div');
+    const _container = document.createElement('div');
     container.className = 'claude-progress-container';
     
-    const label = document.createElement('div');
+    const _label = document.createElement('div');
     label.className = 'claude-progress-label';
     label.textContent = config.label || 'Progress';
     
-    const bar = document.createElement('div');
+    const _bar = document.createElement('div');
     bar.className = 'claude-progress-bar';
     
-    const fill = document.createElement('div');
+    const _fill = document.createElement('div');
     fill.className = 'claude-progress-fill';
     fill.style.width = '0%';
     
-    const text = document.createElement('div');
+    const _text = document.createElement('div');
     text.className = 'claude-progress-text';
     text.textContent = '0%';
     
@@ -196,8 +196,8 @@ export class ComponentLibrary {
   /**
    * Create status badge component
    */
-  createStatusBadge(status, text) {
-    const badge = document.createElement('span');
+  createStatusBadge(_status, text) {
+    const _badge = document.createElement('span');
     badge.className = `claude-status-badge claude-status-${status}`;
     badge.textContent = text || status;
     
@@ -213,14 +213,14 @@ export class ComponentLibrary {
   /**
    * Create loading spinner component
    */
-  createLoadingSpinner(config = {}) {
-    const container = document.createElement('div');
+  createLoadingSpinner(config = { /* empty */ }) {
+    const _container = document.createElement('div');
     container.className = 'claude-loading-container';
     
-    const spinner = document.createElement('div');
+    const _spinner = document.createElement('div');
     spinner.className = 'claude-loading-spinner';
     
-    const message = document.createElement('div');
+    const _message = document.createElement('div');
     message.className = 'claude-loading-message';
     message.textContent = config.message || 'Loading...';
     
@@ -238,15 +238,15 @@ export class ComponentLibrary {
   /**
    * Create error message component
    */
-  createErrorMessage(message, details = null) {
-    const container = document.createElement('div');
+  createErrorMessage(_message, details = null) {
+    const _container = document.createElement('div');
     container.className = 'claude-error-message';
     
-    const icon = document.createElement('span');
+    const _icon = document.createElement('span');
     icon.textContent = '❌';
     icon.className = 'claude-error-icon';
     
-    const text = document.createElement('div');
+    const _text = document.createElement('div');
     text.className = 'claude-error-text';
     text.textContent = message;
     
@@ -254,7 +254,7 @@ export class ComponentLibrary {
     container.appendChild(text);
     
     if (details) {
-      const detailsEl = document.createElement('div');
+      const _detailsEl = document.createElement('div');
       detailsEl.className = 'claude-error-details';
       detailsEl.textContent = details;
       container.appendChild(detailsEl);
@@ -266,7 +266,7 @@ export class ComponentLibrary {
       setDetails: (newDetails) => {
         if (newDetails) {
           if (!container.querySelector('.claude-error-details')) {
-            const detailsEl = document.createElement('div');
+            const _detailsEl = document.createElement('div');
             detailsEl.className = 'claude-error-details';
             container.appendChild(detailsEl);
           }
@@ -280,14 +280,14 @@ export class ComponentLibrary {
    * Create success message component
    */
   createSuccessMessage(message) {
-    const container = document.createElement('div');
+    const _container = document.createElement('div');
     container.className = 'claude-success-message';
     
-    const icon = document.createElement('span');
+    const _icon = document.createElement('span');
     icon.textContent = '✅';
     icon.className = 'claude-success-icon';
     
-    const text = document.createElement('div');
+    const _text = document.createElement('div');
     text.className = 'claude-success-text';
     text.textContent = message;
     
@@ -304,14 +304,14 @@ export class ComponentLibrary {
    * Create info panel component
    */
   createInfoPanel(config) {
-    const panel = document.createElement('div');
+    const _panel = document.createElement('div');
     panel.className = 'claude-info-panel';
     
-    const header = document.createElement('div');
+    const _header = document.createElement('div');
     header.className = 'claude-info-header';
     header.textContent = config.title;
     
-    const content = document.createElement('div');
+    const _content = document.createElement('div');
     content.className = 'claude-info-content';
     
     panel.appendChild(header);
@@ -331,15 +331,15 @@ export class ComponentLibrary {
    * Create action button component
    */
   createActionButton(config) {
-    const button = document.createElement('button');
+    const _button = document.createElement('button');
     button.className = `claude-action-button claude-button-${config.type || 'primary'}`;
     button.textContent = config.text;
     
     if (config.icon) {
-      const icon = document.createElement('span');
+      const _icon = document.createElement('span');
       icon.textContent = config.icon;
       icon.className = 'claude-button-icon';
-      button.insertBefore(icon, button.firstChild);
+      button.insertBefore(_icon, button.firstChild);
     }
     
     if (config.onclick) {
@@ -351,10 +351,10 @@ export class ComponentLibrary {
       setText: (text) => { 
         button.textContent = text; 
         if (config.icon) {
-          const icon = document.createElement('span');
+          const _icon = document.createElement('span');
           icon.textContent = config.icon;
           icon.className = 'claude-button-icon';
-          button.insertBefore(icon, button.firstChild);
+          button.insertBefore(_icon, button.firstChild);
         }
       },
       setDisabled: (disabled) => { button.disabled = disabled; },
@@ -373,23 +373,23 @@ export class ComponentLibrary {
   /**
    * Create tool grid component
    */
-  createToolGrid(tools, onToolClick) {
-    const grid = document.createElement('div');
+  createToolGrid(_tools, onToolClick) {
+    const _grid = document.createElement('div');
     grid.className = 'claude-tool-grid';
     
     tools.forEach(tool => {
-      const card = document.createElement('div');
+      const _card = document.createElement('div');
       card.className = 'claude-tool-card';
       
-      const icon = document.createElement('div');
+      const _icon = document.createElement('div');
       icon.className = 'claude-tool-icon';
       icon.textContent = tool.icon || '🔧';
       
-      const name = document.createElement('div');
+      const _name = document.createElement('div');
       name.className = 'claude-tool-name';
       name.textContent = tool.name;
       
-      const desc = document.createElement('div');
+      const _desc = document.createElement('div');
       desc.className = 'claude-tool-description';
       desc.textContent = tool.description;
       
@@ -408,7 +408,7 @@ export class ComponentLibrary {
         grid.innerHTML = '';
         newTools.forEach(tool => {
           // Recreate cards with new tools
-          const card = this.createToolCard(tool, onToolClick);
+          const _card = this.createToolCard(_tool, onToolClick);
           grid.appendChild(card);
         });
       }
@@ -419,21 +419,21 @@ export class ComponentLibrary {
    * Create stats card component
    */
   createStatsCard(config) {
-    const card = document.createElement('div');
+    const _card = document.createElement('div');
     card.className = 'claude-stats-card';
     
-    const icon = document.createElement('div');
+    const _icon = document.createElement('div');
     icon.className = 'claude-stats-icon';
     icon.textContent = config.icon;
     
-    const content = document.createElement('div');
+    const _content = document.createElement('div');
     content.className = 'claude-stats-content';
     
-    const value = document.createElement('div');
+    const _value = document.createElement('div');
     value.className = 'claude-stats-value';
     value.textContent = config.value;
     
-    const label = document.createElement('div');
+    const _label = document.createElement('div');
     label.className = 'claude-stats-label';
     label.textContent = config.label;
     
@@ -454,23 +454,23 @@ export class ComponentLibrary {
    * Create tab container component
    */
   createTabContainer(tabs) {
-    const container = document.createElement('div');
+    const _container = document.createElement('div');
     container.className = 'claude-tab-container';
     
-    const tabList = document.createElement('div');
+    const _tabList = document.createElement('div');
     tabList.className = 'claude-tab-list';
     
-    const tabContent = document.createElement('div');
+    const _tabContent = document.createElement('div');
     tabContent.className = 'claude-tab-content';
     
-    let activeTab = 0;
+    let _activeTab = 0;
     
-    tabs.forEach((tab, index) => {
-      const tabButton = document.createElement('button');
+    tabs.forEach((_tab, index) => {
+      const _tabButton = document.createElement('button');
       tabButton.className = `claude-tab-button ${index === 0 ? 'active' : ''}`;
       tabButton.textContent = tab.label;
       
-      const tabPane = document.createElement('div');
+      const _tabPane = document.createElement('div');
       tabPane.className = `claude-tab-pane ${index === 0 ? 'active' : ''}`;
       tabPane.innerHTML = tab.content;
       
@@ -512,7 +512,7 @@ export class ComponentLibrary {
   addComponentStyles() {
     if (document.getElementById('claude-component-styles')) return;
 
-    const styles = document.createElement('style');
+    const _styles = document.createElement('style');
     styles.id = 'claude-component-styles';
     styles.textContent = `
       /* Tool Panel Styles */
@@ -581,7 +581,7 @@ export class ComponentLibrary {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(_0, _0, _0, 0.8);
         display: flex;
         justify-content: center;
         align-items: flex-start;
@@ -637,7 +637,7 @@ export class ComponentLibrary {
 
       .claude-progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, #00d4ff, #0099cc);
+        background: linear-gradient(_90deg, #_00d4ff, #0099cc);
         transition: width 0.3s ease;
       }
 
@@ -745,7 +745,7 @@ export class ComponentLibrary {
       /* Tool Grid Styles */
       .claude-tool-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-_fill, minmax(_250px, 1fr));
         gap: 16px;
         margin: 16px 0;
       }
@@ -928,44 +928,44 @@ export class ComponentLibrary {
   /**
    * Update chart with new data
    */
-  updateChart(canvas, data, config) {
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  updateChart(_canvas, _data, config) {
+    const _ctx = canvas.getContext('2d');
+    ctx.clearRect(_0, _0, canvas._width, canvas.height);
     
     // Simple chart implementation
     // In a real implementation, you'd use Chart.js or similar
-    const padding = 40;
-    const chartWidth = canvas.width - (padding * 2);
-    const chartHeight = canvas.height - (padding * 2);
+    const _padding = 40;
+    const _chartWidth = canvas.width - (padding * 2);
+    const _chartHeight = canvas.height - (padding * 2);
     
     if (config.type === 'line') {
-      this.drawLineChart(ctx, data, padding, chartWidth, chartHeight);
+      this.drawLineChart(_ctx, _data, _padding, _chartWidth, chartHeight);
     } else if (config.type === 'bar') {
-      this.drawBarChart(ctx, data, padding, chartWidth, chartHeight);
+      this.drawBarChart(_ctx, _data, _padding, _chartWidth, chartHeight);
     }
   }
 
   /**
    * Draw line chart
    */
-  drawLineChart(ctx, data, padding, width, height) {
+  drawLineChart(_ctx, _data, _padding, _width, height) {
     if (!data || data.length === 0) return;
     
-    const maxValue = Math.max(...data.map(d => d.value));
-    const stepX = width / (data.length - 1);
+    const _maxValue = Math.max(...data.map(d => d.value));
+    const _stepX = width / (data.length - 1);
     
     ctx.strokeStyle = '#00d4ff';
     ctx.lineWidth = 2;
     ctx.beginPath();
     
-    data.forEach((point, index) => {
-      const x = padding + (index * stepX);
-      const y = padding + height - (point.value / maxValue * height);
+    data.forEach((_point, index) => {
+      const _x = padding + (index * stepX);
+      const _y = padding + height - (point.value / maxValue * height);
       
       if (index === 0) {
-        ctx.moveTo(x, y);
+        ctx.moveTo(_x, y);
       } else {
-        ctx.lineTo(x, y);
+        ctx.lineTo(_x, y);
       }
     });
     
@@ -975,21 +975,21 @@ export class ComponentLibrary {
   /**
    * Draw bar chart
    */
-  drawBarChart(ctx, data, padding, width, height) {
+  drawBarChart(_ctx, _data, _padding, _width, height) {
     if (!data || data.length === 0) return;
     
-    const maxValue = Math.max(...data.map(d => d.value));
-    const barWidth = width / data.length * 0.8;
-    const barSpacing = width / data.length * 0.2;
+    const _maxValue = Math.max(...data.map(d => d.value));
+    const _barWidth = width / data.length * 0.8;
+    const _barSpacing = width / data.length * 0.2;
     
     ctx.fillStyle = '#00d4ff';
     
-    data.forEach((point, index) => {
-      const x = padding + (index * (barWidth + barSpacing));
-      const barHeight = (point.value / maxValue) * height;
-      const y = padding + height - barHeight;
+    data.forEach((_point, index) => {
+      const _x = padding + (index * (barWidth + barSpacing));
+      const _barHeight = (point.value / maxValue) * height;
+      const _y = padding + height - barHeight;
       
-      ctx.fillRect(x, y, barWidth, barHeight);
+      ctx.fillRect(_x, _y, _barWidth, barHeight);
     });
   }
 

@@ -5,7 +5,7 @@
  */
 
 // Example of how the GitHub view interacts with MCP tools
-export const GitHubViewMCPIntegration = {
+export const _GitHubViewMCPIntegration = {
   // Tool mappings
   tools: {
     github_repo_analyze: {
@@ -108,14 +108,14 @@ export const GitHubViewMCPIntegration = {
     console.log('🧪 Testing GitHub View MCP Integration');
     
     // Test repository analysis
-    const analysisResult = await GitHubViewMCPIntegration.tools.github_repo_analyze.handler({
+    const _analysisResult = await GitHubViewMCPIntegration.tools.github_repo_analyze.handler({
       repo: 'ruvnet/claude-flow',
       analysis_type: 'code_quality'
     });
     console.log('Repository Analysis Result:', analysisResult);
     
     // Test PR management
-    const prResult = await GitHubViewMCPIntegration.tools.github_pr_manage.handler({
+    const _prResult = await GitHubViewMCPIntegration.tools.github_pr_manage.handler({
       repo: 'ruvnet/claude-flow',
       action: 'review',
       pr_number: 123
@@ -123,7 +123,7 @@ export const GitHubViewMCPIntegration = {
     console.log('PR Management Result:', prResult);
     
     // Test metrics
-    const metricsResult = await GitHubViewMCPIntegration.tools.github_metrics.handler({
+    const _metricsResult = await GitHubViewMCPIntegration.tools.github_metrics.handler({
       repo: 'ruvnet/claude-flow'
     });
     console.log('Metrics Result:', metricsResult);
@@ -144,21 +144,21 @@ export class GitHubMCPBridge {
         try {
           // In real implementation, this would call the actual MCP tool
           // For now, we use the test handlers
-          const handler = GitHubViewMCPIntegration.tools[data.tool]?.handler;
+          const _handler = GitHubViewMCPIntegration.tools[data.tool]?.handler;
           if (handler) {
-            const result = await handler(data.params);
+            const _result = await handler(data.params);
             
             // Emit result back to the view
             this.eventBus.emit('tool:executed', {
-              tool: data.tool,
-              result: result,
+              tool: data._tool,
+              result: _result,
               source: 'github-view'
             });
           }
         } catch (error) {
           this.eventBus.emit('tool:error', {
-            tool: data.tool,
-            error: error.message,
+            tool: data._tool,
+            error: error._message,
             source: 'github-view'
           });
         }

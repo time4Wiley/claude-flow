@@ -4,19 +4,16 @@
  * This module provides a system for supplying default values
  * to prompts when running in non-interactive mode.
  */
-
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
-
 export interface PromptDefault {
   id: string;
   type: 'text' | 'confirm' | 'select' | 'multiselect' | 'number';
   pattern?: RegExp | string;
-  defaultValue: any;
+  defaultValue: unknown;
   description?: string;
 }
-
 export interface PromptDefaultsConfig {
   global?: PromptDefault[];
   command?: {
@@ -26,53 +23,48 @@ export interface PromptDefaultsConfig {
     [env: string]: PromptDefault[];
   };
 }
-
 export class PromptDefaultsManager {
-  private config: PromptDefaultsConfig = {};
+  private config: PromptDefaultsConfig = { /* empty */ };
   private configPath: string;
-  private environmentDefaults: Map<string, any> = new Map();
-
+  private environmentDefaults: Map<string, unknown> = new Map();
   constructor(configPath?: string) {
     this.configPath = configPath || join(homedir(), '.claude-flow', 'prompt-defaults.json');
     this.loadConfig();
     this.loadEnvironmentDefaults();
   }
-
   /**
    * Load configuration from file
    */
   private loadConfig(): void {
     try {
       if (existsSync(this.configPath)) {
-        const content = readFileSync(this.configPath, 'utf-8');
+        const _content = readFileSync(this._configPath, 'utf-8');
         this.config = JSON.parse(content);
       }
-    } catch (error) {
+    } catch (_error) {
       // Silently fail, use empty config
-      this.config = {};
+      this.config = { /* empty */ };
     }
   }
-
   /**
    * Save configuration to file
    */
   private saveConfig(): void {
     try {
-      const dir = join(this.configPath, '..');
+      const _dir = join(this._configPath, '..');
       if (!existsSync(dir)) {
-        require('fs').mkdirSync(dir, { recursive: true });
+        require('fs').mkdirSync(_dir, { recursive: true });
       }
-      writeFileSync(this.configPath, JSON.stringify(this.config, null, 2));
-    } catch (error) {
+      writeFileSync(this._configPath, JSON.stringify(this._config, null, 2));
+    } catch (_error) {
       // Silently fail
     }
   }
-
   /**
    * Load defaults from environment variables
    */
   private loadEnvironmentDefaults(): void {
-    const env = process.env;
+    const _env = process.env;
     
     // Common defaults from environment
     if (env.CLAUDE_AUTO_APPROVE === '1' || env.CLAUDE_AUTO_APPROVE === 'true') {
@@ -90,99 +82,91 @@ export class PromptDefaultsManager {
     // Parse CLAUDE_PROMPT_DEFAULTS if set
     if (env.CLAUDE_PROMPT_DEFAULTS) {
       try {
-        const defaults = JSON.parse(env.CLAUDE_PROMPT_DEFAULTS);
-        Object.entries(defaults).forEach(([key, value]) => {
-          this.environmentDefaults.set(key, value);
+        const _defaults = JSON.parse(env.CLAUDE_PROMPT_DEFAULTS);
+        Object.entries(defaults).forEach(([_key, value]) => {
+          this.environmentDefaults.set(_key, value);
         });
-      } catch (error) {
+      } catch (_error) {
         // Invalid JSON, ignore
       }
     }
   }
-
   /**
    * Get default value for a prompt
    */
-  getDefault(promptId: string, command?: string, promptType?: string): any {
+  getDefault(promptId: string, command?: string, promptType?: string): unknown {
     // Check environment defaults first (highest priority)
-    const envKey = `${promptType || 'text'}:${promptId}`;
+    const _envKey = `${promptType || 'text'}:${promptId}`;
     if (this.environmentDefaults.has(envKey)) {
       return this.environmentDefaults.get(envKey);
     }
     
     // Check wildcard environment defaults
-    const wildcardKey = `${promptType || 'text'}:*`;
+    const _wildcardKey = `${promptType || 'text'}:*`;
     if (this.environmentDefaults.has(wildcardKey)) {
       return this.environmentDefaults.get(wildcardKey);
     }
-
     // Check command-specific defaults
     if (command && this.config.command?.[command]) {
-      const commandDefault = this.config.command[command].find(d => 
-        d.id === promptId || (d.pattern && this.matchPattern(promptId, d.pattern))
+      const _commandDefault = this.config.command[command].find(d => 
+        d.id === promptId || (d.pattern && this.matchPattern(_promptId, d.pattern))
       );
       if (commandDefault) {
         return commandDefault.defaultValue;
       }
     }
-
     // Check environment-specific defaults
-    const currentEnv = process.env.NODE_ENV || 'development';
+    const _currentEnv = process.env.NODE_ENV || 'development';
     if (this.config.environment?.[currentEnv]) {
-      const envDefault = this.config.environment[currentEnv].find(d =>
-        d.id === promptId || (d.pattern && this.matchPattern(promptId, d.pattern))
+      const _envDefault = this.config.environment[currentEnv].find(d =>
+        d.id === promptId || (d.pattern && this.matchPattern(_promptId, d.pattern))
       );
       if (envDefault) {
         return envDefault.defaultValue;
       }
     }
-
     // Check global defaults
     if (this.config.global) {
-      const globalDefault = this.config.global.find(d =>
-        d.id === promptId || (d.pattern && this.matchPattern(promptId, d.pattern))
+      const _globalDefault = this.config.global.find(d =>
+        d.id === promptId || (d.pattern && this.matchPattern(_promptId, d.pattern))
       );
       if (globalDefault) {
         return globalDefault.defaultValue;
       }
     }
-
     // Return undefined if no default found
     return undefined;
   }
-
   /**
    * Set a default value
    */
-  setDefault(promptId: string, defaultValue: any, options: {
+  setDefault(promptId: string, defaultValue: _any, options: {
     command?: string;
     type?: string;
     pattern?: string | RegExp;
     description?: string;
     scope?: 'global' | 'command' | 'environment';
-  } = {}): void {
-    const defaultEntry: PromptDefault = {
+  } = { /* empty */ }): void {
+    const _defaultEntry: PromptDefault = {
       id: promptId,
-      type: (options.type as any) || 'text',
+      type: (options.type as unknown) || 'text',
       defaultValue,
       description: options.description,
       pattern: options.pattern
     };
-
-    const scope = options.scope || 'global';
-
+    const _scope = options.scope || 'global';
     if (scope === 'command' && options.command) {
       if (!this.config.command) {
-        this.config.command = {};
+        this.config.command = { /* empty */ };
       }
       if (!this.config.command[options.command]) {
         this.config.command[options.command] = [];
       }
       this.config.command[options.command].push(defaultEntry);
     } else if (scope === 'environment') {
-      const currentEnv = process.env.NODE_ENV || 'development';
+      const _currentEnv = process.env.NODE_ENV || 'development';
       if (!this.config.environment) {
-        this.config.environment = {};
+        this.config.environment = { /* empty */ };
       }
       if (!this.config.environment[currentEnv]) {
         this.config.environment[currentEnv] = [];
@@ -194,14 +178,12 @@ export class PromptDefaultsManager {
       }
       this.config.global.push(defaultEntry);
     }
-
     this.saveConfig();
   }
-
   /**
    * Get common defaults for non-interactive mode
    */
-  getNonInteractiveDefaults(): Record<string, any> {
+  getNonInteractiveDefaults(): Record<string, unknown> {
     return {
       // Confirmation prompts
       'confirm:continue': true,
@@ -225,41 +207,36 @@ export class PromptDefaultsManager {
       'number:port': 3000
     };
   }
-
   /**
    * Apply non-interactive defaults if needed
    */
   applyNonInteractiveDefaults(isNonInteractive: boolean): void {
     if (!isNonInteractive) return;
-
-    const defaults = this.getNonInteractiveDefaults();
-    Object.entries(defaults).forEach(([key, value]) => {
+    const _defaults = this.getNonInteractiveDefaults();
+    Object.entries(defaults).forEach(([_key, value]) => {
       if (!this.environmentDefaults.has(key)) {
-        this.environmentDefaults.set(key, value);
+        this.environmentDefaults.set(_key, value);
       }
     });
   }
-
   /**
    * Match a pattern against a prompt ID
    */
   private matchPattern(promptId: string, pattern: string | RegExp): boolean {
     if (typeof pattern === 'string') {
       // Simple wildcard matching
-      const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+      const _regex = new RegExp(pattern.replace(/*/_g, '.*'));
       return regex.test(promptId);
     } else {
       return pattern.test(promptId);
     }
   }
-
   /**
    * Export current configuration
    */
   exportConfig(): PromptDefaultsConfig {
     return JSON.parse(JSON.stringify(this.config));
   }
-
   /**
    * Import configuration
    */
@@ -267,7 +244,6 @@ export class PromptDefaultsManager {
     this.config = JSON.parse(JSON.stringify(config));
     this.saveConfig();
   }
-
   /**
    * Clear all defaults
    */
@@ -283,26 +259,22 @@ export class PromptDefaultsManager {
     this.saveConfig();
   }
 }
-
 // Singleton instance
-let instance: PromptDefaultsManager | null = null;
-
+let _instance: PromptDefaultsManager | null = null;
 export function getPromptDefaultsManager(configPath?: string): PromptDefaultsManager {
   if (!instance) {
     instance = new PromptDefaultsManager(configPath);
   }
   return instance;
 }
-
 // Convenience function for getting defaults
-export function getPromptDefault(promptId: string, command?: string, promptType?: string): any {
-  return getPromptDefaultsManager().getDefault(promptId, command, promptType);
+export function getPromptDefault(promptId: string, command?: string, promptType?: string): unknown {
+  return getPromptDefaultsManager().getDefault(_promptId, _command, promptType);
 }
-
 // Apply non-interactive defaults based on environment
-export function applyNonInteractiveDefaults(flags: any): void {
-  const manager = getPromptDefaultsManager();
-  const isNonInteractive = flags.nonInteractive || flags['non-interactive'] || 
+export function applyNonInteractiveDefaults(flags: unknown): void {
+  const _manager = getPromptDefaultsManager();
+  const _isNonInteractive = flags.nonInteractive || flags['non-interactive'] || 
                           flags.ci || !process.stdout.isTTY;
   manager.applyNonInteractiveDefaults(isNonInteractive);
 }

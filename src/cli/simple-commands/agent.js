@@ -1,61 +1,77 @@
 // agent.js - Agent management commands
 import { printSuccess, printError, printWarning } from '../utils.js';
 
-export async function agentCommand(subArgs, flags) {
-  const agentCmd = subArgs[0];
+export async function agentCommand(_subArgs, flags) {
+  const _agentCmd = subArgs[0];
   
   switch (agentCmd) {
     case 'spawn':
-      await spawnAgent(subArgs, flags);
-      break;
+      {
+await spawnAgent(_subArgs, flags);
+      
+}break;
       
     case 'list':
-      await listAgents(subArgs, flags);
-      break;
+      {
+await listAgents(_subArgs, flags);
+      
+}break;
       
     case 'hierarchy':
-      await manageHierarchy(subArgs, flags);
-      break;
+      {
+await manageHierarchy(_subArgs, flags);
+      
+}break;
       
     case 'network':
-      await manageNetwork(subArgs, flags);
-      break;
+      {
+await manageNetwork(_subArgs, flags);
+      
+}break;
       
     case 'ecosystem':
-      await manageEcosystem(subArgs, flags);
-      break;
+      {
+await manageEcosystem(_subArgs, flags);
+      
+}break;
       
     case 'provision':
-      await provisionAgent(subArgs, flags);
-      break;
+      {
+await provisionAgent(_subArgs, flags);
+      
+}break;
       
     case 'terminate':
-      await terminateAgent(subArgs, flags);
-      break;
+      {
+await terminateAgent(_subArgs, flags);
+      
+}break;
       
     case 'info':
-      await showAgentInfo(subArgs, flags);
-      break;
+      {
+await showAgentInfo(_subArgs, flags);
+      
+}break;
       
     default:
       showAgentHelp();
   }
 }
 
-async function spawnAgent(subArgs, flags) {
-  const agentType = subArgs[1] || 'general';
-  const agentName = getFlag(subArgs, '--name') || flags.name || `agent-${Date.now()}`;
+async function spawnAgent(_subArgs, flags) {
+  const _agentType = subArgs[1] || 'general';
+  const _agentName = getFlag(_subArgs, '--name') || flags.name || `agent-${Date.now()}`;
   
   printSuccess(`Spawning ${agentType} agent: ${agentName}`);
   console.log('🤖 Agent would be created with the following configuration:');
   console.log(`   Type: ${agentType}`);
   console.log(`   Name: ${agentName}`);
-  console.log('   Capabilities: Research, Analysis, Code Generation');
+  console.log('   Capabilities: _Research, _Analysis, Code Generation');
   console.log('   Status: Ready');
   console.log('\n📋 Note: Full agent spawning requires orchestrator to be running');
 }
 
-async function listAgents(subArgs, flags) {
+async function listAgents(_subArgs, flags) {
   printSuccess('Active agents:');
   console.log('📋 No agents currently active (orchestrator not running)');
   console.log('\nTo create agents:');
@@ -64,85 +80,96 @@ async function listAgents(subArgs, flags) {
   console.log('  claude-flow agent spawn analyst --name "DataBot"');
 }
 
-async function manageHierarchy(subArgs, flags) {
-  const hierarchyCmd = subArgs[1];
+async function manageHierarchy(_subArgs, flags) {
+  const _hierarchyCmd = subArgs[1];
   
   switch (hierarchyCmd) {
-    case 'create':
-      const hierarchyType = subArgs[2] || 'basic';
+    case 'create': {
+      const _hierarchyType = subArgs[2] || 'basic';
       printSuccess(`Creating ${hierarchyType} agent hierarchy`);
       console.log('🏗️  Hierarchy structure would include:');
       console.log('   - Coordinator Agent (manages workflow)');
       console.log('   - Specialist Agents (domain-specific tasks)');
       console.log('   - Worker Agents (execution tasks)');
       break;
+    }
       
     case 'show':
-      printSuccess('Current agent hierarchy:');
+      {
+printSuccess('Current agent hierarchy:');
       console.log('📊 No hierarchy configured (orchestrator not running)');
-      break;
+      
+}break;
       
     default:
-      console.log('Hierarchy commands: create, show');
+      console.log('Hierarchy commands: _create, show');
       console.log('Examples:');
       console.log('  claude-flow agent hierarchy create enterprise');
       console.log('  claude-flow agent hierarchy show');
   }
 }
 
-async function manageNetwork(subArgs, flags) {
-  const networkCmd = subArgs[1];
+async function manageNetwork(_subArgs, flags) {
+  const _networkCmd = subArgs[1];
   
   switch (networkCmd) {
     case 'topology':
-      printSuccess('Agent network topology:');
+      {
+printSuccess('Agent network topology:');
       console.log('🌐 Network visualization would show agent connections');
-      break;
+      
+}break;
       
     case 'metrics':
-      printSuccess('Network performance metrics:');
-      console.log('📈 Communication latency, throughput, reliability stats');
-      break;
+      {
+printSuccess('Network performance metrics:');
+      console.log('📈 Communication _latency, _throughput, reliability stats');
+      
+}break;
       
     default:
-      console.log('Network commands: topology, metrics');
+      console.log('Network commands: _topology, metrics');
   }
 }
 
-async function manageEcosystem(subArgs, flags) {
-  const ecosystemCmd = subArgs[1];
+async function manageEcosystem(_subArgs, flags) {
+  const _ecosystemCmd = subArgs[1];
   
   switch (ecosystemCmd) {
     case 'status':
-      printSuccess('Agent ecosystem status:');
+      {
+printSuccess('Agent ecosystem status:');
       console.log('🌱 Ecosystem health: Not running');
       console.log('   Active Agents: 0');
       console.log('   Resource Usage: 0%');
       console.log('   Task Queue: Empty');
-      break;
+      
+}break;
       
     case 'optimize':
-      printSuccess('Optimizing agent ecosystem...');
+      {
+printSuccess('Optimizing agent ecosystem...');
       console.log('⚡ Optimization would include:');
       console.log('   - Load balancing across agents');
       console.log('   - Resource allocation optimization');
       console.log('   - Communication path optimization');
-      break;
+      
+}break;
       
     default:
-      console.log('Ecosystem commands: status, optimize');
+      console.log('Ecosystem commands: _status, optimize');
   }
 }
 
-async function provisionAgent(subArgs, flags) {
-  const provision = subArgs[1];
+async function provisionAgent(_subArgs, flags) {
+  const _provision = subArgs[1];
   
   if (!provision) {
     printError('Usage: agent provision <count>');
     return;
   }
   
-  const count = parseInt(provision);
+  const _count = parseInt(provision);
   if (isNaN(count) || count < 1) {
     printError('Count must be a positive number');
     return;
@@ -150,13 +177,13 @@ async function provisionAgent(subArgs, flags) {
   
   printSuccess(`Provisioning ${count} agents...`);
   console.log('🚀 Auto-provisioning would create:');
-  for (let i = 1; i <= count; i++) {
-    console.log(`   Agent ${i}: Type=general, Status=provisioning`);
+  for (let _i = 1; i <= count; i++) {
+    console.log(`   Agent ${i}: Type=_general, Status=provisioning`);
   }
 }
 
-async function terminateAgent(subArgs, flags) {
-  const agentId = subArgs[1];
+async function terminateAgent(_subArgs, flags) {
+  const _agentId = subArgs[1];
   
   if (!agentId) {
     printError('Usage: agent terminate <agent-id>');
@@ -167,8 +194,8 @@ async function terminateAgent(subArgs, flags) {
   console.log('🛑 Agent would be gracefully shut down');
 }
 
-async function showAgentInfo(subArgs, flags) {
-  const agentId = subArgs[1];
+async function showAgentInfo(_subArgs, flags) {
+  const _agentId = subArgs[1];
   
   if (!agentId) {
     printError('Usage: agent info <agent-id>');
@@ -177,11 +204,11 @@ async function showAgentInfo(subArgs, flags) {
   
   printSuccess(`Agent information: ${agentId}`);
   console.log('📊 Agent details would include:');
-  console.log('   Status, capabilities, current tasks, performance metrics');
+  console.log('   _Status, _capabilities, current _tasks, performance metrics');
 }
 
-function getFlag(args, flagName) {
-  const index = args.indexOf(flagName);
+function getFlag(_args, flagName) {
+  const _index = args.indexOf(flagName);
   return index !== -1 && index + 1 < args.length ? args[index + 1] : null;
 }
 

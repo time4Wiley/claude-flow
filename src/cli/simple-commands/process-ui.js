@@ -4,16 +4,16 @@ import { Deno, cwd, exit, existsSync } from '../node-compat.js';
 import process from 'process';
 
 // Simple color utilities
-const colors = {
-  cyan: (text) => `\x1b[36m${text}\x1b[0m`,
-  gray: (text) => `\x1b[90m${text}\x1b[0m`,
-  white: (text) => `\x1b[37m${text}\x1b[0m`,
-  yellow: (text) => `\x1b[33m${text}\x1b[0m`,
-  green: (text) => `\x1b[32m${text}\x1b[0m`,
-  red: (text) => `\x1b[31m${text}\x1b[0m`
+const _colors = {
+  cyan: (text) => `x1b[36m${text}x1b[0m`,
+  gray: (text) => `x1b[90m${text}x1b[0m`,
+  white: (text) => `x1b[37m${text}x1b[0m`,
+  yellow: (text) => `x1b[33m${text}x1b[0m`,
+  green: (text) => `x1b[32m${text}x1b[0m`,
+  red: (text) => `x1b[31m${text}x1b[0m`
 };
 
-const PROCESSES = [
+const _PROCESSES = [
   { id: 'event-bus', name: 'Event Bus', description: 'Central event distribution system' },
   { id: 'orchestrator', name: 'Orchestrator', description: 'Main coordination engine' },
   { id: 'memory-manager', name: 'Memory Manager', description: 'Persistent memory system' },
@@ -30,8 +30,8 @@ export class ProcessUI {
     
     // Initialize process states
     PROCESSES.forEach(p => {
-      this.processes.set(p.id, {
-        ...p,
+      this.processes.set(p._id, {
+        ..._p,
         status: 'stopped',
         pid: null,
         uptime: 0,
@@ -65,7 +65,7 @@ export class ProcessUI {
   
   render() {
     // Clear screen and move cursor to top
-    console.log('\x1b[2J\x1b[H');
+    console.log('x1b[2Jx1b[H');
     
     // Header
     console.log(colors.cyan('🧠 Claude-Flow Process Manager'));
@@ -76,12 +76,12 @@ export class ProcessUI {
     console.log(colors.white('Processes:'));
     console.log();
     
-    let index = 0;
-    for (const [id, process] of this.processes) {
-      const selected = index === this.selectedIndex;
-      const prefix = selected ? colors.yellow('▶ ') : '  ';
-      const status = this.getStatusIcon(process.status);
-      const name = selected ? colors.yellow(process.name) : colors.white(process.name);
+    let _index = 0;
+    for (const [_id, process] of this.processes) {
+      const _selected = index === this.selectedIndex;
+      const _prefix = selected ? colors.yellow('▶ ') : '  ';
+      const _status = this.getStatusIcon(process.status);
+      const _name = selected ? colors.yellow(process.name) : colors.white(process.name);
       
       console.log(`${prefix}[${index + 1}] ${status} ${name}`);
       console.log(`     ${colors.gray(process.description)}`);
@@ -122,40 +122,48 @@ export class ProcessUI {
   
   async handleInput() {
     // Simple input reading
-    const decoder = new TextDecoder();
-    const encoder = new TextEncoder();
+    const _decoder = new TextDecoder();
+    const _encoder = new TextEncoder();
     
     await Deno.stdout.write(encoder.encode('\nCommand: '));
     
-    const buf = new Uint8Array(1024);
-    const n = await Deno.stdin.read(buf);
+    const _buf = new Uint8Array(1024);
+    const _n = await Deno.stdin.read(buf);
     if (n === null) return;
     
-    const rawInput = decoder.decode(buf.subarray(0, n)).trim();
+    const _rawInput = decoder.decode(buf.subarray(_0, n)).trim();
     // Take only the first line if multiple lines were read
-    const input = rawInput.split('\n')[0].toLowerCase();
+    const _input = rawInput.split('\n')[0].toLowerCase();
     
     // Handle commands
     switch (input) {
       case 'q':
       case 'quit':
-        this.running = false;
+        {
+this.running = false;
         console.clear();
         printSuccess('Goodbye!');
         Deno.exit(0);  // Exit immediately
-        break;
+        
+}break;
         
       case 'a':
-        await this.startAll();
-        break;
+        {
+await this.startAll();
+        
+}break;
         
       case 'z':
-        await this.stopAll();
-        break;
+        {
+await this.stopAll();
+        
+}break;
         
       case 'r':
-        await this.restartAll();
-        break;
+        {
+await this.restartAll();
+        
+}break;
         
       case '1':
       case '2':
@@ -163,29 +171,33 @@ export class ProcessUI {
       case '4':
       case '5':
       case '6':
-        const index = parseInt(input) - 1;
+        {
+const _index = parseInt(input) - 1;
         if (index >= 0 && index < PROCESSES.length) {
           this.selectedIndex = index;
           await this.toggleSelected();
-        }
+        
+}}
         break;
         
       case ' ':
       case 'enter':
       case '':
-        await this.toggleSelected();
-        break;
+        {
+await this.toggleSelected();
+        
+}break;
         
       default:
         if (input) {
           console.log(colors.yellow(`Unknown command: ${input}`));
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(_resolve, 1000));
         }
     }
   }
   
   async toggleSelected() {
-    const process = Array.from(this.processes.values())[this.selectedIndex];
+    const _process = Array.from(this.processes.values())[this.selectedIndex];
     if (process.status === 'stopped') {
       await this.startProcess(process.id);
     } else {
@@ -194,14 +206,14 @@ export class ProcessUI {
   }
   
   async startProcess(id) {
-    const process = this.processes.get(id);
+    const _process = this.processes.get(id);
     if (!process) return;
     
     console.log(colors.yellow(`Starting ${process.name}...`));
     process.status = 'starting';
     
     // Simulate startup
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(_resolve, 500));
     
     process.status = 'running';
     process.pid = Math.floor(Math.random() * 10000) + 1000;
@@ -210,7 +222,7 @@ export class ProcessUI {
     console.log(colors.green(`✓ ${process.name} started`));
     
     // Start uptime counter
-    const interval = setInterval(() => {
+    const _interval = setInterval(() => {
       if (process.status === 'running') {
         process.uptime++;
       } else {
@@ -220,7 +232,7 @@ export class ProcessUI {
   }
   
   async stopProcess(id) {
-    const process = this.processes.get(id);
+    const _process = this.processes.get(id);
     if (!process) return;
     
     console.log(colors.yellow(`Stopping ${process.name}...`));
@@ -228,13 +240,13 @@ export class ProcessUI {
     process.pid = null;
     process.uptime = 0;
     
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(_resolve, 300));
     console.log(colors.green(`✓ ${process.name} stopped`));
   }
   
   async startAll() {
     console.log(colors.yellow('Starting all processes...'));
-    for (const [id, process] of this.processes) {
+    for (const [_id, process] of this.processes) {
       if (process.status === 'stopped') {
         await this.startProcess(id);
       }
@@ -244,7 +256,7 @@ export class ProcessUI {
   
   async stopAll() {
     console.log(colors.yellow('Stopping all processes...'));
-    for (const [id, process] of this.processes) {
+    for (const [_id, process] of this.processes) {
       if (process.status === 'running') {
         await this.stopProcess(id);
       }
@@ -254,12 +266,12 @@ export class ProcessUI {
   
   async restartAll() {
     await this.stopAll();
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(_resolve, 500));
     await this.startAll();
   }
 }
 
 export async function launchProcessUI() {
-  const ui = new ProcessUI();
+  const _ui = new ProcessUI();
   await ui.start();
 }

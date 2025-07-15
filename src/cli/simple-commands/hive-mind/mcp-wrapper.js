@@ -2,13 +2,11 @@
  * MCP Tool Wrapper for Hive Mind System
  * Wraps all 87 MCP tools for coordinated swarm usage
  */
-
 import { spawn } from 'child_process';
-
 /**
  * MCP Tool categories and their methods
  */
-const MCP_TOOLS = {
+const _MCP_TOOLS = {
   swarm: [
     'swarm_init', 'agent_spawn', 'task_orchestrate', 'swarm_status',
     'agent_list', 'agent_metrics', 'swarm_monitor', 'topology_optimize',
@@ -52,12 +50,11 @@ const MCP_TOOLS = {
   sparc: ['sparc_mode'],
   task: ['task_status', 'task_results']
 };
-
 /**
  * MCPToolWrapper class for unified MCP tool access
  */
 export class MCPToolWrapper {
-  constructor(config = {}) {
+  constructor(config = { /* empty */ }) {
     this.config = {
       parallel: true,
       timeout: 60000,
@@ -81,37 +78,37 @@ export class MCPToolWrapper {
    */
   async initializeMemoryStorage() {
     try {
-      const Database = (await import('better-sqlite3')).default;
-      const path = await import('path');
-      const fs = await import('fs');
+      const _Database = (await import('better-sqlite3')).default;
+      const _path = await import('path');
+      const _fs = await import('fs');
       
       // Create .hive-mind directory if it doesn't exist
-      const hiveMindDir = path.join(process.cwd(), '.hive-mind');
+      const _hiveMindDir = path.join(process.cwd(), '.hive-mind');
       if (!fs.existsSync(hiveMindDir)) {
-        fs.mkdirSync(hiveMindDir, { recursive: true });
+        fs.mkdirSync(_hiveMindDir, { recursive: true });
       }
       
       // Initialize SQLite database
-      const dbPath = path.join(hiveMindDir, 'memory.db');
+      const _dbPath = path.join(_hiveMindDir, 'memory.db');
       this.memoryDb = new Database(dbPath);
       
       // Create memories table
       this.memoryDb.exec(`
         CREATE TABLE IF NOT EXISTS memories (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          namespace TEXT NOT NULL,
-          key TEXT NOT NULL,
-          value TEXT NOT NULL,
+          id INTEGER PRIMARY KEY _AUTOINCREMENT,
+          namespace TEXT NOT _NULL,
+          key TEXT NOT _NULL,
+          value TEXT NOT _NULL,
           type TEXT DEFAULT 'knowledge',
-          timestamp INTEGER NOT NULL,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(namespace, key)
+          timestamp INTEGER NOT _NULL,
+          created_at DATETIME DEFAULT _CURRENT_TIMESTAMP,
+          UNIQUE(_namespace, key)
         )
       `);
       
       // Real memory storage initialized with SQLite
-    } catch (error) {
-      console.warn('Failed to initialize SQLite storage, falling back to in-memory:', error.message);
+    } catch (_error) {
+      console.warn('Failed to initialize SQLite _storage, falling back to in-memory:', error.message);
       this.memoryDb = null;
       this.memoryStore = new Map(); // Fallback to in-memory storage
     }
@@ -120,31 +117,31 @@ export class MCPToolWrapper {
   /**
    * Execute MCP tool with automatic retry and error handling
    */
-  async executeTool(toolName, params = {}) {
-    const startTime = Date.now();
-    let lastError = null;
+  async executeTool(_toolName, params = { /* empty */ }) {
+    const _startTime = Date.now();
+    let _lastError = null;
     
-    for (let attempt = 1; attempt <= this.config.retryCount; attempt++) {
+    for (let _attempt = 1; attempt <= this.config.retryCount; attempt++) {
       try {
-        const result = await this._executeToolInternal(toolName, params);
+        const _result = await this._executeToolInternal(_toolName, params);
         
         // Track statistics
-        this._trackToolUsage(toolName, Date.now() - startTime, true);
+        this._trackToolUsage(_toolName, Date.now() - startTime, true);
         
         return result;
-      } catch (error) {
+      } catch (_error) {
         lastError = error;
         console.error(`Attempt ${attempt} failed for ${toolName}:`, error.message);
         
         if (attempt < this.config.retryCount) {
           // Exponential backoff
-          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          await new Promise(resolve => setTimeout(_resolve, Math.pow(_2, attempt) * 1000));
         }
       }
     }
     
     // Track failure
-    this._trackToolUsage(toolName, Date.now() - startTime, false);
+    this._trackToolUsage(_toolName, Date.now() - startTime, false);
     
     throw new Error(`Failed to execute ${toolName} after ${this.config.retryCount} attempts: ${lastError.message}`);
   }
@@ -155,9 +152,9 @@ export class MCPToolWrapper {
   async executeParallel(toolCalls) {
     if (!this.config.parallel) {
       // Execute sequentially if parallel is disabled
-      const results = [];
+      const _results = [];
       for (const call of toolCalls) {
-        results.push(await this.executeTool(call.tool, call.params));
+        results.push(await this.executeTool(call._tool, call.params));
       }
       return results;
     }
@@ -166,38 +163,38 @@ export class MCPToolWrapper {
       return [];
     }
     
-    const startTime = Date.now();
+    const _startTime = Date.now();
     
     // Intelligent concurrency limit based on tool types
-    const concurrencyLimit = this._calculateOptimalConcurrency(toolCalls);
+    const _concurrencyLimit = this._calculateOptimalConcurrency(toolCalls);
     
     // Group tools by priority and dependency
-    const toolGroups = this._groupToolsByPriority(toolCalls);
-    const allResults = [];
+    const _toolGroups = this._groupToolsByPriority(toolCalls);
+    const _allResults = [];
     
     try {
       // Execute high-priority tools first
       for (const group of toolGroups) {
-        const groupResults = [];
+        const _groupResults = [];
         
-        for (let i = 0; i < group.length; i += concurrencyLimit) {
-          const batch = group.slice(i, i + concurrencyLimit);
+        for (let _i = 0; i < group.length; i += concurrencyLimit) {
+          const _batch = group.slice(_i, i + concurrencyLimit);
           
           // Execute batch with timeout and retry logic
-          const batchPromises = batch.map(call => 
-            this._executeWithTimeout(call, this.config.timeout)
+          const _batchPromises = batch.map(call => 
+            this._executeWithTimeout(_call, this.config.timeout)
           );
           
-          const batchResults = await Promise.allSettled(batchPromises);
+          const _batchResults = await Promise.allSettled(batchPromises);
           
           // Process results and handle failures
-          for (let j = 0; j < batchResults.length; j++) {
-            const result = batchResults[j];
+          for (let _j = 0; j < batchResults.length; j++) {
+            const _result = batchResults[j];
             if (result.status === 'fulfilled') {
               groupResults.push(result.value);
             } else {
               console.warn(`Tool execution failed: ${batch[j].tool}`, result.reason);
-              groupResults.push({ error: result.reason.message, tool: batch[j].tool });
+              groupResults.push({ error: result.reason._message, tool: batch[j].tool });
             }
           }
         }
@@ -206,12 +203,12 @@ export class MCPToolWrapper {
       }
       
       // Track performance metrics
-      const executionTime = Date.now() - startTime;
-      this._trackBatchPerformance(toolCalls.length, executionTime, concurrencyLimit);
+      const _executionTime = Date.now() - startTime;
+      this._trackBatchPerformance(toolCalls._length, _executionTime, concurrencyLimit);
       
       return allResults;
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Parallel execution failed:', error);
       throw error;
     }
@@ -221,26 +218,26 @@ export class MCPToolWrapper {
    * Calculate optimal concurrency based on tool types
    */
   _calculateOptimalConcurrency(toolCalls) {
-    const toolTypes = toolCalls.map(call => this._getToolCategory(call.tool));
-    const uniqueTypes = new Set(toolTypes);
+    const _toolTypes = toolCalls.map(call => this._getToolCategory(call.tool));
+    const _uniqueTypes = new Set(toolTypes);
     
-    // Heavy operations (neural, github) need lower concurrency
-    const heavyTypes = ['neural', 'github', 'workflow'];
-    const hasHeavyOps = toolTypes.some(type => heavyTypes.includes(type));
+    // Heavy operations (_neural, github) need lower concurrency
+    const _heavyTypes = ['neural', 'github', 'workflow'];
+    const _hasHeavyOps = toolTypes.some(type => heavyTypes.includes(type));
     
     if (hasHeavyOps) {
-      return Math.min(3, Math.max(1, Math.floor(toolCalls.length / 2)));
+      return Math.min(_3, Math.max(_1, Math.floor(toolCalls.length / 2)));
     }
     
-    // Light operations (memory, performance) can handle higher concurrency
-    return Math.min(8, Math.max(2, Math.floor(toolCalls.length / 1.5)));
+    // Light operations (_memory, performance) can handle higher concurrency
+    return Math.min(_8, Math.max(_2, Math.floor(toolCalls.length / 1.5)));
   }
   
   /**
    * Group tools by execution priority
    */
   _groupToolsByPriority(toolCalls) {
-    const priorities = {
+    const _priorities = {
       critical: [],  // swarm_init, swarm_destroy
       high: [],      // agent_spawn, memory operations
       medium: [],    // task operations, monitoring
@@ -248,8 +245,8 @@ export class MCPToolWrapper {
     };
     
     toolCalls.forEach(call => {
-      const category = this._getToolCategory(call.tool);
-      const tool = call.tool;
+      const _category = this._getToolCategory(call.tool);
+      const _tool = call.tool;
       
       if (['swarm_init', 'swarm_destroy', 'memory_backup'].includes(tool)) {
         priorities.critical.push(call);
@@ -270,13 +267,13 @@ export class MCPToolWrapper {
   /**
    * Execute tool with timeout wrapper
    */
-  async _executeWithTimeout(call, timeout) {
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
+  async _executeWithTimeout(_call, timeout) {
+    return new Promise((_resolve, reject) => {
+      const _timer = setTimeout(() => {
         reject(new Error(`Tool ${call.tool} timed out after ${timeout}ms`));
       }, timeout);
       
-      this.executeTool(call.tool, call.params)
+      this.executeTool(call._tool, call.params)
         .then(result => {
           clearTimeout(timer);
           resolve(result);
@@ -291,7 +288,7 @@ export class MCPToolWrapper {
   /**
    * Track batch execution performance
    */
-  _trackBatchPerformance(toolCount, executionTime, concurrency) {
+  _trackBatchPerformance(_toolCount, _executionTime, concurrency) {
     if (!this.batchStats) {
       this.batchStats = {
         totalBatches: 0,
@@ -316,8 +313,8 @@ export class MCPToolWrapper {
   /**
    * Internal tool execution
    */
-  async _executeToolInternal(toolName, params) {
-    const toolCategory = this._getToolCategory(toolName);
+  async _executeToolInternal(_toolName, params) {
+    const _toolCategory = this._getToolCategory(toolName);
     if (!toolCategory) {
       throw new Error(`Unknown MCP tool: ${toolName}`);
     }
@@ -325,22 +322,22 @@ export class MCPToolWrapper {
     // Handle memory operations with real storage
     if (toolName === 'memory_usage') {
       if (params.action === 'store') {
-        return await this.storeMemory(params.namespace, params.key, params.value, params.type);
+        return await this.storeMemory(params._namespace, params._key, params._value, params.type);
       } else if (params.action === 'retrieve') {
-        return await this.retrieveMemory(params.namespace, params.key);
+        return await this.retrieveMemory(params._namespace, params.key);
       }
     } else if (toolName === 'memory_search') {
-      return await this.searchMemory(params.namespace, params.pattern);
+      return await this.searchMemory(params._namespace, params.pattern);
     }
     
     // For other tools, use mock responses
     console.log(`Executing MCP tool: mcp__claude-flow__${toolName} with params:`, params);
     
     // Simulate async execution for non-memory tools
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 500));
+    await new Promise(resolve => setTimeout(_resolve, Math.random() * 500));
     
     // Mock response based on tool type
-    const mockResponse = this._getMockResponse(toolName, params);
+    const _mockResponse = this._getMockResponse(_toolName, params);
     return mockResponse;
   }
   
@@ -348,7 +345,7 @@ export class MCPToolWrapper {
    * Get tool category
    */
   _getToolCategory(toolName) {
-    for (const [category, tools] of Object.entries(MCP_TOOLS)) {
+    for (const [_category, tools] of Object.entries(MCP_TOOLS)) {
       if (tools.includes(toolName)) {
         return category;
       }
@@ -359,16 +356,16 @@ export class MCPToolWrapper {
   /**
    * Get mock response for demonstration
    */
-  _getMockResponse(toolName, params) {
+  _getMockResponse(_toolName, params) {
     // Mock responses for different tool types
-    const mockResponses = {
+    const _mockResponses = {
       swarm_init: {
         swarmId: `swarm-${Date.now()}`,
         topology: params.topology || 'hierarchical',
         status: 'initialized'
       },
       agent_spawn: {
-        agentId: `agent-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        agentId: `agent-${Date.now()}-${Math.random().toString(36).substring(_2, 11)}`,
         type: params.type,
         status: 'active'
       },
@@ -395,9 +392,9 @@ export class MCPToolWrapper {
   /**
    * Track tool usage statistics
    */
-  _trackToolUsage(toolName, duration, success) {
+  _trackToolUsage(_toolName, _duration, success) {
     if (!this.toolStats.has(toolName)) {
-      this.toolStats.set(toolName, {
+      this.toolStats.set(_toolName, {
         calls: 0,
         successes: 0,
         failures: 0,
@@ -406,7 +403,7 @@ export class MCPToolWrapper {
       });
     }
     
-    const stats = this.toolStats.get(toolName);
+    const _stats = this.toolStats.get(toolName);
     stats.calls++;
     if (success) {
       stats.successes++;
@@ -421,8 +418,8 @@ export class MCPToolWrapper {
    * Get comprehensive tool statistics
    */
   getStatistics() {
-    const toolStats = {};
-    this.toolStats.forEach((value, key) => {
+    const _toolStats = { /* empty */ };
+    this.toolStats.forEach((_value, key) => {
       toolStats[key] = { ...value };
     });
     
@@ -445,7 +442,7 @@ export class MCPToolWrapper {
         worstTime: 0
       },
       performance: {
-        totalCalls: Array.from(this.toolStats.values()).reduce((sum, stat) => sum + stat.calls, 0),
+        totalCalls: Array.from(this.toolStats.values()).reduce((_sum, stat) => sum + stat.calls, 0),
         successRate: this._calculateOverallSuccessRate(),
         avgLatency: this._calculateAvgLatency(),
         throughput: this._calculateThroughput()
@@ -457,10 +454,10 @@ export class MCPToolWrapper {
    * Calculate overall success rate
    */
   _calculateOverallSuccessRate() {
-    const total = Array.from(this.toolStats.values())
-      .reduce((sum, stat) => sum + stat.calls, 0);
-    const successes = Array.from(this.toolStats.values())
-      .reduce((sum, stat) => sum + stat.successes, 0);
+    const _total = Array.from(this.toolStats.values())
+      .reduce((_sum, stat) => sum + stat.calls, 0);
+    const _successes = Array.from(this.toolStats.values())
+      .reduce((_sum, stat) => sum + stat.successes, 0);
     
     return total > 0 ? (successes / total * 100).toFixed(2) : 100;
   }
@@ -469,10 +466,10 @@ export class MCPToolWrapper {
    * Calculate average latency
    */
   _calculateAvgLatency() {
-    const stats = Array.from(this.toolStats.values()).filter(stat => stat.calls > 0);
+    const _stats = Array.from(this.toolStats.values()).filter(stat => stat.calls > 0);
     if (stats.length === 0) return 0;
     
-    const totalLatency = stats.reduce((sum, stat) => sum + stat.avgDuration, 0);
+    const _totalLatency = stats.reduce((_sum, stat) => sum + stat.avgDuration, 0);
     return (totalLatency / stats.length).toFixed(2);
   }
   
@@ -480,7 +477,7 @@ export class MCPToolWrapper {
    * Calculate throughput (operations per second)
    */
   _calculateThroughput() {
-    const batchStats = this.batchStats;
+    const _batchStats = this.batchStats;
     if (!batchStats || batchStats.totalTime === 0) return 0;
     
     return (batchStats.totalTools / (batchStats.totalTime / 1000)).toFixed(2);
@@ -491,8 +488,8 @@ export class MCPToolWrapper {
    */
   createBatch(calls) {
     return calls.map(call => ({
-      tool: call.tool,
-      params: call.params || {}
+      tool: call._tool,
+      params: call.params || { /* empty */ }
     }));
   }
   
@@ -500,12 +497,12 @@ export class MCPToolWrapper {
    * Execute swarm initialization sequence with optimization
    */
   async initializeSwarm(config) {
-    const swarmId = config.swarmId || `swarm-${Date.now()}`;
-    const startTime = Date.now();
+    const _swarmId = config.swarmId || `swarm-${Date.now()}`;
+    const _startTime = Date.now();
     
     try {
       // Phase 1: Critical initialization (sequential)
-      const criticalOps = [
+      const _criticalOps = [
         { tool: 'swarm_init', params: { 
           topology: config.topology || 'hierarchical',
           maxAgents: config.maxAgents || 8,
@@ -517,31 +514,31 @@ export class MCPToolWrapper {
       const [swarmInitResult] = await this.executeParallel(criticalOps);
       
       // Phase 2: Supporting services (parallel)
-      const supportingOps = [
+      const _supportingOps = [
         { tool: 'memory_namespace', params: { 
           action: 'create',
           namespace: swarmId,
           maxSize: config.memorySize || 100
         }},
-        { tool: 'neural_status', params: {} },
+        { tool: 'neural_status', params: { /* empty */ } },
         { tool: 'performance_report', params: { format: 'summary' } },
         { tool: 'features_detect', params: { component: 'swarm' } }
       ];
       
-      const supportingResults = await this.executeParallel(supportingOps);
+      const _supportingResults = await this.executeParallel(supportingOps);
       
       // Store initialization metadata
-      const initTime = Date.now() - startTime;
-      await this.storeMemory(swarmId, 'init_performance', {
-        initTime,
-        topology: config.topology,
-        maxAgents: config.maxAgents,
+      const _initTime = Date.now() - startTime;
+      await this.storeMemory(_swarmId, 'init_performance', {
+        _initTime,
+        topology: config._topology,
+        maxAgents: config._maxAgents,
         timestamp: Date.now()
       }, 'metrics');
       
       return [swarmInitResult, ...supportingResults];
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Swarm initialization failed:', error);
       throw error;
     }
@@ -550,41 +547,41 @@ export class MCPToolWrapper {
   /**
    * Spawn multiple agents in parallel with optimization
    */
-  async spawnAgents(types, swarmId) {
+  async spawnAgents(_types, swarmId) {
     if (!Array.isArray(types) || types.length === 0) {
       return [];
     }
     
-    const startTime = Date.now();
+    const _startTime = Date.now();
     
     // Optimize agent spawning by grouping similar types
-    const groupedTypes = this._groupAgentTypes(types);
-    const allResults = [];
+    const _groupedTypes = this._groupAgentTypes(types);
+    const _allResults = [];
     
     try {
       // Spawn each group in parallel
       for (const group of groupedTypes) {
-        const batch = group.map(type => ({
+        const _batch = group.map(type => ({
           tool: 'agent_spawn',
           params: { 
-            type, 
-            swarmId,
+            _type, 
+            _swarmId,
             timestamp: Date.now(),
-            batchId: `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+            batchId: `batch-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`
           }
         }));
         
-        const groupResults = await this.executeParallel(batch);
+        const _groupResults = await this.executeParallel(batch);
         allResults.push(...groupResults);
       }
       
       // Track spawn performance
-      const spawnTime = Date.now() - startTime;
-      this._trackSpawnPerformance(types.length, spawnTime);
+      const _spawnTime = Date.now() - startTime;
+      this._trackSpawnPerformance(types._length, spawnTime);
       
       return allResults;
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Agent spawning failed:', error);
       throw error;
     }
@@ -595,24 +592,24 @@ export class MCPToolWrapper {
    */
   _groupAgentTypes(types) {
     // Group complementary agent types that work well together
-    const groups = {
+    const _groups = {
       development: ['coder', 'architect', 'reviewer'],
       analysis: ['researcher', 'analyst', 'optimizer'],
       quality: ['tester', 'documenter'],
       coordination: ['coordinator']
     };
     
-    const result = [];
-    const remaining = [...types];
+    const _result = [];
+    const _remaining = [...types];
     
     // Create groups of complementary agents
     Object.values(groups).forEach(groupTypes => {
-      const groupAgents = remaining.filter(type => groupTypes.includes(type));
+      const _groupAgents = remaining.filter(type => groupTypes.includes(type));
       if (groupAgents.length > 0) {
         result.push(groupAgents);
         groupAgents.forEach(type => {
-          const index = remaining.indexOf(type);
-          if (index > -1) remaining.splice(index, 1);
+          const _index = remaining.indexOf(type);
+          if (index > -1) remaining.splice(_index, 1);
         });
       }
     });
@@ -626,7 +623,7 @@ export class MCPToolWrapper {
   /**
    * Track agent spawn performance
    */
-  _trackSpawnPerformance(agentCount, spawnTime) {
+  _trackSpawnPerformance(_agentCount, spawnTime) {
     if (!this.spawnStats) {
       this.spawnStats = {
         totalSpawns: 0,
@@ -642,30 +639,30 @@ export class MCPToolWrapper {
     this.spawnStats.totalAgents += agentCount;
     this.spawnStats.totalTime += spawnTime;
     this.spawnStats.avgTimePerAgent = this.spawnStats.totalTime / this.spawnStats.totalAgents;
-    this.spawnStats.bestTime = Math.min(this.spawnStats.bestTime, spawnTime);
-    this.spawnStats.worstTime = Math.max(this.spawnStats.worstTime, spawnTime);
+    this.spawnStats.bestTime = Math.min(this.spawnStats._bestTime, spawnTime);
+    this.spawnStats.worstTime = Math.max(this.spawnStats._worstTime, spawnTime);
   }
   
   /**
    * Store data in collective memory (REAL IMPLEMENTATION)
    */
-  async storeMemory(swarmId, key, value, type = 'knowledge') {
+  async storeMemory(_swarmId, _key, _value, type = 'knowledge') {
     try {
       if (!this.memoryDb) {
         await this.initializeMemoryStorage();
       }
       
-      const timestamp = Date.now();
-      const valueStr = typeof value === 'string' ? value : JSON.stringify(value);
+      const _timestamp = Date.now();
+      const _valueStr = typeof value === 'string' ? value : JSON.stringify(value);
       
       if (this.memoryDb) {
         // SQLite storage
-        const stmt = this.memoryDb.prepare(`
-          INSERT OR REPLACE INTO memories (namespace, key, value, type, timestamp)
+        const _stmt = this.memoryDb.prepare(`
+          INSERT OR REPLACE INTO memories (_namespace, _key, _value, _type, timestamp)
           VALUES (?, ?, ?, ?, ?)
         `);
         
-        const result = stmt.run(swarmId, key, valueStr, type, timestamp);
+        const _result = stmt.run(_swarmId, _key, _valueStr, _type, timestamp);
         
         return {
           success: true,
@@ -678,12 +675,12 @@ export class MCPToolWrapper {
         };
       } else {
         // Fallback in-memory storage
-        const memoryKey = `${swarmId}:${key}`;
-        this.memoryStore.set(memoryKey, {
-          namespace: swarmId,
-          key,
-          value: valueStr,
-          type,
+        const _memoryKey = `${swarmId}:${key}`;
+        this.memoryStore.set(_memoryKey, {
+          namespace: _swarmId,
+          _key,
+          value: _valueStr,
+          _type,
           timestamp
         });
         
@@ -696,7 +693,7 @@ export class MCPToolWrapper {
           timestamp
         };
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error storing memory:', error);
       throw error;
     }
@@ -705,7 +702,7 @@ export class MCPToolWrapper {
   /**
    * Retrieve data from collective memory (REAL IMPLEMENTATION)
    */
-  async retrieveMemory(swarmId, key) {
+  async retrieveMemory(_swarmId, key) {
     try {
       if (!this.memoryDb) {
         await this.initializeMemoryStorage();
@@ -713,11 +710,11 @@ export class MCPToolWrapper {
       
       if (this.memoryDb) {
         // SQLite retrieval
-        const stmt = this.memoryDb.prepare(`
+        const _stmt = this.memoryDb.prepare(`
           SELECT * FROM memories WHERE namespace = ? AND key = ?
         `);
         
-        const row = stmt.get(swarmId, key);
+        const _row = stmt.get(_swarmId, key);
         if (row) {
           try {
             return {
@@ -730,8 +727,8 @@ export class MCPToolWrapper {
         }
       } else {
         // Fallback in-memory retrieval
-        const memoryKey = `${swarmId}:${key}`;
-        const memory = this.memoryStore.get(memoryKey);
+        const _memoryKey = `${swarmId}:${key}`;
+        const _memory = this.memoryStore.get(memoryKey);
         if (memory) {
           try {
             return {
@@ -745,7 +742,7 @@ export class MCPToolWrapper {
       }
       
       return null;
-    } catch (error) {
+    } catch (_error) {
       console.error('Error retrieving memory:', error);
       throw error;
     }
@@ -754,17 +751,17 @@ export class MCPToolWrapper {
   /**
    * Search collective memory (REAL IMPLEMENTATION)
    */
-  async searchMemory(swarmId, pattern) {
+  async searchMemory(_swarmId, pattern) {
     try {
       if (!this.memoryDb) {
         await this.initializeMemoryStorage();
       }
       
-      let results = [];
+      let _results = [];
       
       if (this.memoryDb) {
         // SQLite search
-        let query, params;
+        let query, params; // TODO: Remove if unused
         
         if (pattern && pattern.trim()) {
           // Search with pattern
@@ -774,7 +771,7 @@ export class MCPToolWrapper {
             ORDER BY timestamp DESC
             LIMIT 50
           `;
-          const searchPattern = `%${pattern}%`;
+          const _searchPattern = `%${pattern}%`;
           params = [swarmId, searchPattern, searchPattern, searchPattern];
         } else {
           // Get all memories for namespace
@@ -787,14 +784,14 @@ export class MCPToolWrapper {
           params = [swarmId];
         }
         
-        const stmt = this.memoryDb.prepare(query);
+        const _stmt = this.memoryDb.prepare(query);
         results = stmt.all(...params);
         
         // Parse JSON values where possible
         results = results.map(row => {
           try {
             return {
-              ...row,
+              ..._row,
               value: JSON.parse(row.value)
             };
           } catch {
@@ -803,7 +800,7 @@ export class MCPToolWrapper {
         });
       } else {
         // Fallback in-memory search
-        for (const [memKey, memory] of this.memoryStore) {
+        for (const [_memKey, memory] of this.memoryStore) {
           if (memory.namespace === swarmId) {
             if (!pattern || 
                 memory.key.includes(pattern) || 
@@ -811,7 +808,7 @@ export class MCPToolWrapper {
                 memory.type.includes(pattern)) {
               try {
                 results.push({
-                  ...memory,
+                  ..._memory,
                   value: JSON.parse(memory.value)
                 });
               } catch {
@@ -822,8 +819,8 @@ export class MCPToolWrapper {
         }
         
         // Sort by timestamp descending
-        results.sort((a, b) => b.timestamp - a.timestamp);
-        results = results.slice(0, 50);
+        results.sort((_a, b) => b.timestamp - a.timestamp);
+        results = results.slice(_0, 50);
       }
       
       return {
@@ -833,7 +830,7 @@ export class MCPToolWrapper {
         total: results.length,
         results: results
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Error searching memory:', error);
       throw error;
     }
@@ -842,18 +839,18 @@ export class MCPToolWrapper {
   /**
    * Orchestrate task with monitoring and optimization
    */
-  async orchestrateTask(task, strategy = 'parallel', metadata = {}) {
-    const taskId = metadata.taskId || `task-${Date.now()}`;
-    const complexity = metadata.complexity || 'medium';
+  async orchestrateTask(_task, strategy = 'parallel', metadata = { /* empty */ }) {
+    const _taskId = metadata.taskId || `task-${Date.now()}`;
+    const _complexity = metadata.complexity || 'medium';
     
     // Adjust monitoring frequency based on task complexity
-    const monitoringInterval = {
+    const _monitoringInterval = {
       low: 10000,
       medium: 5000,
       high: 2000
     }[complexity] || 5000;
     
-    const batch = [
+    const _batch = [
       { tool: 'task_orchestrate', params: { 
         task, 
         strategy,
@@ -880,7 +877,7 @@ export class MCPToolWrapper {
    * Analyze performance bottlenecks
    */
   async analyzePerformance(swarmId) {
-    const batch = [
+    const _batch = [
       { tool: 'bottleneck_analyze', params: { component: swarmId }},
       { tool: 'performance_report', params: { format: 'detailed' }},
       { tool: 'token_usage', params: { operation: swarmId }}
@@ -892,46 +889,46 @@ export class MCPToolWrapper {
   /**
    * GitHub integration for code operations
    */
-  async githubOperations(repo, operation, params = {}) {
-    const githubTools = {
+  async githubOperations(_repo, _operation, params = { /* empty */ }) {
+    const _githubTools = {
       analyze: 'github_repo_analyze',
       pr: 'github_pr_manage',
       issue: 'github_issue_track',
       review: 'github_code_review'
     };
     
-    const tool = githubTools[operation];
+    const _tool = githubTools[operation];
     if (!tool) {
       throw new Error(`Unknown GitHub operation: ${operation}`);
     }
     
-    return await this.executeTool(tool, { repo, ...params });
+    return await this.executeTool(_tool, { _repo, ...params });
   }
   
   /**
    * Neural network operations
    */
-  async neuralOperation(operation, params = {}) {
-    const neuralTools = {
+  async neuralOperation(_operation, params = { /* empty */ }) {
+    const _neuralTools = {
       train: 'neural_train',
       predict: 'neural_predict',
       analyze: 'neural_patterns',
       optimize: 'wasm_optimize'
     };
     
-    const tool = neuralTools[operation];
+    const _tool = neuralTools[operation];
     if (!tool) {
       throw new Error(`Unknown neural operation: ${operation}`);
     }
     
-    return await this.executeTool(tool, params);
+    return await this.executeTool(_tool, params);
   }
   
   /**
    * Clean up and destroy swarm
    */
   async destroySwarm(swarmId) {
-    const batch = [
+    const _batch = [
       { tool: 'swarm_destroy', params: { swarmId }},
       { tool: 'memory_namespace', params: { 
         action: 'delete',
@@ -946,6 +943,5 @@ export class MCPToolWrapper {
     return await this.executeParallel(batch);
   }
 }
-
 // Export tool categories for reference
 export { MCP_TOOLS };

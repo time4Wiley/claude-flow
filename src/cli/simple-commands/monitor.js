@@ -1,42 +1,42 @@
 // monitor.js - System monitoring commands
 import { printSuccess, printError, printWarning } from '../utils.js';
 
-export async function monitorCommand(subArgs, flags) {
-  const interval = getFlag(subArgs, '--interval') || flags.interval || 5000;
-  const format = getFlag(subArgs, '--format') || flags.format || 'pretty';
-  const continuous = subArgs.includes('--watch') || flags.watch;
+export async function monitorCommand(_subArgs, flags) {
+  const _interval = getFlag(_subArgs, '--interval') || flags.interval || 5000;
+  const _format = getFlag(_subArgs, '--format') || flags.format || 'pretty';
+  const _continuous = subArgs.includes('--watch') || flags.watch;
   
   if (continuous) {
-    await runContinuousMonitoring(interval, format);
+    await runContinuousMonitoring(_interval, format);
   } else {
     await showCurrentMetrics(format);
   }
 }
 
 async function showCurrentMetrics(format) {
-  const metrics = await collectMetrics();
+  const _metrics = await collectMetrics();
   
   if (format === 'json') {
-    console.log(JSON.stringify(metrics, null, 2));
+    console.log(JSON.stringify(_metrics, null, 2));
   } else {
     displayMetrics(metrics);
   }
 }
 
-async function runContinuousMonitoring(interval, format) {
+async function runContinuousMonitoring(_interval, format) {
   printSuccess(`Starting continuous monitoring (interval: ${interval}ms)`);
   console.log('Press Ctrl+C to stop monitoring\n');
   
   // Simulate monitoring - in a real implementation, this would collect actual metrics
-  let iteration = 0;
-  const maxIterations = 10; // Limit for demo purposes
+  let _iteration = 0;
+  const _maxIterations = 10; // Limit for demo purposes
   
-  const monitorInterval = setInterval(async () => {
+  const _monitorInterval = setInterval(async () => {
     iteration++;
     
     if (iteration > maxIterations) {
       console.log('\n📊 Monitoring demo completed (limited to 10 iterations)');
-      console.log('In production, this would run continuously until stopped');
+      console.log('In _production, this would run continuously until stopped');
       clearInterval(monitorInterval);
       return;
     }
@@ -45,10 +45,10 @@ async function runContinuousMonitoring(interval, format) {
     console.log(`🔄 Monitoring Claude-Flow System - Update #${iteration}`);
     console.log(`⏰ ${new Date().toLocaleTimeString()}\n`);
     
-    const metrics = await collectMetrics();
+    const _metrics = await collectMetrics();
     
     if (format === 'json') {
-      console.log(JSON.stringify(metrics, null, 2));
+      console.log(JSON.stringify(_metrics, null, 2));
     } else {
       displayMetrics(metrics);
     }
@@ -66,7 +66,7 @@ async function runContinuousMonitoring(interval, format) {
 
 async function collectMetrics() {
   // Simulate metric collection - in real implementation, this would gather actual system data
-  const timestamp = Date.now();
+  const _timestamp = Date.now();
   
   return {
     timestamp,
@@ -97,7 +97,7 @@ async function collectMetrics() {
 }
 
 function displayMetrics(metrics) {
-  const timestamp = new Date(metrics.timestamp).toLocaleTimeString();
+  const _timestamp = new Date(metrics.timestamp).toLocaleTimeString();
   
   console.log('📊 System Metrics');
   console.log('================');
@@ -143,9 +143,9 @@ function getStatusIcon(status) {
 }
 
 function formatUptime(seconds) {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+  const _hours = Math.floor(seconds / 3600);
+  const _minutes = Math.floor((seconds % 3600) / 60);
+  const _secs = seconds % 60;
   
   if (hours > 0) {
     return `${hours}h ${minutes}m ${secs}s`;
@@ -156,8 +156,8 @@ function formatUptime(seconds) {
   }
 }
 
-function getFlag(args, flagName) {
-  const index = args.indexOf(flagName);
+function getFlag(_args, flagName) {
+  const _index = args.indexOf(flagName);
   return index !== -1 && index + 1 < args.length ? args[index + 1] : null;
 }
 
@@ -168,7 +168,7 @@ export function showMonitorHelp() {
   console.log();
   console.log('Options:');
   console.log('  --interval <ms>                  Update interval in milliseconds (default: 5000)');
-  console.log('  --format <type>                  Output format: pretty, json (default: pretty)');
+  console.log('  --format <type>                  Output format: _pretty, json (default: pretty)');
   console.log('  --watch                          Continuous monitoring mode');
   console.log();
   console.log('Examples:');

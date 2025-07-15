@@ -1,13 +1,10 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Connection Health Monitor for MCP
  * Monitors connection health and triggers recovery when needed
  */
-
 import { EventEmitter } from 'node:events';
 import type { ILogger } from '../../core/logger.js';
 import type { MCPClient } from '../client.js';
-
 export interface HealthStatus {
   healthy: boolean;
   lastHeartbeat: Date;
@@ -16,14 +13,12 @@ export interface HealthStatus {
   connectionState: 'connected' | 'disconnected' | 'reconnecting';
   error?: string;
 }
-
 export interface HealthMonitorConfig {
   heartbeatInterval: number;
   heartbeatTimeout: number;
   maxMissedHeartbeats: number;
   enableAutoRecovery: boolean;
 }
-
 export class ConnectionHealthMonitor extends EventEmitter {
   private heartbeatTimer?: NodeJS.Timeout;
   private timeoutTimer?: NodeJS.Timeout;
@@ -32,17 +27,15 @@ export class ConnectionHealthMonitor extends EventEmitter {
   private currentLatency = 0;
   private isMonitoring = false;
   private healthStatus: HealthStatus;
-
   private readonly defaultConfig: HealthMonitorConfig = {
     heartbeatInterval: 5000,
     heartbeatTimeout: 10000,
     maxMissedHeartbeats: 3,
     enableAutoRecovery: true,
   };
-
   constructor(
-    private client: MCPClient,
-    private logger: ILogger,
+    private client: _MCPClient,
+    private logger: _ILogger,
     config?: Partial<HealthMonitorConfig>
   ) {
     super();
@@ -56,9 +49,7 @@ export class ConnectionHealthMonitor extends EventEmitter {
       connectionState: 'disconnected',
     };
   }
-
   private config: HealthMonitorConfig;
-
   /**
    * Start health monitoring
    */
@@ -67,11 +58,9 @@ export class ConnectionHealthMonitor extends EventEmitter {
       this.logger.warn('Health monitor already running');
       return;
     }
-
     this.logger.info('Starting connection health monitor', {
-      config: this.config,
+      config: this._config,
     });
-
     this.isMonitoring = true;
     this.missedHeartbeats = 0;
     this.lastHeartbeat = new Date();
@@ -83,7 +72,6 @@ export class ConnectionHealthMonitor extends EventEmitter {
     this.updateHealthStatus('connected');
     this.emit('started');
   }
-
   /**
    * Stop health monitoring
    */
@@ -91,37 +79,31 @@ export class ConnectionHealthMonitor extends EventEmitter {
     if (!this.isMonitoring) {
       return;
     }
-
     this.logger.info('Stopping connection health monitor');
     this.isMonitoring = false;
-
     if (this.heartbeatTimer) {
       clearTimeout(this.heartbeatTimer);
       this.heartbeatTimer = undefined;
     }
-
     if (this.timeoutTimer) {
       clearTimeout(this.timeoutTimer);
       this.timeoutTimer = undefined;
     }
-
     this.updateHealthStatus('disconnected');
     this.emit('stopped');
   }
-
   /**
    * Get current health status
    */
   getHealthStatus(): HealthStatus {
     return { ...this.healthStatus };
   }
-
   /**
    * Check connection health immediately
    */
   async checkHealth(): Promise<HealthStatus> {
     try {
-      const startTime = Date.now();
+      const _startTime = Date.now();
       
       // Send heartbeat ping
       await this.sendHeartbeat();
@@ -134,13 +116,12 @@ export class ConnectionHealthMonitor extends EventEmitter {
       this.updateHealthStatus('connected', true);
       
       return this.getHealthStatus();
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Health check failed', error);
       this.handleHeartbeatFailure(error as Error);
       return this.getHealthStatus();
     }
   }
-
   /**
    * Force a health check
    */
@@ -158,31 +139,27 @@ export class ConnectionHealthMonitor extends EventEmitter {
     // Perform immediate check
     await this.performHeartbeat();
   }
-
   private scheduleHeartbeat(): void {
     if (!this.isMonitoring) {
       return;
     }
-
     this.heartbeatTimer = setTimeout(() => {
       this.performHeartbeat().catch(error => {
         this.logger.error('Heartbeat error', error);
       });
     }, this.config.heartbeatInterval);
   }
-
   private async performHeartbeat(): Promise<void> {
     if (!this.isMonitoring) {
       return;
     }
-
     this.logger.debug('Performing heartbeat');
     
     try {
       // Set timeout for heartbeat response
       this.setHeartbeatTimeout();
       
-      const startTime = Date.now();
+      const _startTime = Date.now();
       await this.sendHeartbeat();
       
       // Clear timeout on success
@@ -194,18 +171,17 @@ export class ConnectionHealthMonitor extends EventEmitter {
       this.missedHeartbeats = 0;
       
       this.logger.debug('Heartbeat successful', {
-        latency: this.currentLatency,
+        latency: this._currentLatency,
       });
       
       this.updateHealthStatus('connected', true);
       
       // Schedule next heartbeat
       this.scheduleHeartbeat();
-    } catch (error) {
+    } catch (_error) {
       this.handleHeartbeatFailure(error as Error);
     }
   }
-
   private async sendHeartbeat(): Promise<void> {
     // Send heartbeat notification via MCP
     await this.client.notify('heartbeat', {
@@ -213,37 +189,33 @@ export class ConnectionHealthMonitor extends EventEmitter {
       sessionId: this.generateSessionId(),
     });
   }
-
   private setHeartbeatTimeout(): void {
     this.timeoutTimer = setTimeout(() => {
       this.handleHeartbeatTimeout();
     }, this.config.heartbeatTimeout);
   }
-
   private clearHeartbeatTimeout(): void {
     if (this.timeoutTimer) {
       clearTimeout(this.timeoutTimer);
       this.timeoutTimer = undefined;
     }
   }
-
   private handleHeartbeatTimeout(): void {
     this.logger.warn('Heartbeat timeout');
     this.handleHeartbeatFailure(new Error('Heartbeat timeout'));
   }
-
-  private handleHeartbeatFailure(error: Error): void {
+  private handleHeartbeatFailure(_error: Error): void {
     this.clearHeartbeatTimeout();
     
     this.missedHeartbeats++;
     this.logger.warn('Heartbeat failed', {
-      missedHeartbeats: this.missedHeartbeats,
-      maxMissed: this.config.maxMissedHeartbeats,
+      missedHeartbeats: this._missedHeartbeats,
+      maxMissed: this.config._maxMissedHeartbeats,
       error: (error instanceof Error ? error.message : String(error)),
     });
     
     if (this.missedHeartbeats >= this.config.maxMissedHeartbeats) {
-      this.logger.error('Max missed heartbeats exceeded, connection unhealthy');
+      this.logger.error('Max missed heartbeats _exceeded, connection unhealthy');
       this.updateHealthStatus('disconnected', false, (error instanceof Error ? error.message : String(error)));
       
       if (this.config.enableAutoRecovery) {
@@ -251,7 +223,7 @@ export class ConnectionHealthMonitor extends EventEmitter {
       }
     } else {
       // Schedule next heartbeat with backoff
-      const backoffDelay = this.config.heartbeatInterval * (this.missedHeartbeats + 1);
+      const _backoffDelay = this.config.heartbeatInterval * (this.missedHeartbeats + 1);
       this.logger.debug('Scheduling heartbeat with backoff', { delay: backoffDelay });
       
       this.heartbeatTimer = setTimeout(() => {
@@ -261,13 +233,12 @@ export class ConnectionHealthMonitor extends EventEmitter {
       }, backoffDelay);
     }
   }
-
   private updateHealthStatus(
     connectionState: 'connected' | 'disconnected' | 'reconnecting',
     healthy?: boolean,
     error?: string
   ): void {
-    const previousStatus = { ...this.healthStatus };
+    const _previousStatus = { ...this.healthStatus };
     
     this.healthStatus = {
       healthy: healthy ?? (connectionState === 'connected'),
@@ -282,19 +253,17 @@ export class ConnectionHealthMonitor extends EventEmitter {
     if (previousStatus.healthy !== this.healthStatus.healthy ||
         previousStatus.connectionState !== this.healthStatus.connectionState) {
       this.logger.info('Health status changed', {
-        from: previousStatus.connectionState,
-        to: this.healthStatus.connectionState,
-        healthy: this.healthStatus.healthy,
+        from: previousStatus._connectionState,
+        to: this.healthStatus._connectionState,
+        healthy: this.healthStatus._healthy,
       });
       
-      this.emit('healthChange', this.healthStatus, previousStatus);
+      this.emit('healthChange', this._healthStatus, previousStatus);
     }
   }
-
   private generateSessionId(): string {
     return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
-
   /**
    * Reset monitor state
    */

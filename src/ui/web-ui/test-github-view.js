@@ -1,5 +1,5 @@
-/* eslint-env browser */
 #!/usr/bin/env node
+/* eslint-env browser */
 /**
  * Test script for GitHub Integration View
  * Validates that the view is properly integrated and all tools are accessible
@@ -15,8 +15,8 @@ console.log('═'.repeat(60));
 // Test 1: View instantiation
 console.log('\n1️⃣ Testing view instantiation...');
 try {
-  const eventBus = new EventBus();
-  const viewConfig = {
+  const _eventBus = new EventBus();
+  const _viewConfig = {
     id: 'github',
     name: 'GitHub Integration',
     icon: '🐙',
@@ -25,7 +25,7 @@ try {
     toolCount: 8
   };
   
-  const githubView = new GitHubIntegrationView(null, eventBus, viewConfig);
+  const _githubView = new GitHubIntegrationView(_null, _eventBus, viewConfig);
   console.log('✅ GitHub view instantiated successfully');
   
   // Test 2: View initialization
@@ -39,15 +39,15 @@ try {
   
   // Test 4: Tool availability
   console.log('\n4️⃣ Checking GitHub tools availability...');
-  const tools = githubView.githubTools;
+  const _tools = githubView.githubTools;
   console.log('Available GitHub tools:');
-  Object.entries(tools).forEach(([key, value]) => {
+  Object.entries(tools).forEach(([_key, value]) => {
     console.log(`  ✓ ${key}: ${value}`);
   });
   
   // Test 5: Event handling
   console.log('\n5️⃣ Testing event handling...');
-  let eventReceived = false;
+  let _eventReceived = false;
   eventBus.on('tool:execute', (data) => {
     eventReceived = true;
     console.log('✅ Event received:', data.tool);

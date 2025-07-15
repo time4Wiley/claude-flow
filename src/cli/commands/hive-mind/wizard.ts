@@ -5,7 +5,6 @@
  * Interactive setup and management wizard for Hive Mind swarms
  * with guided workflows and visual feedback.
  */
-
 import { Command } from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
@@ -14,7 +13,6 @@ import gradient from 'gradient-string';
 import { HiveMind } from '../../../hive-mind/core/HiveMind.js';
 import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager.js';
 import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter.js';
-
 type WizardAction = 
   | 'create_swarm'
   | 'manage_agents'
@@ -25,8 +23,7 @@ type WizardAction =
   | 'export_data'
   | 'switch_swarm'
   | 'exit';
-
-export const wizardCommand = new Command('wizard')
+export const _wizardCommand = new Command('wizard')
   .description('Interactive Hive Mind setup and management wizard')
   .option('--skip-intro', 'Skip the intro animation', false)
   .action(async (options) => {
@@ -37,38 +34,56 @@ export const wizardCommand = new Command('wizard')
       }
       
       // Main wizard loop
-      let exit = false;
+      let _exit = false;
       while (!exit) {
-        const action = await selectAction();
+        const _action = await selectAction();
         
         switch (action) {
           case 'create_swarm':
-            await createSwarmWizard();
-            break;
+            {
+await createSwarmWizard();
+            
+}break;
           case 'manage_agents':
-            await manageAgentsWizard();
-            break;
+            {
+await manageAgentsWizard();
+            
+}break;
           case 'submit_task':
-            await submitTaskWizard();
-            break;
+            {
+await submitTaskWizard();
+            
+}break;
           case 'view_status':
-            await viewStatusWizard();
-            break;
+            {
+await viewStatusWizard();
+            
+}break;
           case 'configure_memory':
-            await configureMemoryWizard();
-            break;
+            {
+await configureMemoryWizard();
+            
+}break;
           case 'run_simulation':
-            await runSimulationWizard();
-            break;
+            {
+await runSimulationWizard();
+            
+}break;
           case 'export_data':
-            await exportDataWizard();
-            break;
+            {
+await exportDataWizard();
+            
+}break;
           case 'switch_swarm':
-            await switchSwarmWizard();
-            break;
+            {
+await switchSwarmWizard();
+            
+}break;
           case 'exit':
-            exit = true;
-            break;
+            {
+exit = true;
+            
+}break;
         }
         
         if (!exit) {
@@ -85,15 +100,14 @@ export const wizardCommand = new Command('wizard')
       
       console.log('\n' + chalk.bold.yellow('👋 Thank you for using Hive Mind!'));
       
-    } catch (error) {
+    } catch (_error) {
       console.error(formatError('Wizard error: ' + (error as Error).message));
       process.exit(1);
     }
   });
-
 async function showIntro() {
   console.clear();
-  const title = figlet.textSync('Hive Mind', {
+  const _title = figlet.textSync('Hive Mind', {
     font: 'Big',
     horizontalLayout: 'default',
     verticalLayout: 'default'
@@ -103,12 +117,11 @@ async function showIntro() {
   console.log(chalk.bold.yellow('\n🐝 Welcome to the Hive Mind Interactive Wizard! 🐝\n'));
   console.log(chalk.gray('Collective intelligence for autonomous task orchestration\n'));
   
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise(resolve => setTimeout(_resolve, 2000));
 }
-
 async function selectAction(): Promise<WizardAction> {
-  const db = await DatabaseManager.getInstance();
-  const activeSwarm = await db.getActiveSwarmId();
+  const _db = await DatabaseManager.getInstance();
+  const _activeSwarm = await db.getActiveSwarmId();
   
   console.log('\n' + chalk.bold('🎯 What would you like to do?'));
   if (activeSwarm) {
@@ -135,11 +148,10 @@ async function selectAction(): Promise<WizardAction> {
   
   return action;
 }
-
 async function createSwarmWizard() {
   console.log('\n' + chalk.bold('🆕 Create New Hive Mind Swarm'));
   
-  const answers = await inquirer.prompt([
+  const _answers = await inquirer.prompt([
     {
       type: 'input',
       name: 'name',
@@ -198,7 +210,7 @@ async function createSwarmWizard() {
   }]);
   
   if (showAdvanced) {
-    const advanced = await inquirer.prompt([
+    const _advanced = await inquirer.prompt([
       {
         type: 'number',
         name: 'memoryTTL',
@@ -219,41 +231,42 @@ async function createSwarmWizard() {
       }
     ]);
     
-    Object.assign(answers, advanced);
+    Object.assign(_answers, advanced);
   }
   
   // Create swarm
-  const spinner = require('ora')('Creating Hive Mind swarm...').start();
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _spinner = require('ora')('Creating Hive Mind swarm...').start();
   
   try {
-    const hiveMind = new HiveMind({
-      name: answers.name,
-      topology: answers.topology,
-      maxAgents: answers.maxAgents,
-      queenMode: answers.queenMode,
-      memoryTTL: answers.memoryTTL || 86400,
-      consensusThreshold: answers.consensusThreshold,
-      autoSpawn: answers.autoSpawn,
+    const _hiveMind = new HiveMind({
+      name: answers._name,
+      topology: answers._topology,
+      maxAgents: answers._maxAgents,
+      queenMode: answers._queenMode,
+      memoryTTL: answers.memoryTTL || _86400,
+      consensusThreshold: answers._consensusThreshold,
+      autoSpawn: answers._autoSpawn,
       enabledFeatures: answers.enabledFeatures || ['neural', 'monitoring', 'faultTolerance'],
       createdAt: new Date()
     });
     
-    const swarmId = await hiveMind.initialize();
+    const _swarmId = await hiveMind.initialize();
     
     spinner.succeed(formatSuccess('Hive Mind created successfully!'));
     console.log(formatInfo(`Swarm ID: ${swarmId}`));
     
     if (answers.autoSpawn) {
-      const agents = await hiveMind.autoSpawnAgents();
+      const _agents = await hiveMind.autoSpawnAgents();
       console.log(formatSuccess(`Spawned ${agents.length} initial agents`));
     }
     
-  } catch (error) {
+  } catch (_error) {
     spinner.fail(formatError('Failed to create swarm'));
     throw error;
   }
 }
-
 async function manageAgentsWizard() {
   console.log('\n' + chalk.bold('🤖 Manage Agents'));
   
@@ -270,31 +283,40 @@ async function manageAgentsWizard() {
     ]
   }]);
   
-  const db = await DatabaseManager.getInstance();
-  const swarmId = await db.getActiveSwarmId();
-  const hiveMind = await HiveMind.load(swarmId!);
+  const _db = await DatabaseManager.getInstance();
+  const _swarmId = await db.getActiveSwarmId();
+  const _hiveMind = await HiveMind.load(swarmId!);
   
   switch (action) {
     case 'spawn':
-      await spawnAgentInteractive(hiveMind);
-      break;
+      {
+await spawnAgentInteractive(hiveMind);
+      
+}break;
     case 'list':
-      await listAgentsInteractive(hiveMind);
-      break;
+      {
+await listAgentsInteractive(hiveMind);
+      
+}break;
     case 'modify':
-      await modifyAgentInteractive(hiveMind);
-      break;
+      {
+await modifyAgentInteractive(hiveMind);
+      
+}break;
     case 'remove':
-      await removeAgentInteractive(hiveMind);
-      break;
+      {
+await removeAgentInteractive(hiveMind);
+      
+}break;
     case 'rebalance':
-      await rebalanceAgentsInteractive(hiveMind);
-      break;
+      {
+await rebalanceAgentsInteractive(hiveMind);
+      
+}break;
   }
 }
-
 async function spawnAgentInteractive(hiveMind: HiveMind) {
-  const agentTypes = [
+  const _agentTypes = [
     { name: '🎯 Coordinator - Task management and delegation', value: 'coordinator' },
     { name: '🔬 Researcher - Information gathering and analysis', value: 'researcher' },
     { name: '💻 Coder - Code generation and implementation', value: 'coder' },
@@ -308,7 +330,7 @@ async function spawnAgentInteractive(hiveMind: HiveMind) {
     { name: '🎨 Specialist - Custom specialized agent', value: 'specialist' }
   ];
   
-  const answers = await inquirer.prompt([
+  const _answers = await inquirer.prompt([
     {
       type: 'list',
       name: 'type',
@@ -319,7 +341,7 @@ async function spawnAgentInteractive(hiveMind: HiveMind) {
       type: 'input',
       name: 'name',
       message: 'Agent name (optional):',
-      default: (answers: any) => `${answers.type}-${Date.now()}`
+      default: (answers: unknown) => `${answers.type}-${Date.now()}`
     },
     {
       type: 'number',
@@ -330,13 +352,15 @@ async function spawnAgentInteractive(hiveMind: HiveMind) {
     }
   ]);
   
-  const spinner = require('ora')(`Spawning ${answers.count} ${answers.type} agent(s)...`).start();
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _spinner = require('ora')(`Spawning ${answers.count} ${answers.type} agent(s)...`).start();
   
   try {
-    const agents = [];
-    for (let i = 0; i < answers.count; i++) {
-      const agent = await hiveMind.spawnAgent({
-        type: answers.type,
+    const _agents = [];
+    for (let _i = 0; i < answers.count; i++) {
+      const _agent = await hiveMind.spawnAgent({
+        type: answers._type,
         name: answers.count > 1 ? `${answers.name}-${i}` : answers.name
       });
       agents.push(agent);
@@ -344,20 +368,19 @@ async function spawnAgentInteractive(hiveMind: HiveMind) {
     
     spinner.succeed(formatSuccess(`Spawned ${agents.length} agent(s) successfully!`));
     
-  } catch (error) {
+  } catch (_error) {
     spinner.fail(formatError('Failed to spawn agents'));
     throw error;
   }
 }
-
 async function submitTaskWizard() {
   console.log('\n' + chalk.bold('📋 Submit Task to Hive Mind'));
   
-  const db = await DatabaseManager.getInstance();
-  const swarmId = await db.getActiveSwarmId();
-  const hiveMind = await HiveMind.load(swarmId!);
+  const _db = await DatabaseManager.getInstance();
+  const _swarmId = await db.getActiveSwarmId();
+  const _hiveMind = await HiveMind.load(swarmId!);
   
-  const templates = [
+  const _templates = [
     { name: '🔍 Research Task', value: 'research' },
     { name: '💻 Development Task', value: 'development' },
     { name: '📊 Analysis Task', value: 'analysis' },
@@ -373,11 +396,11 @@ async function submitTaskWizard() {
     choices: templates
   }]);
   
-  let taskDescription = '';
-  const taskConfig: any = {};
+  let _taskDescription = '';
+  const _taskConfig: unknown = { /* empty */ };
   
   if (template === 'custom') {
-    const answers = await inquirer.prompt([
+    const _answers = await inquirer.prompt([
       {
         type: 'editor',
         name: 'description',
@@ -387,7 +410,7 @@ async function submitTaskWizard() {
     taskDescription = answers.description;
   } else {
     // Use predefined templates
-    const templates = {
+    const _templates = {
       research: {
         prompt: 'What would you like to research?',
         prefix: 'Research and analyze: '
@@ -410,7 +433,7 @@ async function submitTaskWizard() {
       }
     };
     
-    const tmpl = templates[template as keyof typeof templates];
+    const _tmpl = templates[template as keyof typeof templates];
     const { detail } = await inquirer.prompt([{
       type: 'input',
       name: 'detail',
@@ -421,7 +444,7 @@ async function submitTaskWizard() {
   }
   
   // Task configuration
-  const config = await inquirer.prompt([
+  const _config = await inquirer.prompt([
     {
       type: 'list',
       name: 'priority',
@@ -454,12 +477,14 @@ async function submitTaskWizard() {
     }
   ]);
   
-  const spinner = require('ora')('Submitting task...').start();
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _spinner = require('ora')('Submitting task...').start();
   
   try {
-    const task = await hiveMind.submitTask({
-      description: taskDescription,
-      priority: config.priority,
+    const _task = await hiveMind.submitTask({
+      description: _taskDescription,
+      priority: config._priority,
       strategy: config.strategy
     });
     
@@ -471,12 +496,11 @@ async function submitTaskWizard() {
       // TODO: Implement real-time monitoring
     }
     
-  } catch (error) {
+  } catch (_error) {
     spinner.fail(formatError('Failed to submit task'));
     throw error;
   }
 }
-
 async function viewStatusWizard() {
   const { view } = await inquirer.prompt([{
     type: 'list',
@@ -493,75 +517,79 @@ async function viewStatusWizard() {
   }]);
   
   // Execute the status command with appropriate flags
-  const statusCmd = require('./status').statusCommand;
-  const args = ['status'];
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _statusCmd = require('./status').statusCommand;
+  const _args = ['status'];
   
   switch (view) {
     case 'agents':
-      args.push('--detailed');
-      break;
+      {
+args.push('--detailed');
+      
+}break;
     case 'tasks':
-      args.push('--tasks');
-      break;
+      {
+args.push('--tasks');
+      
+}break;
     case 'memory':
-      args.push('--memory');
-      break;
+      {
+args.push('--memory');
+      
+}break;
     case 'performance':
-      args.push('--performance');
-      break;
+      {
+args.push('--performance');
+      
+}break;
   }
   
   await statusCmd.parseAsync(args);
 }
-
 // Helper functions for other wizard actions
 async function listAgentsInteractive(hiveMind: HiveMind) {
-  const agents = await hiveMind.getAgents();
+  const _agents = await hiveMind.getAgents();
   
   console.log('\n' + chalk.bold('🤖 Agent List:'));
   agents.forEach(agent => {
-    const statusEmoji = agent.status === 'busy' ? '🔴' : '🟢';
+    const _statusEmoji = agent.status === 'busy' ? '🔴' : '🟢';
     console.log(`${statusEmoji} ${agent.name} (${agent.type}) - ${agent.status}`);
   });
 }
-
 async function modifyAgentInteractive(hiveMind: HiveMind) {
   // Implementation for modifying agents
   console.log(formatInfo('Agent modification coming soon...'));
 }
-
 async function removeAgentInteractive(hiveMind: HiveMind) {
   // Implementation for removing agents
   console.log(formatInfo('Agent removal coming soon...'));
 }
-
 async function rebalanceAgentsInteractive(hiveMind: HiveMind) {
-  const spinner = require('ora')('Rebalancing agents...').start();
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _spinner = require('ora')('Rebalancing agents...').start();
   
   try {
     await hiveMind.rebalanceAgents();
     spinner.succeed(formatSuccess('Agents rebalanced successfully!'));
-  } catch (error) {
+  } catch (_error) {
     spinner.fail(formatError('Failed to rebalance agents'));
     throw error;
   }
 }
-
 async function configureMemoryWizard() {
   console.log(formatInfo('Memory configuration coming soon...'));
 }
-
 async function runSimulationWizard() {
   console.log(formatInfo('Simulation mode coming soon...'));
 }
-
 async function exportDataWizard() {
   console.log(formatInfo('Data export coming soon...'));
 }
-
 async function switchSwarmWizard() {
-  const db = await DatabaseManager.getInstance();
-  const swarms = await db.getAllSwarms();
+  const _db = await DatabaseManager.getInstance();
+  const _swarms = await db.getAllSwarms();
   
   if (swarms.length === 0) {
     console.log(formatWarning('No swarms found. Create one first!'));

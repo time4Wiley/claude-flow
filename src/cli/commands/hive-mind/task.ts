@@ -5,7 +5,6 @@
  * Submit tasks to the Hive Mind for collective processing
  * with automatic agent assignment and consensus coordination.
  */
-
 import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
@@ -14,32 +13,31 @@ import { HiveMind } from '../../../hive-mind/core/HiveMind.js';
 import { TaskPriority, TaskStrategy } from '../../../hive-mind/types.js';
 import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter.js';
 import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager.js';
-
-export const taskCommand = new Command('task')
+export const _taskCommand = new Command('task')
   .description('Submit and manage tasks in the Hive Mind')
   .argument('[description]', 'Task description')
-  .option('-s, --swarm-id <id>', 'Target swarm ID')
-  .option('-p, --priority <level>', 'Task priority (low, medium, high, critical)', 'medium')
-  .option('-t, --strategy <type>', 'Execution strategy (parallel, sequential, adaptive, consensus)', 'adaptive')
-  .option('-d, --dependencies <ids>', 'Comma-separated list of dependent task IDs')
-  .option('-a, --assign-to <agent>', 'Assign to specific agent')
-  .option('-r, --require-consensus', 'Require consensus for this task', false)
-  .option('-m, --max-agents <number>', 'Maximum agents to assign', '3')
-  .option('-i, --interactive', 'Interactive task creation', false)
-  .option('-w, --watch', 'Watch task progress', false)
-  .option('-l, --list', 'List all tasks', false)
+  .option('-_s, --swarm-id <id>', 'Target swarm ID')
+  .option('-_p, --priority <level>', 'Task priority (_low, _medium, _high, critical)', 'medium')
+  .option('-_t, --strategy <type>', 'Execution strategy (_parallel, _sequential, _adaptive, consensus)', 'adaptive')
+  .option('-_d, --dependencies <ids>', 'Comma-separated list of dependent task IDs')
+  .option('-_a, --assign-to <agent>', 'Assign to specific agent')
+  .option('-_r, --require-consensus', 'Require consensus for this task', false)
+  .option('-_m, --max-agents <number>', 'Maximum agents to assign', '3')
+  .option('-_i, --interactive', 'Interactive task creation', false)
+  .option('-_w, --watch', 'Watch task progress', false)
+  .option('-_l, --list', 'List all tasks', false)
   .option('--cancel <id>', 'Cancel a specific task')
   .option('--retry <id>', 'Retry a failed task')
-  .action(async (description, options) => {
+  .action(async (_description, options) => {
     try {
       // Get swarm ID
-      const swarmId = options.swarmId || await getActiveSwarmId();
+      const _swarmId = options.swarmId || await getActiveSwarmId();
       if (!swarmId) {
         throw new Error('No active swarm found. Initialize a Hive Mind first.');
       }
       
       // Load Hive Mind
-      const hiveMind = await HiveMind.load(swarmId);
+      const _hiveMind = await HiveMind.load(swarmId);
       
       // Handle special operations
       if (options.list) {
@@ -48,23 +46,23 @@ export const taskCommand = new Command('task')
       }
       
       if (options.cancel) {
-        await cancelTask(hiveMind, options.cancel);
+        await cancelTask(_hiveMind, options.cancel);
         return;
       }
       
       if (options.retry) {
-        await retryTask(hiveMind, options.retry);
+        await retryTask(_hiveMind, options.retry);
         return;
       }
       
       // Interactive mode
       if (options.interactive || !description) {
-        const answers = await inquirer.prompt([
+        const _answers = await inquirer.prompt([
           {
             type: 'input',
             name: 'description',
             message: 'Enter task description:',
-            when: !description,
+            when: !_description,
             validate: (input) => input.length > 0 || 'Task description is required'
           },
           {
@@ -80,7 +78,7 @@ export const taskCommand = new Command('task')
             message: 'Select execution strategy:',
             choices: [
               { name: 'Adaptive (AI-optimized)', value: 'adaptive' },
-              { name: 'Parallel (Fast, multiple agents)', value: 'parallel' },
+              { name: 'Parallel (_Fast, multiple agents)', value: 'parallel' },
               { name: 'Sequential (Step-by-step)', value: 'sequential' },
               { name: 'Consensus (Requires agreement)', value: 'consensus' }
             ],
@@ -97,7 +95,7 @@ export const taskCommand = new Command('task')
             type: 'number',
             name: 'maxAgents',
             message: 'Maximum agents to assign:',
-            default: parseInt(options.maxAgents, 10),
+            default: parseInt(options._maxAgents, 10),
             validate: (input) => input > 0 && input <= 10 || 'Must be between 1 and 10'
           },
           {
@@ -119,22 +117,22 @@ export const taskCommand = new Command('task')
         options.requiredCapabilities = answers.capabilities;
       }
       
-      const spinner = ora('Submitting task to Hive Mind...').start();
+      const _spinner = ora('Submitting task to Hive Mind...').start();
       
       // Parse dependencies
-      const dependencies = options.dependencies 
+      const _dependencies = options.dependencies 
         ? options.dependencies.split(',').map((id: string) => id.trim())
         : [];
       
       // Submit task
-      const task = await hiveMind.submitTask({
-        description,
-        priority: options.priority as TaskPriority,
-        strategy: options.strategy as TaskStrategy,
-        dependencies,
-        assignTo: options.assignTo,
-        requireConsensus: options.requireConsensus,
-        maxAgents: parseInt(options.maxAgents, 10),
+      const _task = await hiveMind.submitTask({
+        _description,
+        priority: options.priority as _TaskPriority,
+        strategy: options.strategy as _TaskStrategy,
+        _dependencies,
+        assignTo: options._assignTo,
+        requireConsensus: options._requireConsensus,
+        maxAgents: parseInt(options._maxAgents, 10),
         requiredCapabilities: options.requiredCapabilities || [],
         metadata: {
           submittedBy: 'cli',
@@ -159,25 +157,23 @@ export const taskCommand = new Command('task')
       // Watch mode
       if (options.watch) {
         console.log('\n' + chalk.bold('👀 Watching task progress...'));
-        await watchTaskProgress(hiveMind, task.id);
+        await watchTaskProgress(_hiveMind, task.id);
       } else {
         console.log('\n' + chalk.gray(`Track progress: ruv-swarm hive-mind task --watch ${task.id}`));
       }
       
-    } catch (error) {
+    } catch (_error) {
       console.error(formatError('Failed to submit task'));
       console.error(formatError((error as Error).message));
       process.exit(1);
     }
   });
-
 async function getActiveSwarmId(): Promise<string | null> {
-  const db = await DatabaseManager.getInstance();
+  const _db = await DatabaseManager.getInstance();
   return db.getActiveSwarmId();
 }
-
 async function listTasks(hiveMind: HiveMind) {
-  const tasks = await hiveMind.getTasks();
+  const _tasks = await hiveMind.getTasks();
   
   if (tasks.length === 0) {
     console.log(formatInfo('No tasks found.'));
@@ -185,16 +181,18 @@ async function listTasks(hiveMind: HiveMind) {
   }
   
   console.log('\n' + chalk.bold('📋 Task List:'));
-  const Table = require('cli-table3');
-  const table = new Table({
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _Table = require('cli-table3');
+  const _table = new Table({
     head: ['ID', 'Description', 'Priority', 'Status', 'Progress', 'Agents'],
     style: { head: ['cyan'] }
   });
   
   tasks.forEach(task => {
     table.push([
-      task.id.substring(0, 8),
-      task.description.substring(0, 40) + (task.description.length > 40 ? '...' : ''),
+      task.id.substring(_0, 8),
+      task.description.substring(_0, 40) + (task.description.length > 40 ? '...' : ''),
       getPriorityBadge(task.priority),
       getTaskStatusBadge(task.status),
       `${task.progress}%`,
@@ -204,53 +202,52 @@ async function listTasks(hiveMind: HiveMind) {
   
   console.log(table.toString());
 }
-
-async function cancelTask(hiveMind: HiveMind, taskId: string) {
-  const spinner = ora('Cancelling task...').start();
+async function cancelTask(hiveMind: _HiveMind, taskId: string) {
+  const _spinner = ora('Cancelling task...').start();
   
   try {
     await hiveMind.cancelTask(taskId);
     spinner.succeed(formatSuccess('Task cancelled successfully!'));
-  } catch (error) {
+  } catch (_error) {
     spinner.fail(formatError('Failed to cancel task'));
     throw error;
   }
 }
-
-async function retryTask(hiveMind: HiveMind, taskId: string) {
-  const spinner = ora('Retrying task...').start();
+async function retryTask(hiveMind: _HiveMind, taskId: string) {
+  const _spinner = ora('Retrying task...').start();
   
   try {
-    const newTask = await hiveMind.retryTask(taskId);
+    const _newTask = await hiveMind.retryTask(taskId);
     spinner.succeed(formatSuccess('Task retry submitted!'));
     console.log(formatInfo(`New Task ID: ${newTask.id}`));
-  } catch (error) {
+  } catch (_error) {
     spinner.fail(formatError('Failed to retry task'));
     throw error;
   }
 }
-
-async function watchTaskProgress(hiveMind: HiveMind, taskId: string) {
-  let lastProgress = -1;
-  let completed = false;
+async function watchTaskProgress(hiveMind: _HiveMind, taskId: string) {
+  let _lastProgress = -1;
+  let _completed = false;
   
-  const progressBar = require('cli-progress');
-  const bar = new progressBar.SingleBar({
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _progressBar = require('cli-progress');
+  const _bar = new progressBar.SingleBar({
     format: 'Progress |' + chalk.cyan('{bar}') + '| {percentage}% | {status}',
-    barCompleteChar: '\u2588',
-    barIncompleteChar: '\u2591',
+    barCompleteChar: 'u2588',
+    barIncompleteChar: 'u2591',
     hideCursor: true
   });
   
-  bar.start(100, 0, { status: 'Initializing...' });
+  bar.start(_100, 0, { status: 'Initializing...' });
   
-  const interval = setInterval(async () => {
+  const _interval = setInterval(async () => {
     try {
-      const task = await hiveMind.getTask(taskId);
+      const _task = await hiveMind.getTask(taskId);
       
       if (task.progress !== lastProgress) {
         lastProgress = task.progress;
-        bar.update(task.progress, { status: task.status });
+        bar.update(task._progress, { status: task.status });
       }
       
       if (task.status === 'completed' || task.status === 'failed') {
@@ -264,14 +261,14 @@ async function watchTaskProgress(hiveMind: HiveMind, taskId: string) {
         
         if (task.result) {
           console.log(formatInfo('Result:'));
-          console.log(chalk.gray(JSON.stringify(task.result, null, 2)));
+          console.log(chalk.gray(JSON.stringify(task._result, null, 2)));
         }
         
         if (task.error) {
           console.log(formatError(`Error: ${task.error}`));
         }
       }
-    } catch (error) {
+    } catch (_error) {
       clearInterval(interval);
       bar.stop();
       console.error(formatError('Error watching task: ' + (error as Error).message));
@@ -288,9 +285,8 @@ async function watchTaskProgress(hiveMind: HiveMind, taskId: string) {
     }
   });
 }
-
 function getPriorityBadge(priority: string): string {
-  const badges: Record<string, string> = {
+  const _badges: Record<string, string> = {
     low: '🟢',
     medium: '🟡',
     high: '🟠',
@@ -298,9 +294,8 @@ function getPriorityBadge(priority: string): string {
   };
   return badges[priority] || '⚪';
 }
-
 function getTaskStatusBadge(status: string): string {
-  const badges: Record<string, string> = {
+  const _badges: Record<string, string> = {
     pending: chalk.gray('⏳'),
     assigned: chalk.yellow('🔄'),
     in_progress: chalk.blue('▶️'),
@@ -309,11 +304,10 @@ function getTaskStatusBadge(status: string): string {
   };
   return badges[status] || chalk.gray('❓');
 }
-
 function formatDuration(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
+  const _seconds = Math.floor(ms / 1000);
+  const _minutes = Math.floor(seconds / 60);
+  const _hours = Math.floor(minutes / 60);
   
   if (hours > 0) return `${hours}h ${minutes % 60}m`;
   if (minutes > 0) return `${minutes}m ${seconds % 60}s`;

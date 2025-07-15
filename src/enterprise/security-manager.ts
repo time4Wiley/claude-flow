@@ -1,11 +1,8 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 import { EventEmitter } from 'events';
 import { writeFile, readFile, mkdir, readdir } from 'fs/promises';
 import { join } from 'path';
 import { spawn } from 'child_process';
-import { Logger } from '../core/logger.js';
 import { ConfigManager } from '../core/config.js';
-
 export interface SecurityScan {
   id: string;
   name: string;
@@ -71,9 +68,7 @@ export interface SecurityScan {
   createdBy: string;
   auditLog: SecurityAuditEntry[];
 }
-
 export type SecuritySeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
-
 export interface SecurityFinding {
   id: string;
   title: string;
@@ -112,12 +107,11 @@ export interface SecurityFinding {
   assignedTo?: string;
   dueDate?: Date;
   tags: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   firstSeen: Date;
   lastSeen: Date;
   occurrences: number;
 }
-
 export interface ComplianceCheck {
   id: string;
   framework: string; // e.g., 'SOC2', 'GDPR', 'HIPAA', 'PCI-DSS', 'CIS', 'NIST'
@@ -129,7 +123,6 @@ export interface ComplianceCheck {
   remediation?: string;
   lastChecked: Date;
 }
-
 export interface SecurityRecommendation {
   id: string;
   title: string;
@@ -147,7 +140,6 @@ export interface SecurityRecommendation {
   references: string[];
   applicableFrameworks: string[];
 }
-
 export interface SecurityPolicy {
   id: string;
   name: string;
@@ -181,7 +173,6 @@ export interface SecurityPolicy {
   updatedAt: Date;
   createdBy: string;
 }
-
 export interface SecurityRule {
   id: string;
   name: string;
@@ -189,10 +180,9 @@ export interface SecurityRule {
   condition: string; // Query or condition syntax
   action: 'allow' | 'deny' | 'alert' | 'audit';
   severity: SecuritySeverity;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   enabled: boolean;
 }
-
 export interface SecurityIncident {
   id: string;
   title: string;
@@ -202,7 +192,7 @@ export interface SecurityIncident {
   type: 'security-breach' | 'vulnerability-exploit' | 'policy-violation' | 'suspicious-activity' | 'compliance-violation';
   source: {
     type: 'scan' | 'alert' | 'user-report' | 'automated-detection';
-    details: Record<string, any>;
+    details: Record<string, unknown>;
   };
   affected: {
     systems: string[];
@@ -253,7 +243,6 @@ export interface SecurityIncident {
   createdBy: string;
   auditLog: SecurityAuditEntry[];
 }
-
 export interface SecurityAction {
   id: string;
   type: 'investigation' | 'containment' | 'eradication' | 'recovery' | 'notification' | 'documentation';
@@ -264,7 +253,6 @@ export interface SecurityAction {
   completedAt?: Date;
   notes: string;
 }
-
 export interface SecurityCommunication {
   id: string;
   type: 'internal' | 'external' | 'regulatory' | 'customer' | 'media';
@@ -275,18 +263,16 @@ export interface SecurityCommunication {
   sentBy: string;
   channel: 'email' | 'phone' | 'meeting' | 'document' | 'portal';
 }
-
 export interface SecurityAuditEntry {
   id: string;
   timestamp: Date;
   userId: string;
   action: string;
   target: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
 }
-
 export interface VulnerabilityDatabase {
   id: string;
   name: string;
@@ -295,9 +281,8 @@ export interface VulnerabilityDatabase {
   updateFrequency: 'hourly' | 'daily' | 'weekly';
   lastUpdate: Date;
   status: 'active' | 'inactive' | 'error';
-  configuration: Record<string, any>;
+  configuration: Record<string, unknown>;
 }
-
 export interface SecurityMetrics {
   scans: {
     total: number;
@@ -347,7 +332,6 @@ export interface SecurityMetrics {
     incidentsTrend: Array<{ date: Date; count: number }>;
   };
 }
-
 export class SecurityManager extends EventEmitter {
   private scans: Map<string, SecurityScan> = new Map();
   private policies: Map<string, SecurityPolicy> = new Map();
@@ -356,10 +340,9 @@ export class SecurityManager extends EventEmitter {
   private securityPath: string;
   private logger: Logger;
   private config: ConfigManager;
-
   constructor(
     securityPath: string = './security',
-    logger?: Logger,
+    logger?: _Logger,
     config?: ConfigManager
   ) {
     super();
@@ -367,27 +350,25 @@ export class SecurityManager extends EventEmitter {
     this.logger = logger || new Logger({ level: 'info', format: 'text', destination: 'console' });
     this.config = config || ConfigManager.getInstance();
   }
-
   async initialize(): Promise<void> {
     try {
-      await mkdir(this.securityPath, { recursive: true });
-      await mkdir(join(this.securityPath, 'scans'), { recursive: true });
-      await mkdir(join(this.securityPath, 'policies'), { recursive: true });
-      await mkdir(join(this.securityPath, 'incidents'), { recursive: true });
-      await mkdir(join(this.securityPath, 'reports'), { recursive: true });
-      await mkdir(join(this.securityPath, 'databases'), { recursive: true });
+      await mkdir(this._securityPath, { recursive: true });
+      await mkdir(join(this._securityPath, 'scans'), { recursive: true });
+      await mkdir(join(this._securityPath, 'policies'), { recursive: true });
+      await mkdir(join(this._securityPath, 'incidents'), { recursive: true });
+      await mkdir(join(this._securityPath, 'reports'), { recursive: true });
+      await mkdir(join(this._securityPath, 'databases'), { recursive: true });
       
       await this.loadConfigurations();
       await this.initializeDefaultPolicies();
       await this.initializeVulnerabilityDatabases();
       
       this.logger.info('Security Manager initialized successfully');
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Failed to initialize Security Manager', { error });
       throw error;
     }
   }
-
   async createSecurityScan(scanData: {
     name: string;
     type: SecurityScan['type'];
@@ -396,8 +377,8 @@ export class SecurityManager extends EventEmitter {
     projectId?: string;
     schedule?: SecurityScan['schedule'];
   }): Promise<SecurityScan> {
-    const scan: SecurityScan = {
-      id: `scan-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    const _scan: SecurityScan = {
+      id: `scan-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
       name: scanData.name,
       type: scanData.type,
       status: 'pending',
@@ -409,7 +390,7 @@ export class SecurityManager extends EventEmitter {
         excludes: [],
         severity: ['critical', 'high', 'medium', 'low'],
         formats: ['json', 'html'],
-        outputPath: join(this.securityPath, 'reports'),
+        outputPath: join(this._securityPath, 'reports'),
         ...scanData.configuration
       },
       results: [],
@@ -451,96 +432,73 @@ export class SecurityManager extends EventEmitter {
       createdBy: 'system',
       auditLog: []
     };
-
-    this.addAuditEntry(scan, 'system', 'scan_created', 'scan', {
-      scanId: scan.id,
-      scanName: scan.name,
+    this.addAuditEntry(_scan, 'system', 'scan_created', 'scan', {
+      scanId: scan._id,
+      scanName: scan._name,
       scanType: scan.type
     });
-
-    this.scans.set(scan.id, scan);
+    this.scans.set(scan._id, scan);
     await this.saveScan(scan);
-
     this.emit('scan:created', scan);
     this.logger.info(`Security scan created: ${scan.name} (${scan.id})`);
-
     return scan;
   }
-
   async executeScan(scanId: string): Promise<void> {
-    const scan = this.scans.get(scanId);
+    const _scan = this.scans.get(scanId);
     if (!scan) {
       throw new Error(`Scan not found: ${scanId}`);
     }
-
     if (scan.status !== 'pending') {
       throw new Error(`Scan ${scanId} is not in pending status`);
     }
-
     scan.status = 'running';
     scan.updatedAt = new Date();
-
-    this.addAuditEntry(scan, 'system', 'scan_started', 'scan', {
-      scanId,
+    this.addAuditEntry(_scan, 'system', 'scan_started', 'scan', {
+      _scanId,
       target: scan.target
     });
-
     await this.saveScan(scan);
     this.emit('scan:started', scan);
-
     try {
-      const startTime = Date.now();
+      const _startTime = Date.now();
       
       // Execute the appropriate scanner
-      const findings = await this.executeScanEngine(scan);
+      const _findings = await this.executeScanEngine(scan);
       
-      const endTime = Date.now();
+      const _endTime = Date.now();
       scan.metrics.scanDuration = endTime - startTime;
       scan.results = findings;
       scan.status = 'completed';
-
       // Calculate metrics
       this.calculateScanMetrics(scan);
-
       // Run compliance checks
       await this.runComplianceChecks(scan);
-
       // Generate remediation recommendations
       await this.generateRemediationRecommendations(scan);
-
       // Check notification thresholds
       await this.checkNotificationThresholds(scan);
-
       scan.updatedAt = new Date();
-
-      this.addAuditEntry(scan, 'system', 'scan_completed', 'scan', {
-        scanId,
-        duration: scan.metrics.scanDuration,
+      this.addAuditEntry(_scan, 'system', 'scan_completed', 'scan', {
+        _scanId,
+        duration: scan.metrics._scanDuration,
         findingsCount: scan.results.length
       });
-
       await this.saveScan(scan);
       this.emit('scan:completed', scan);
-
       this.logger.info(`Security scan completed: ${scan.name} (${scan.id}) - ${scan.results.length} findings`);
-
-    } catch (error) {
+    } catch (_error) {
       scan.status = 'failed';
       scan.updatedAt = new Date();
-
-      this.addAuditEntry(scan, 'system', 'scan_failed', 'scan', {
-        scanId,
+      this.addAuditEntry(_scan, 'system', 'scan_failed', 'scan', {
+        _scanId,
         error: (error instanceof Error ? error.message : String(error))
       });
-
       await this.saveScan(scan);
-      this.emit('scan:failed', { scan, error });
-
+      this.emit('scan:failed', { _scan, error });
       this.logger.error(`Security scan failed: ${scan.name} (${scanId})`, { error });
       throw error;
     }
   }
-
   async createSecurityIncident(incidentData: {
     title: string;
     description: string;
@@ -549,8 +507,8 @@ export class SecurityManager extends EventEmitter {
     source: SecurityIncident['source'];
     affected?: Partial<SecurityIncident['affected']>;
   }): Promise<SecurityIncident> {
-    const incident: SecurityIncident = {
-      id: `incident-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    const _incident: SecurityIncident = {
+      id: `incident-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
       title: incidentData.title,
       description: incidentData.description,
       severity: incidentData.severity,
@@ -601,64 +559,50 @@ export class SecurityManager extends EventEmitter {
       createdBy: 'system',
       auditLog: []
     };
-
-    this.addAuditEntry(incident, 'system', 'incident_created', 'incident', {
-      incidentId: incident.id,
-      severity: incident.severity,
+    this.addAuditEntry(_incident, 'system', 'incident_created', 'incident', {
+      incidentId: incident._id,
+      severity: incident._severity,
       type: incident.type
     });
-
-    this.incidents.set(incident.id, incident);
+    this.incidents.set(incident._id, incident);
     await this.saveIncident(incident);
-
     // Auto-assign based on severity and type
     await this.autoAssignIncident(incident);
-
     // Send immediate notifications for high/critical incidents
     if (incident.severity === 'critical' || incident.severity === 'high') {
       await this.sendIncidentNotification(incident);
     }
-
     this.emit('incident:created', incident);
     this.logger.info(`Security incident created: ${incident.title} (${incident.id})`);
-
     return incident;
   }
-
   async updateIncident(
     incidentId: string,
     updates: Partial<SecurityIncident>,
     userId: string = 'system'
   ): Promise<SecurityIncident> {
-    const incident = this.incidents.get(incidentId);
+    const _incident = this.incidents.get(incidentId);
     if (!incident) {
       throw new Error(`Incident not found: ${incidentId}`);
     }
-
-    const oldStatus = incident.status;
-    Object.assign(incident, updates);
+    const _oldStatus = incident.status;
+    Object.assign(_incident, updates);
     incident.updatedAt = new Date();
-
     // Update timeline based on status changes
     if (updates.status && updates.status !== oldStatus) {
-      this.updateIncidentTimeline(incident, updates.status);
+      this.updateIncidentTimeline(_incident, updates.status);
     }
-
-    this.addAuditEntry(incident, userId, 'incident_updated', 'incident', {
-      incidentId,
+    this.addAuditEntry(_incident, _userId, 'incident_updated', 'incident', {
+      _incidentId,
       changes: Object.keys(updates),
       oldStatus,
       newStatus: incident.status
     });
-
     await this.saveIncident(incident);
-    this.emit('incident:updated', { incident, updates });
-
+    this.emit('incident:updated', { _incident, updates });
     this.logger.info(`Security incident updated: ${incident.title} (${incidentId})`);
-
     return incident;
   }
-
   async runComplianceAssessment(
     frameworks: string[],
     scope?: {
@@ -667,36 +611,32 @@ export class SecurityManager extends EventEmitter {
       resources?: string[];
     }
   ): Promise<ComplianceCheck[]> {
-    const checks: ComplianceCheck[] = [];
-
+    const _checks: ComplianceCheck[] = [];
     for (const framework of frameworks) {
-      const frameworkChecks = await this.runFrameworkChecks(framework, scope);
+      const _frameworkChecks = await this.runFrameworkChecks(_framework, scope);
       checks.push(...frameworkChecks);
     }
-
     this.logger.info(`Compliance assessment completed: ${checks.length} checks across ${frameworks.length} frameworks`);
-    this.emit('compliance:assessed', { frameworks, checks, scope });
-
+    this.emit('compliance:assessed', { _frameworks, _checks, scope });
     return checks;
   }
-
   async createSecurityPolicy(policyData: {
     name: string;
     description: string;
     type: SecurityPolicy['type'];
-    rules: Omit<SecurityRule, 'id'>[];
+    rules: Omit<_SecurityRule, 'id'>[];
     enforcement?: Partial<SecurityPolicy['enforcement']>;
     applicability?: Partial<SecurityPolicy['applicability']>;
   }): Promise<SecurityPolicy> {
-    const policy: SecurityPolicy = {
-      id: `policy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    const _policy: SecurityPolicy = {
+      id: `policy-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
       name: policyData.name,
       description: policyData.description,
       type: policyData.type,
       version: '1.0.0',
       status: 'draft',
       rules: policyData.rules.map(rule => ({
-        id: `rule-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `rule-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
         ...rule
       })),
       enforcement: {
@@ -725,16 +665,12 @@ export class SecurityManager extends EventEmitter {
       updatedAt: new Date(),
       createdBy: 'system'
     };
-
-    this.policies.set(policy.id, policy);
+    this.policies.set(policy._id, policy);
     await this.savePolicy(policy);
-
     this.emit('policy:created', policy);
     this.logger.info(`Security policy created: ${policy.name} (${policy.id})`);
-
     return policy;
   }
-
   async getSecurityMetrics(
     filters?: {
       timeRange?: { start: Date; end: Date };
@@ -743,9 +679,8 @@ export class SecurityManager extends EventEmitter {
       severity?: SecuritySeverity[];
     }
   ): Promise<SecurityMetrics> {
-    let scans = Array.from(this.scans.values());
-    let incidents = Array.from(this.incidents.values());
-
+    let _scans = Array.from(this.scans.values());
+    let _incidents = Array.from(this.incidents.values());
     // Apply filters
     if (filters) {
       if (filters.timeRange) {
@@ -762,33 +697,30 @@ export class SecurityManager extends EventEmitter {
         scans = scans.filter(s => s.projectId === filters.projectId);
       }
     }
-
     // Calculate scan metrics
-    const scanMetrics = {
+    const _scanMetrics = {
       total: scans.length,
       completed: scans.filter(s => s.status === 'completed').length,
       failed: scans.filter(s => s.status === 'failed').length,
       inProgress: scans.filter(s => s.status === 'running').length,
-      byType: this.groupBy(scans, 'type'),
+      byType: this.groupBy(_scans, 'type'),
       averageDuration: scans.length > 0 ? 
-        scans.reduce((sum, s) => sum + s.metrics.scanDuration, 0) / scans.length : 0
+        scans.reduce((_sum, s) => sum + s.metrics.scanDuration, 0) / scans.length : 0
     };
-
     // Calculate finding metrics
-    const allFindings = scans.flatMap(s => s.results);
-    const findingMetrics = {
+    const _allFindings = scans.flatMap(s => s.results);
+    const _findingMetrics = {
       total: allFindings.length,
       open: allFindings.filter(f => f.status === 'open').length,
       resolved: allFindings.filter(f => f.status === 'resolved').length,
       suppressed: allFindings.filter(f => f.status === 'suppressed').length,
-      bySeverity: this.groupBy(allFindings, 'severity') as Record<SecuritySeverity, number>,
-      byCategory: this.groupBy(allFindings, 'category'),
+      bySeverity: this.groupBy(_allFindings, 'severity') as Record<SecuritySeverity, number>,
+      byCategory: this.groupBy(_allFindings, 'category'),
       meanTimeToResolution: this.calculateMTTR(allFindings)
     };
-
     // Calculate compliance metrics
-    const allComplianceChecks = scans.flatMap(s => s.compliance.requirements);
-    const complianceFrameworks: Record<string, any> = {};
+    const _allComplianceChecks = scans.flatMap(s => s.compliance.requirements);
+    const _complianceFrameworks: Record<string, unknown> = { /* empty */ };
     
     for (const check of allComplianceChecks) {
       if (!complianceFrameworks[check.framework]) {
@@ -807,38 +739,33 @@ export class SecurityManager extends EventEmitter {
         complianceFrameworks[check.framework].failed++;
       }
     }
-
     // Calculate scores
     for (const framework in complianceFrameworks) {
-      const fw = complianceFrameworks[framework];
+      const _fw = complianceFrameworks[framework];
       fw.score = fw.total > 0 ? (fw.passed / fw.total) * 100 : 0;
     }
-
-    const overallComplianceScore = Object.values(complianceFrameworks).length > 0 ?
-      Object.values(complianceFrameworks).reduce((sum: number, fw: any) => sum + fw.score, 0) / 
+    const _overallComplianceScore = Object.values(complianceFrameworks).length > 0 ?
+      Object.values(complianceFrameworks).reduce((sum: number, fw: unknown) => sum + fw.score, 0) / 
       Object.values(complianceFrameworks).length : 0;
-
     // Calculate incident metrics
-    const incidentMetrics = {
+    const _incidentMetrics = {
       total: incidents.length,
       open: incidents.filter(i => i.status === 'open' || i.status === 'investigating').length,
       resolved: incidents.filter(i => i.status === 'resolved' || i.status === 'closed').length,
-      bySeverity: this.groupBy(incidents, 'severity') as Record<SecuritySeverity, number>,
+      bySeverity: this.groupBy(_incidents, 'severity') as Record<SecuritySeverity, number>,
       meanTimeToDetection: this.calculateMTTD(incidents),
       meanTimeToResponse: this.calculateMTTResponse(incidents),
       meanTimeToResolution: this.calculateIncidentMTTR(incidents)
     };
-
     // Policy metrics
-    const policies = Array.from(this.policies.values());
-    const policyMetrics = {
+    const _policies = Array.from(this.policies.values());
+    const _policyMetrics = {
       total: policies.length,
       active: policies.filter(p => p.status === 'active').length,
-      violations: policies.reduce((sum, p) => sum + p.metrics.violations, 0),
+      violations: policies.reduce((_sum, p) => sum + p.metrics.violations, 0),
       compliance: policies.length > 0 ? 
-        policies.reduce((sum, p) => sum + p.metrics.compliance, 0) / policies.length : 0
+        policies.reduce((_sum, p) => sum + p.metrics.compliance, 0) / policies.length : 0
     };
-
     return {
       scans: scanMetrics,
       findings: findingMetrics,
@@ -856,42 +783,37 @@ export class SecurityManager extends EventEmitter {
       }
     };
   }
-
   // Private helper methods
   private async loadConfigurations(): Promise<void> {
     try {
       // Load scans
-      const scanFiles = await readdir(join(this.securityPath, 'scans'));
+      const _scanFiles = await readdir(join(this._securityPath, 'scans'));
       for (const file of scanFiles.filter(f => f.endsWith('.json'))) {
-        const content = await readFile(join(this.securityPath, 'scans', file), 'utf-8');
-        const scan: SecurityScan = JSON.parse(content);
-        this.scans.set(scan.id, scan);
+        const _content = await readFile(join(this._securityPath, 'scans', file), 'utf-8');
+        const _scan: SecurityScan = JSON.parse(content);
+        this.scans.set(scan._id, scan);
       }
-
       // Load policies
-      const policyFiles = await readdir(join(this.securityPath, 'policies'));
+      const _policyFiles = await readdir(join(this._securityPath, 'policies'));
       for (const file of policyFiles.filter(f => f.endsWith('.json'))) {
-        const content = await readFile(join(this.securityPath, 'policies', file), 'utf-8');
-        const policy: SecurityPolicy = JSON.parse(content);
-        this.policies.set(policy.id, policy);
+        const _content = await readFile(join(this._securityPath, 'policies', file), 'utf-8');
+        const _policy: SecurityPolicy = JSON.parse(content);
+        this.policies.set(policy._id, policy);
       }
-
       // Load incidents
-      const incidentFiles = await readdir(join(this.securityPath, 'incidents'));
+      const _incidentFiles = await readdir(join(this._securityPath, 'incidents'));
       for (const file of incidentFiles.filter(f => f.endsWith('.json'))) {
-        const content = await readFile(join(this.securityPath, 'incidents', file), 'utf-8');
-        const incident: SecurityIncident = JSON.parse(content);
-        this.incidents.set(incident.id, incident);
+        const _content = await readFile(join(this._securityPath, 'incidents', file), 'utf-8');
+        const _incident: SecurityIncident = JSON.parse(content);
+        this.incidents.set(incident._id, incident);
       }
-
-      this.logger.info(`Loaded ${this.scans.size} scans, ${this.policies.size} policies, ${this.incidents.size} incidents`);
-    } catch (error) {
+      this.logger.info(`Loaded ${this.scans.size} _scans, ${this.policies.size} _policies, ${this.incidents.size} incidents`);
+    } catch (_error) {
       this.logger.warn('Failed to load some security configurations', { error });
     }
   }
-
   private async initializeDefaultPolicies(): Promise<void> {
-    const defaultPolicies = [
+    const _defaultPolicies = [
       {
         name: 'Critical Vulnerability Policy',
         description: 'Immediate action required for critical vulnerabilities',
@@ -924,22 +846,20 @@ export class SecurityManager extends EventEmitter {
             condition: 'category == "secret" && type == "api-key"',
             action: 'deny' as const,
             severity: 'high' as const,
-            parameters: {},
+            parameters: { /* empty */ },
             enabled: true
           }
         ]
       }
     ];
-
     for (const policyData of defaultPolicies) {
       if (!Array.from(this.policies.values()).some(p => p.name === policyData.name)) {
         await this.createSecurityPolicy(policyData);
       }
     }
   }
-
   private async initializeVulnerabilityDatabases(): Promise<void> {
-    const databases: VulnerabilityDatabase[] = [
+    const _databases: VulnerabilityDatabase[] = [
       {
         id: 'nvd',
         name: 'National Vulnerability Database',
@@ -948,7 +868,7 @@ export class SecurityManager extends EventEmitter {
         updateFrequency: 'daily',
         lastUpdate: new Date(),
         status: 'active',
-        configuration: {}
+        configuration: { /* empty */ }
       },
       {
         id: 'github-advisories',
@@ -958,17 +878,15 @@ export class SecurityManager extends EventEmitter {
         updateFrequency: 'daily',
         lastUpdate: new Date(),
         status: 'active',
-        configuration: {}
+        configuration: { /* empty */ }
       }
     ];
-
     for (const db of databases) {
-      this.vulnerabilityDatabases.set(db.id, db);
+      this.vulnerabilityDatabases.set(db._id, db);
     }
   }
-
   private getDefaultScanner(type: SecurityScan['type']): string {
-    const scanners: Record<SecurityScan['type'], string> = {
+    const _scanners: Record<SecurityScan['type'], string> = {
       'vulnerability': 'trivy',
       'dependency': 'npm-audit',
       'code-quality': 'sonarqube',
@@ -977,13 +895,10 @@ export class SecurityManager extends EventEmitter {
       'infrastructure': 'checkov',
       'container': 'clair'
     };
-
     return scanners[type] || 'generic';
   }
-
   private async executeScanEngine(scan: SecurityScan): Promise<SecurityFinding[]> {
-    const findings: SecurityFinding[] = [];
-
+    const _findings: SecurityFinding[] = [];
     switch (scan.configuration.scanner) {
       case 'trivy':
         return this.executeTrivyScan(scan);
@@ -997,13 +912,12 @@ export class SecurityManager extends EventEmitter {
         return this.executeGenericScan(scan);
     }
   }
-
   private async executeTrivyScan(scan: SecurityScan): Promise<SecurityFinding[]> {
-    return new Promise((resolve, reject) => {
-      const findings: SecurityFinding[] = [];
+    return new Promise((_resolve, reject) => {
+      const _findings: SecurityFinding[] = [];
       
       // Mock Trivy execution
-      const mockFindings = [
+      const _mockFindings = [
         {
           id: `finding-${Date.now()}-1`,
           title: 'CVE-2023-12345: Remote Code Execution in libxml2',
@@ -1037,57 +951,49 @@ export class SecurityManager extends EventEmitter {
           },
           status: 'open' as const,
           tags: ['cve', 'rce', 'dependency'],
-          metadata: {},
+          metadata: { /* empty */ },
           firstSeen: new Date(),
           lastSeen: new Date(),
           occurrences: 1
         }
       ];
-
       // Simulate scan delay
       setTimeout(() => {
         resolve(mockFindings);
       }, 2000);
     });
   }
-
   private async executeNpmAuditScan(scan: SecurityScan): Promise<SecurityFinding[]> {
-    return new Promise((resolve, reject) => {
-      const command = 'npm';
-      const args = ['audit', '--json'];
+    return new Promise((_resolve, reject) => {
+      const _command = 'npm';
+      const _args = ['audit', '--json'];
       
-      const child = spawn(command, args, {
-        cwd: scan.target.path,
+      const _child = spawn(_command, _args, {
+        cwd: scan.target._path,
         stdio: ['pipe', 'pipe', 'pipe']
       });
-
-      let stdout = '';
-      let stderr = '';
-
+      let _stdout = '';
+      let _stderr = '';
       child.stdout?.on('data', (data) => {
         stdout += data.toString();
       });
-
       child.stderr?.on('data', (data) => {
         stderr += data.toString();
       });
-
       child.on('close', (code) => {
         try {
-          const auditResult = JSON.parse(stdout);
-          const findings = this.parseNpmAuditResults(auditResult);
+          const _auditResult = JSON.parse(stdout);
+          const _findings = this.parseNpmAuditResults(auditResult);
           resolve(findings);
-        } catch (error) {
+        } catch (_error) {
           reject(new Error(`Failed to parse npm audit results: ${(error instanceof Error ? error.message : String(error))}`));
         }
       });
-
       child.on('error', (error) => {
         reject(error);
       });
     });
   }
-
   private async executeGitleaksScan(scan: SecurityScan): Promise<SecurityFinding[]> {
     // Mock Gitleaks scan for secrets detection
     return [
@@ -1103,7 +1009,7 @@ export class SecurityManager extends EventEmitter {
           column: 20
         },
         evidence: {
-          snippet: 'const accessKey = "AKIA123456789..."',
+          snippet: 'const _accessKey = "AKIA123456789..."',
           context: 'Hardcoded AWS credentials'
         },
         impact: 'Unauthorized access to AWS resources',
@@ -1121,33 +1027,30 @@ export class SecurityManager extends EventEmitter {
         },
         status: 'open' as const,
         tags: ['secret', 'aws', 'credentials'],
-        metadata: {},
+        metadata: { /* empty */ },
         firstSeen: new Date(),
         lastSeen: new Date(),
         occurrences: 1
       }
     ];
   }
-
   private async executeCheckovScan(scan: SecurityScan): Promise<SecurityFinding[]> {
     // Mock Checkov scan for infrastructure as code
     return [];
   }
-
   private async executeGenericScan(scan: SecurityScan): Promise<SecurityFinding[]> {
     // Generic scan implementation
     return [];
   }
-
-  private parseNpmAuditResults(auditResult: any): SecurityFinding[] {
-    const findings: SecurityFinding[] = [];
+  private parseNpmAuditResults(auditResult: unknown): SecurityFinding[] {
+    const _findings: SecurityFinding[] = [];
     
     if (auditResult.vulnerabilities) {
-      for (const [packageName, vulnData] of Object.entries(auditResult.vulnerabilities)) {
-        const vuln = vulnData as any;
+      for (const [_packageName, vulnData] of Object.entries(auditResult.vulnerabilities)) {
+        const _vuln = vulnData as unknown;
         
         findings.push({
-          id: `finding-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: `finding-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
           title: `${vuln.severity} vulnerability in ${packageName}`,
           description: vuln.title || 'Vulnerability detected',
           severity: vuln.severity as SecuritySeverity,
@@ -1182,9 +1085,8 @@ export class SecurityManager extends EventEmitter {
     
     return findings;
   }
-
   private calculateScanMetrics(scan: SecurityScan): void {
-    const findings = scan.results;
+    const _findings = scan.results;
     
     scan.metrics.totalFindings = findings.length;
     scan.metrics.criticalFindings = findings.filter(f => f.severity === 'critical').length;
@@ -1194,13 +1096,12 @@ export class SecurityManager extends EventEmitter {
     scan.metrics.falsePositives = findings.filter(f => f.status === 'false-positive').length;
     scan.metrics.suppressed = findings.filter(f => f.status === 'suppressed').length;
   }
-
   private async runComplianceChecks(scan: SecurityScan): Promise<void> {
     // Mock compliance checks
-    const frameworks = ['SOC2', 'GDPR', 'PCI-DSS'];
+    const _frameworks = ['SOC2', 'GDPR', 'PCI-DSS'];
     
     for (const framework of frameworks) {
-      const checks = await this.runFrameworkChecks(framework, { projectId: scan.projectId });
+      const _checks = await this.runFrameworkChecks(_framework, { projectId: scan.projectId });
       scan.compliance.requirements.push(...checks);
     }
     
@@ -1210,10 +1111,9 @@ export class SecurityManager extends EventEmitter {
     scan.compliance.overallScore = scan.compliance.requirements.length > 0 ?
       (scan.compliance.passedChecks / scan.compliance.requirements.length) * 100 : 0;
   }
-
-  private async runFrameworkChecks(framework: string, scope?: any): Promise<ComplianceCheck[]> {
+  private async runFrameworkChecks(framework: string, scope?: unknown): Promise<ComplianceCheck[]> {
     // Mock compliance checks for different frameworks
-    const mockChecks: ComplianceCheck[] = [
+    const _mockChecks: ComplianceCheck[] = [
       {
         id: `check-${Date.now()}-1`,
         framework,
@@ -1238,10 +1138,9 @@ export class SecurityManager extends EventEmitter {
     
     return mockChecks;
   }
-
   private async generateRemediationRecommendations(scan: SecurityScan): Promise<void> {
-    const autoFixable = scan.results.filter(f => f.remediation.autoFixable);
-    const manualReview = scan.results.filter(f => !f.remediation.autoFixable);
+    const _autoFixable = scan.results.filter(f => f.remediation.autoFixable);
+    const _manualReview = scan.results.filter(f => !f.remediation.autoFixable);
     
     scan.remediation.autoFixAvailable = autoFixable;
     scan.remediation.manualReview = manualReview;
@@ -1274,9 +1173,8 @@ export class SecurityManager extends EventEmitter {
       }
     ];
   }
-
   private async checkNotificationThresholds(scan: SecurityScan): Promise<void> {
-    const thresholds = scan.notifications.thresholds;
+    const _thresholds = scan.notifications.thresholds;
     
     if (scan.metrics.criticalFindings >= thresholds.critical ||
         scan.metrics.highFindings >= thresholds.high ||
@@ -1285,23 +1183,21 @@ export class SecurityManager extends EventEmitter {
       await this.sendScanNotification(scan);
     }
   }
-
   private async sendScanNotification(scan: SecurityScan): Promise<void> {
-    const message = `Security scan '${scan.name}' completed with ${scan.metrics.totalFindings} findings (${scan.metrics.criticalFindings} critical, ${scan.metrics.highFindings} high)`;
+    const _message = `Security scan '${scan.name}' completed with ${scan.metrics.totalFindings} findings (${scan.metrics.criticalFindings} _critical, ${scan.metrics.highFindings} high)`;
     
     this.emit('notification:scan', {
-      scan,
-      message,
+      _scan,
+      _message,
       severity: scan.metrics.criticalFindings > 0 ? 'critical' : 
                scan.metrics.highFindings > 0 ? 'high' : 'medium'
     });
     
     this.logger.warn(message);
   }
-
   private async autoAssignIncident(incident: SecurityIncident): Promise<void> {
     // Auto-assign based on severity and type
-    const assignmentRules: Record<string, string[]> = {
+    const _assignmentRules: Record<string, string[]> = {
       'critical': ['security-lead', 'ciso'],
       'high': ['security-team'],
       'medium': ['security-analyst'],
@@ -1310,130 +1206,126 @@ export class SecurityManager extends EventEmitter {
     
     incident.response.assignedTo = assignmentRules[incident.severity] || ['security-team'];
   }
-
   private async sendIncidentNotification(incident: SecurityIncident): Promise<void> {
-    const message = `SECURITY INCIDENT: ${incident.title} (${incident.severity.toUpperCase()})`;
+    const _message = `SECURITY INCIDENT: ${incident.title} (${incident.severity.toUpperCase()})`;
     
     this.emit('notification:incident', {
-      incident,
-      message,
+      _incident,
+      _message,
       urgency: incident.severity === 'critical' ? 'immediate' : 'high'
     });
     
     this.logger.error(message);
   }
-
-  private updateIncidentTimeline(incident: SecurityIncident, newStatus: string): void {
-    const now = new Date();
+  private updateIncidentTimeline(incident: _SecurityIncident, newStatus: string): void {
+    const _now = new Date();
     
     switch (newStatus) {
       case 'investigating':
-        incident.timeline.acknowledged = now;
-        break;
+        {
+incident.timeline.acknowledged = now;
+        
+}break;
       case 'contained':
-        incident.timeline.contained = now;
-        break;
+        {
+incident.timeline.contained = now;
+        
+}break;
       case 'resolved':
-        incident.timeline.resolved = now;
-        break;
+        {
+incident.timeline.resolved = now;
+        
+}break;
       case 'closed':
-        incident.timeline.closed = now;
-        break;
+        {
+incident.timeline.closed = now;
+        
+}break;
     }
   }
-
   private async saveScan(scan: SecurityScan): Promise<void> {
-    const filePath = join(this.securityPath, 'scans', `${scan.id}.json`);
-    await writeFile(filePath, JSON.stringify(scan, null, 2));
+    const _filePath = join(this._securityPath, 'scans', `${scan.id}.json`);
+    await writeFile(_filePath, JSON.stringify(_scan, null, 2));
   }
-
   private async savePolicy(policy: SecurityPolicy): Promise<void> {
-    const filePath = join(this.securityPath, 'policies', `${policy.id}.json`);
-    await writeFile(filePath, JSON.stringify(policy, null, 2));
+    const _filePath = join(this._securityPath, 'policies', `${policy.id}.json`);
+    await writeFile(_filePath, JSON.stringify(_policy, null, 2));
   }
-
   private async saveIncident(incident: SecurityIncident): Promise<void> {
-    const filePath = join(this.securityPath, 'incidents', `${incident.id}.json`);
-    await writeFile(filePath, JSON.stringify(incident, null, 2));
+    const _filePath = join(this._securityPath, 'incidents', `${incident.id}.json`);
+    await writeFile(_filePath, JSON.stringify(_incident, null, 2));
   }
-
   private addAuditEntry(
-    target: SecurityScan | SecurityIncident,
+    target: SecurityScan | _SecurityIncident,
     userId: string,
     action: string,
     targetType: string,
-    details: Record<string, any>
+    details: Record<string, unknown>
   ): void {
-    const entry: SecurityAuditEntry = {
-      id: `audit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    const _entry: SecurityAuditEntry = {
+      id: `audit-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`,
       timestamp: new Date(),
       userId,
       action,
       target: targetType,
       details
     };
-
     target.auditLog.push(entry);
   }
-
   private groupBy<T>(array: T[], key: keyof T): Record<string, number> {
-    return array.reduce((groups, item) => {
-      const value = String(item[key]);
+    return array.reduce((_groups, item) => {
+      const _value = String(item[key]);
       groups[value] = (groups[value] || 0) + 1;
       return groups;
-    }, {} as Record<string, number>);
+    }, { /* empty */ } as Record<string, number>);
   }
-
   private calculateMTTR(findings: SecurityFinding[]): number {
-    const resolvedFindings = findings.filter(f => 
+    const _resolvedFindings = findings.filter(f => 
       f.status === 'resolved' && f.firstSeen && f.lastSeen
     );
     
     if (resolvedFindings.length === 0) return 0;
     
-    const totalTime = resolvedFindings.reduce((sum, f) => 
+    const _totalTime = resolvedFindings.reduce((_sum, f) => 
       sum + (f.lastSeen.getTime() - f.firstSeen.getTime()), 0
     );
     
     return totalTime / resolvedFindings.length;
   }
-
   private calculateMTTD(incidents: SecurityIncident[]): number {
-    const detectedIncidents = incidents.filter(i => 
+    const _detectedIncidents = incidents.filter(i => 
       i.timeline.detected && i.timeline.reported
     );
     
     if (detectedIncidents.length === 0) return 0;
     
-    const totalTime = detectedIncidents.reduce((sum, i) => 
+    const _totalTime = detectedIncidents.reduce((_sum, i) => 
       sum + (i.timeline.reported.getTime() - i.timeline.detected.getTime()), 0
     );
     
     return totalTime / detectedIncidents.length;
   }
-
   private calculateMTTResponse(incidents: SecurityIncident[]): number {
-    const respondedIncidents = incidents.filter(i => 
+    const _respondedIncidents = incidents.filter(i => 
       i.timeline.reported && i.timeline.acknowledged
     );
     
     if (respondedIncidents.length === 0) return 0;
     
-    const totalTime = respondedIncidents.reduce((sum, i) => 
+    const _totalTime = respondedIncidents.reduce((_sum, i) => 
       sum + (i.timeline.acknowledged.getTime() - i.timeline.reported.getTime()), 0
     );
     
     return totalTime / respondedIncidents.length;
   }
-
   private calculateIncidentMTTR(incidents: SecurityIncident[]): number {
-    const resolvedIncidents = incidents.filter(i => 
+    const _resolvedIncidents = incidents.filter(i => 
       i.timeline.reported && i.timeline.resolved
     );
     
     if (resolvedIncidents.length === 0) return 0;
     
-    const totalTime = resolvedIncidents.reduce((sum, i) => 
+    const _totalTime = resolvedIncidents.reduce((_sum, i) => 
       sum + (i.timeline.resolved!.getTime() - i.timeline.reported.getTime()), 0
     );
     

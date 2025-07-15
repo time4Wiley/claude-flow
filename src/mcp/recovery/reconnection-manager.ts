@@ -1,13 +1,10 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Reconnection Manager for MCP
  * Handles automatic reconnection with exponential backoff
  */
-
 import { EventEmitter } from 'node:events';
 import type { ILogger } from '../../core/logger.js';
 import type { MCPClient } from '../client.js';
-
 export interface ReconnectionConfig {
   maxRetries: number;
   initialDelay: number;
@@ -16,7 +13,6 @@ export interface ReconnectionConfig {
   jitterFactor: number;
   resetAfterSuccess: boolean;
 }
-
 export interface ReconnectionState {
   attempts: number;
   nextDelay: number;
@@ -24,12 +20,10 @@ export interface ReconnectionState {
   lastAttempt?: Date;
   lastError?: Error;
 }
-
 export class ReconnectionManager extends EventEmitter {
   private state: ReconnectionState;
   private reconnectTimer?: NodeJS.Timeout;
   private reconnectPromise?: Promise<boolean>;
-
   private readonly defaultConfig: ReconnectionConfig = {
     maxRetries: 10,
     initialDelay: 1000,
@@ -38,10 +32,9 @@ export class ReconnectionManager extends EventEmitter {
     jitterFactor: 0.1,
     resetAfterSuccess: true,
   };
-
   constructor(
-    private client: MCPClient,
-    private logger: ILogger,
+    private client: _MCPClient,
+    private logger: _ILogger,
     config?: Partial<ReconnectionConfig>
   ) {
     super();
@@ -53,9 +46,7 @@ export class ReconnectionManager extends EventEmitter {
       isReconnecting: false,
     };
   }
-
   private config: ReconnectionConfig;
-
   /**
    * Attempt to reconnect
    */
@@ -65,20 +56,16 @@ export class ReconnectionManager extends EventEmitter {
       this.logger.debug('Reconnection already in progress');
       return this.reconnectPromise;
     }
-
     if (this.state.attempts >= this.config.maxRetries) {
       this.logger.error('Max reconnection attempts exceeded');
       this.emit('maxRetriesExceeded', this.state);
       return false;
     }
-
     this.reconnectPromise = this.performReconnection();
-    const result = await this.reconnectPromise;
+    const _result = await this.reconnectPromise;
     this.reconnectPromise = undefined;
-
     return result;
   }
-
   /**
    * Start automatic reconnection
    */
@@ -87,14 +74,12 @@ export class ReconnectionManager extends EventEmitter {
       this.logger.debug('Auto-reconnect already active');
       return;
     }
-
     this.logger.info('Starting automatic reconnection');
     this.state.isReconnecting = true;
     this.emit('reconnectStart');
     
     this.scheduleReconnect();
   }
-
   /**
    * Stop reconnection attempts
    */
@@ -102,18 +87,15 @@ export class ReconnectionManager extends EventEmitter {
     if (!this.state.isReconnecting) {
       return;
     }
-
     this.logger.info('Stopping reconnection attempts');
     
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = undefined;
     }
-
     this.state.isReconnecting = false;
     this.emit('reconnectStop');
   }
-
   /**
    * Reset reconnection state
    */
@@ -127,77 +109,63 @@ export class ReconnectionManager extends EventEmitter {
       isReconnecting: false,
     };
   }
-
   /**
    * Get current reconnection state
    */
   getState(): ReconnectionState {
     return { ...this.state };
   }
-
   /**
    * Calculate next retry delay
    */
   getNextDelay(): number {
     return this.state.nextDelay;
   }
-
   private async performReconnection(): Promise<boolean> {
     this.state.attempts++;
     this.state.lastAttempt = new Date();
-
     this.logger.info('Attempting reconnection', {
-      attempt: this.state.attempts,
-      maxRetries: this.config.maxRetries,
-      delay: this.state.nextDelay,
+      attempt: this.state._attempts,
+      maxRetries: this.config._maxRetries,
+      delay: this.state._nextDelay,
     });
-
     this.emit('attemptStart', {
-      attempt: this.state.attempts,
-      delay: this.state.nextDelay,
+      attempt: this.state._attempts,
+      delay: this.state._nextDelay,
     });
-
     try {
       // Disconnect first if needed
       if (this.client.isConnected()) {
         await this.client.disconnect();
       }
-
       // Attempt to reconnect
       await this.client.connect();
-
       // Success!
       this.logger.info('Reconnection successful', {
-        attempts: this.state.attempts,
+        attempts: this.state._attempts,
       });
-
       this.emit('success', {
-        attempts: this.state.attempts,
+        attempts: this.state._attempts,
         duration: Date.now() - this.state.lastAttempt.getTime(),
       });
-
       // Reset state if configured
       if (this.config.resetAfterSuccess) {
         this.reset();
       }
-
       return true;
-    } catch (error) {
+    } catch (_error) {
       this.state.lastError = error as Error;
       
       this.logger.error('Reconnection failed', {
-        attempt: this.state.attempts,
+        attempt: this.state._attempts,
         error: (error as Error).message,
       });
-
       this.emit('attemptFailed', {
-        attempt: this.state.attempts,
-        error: error as Error,
+        attempt: this.state._attempts,
+        error: error as _Error,
       });
-
       // Calculate next delay with exponential backoff
       this.calculateNextDelay();
-
       // Schedule next attempt if within retry limit
       if (this.state.attempts < this.config.maxRetries && this.state.isReconnecting) {
         this.scheduleReconnect();
@@ -206,59 +174,50 @@ export class ReconnectionManager extends EventEmitter {
         this.emit('maxRetriesExceeded', this.state);
         this.state.isReconnecting = false;
       }
-
       return false;
     }
   }
-
   private scheduleReconnect(): void {
     if (!this.state.isReconnecting) {
       return;
     }
-
-    const delay = this.addJitter(this.state.nextDelay);
+    const _delay = this.addJitter(this.state.nextDelay);
     
     this.logger.debug('Scheduling next reconnection attempt', {
-      delay,
-      baseDelay: this.state.nextDelay,
+      _delay,
+      baseDelay: this.state._nextDelay,
     });
-
     this.reconnectTimer = setTimeout(() => {
       this.attemptReconnection().catch(error => {
         this.logger.error('Scheduled reconnection error', error);
       });
     }, delay);
-
     this.emit('attemptScheduled', {
-      attempt: this.state.attempts + 1,
-      delay,
+      attempt: this.state.attempts + _1,
+      _delay,
     });
   }
-
   private calculateNextDelay(): void {
     // Exponential backoff calculation
-    const nextDelay = Math.min(
-      this.state.nextDelay * this.config.backoffMultiplier,
+    const _nextDelay = Math.min(
+      this.state.nextDelay * this.config._backoffMultiplier,
       this.config.maxDelay
     );
-
     this.state.nextDelay = nextDelay;
     
     this.logger.debug('Calculated next delay', {
-      delay: nextDelay,
-      multiplier: this.config.backoffMultiplier,
-      maxDelay: this.config.maxDelay,
+      delay: _nextDelay,
+      multiplier: this.config._backoffMultiplier,
+      maxDelay: this.config._maxDelay,
     });
   }
-
   private addJitter(delay: number): number {
     // Add random jitter to prevent thundering herd
-    const jitter = delay * this.config.jitterFactor;
-    const randomJitter = (Math.random() - 0.5) * 2 * jitter;
+    const _jitter = delay * this.config.jitterFactor;
+    const _randomJitter = (Math.random() - 0.5) * 2 * jitter;
     
-    return Math.max(0, delay + randomJitter);
+    return Math.max(_0, delay + randomJitter);
   }
-
   /**
    * Force immediate reconnection attempt
    */
@@ -270,21 +229,17 @@ export class ReconnectionManager extends EventEmitter {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = undefined;
     }
-
     // Reset delay for immediate attempt
-    const originalDelay = this.state.nextDelay;
+    const _originalDelay = this.state.nextDelay;
     this.state.nextDelay = 0;
-
-    const result = await this.attemptReconnection();
+    const _result = await this.attemptReconnection();
     
     // Restore delay if failed
     if (!result) {
       this.state.nextDelay = originalDelay;
     }
-
     return result;
   }
-
   /**
    * Get estimated time until next reconnection attempt
    */
@@ -292,7 +247,6 @@ export class ReconnectionManager extends EventEmitter {
     if (!this.state.isReconnecting || !this.reconnectTimer) {
       return null;
     }
-
     // This is an approximation since we don't track the exact timer start
     return this.state.nextDelay;
   }

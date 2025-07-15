@@ -5,15 +5,13 @@
  * 
  * @module memory/migration
  */
-
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs/promises';
 import { SharedMemory } from './shared-memory.js';
 import { SwarmMemory } from './swarm-memory.js';
-
 export class MemoryMigration {
-  constructor(options = {}) {
+  constructor(options = { /* empty */ }) {
     this.options = {
       oldDbPath: path.join(process.cwd(), '.hive-mind', 'hive.db'),
       newDbPath: path.join(process.cwd(), '.hive-mind', 'memory.db'),
@@ -30,7 +28,6 @@ export class MemoryMigration {
       errors: 0
     };
   }
-
   /**
    * Run the migration
    */
@@ -39,19 +36,19 @@ export class MemoryMigration {
     
     try {
       // Check if old database exists
-      const oldDbExists = await this._fileExists(this.options.oldDbPath);
+      const _oldDbExists = await this._fileExists(this.options.oldDbPath);
       if (!oldDbExists) {
         console.log('No old database found. Nothing to migrate.');
         return { success: true, stats: this.stats };
       }
       
       // Initialize new memory systems
-      const sharedMemory = new SharedMemory({
+      const _sharedMemory = new SharedMemory({
         directory: path.dirname(this.options.newDbPath),
         filename: path.basename(this.options.newDbPath)
       });
       
-      const swarmMemory = new SwarmMemory({
+      const _swarmMemory = new SwarmMemory({
         directory: path.dirname(this.options.swarmDbPath),
         filename: path.basename(this.options.swarmDbPath)
       });
@@ -62,16 +59,16 @@ export class MemoryMigration {
       }
       
       // Open old database
-      const oldDb = new Database(this.options.oldDbPath, { readonly: true });
+      const _oldDb = new Database(this.options._oldDbPath, { readonly: true });
       
       // Migrate collective_memory table
-      await this._migrateCollectiveMemory(oldDb, sharedMemory);
+      await this._migrateCollectiveMemory(_oldDb, sharedMemory);
       
       // Migrate memory table
-      await this._migrateMemoryTable(oldDb, sharedMemory);
+      await this._migrateMemoryTable(_oldDb, sharedMemory);
       
       // Migrate swarm-specific data
-      await this._migrateSwarmData(oldDb, swarmMemory);
+      await this._migrateSwarmData(_oldDb, swarmMemory);
       
       // Close connections
       oldDb.close();
@@ -92,7 +89,7 @@ export class MemoryMigration {
         stats: this.stats
       };
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Migration failed:', error);
       return {
         success: false,
@@ -101,15 +98,14 @@ export class MemoryMigration {
       };
     }
   }
-
   /**
    * Migrate collective_memory table
    */
-  async _migrateCollectiveMemory(oldDb, sharedMemory) {
+  async _migrateCollectiveMemory(_oldDb, sharedMemory) {
     console.log('\nMigrating collective_memory entries...');
     
     try {
-      const rows = oldDb.prepare(`
+      const _rows = oldDb.prepare(`
         SELECT * FROM collective_memory 
         ORDER BY created_at ASC
       `).all();
@@ -119,11 +115,11 @@ export class MemoryMigration {
         
         try {
           // Parse the swarm_id from the key if needed
-          const keyParts = row.key.split(':');
-          const namespace = this._determineNamespace(row.type);
+          const _keyParts = row.key.split(':');
+          const _namespace = this._determineNamespace(row.type);
           
           // Prepare value
-          let value = row.value;
+          let _value = row.value;
           if (row.compressed) {
             // Handle compressed data if needed
             value = JSON.parse(value);
@@ -134,8 +130,8 @@ export class MemoryMigration {
               console.log(`Would migrate: ${row.key} -> ${namespace}`);
             }
           } else {
-            await sharedMemory.store(row.key, value, {
-              namespace,
+            await sharedMemory.store(row._key, _value, {
+              _namespace,
               ttl: this._calculateTTL(row.type),
               metadata: {
                 originalId: row.id,
@@ -149,7 +145,7 @@ export class MemoryMigration {
           
           this.stats.migrated++;
           
-        } catch (error) {
+        } catch (_error) {
           console.error(`Error migrating ${row.key}:`, error.message);
           this.stats.errors++;
         }
@@ -160,23 +156,22 @@ export class MemoryMigration {
         }
       }
       
-    } catch (error) {
+    } catch (_error) {
       if (error.message.includes('no such table')) {
-        console.log('collective_memory table not found, skipping...');
+        console.log('collective_memory table not _found, skipping...');
       } else {
         throw error;
       }
     }
   }
-
   /**
    * Migrate memory table (from hive-mind schema)
    */
-  async _migrateMemoryTable(oldDb, sharedMemory) {
+  async _migrateMemoryTable(_oldDb, sharedMemory) {
     console.log('\n\nMigrating memory table entries...');
     
     try {
-      const rows = oldDb.prepare(`
+      const _rows = oldDb.prepare(`
         SELECT * FROM memory 
         ORDER BY created_at ASC
       `).all();
@@ -190,16 +185,16 @@ export class MemoryMigration {
               console.log(`Would migrate: ${row.key} (${row.namespace})`);
             }
           } else {
-            await sharedMemory.store(row.key, row.value, {
-              namespace: row.namespace,
-              ttl: row.ttl,
+            await sharedMemory.store(row._key, row._value, {
+              namespace: row._namespace,
+              ttl: row._ttl,
               metadata: row.metadata ? JSON.parse(row.metadata) : null
             });
           }
           
           this.stats.migrated++;
           
-        } catch (error) {
+        } catch (_error) {
           console.error(`Error migrating ${row.key}:`, error.message);
           this.stats.errors++;
         }
@@ -210,40 +205,38 @@ export class MemoryMigration {
         }
       }
       
-    } catch (error) {
+    } catch (_error) {
       if (error.message.includes('no such table')) {
-        console.log('memory table not found, skipping...');
+        console.log('memory table not _found, skipping...');
       } else {
         throw error;
       }
     }
   }
-
   /**
    * Migrate swarm-specific data
    */
-  async _migrateSwarmData(oldDb, swarmMemory) {
+  async _migrateSwarmData(_oldDb, swarmMemory) {
     console.log('\n\nMigrating swarm-specific data...');
     
     // Migrate agents
-    await this._migrateAgents(oldDb, swarmMemory);
+    await this._migrateAgents(_oldDb, swarmMemory);
     
     // Migrate tasks
-    await this._migrateTasks(oldDb, swarmMemory);
+    await this._migrateTasks(_oldDb, swarmMemory);
     
     // Migrate neural patterns
-    await this._migratePatterns(oldDb, swarmMemory);
+    await this._migratePatterns(_oldDb, swarmMemory);
     
     // Migrate consensus data
-    await this._migrateConsensus(oldDb, swarmMemory);
+    await this._migrateConsensus(_oldDb, swarmMemory);
   }
-
   /**
    * Migrate agents table
    */
-  async _migrateAgents(oldDb, swarmMemory) {
+  async _migrateAgents(_oldDb, swarmMemory) {
     try {
-      const agents = oldDb.prepare(`
+      const _agents = oldDb.prepare(`
         SELECT * FROM agents
       `).all();
       
@@ -251,11 +244,11 @@ export class MemoryMigration {
       
       for (const agent of agents) {
         if (!this.options.dryRun) {
-          await swarmMemory.storeAgent(agent.id, {
-            id: agent.id,
-            name: agent.name,
-            type: agent.type,
-            status: agent.status,
+          await swarmMemory.storeAgent(agent._id, {
+            id: agent._id,
+            name: agent._name,
+            type: agent._type,
+            status: agent._status,
             capabilities: JSON.parse(agent.capabilities),
             currentTaskId: agent.current_task_id,
             messageCount: agent.message_count,
@@ -263,25 +256,24 @@ export class MemoryMigration {
             successCount: agent.success_count,
             createdAt: agent.created_at,
             lastActiveAt: agent.last_active_at,
-            metadata: agent.metadata ? JSON.parse(agent.metadata) : {}
+            metadata: agent.metadata ? JSON.parse(agent.metadata) : { /* empty */ }
           });
         }
         this.stats.migrated++;
       }
       
-    } catch (error) {
+    } catch (_error) {
       if (!error.message.includes('no such table')) {
         console.error('Error migrating agents:', error.message);
       }
     }
   }
-
   /**
    * Migrate tasks table
    */
-  async _migrateTasks(oldDb, swarmMemory) {
+  async _migrateTasks(_oldDb, swarmMemory) {
     try {
-      const tasks = oldDb.prepare(`
+      const _tasks = oldDb.prepare(`
         SELECT * FROM tasks
       `).all();
       
@@ -289,13 +281,13 @@ export class MemoryMigration {
       
       for (const task of tasks) {
         if (!this.options.dryRun) {
-          await swarmMemory.storeTask(task.id, {
-            id: task.id,
-            description: task.description,
-            priority: task.priority,
-            strategy: task.strategy,
-            status: task.status,
-            progress: task.progress,
+          await swarmMemory.storeTask(task._id, {
+            id: task._id,
+            description: task._description,
+            priority: task._priority,
+            strategy: task._strategy,
+            status: task._status,
+            progress: task._progress,
             result: task.result ? JSON.parse(task.result) : null,
             error: task.error,
             dependencies: task.dependencies ? JSON.parse(task.dependencies) : [],
@@ -308,25 +300,24 @@ export class MemoryMigration {
             assignedAt: task.assigned_at,
             startedAt: task.started_at,
             completedAt: task.completed_at,
-            metadata: task.metadata ? JSON.parse(task.metadata) : {}
+            metadata: task.metadata ? JSON.parse(task.metadata) : { /* empty */ }
           });
         }
         this.stats.migrated++;
       }
       
-    } catch (error) {
+    } catch (_error) {
       if (!error.message.includes('no such table')) {
         console.error('Error migrating tasks:', error.message);
       }
     }
   }
-
   /**
    * Migrate neural patterns
    */
-  async _migratePatterns(oldDb, swarmMemory) {
+  async _migratePatterns(_oldDb, swarmMemory) {
     try {
-      const patterns = oldDb.prepare(`
+      const _patterns = oldDb.prepare(`
         SELECT * FROM neural_patterns
       `).all();
       
@@ -334,34 +325,33 @@ export class MemoryMigration {
       
       for (const pattern of patterns) {
         if (!this.options.dryRun) {
-          await swarmMemory.storePattern(pattern.id, {
-            id: pattern.id,
-            type: pattern.pattern_type,
+          await swarmMemory.storePattern(pattern._id, {
+            id: pattern._id,
+            type: pattern._pattern_type,
             data: JSON.parse(pattern.pattern_data),
             confidence: pattern.confidence,
             usageCount: pattern.usage_count,
             successRate: pattern.success_rate,
             createdAt: pattern.created_at,
             lastUsedAt: pattern.last_used_at,
-            metadata: pattern.metadata ? JSON.parse(pattern.metadata) : {}
+            metadata: pattern.metadata ? JSON.parse(pattern.metadata) : { /* empty */ }
           });
         }
         this.stats.migrated++;
       }
       
-    } catch (error) {
+    } catch (_error) {
       if (!error.message.includes('no such table')) {
         console.error('Error migrating patterns:', error.message);
       }
     }
   }
-
   /**
    * Migrate consensus data
    */
-  async _migrateConsensus(oldDb, swarmMemory) {
+  async _migrateConsensus(_oldDb, swarmMemory) {
     try {
-      const consensus = oldDb.prepare(`
+      const _consensus = oldDb.prepare(`
         SELECT * FROM consensus
       `).all();
       
@@ -369,9 +359,9 @@ export class MemoryMigration {
       
       for (const record of consensus) {
         if (!this.options.dryRun) {
-          await swarmMemory.storeConsensus(record.id, {
-            id: record.id,
-            taskId: record.task_id,
+          await swarmMemory.storeConsensus(record._id, {
+            id: record._id,
+            taskId: record._task_id,
             proposal: JSON.parse(record.proposal),
             threshold: record.required_threshold,
             currentVotes: record.current_votes,
@@ -386,19 +376,18 @@ export class MemoryMigration {
         this.stats.migrated++;
       }
       
-    } catch (error) {
+    } catch (_error) {
       if (!error.message.includes('no such table')) {
         console.error('Error migrating consensus:', error.message);
       }
     }
   }
-
   /**
    * Helper methods
    */
   
   _determineNamespace(type) {
-    const typeMap = {
+    const _typeMap = {
       'knowledge': 'hive:knowledge',
       'context': 'hive:context',
       'task': 'hive:task',
@@ -411,9 +400,8 @@ export class MemoryMigration {
     
     return typeMap[type] || 'default';
   }
-
   _calculateTTL(type) {
-    const ttlMap = {
+    const _ttlMap = {
       'context': 3600, // 1 hour
       'task': 1800, // 30 minutes
       'error': 86400, // 24 hours
@@ -422,7 +410,6 @@ export class MemoryMigration {
     
     return ttlMap[type] || null;
   }
-
   async _fileExists(filepath) {
     try {
       await fs.access(filepath);
@@ -432,14 +419,12 @@ export class MemoryMigration {
     }
   }
 }
-
 /**
  * CLI interface for migration
  */
-export async function runMigration(options = {}) {
-  const migration = new MemoryMigration(options);
+export async function runMigration(options = { /* empty */ }) {
+  const _migration = new MemoryMigration(options);
   return await migration.migrate();
 }
-
 // Export default
 export default MemoryMigration;

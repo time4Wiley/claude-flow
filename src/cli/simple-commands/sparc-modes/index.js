@@ -1,3 +1,4 @@
+/* global Deno */
 // index.js - SPARC mode orchestration loader
 import { getArchitectOrchestration } from './architect.js';
 import { getCodeOrchestration } from './code.js';
@@ -19,7 +20,7 @@ import { getGenericOrchestration } from './generic.js';
 import { getSwarmOrchestration } from './swarm.js';
 
 // Mode orchestration mapping
-const modeOrchestrations = {
+const _modeOrchestrations = {
   'architect': getArchitectOrchestration,
   'code': getCodeOrchestration,
   'tdd': getTddOrchestration,
@@ -46,15 +47,15 @@ const modeOrchestrations = {
  * @param {string} memoryNamespace - The memory namespace
  * @returns {string} The orchestration template
  */
-export function getModeOrchestration(modeSlug, taskDescription, memoryNamespace) {
-  const orchestrationFunction = modeOrchestrations[modeSlug];
+export function getModeOrchestration(_modeSlug, _taskDescription, memoryNamespace) {
+  const _orchestrationFunction = modeOrchestrations[modeSlug];
   
   if (orchestrationFunction) {
-    return orchestrationFunction(taskDescription, memoryNamespace);
+    return orchestrationFunction(_taskDescription, memoryNamespace);
   }
   
   // Return generic orchestration for unknown modes
-  return getGenericOrchestration(taskDescription, memoryNamespace);
+  return getGenericOrchestration(_taskDescription, memoryNamespace);
 }
 
 /**
@@ -64,10 +65,10 @@ export function getModeOrchestration(modeSlug, taskDescription, memoryNamespace)
  * @param {string} memoryNamespace - The memory namespace
  * @returns {string} The complete SPARC prompt
  */
-export function createSparcPrompt(mode, taskDescription, memoryNamespace) {
-  const orchestration = getModeOrchestration(mode.slug, taskDescription, memoryNamespace);
+export function createSparcPrompt(_mode, _taskDescription, memoryNamespace) {
+  const _orchestration = getModeOrchestration(mode._slug, _taskDescription, memoryNamespace);
   // Get the actual working directory where the command was run from
-  const cwd = Deno.env.get('PWD') || Deno.cwd();
+  const _cwd = Deno.env.get('PWD') || Deno.cwd();
   
   return `# ${mode.name} - Task Execution
 
@@ -97,7 +98,7 @@ ${mode.customInstructions}
 ### Memory Operations
 Use the memory system to track your progress and share context:
 
-\`\`\`bash
+```bash
 # Store your work
 npx claude-flow memory store ${memoryNamespace}_<phase> "description of work completed"
 
@@ -108,12 +109,12 @@ npx claude-flow memory query ${memoryNamespace}
 npx claude-flow memory store ${memoryNamespace}_analysis "Analyzed ${taskDescription} - found X components needed"
 npx claude-flow memory store ${memoryNamespace}_progress "Completed Y% of implementation"
 npx claude-flow memory store ${memoryNamespace}_blockers "Issue with Z - need clarification"
-\`\`\`
+```
 
 ### Task Orchestration
 For complex tasks, coordinate with other specialists:
 
-\`\`\`bash
+```bash
 # Check system status
 npx claude-flow status
 
@@ -122,33 +123,33 @@ npx claude-flow agent list
 
 # Monitor progress
 npx claude-flow monitor
-\`\`\`
+```
 
 ### 🚀 Parallel Execution with BatchTool
 Use BatchTool to orchestrate multiple SPARC modes concurrently in a boomerang pattern:
 
-\`\`\`bash
+```bash
 # Example: Parallel development workflow
-batchtool run --parallel \\
-  "npx claude-flow sparc run architect 'design user authentication system' --non-interactive" \\
-  "npx claude-flow sparc run security-review 'analyze authentication requirements' --non-interactive" \\
+batchtool run --parallel \
+  "npx claude-flow sparc run architect 'design user authentication system' --non-interactive" \
+  "npx claude-flow sparc run security-review 'analyze authentication requirements' --non-interactive" \
   "npx claude-flow sparc run spec-pseudocode 'create auth flow pseudocode' --non-interactive"
 
 # Boomerang Pattern: Research → Design → Implement → Test → Refine
-batchtool orchestrate --boomerang \\
-  --phase1 "npx claude-flow sparc run ask 'research best auth practices' --non-interactive" \\
-  --phase2 "npx claude-flow sparc run architect 'design based on research' --non-interactive" \\
-  --phase3 "npx claude-flow sparc run code 'implement auth system' --non-interactive" \\
-  --phase4 "npx claude-flow sparc run tdd 'test auth implementation' --non-interactive" \\
+batchtool orchestrate --boomerang \
+  --phase1 "npx claude-flow sparc run ask 'research best auth practices' --non-interactive" \
+  --phase2 "npx claude-flow sparc run architect 'design based on research' --non-interactive" \
+  --phase3 "npx claude-flow sparc run code 'implement auth system' --non-interactive" \
+  --phase4 "npx claude-flow sparc run tdd 'test auth implementation' --non-interactive" \
   --phase5 "npx claude-flow sparc run optimization 'refine auth performance' --non-interactive"
 
 # Concurrent Feature Development
-batchtool run --concurrent --max-parallel 3 \\
-  "npx claude-flow sparc run code 'implement login feature' --non-interactive" \\
-  "npx claude-flow sparc run code 'implement registration feature' --non-interactive" \\
-  "npx claude-flow sparc run code 'implement password reset' --non-interactive" \\
+batchtool run --concurrent --max-parallel 3 \
+  "npx claude-flow sparc run code 'implement login feature' --non-interactive" \
+  "npx claude-flow sparc run code 'implement registration feature' --non-interactive" \
+  "npx claude-flow sparc run code 'implement password reset' --non-interactive" \
   "npx claude-flow sparc run tdd 'create auth test suite' --non-interactive"
-\`\`\`
+```
 
 #### Boomerang Orchestration Pattern
 The boomerang pattern allows for iterative development where results from one phase inform the next:

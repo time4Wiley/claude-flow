@@ -3,14 +3,12 @@
  * Swarm Communication System for Hive Mind
  * Handles inter-agent messaging and coordination
  */
-
 import EventEmitter from 'events';
 import crypto from 'crypto';
-
 /**
  * Message types and their priorities
  */
-const MESSAGE_TYPES = {
+const _MESSAGE_TYPES = {
   command: { priority: 1, reliable: true, encrypted: true },
   query: { priority: 2, reliable: true, encrypted: false },
   response: { priority: 2, reliable: true, encrypted: false },
@@ -22,23 +20,21 @@ const MESSAGE_TYPES = {
   error: { priority: 1, reliable: true, encrypted: false },
   sync: { priority: 3, reliable: true, encrypted: false }
 };
-
 /**
  * Communication protocols
  */
-const PROTOCOLS = {
+const _PROTOCOLS = {
   direct: 'direct',        // Point-to-point
   broadcast: 'broadcast',  // One-to-all
   multicast: 'multicast',  // One-to-many
   gossip: 'gossip',       // Epidemic spread
   consensus: 'consensus'   // Byzantine agreement
 };
-
 /**
  * SwarmCommunication class
  */
 export class SwarmCommunication extends EventEmitter {
-  constructor(config = {}) {
+  constructor(config = { /* empty */ }) {
     super();
     
     this.config = {
@@ -93,8 +89,8 @@ export class SwarmCommunication extends EventEmitter {
   /**
    * Register agent in communication network
    */
-  registerAgent(agentId, metadata = {}) {
-    const agent = {
+  registerAgent(_agentId, metadata = { /* empty */ }) {
+    const _agent = {
       id: agentId,
       status: 'online',
       lastSeen: Date.now(),
@@ -103,12 +99,12 @@ export class SwarmCommunication extends EventEmitter {
       channel: this._createChannel(agentId)
     };
     
-    this.state.agents.set(agentId, agent);
+    this.state.agents.set(_agentId, agent);
     
     // Announce new agent to swarm
     this.broadcast({
       type: 'agent_joined',
-      agentId,
+      _agentId,
       metadata
     }, 'sync');
     
@@ -120,11 +116,11 @@ export class SwarmCommunication extends EventEmitter {
    * Unregister agent from network
    */
   unregisterAgent(agentId) {
-    const agent = this.state.agents.get(agentId);
+    const _agent = this.state.agents.get(agentId);
     if (!agent) return;
     
     // Close channel
-    const channel = this.state.channels.get(agentId);
+    const _channel = this.state.channels.get(agentId);
     if (channel) {
       channel.close();
       this.state.channels.delete(agentId);
@@ -144,11 +140,11 @@ export class SwarmCommunication extends EventEmitter {
   /**
    * Send direct message to agent
    */
-  async send(toAgentId, message, type = 'query') {
-    const messageId = this._generateMessageId();
-    const timestamp = Date.now();
+  async send(_toAgentId, _message, type = 'query') {
+    const _messageId = this._generateMessageId();
+    const _timestamp = Date.now();
     
-    const envelope = {
+    const _envelope = {
       id: messageId,
       from: 'system', // Will be set by sender
       to: toAgentId,
@@ -169,8 +165,8 @@ export class SwarmCommunication extends EventEmitter {
     this._addToBuffer(envelope);
     
     // Track message
-    this.state.messageHistory.set(messageId, {
-      ...envelope,
+    this.state.messageHistory.set(_messageId, {
+      ..._envelope,
       status: 'pending',
       attempts: 0
     });
@@ -178,14 +174,14 @@ export class SwarmCommunication extends EventEmitter {
     this.state.metrics.sent++;
     
     // Return promise that resolves when message is acknowledged
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
+    return new Promise((_resolve, reject) => {
+      const _timeout = setTimeout(() => {
         reject(new Error(`Message timeout: ${messageId}`));
       }, this.config.timeout);
       
       this.once(`ack:${messageId}`, () => {
         clearTimeout(timeout);
-        resolve({ messageId, delivered: true });
+        resolve({ _messageId, delivered: true });
       });
       
       this.once(`nack:${messageId}`, (error) => {
@@ -198,11 +194,11 @@ export class SwarmCommunication extends EventEmitter {
   /**
    * Broadcast message to all agents
    */
-  broadcast(message, type = 'broadcast') {
-    const messageId = this._generateMessageId();
-    const timestamp = Date.now();
+  broadcast(_message, type = 'broadcast') {
+    const _messageId = this._generateMessageId();
+    const _timestamp = Date.now();
     
-    const envelope = {
+    const _envelope = {
       id: messageId,
       from: 'system',
       to: '*',
@@ -225,18 +221,18 @@ export class SwarmCommunication extends EventEmitter {
   /**
    * Multicast message to specific agents
    */
-  multicast(agentIds, message, type = 'query') {
-    const messageId = this._generateMessageId();
-    const timestamp = Date.now();
+  multicast(_agentIds, _message, type = 'query') {
+    const _messageId = this._generateMessageId();
+    const _timestamp = Date.now();
     
-    const envelopes = agentIds.map(agentId => ({
+    const _envelopes = agentIds.map(agentId => ({
       id: `${messageId}-${agentId}`,
       from: 'system',
-      to: agentId,
-      type,
-      timestamp,
-      message,
-      protocol: PROTOCOLS.multicast,
+      to: _agentId,
+      _type,
+      _timestamp,
+      _message,
+      protocol: PROTOCOLS._multicast,
       groupId: messageId
     }));
     
@@ -250,25 +246,25 @@ export class SwarmCommunication extends EventEmitter {
   /**
    * Gossip protocol for epidemic spread
    */
-  gossip(message, type = 'sync') {
-    const messageId = this._generateMessageId();
-    const timestamp = Date.now();
+  gossip(_message, type = 'sync') {
+    const _messageId = this._generateMessageId();
+    const _timestamp = Date.now();
     
     // Select random agents for initial spread
-    const agents = Array.from(this.state.agents.keys());
-    const selected = this._selectRandomAgents(agents, this.config.gossipFanout);
+    const _agents = Array.from(this.state.agents.keys());
+    const _selected = this._selectRandomAgents(_agents, this.config.gossipFanout);
     
     selected.forEach(agentId => {
-      const envelope = {
+      const _envelope = {
         id: `${messageId}-${agentId}`,
         from: 'system',
-        to: agentId,
-        type,
-        timestamp,
+        to: _agentId,
+        _type,
+        _timestamp,
         message: {
-          ...message,
+          ..._message,
           _gossip: {
-            originalId: messageId,
+            originalId: _messageId,
             hops: 0,
             seen: []
           }
@@ -287,9 +283,9 @@ export class SwarmCommunication extends EventEmitter {
   /**
    * Byzantine consensus protocol
    */
-  async consensus(proposal, validators = []) {
-    const consensusId = this._generateMessageId();
-    const timestamp = Date.now();
+  async consensus(_proposal, validators = []) {
+    const _consensusId = this._generateMessageId();
+    const _timestamp = Date.now();
     
     // If no validators specified, use all online agents
     if (validators.length === 0) {
@@ -297,20 +293,20 @@ export class SwarmCommunication extends EventEmitter {
         .filter(id => this.state.agents.get(id).status === 'online');
     }
     
-    const votes = new Map();
-    const votePromises = [];
+    const _votes = new Map();
+    const _votePromises = [];
     
     // Phase 1: Proposal
     validators.forEach(agentId => {
-      const envelope = {
+      const _envelope = {
         id: `${consensusId}-propose-${agentId}`,
         from: 'system',
-        to: agentId,
+        to: _agentId,
         type: 'consensus',
-        timestamp,
+        _timestamp,
         message: {
           phase: 'propose',
-          consensusId,
+          _consensusId,
           proposal
         },
         protocol: PROTOCOLS.consensus
@@ -319,17 +315,17 @@ export class SwarmCommunication extends EventEmitter {
       this._addToBuffer(envelope);
       
       // Create promise for vote
-      const votePromise = new Promise((resolve) => {
+      const _votePromise = new Promise((resolve) => {
         this.once(`vote:${consensusId}:${agentId}`, (vote) => {
-          votes.set(agentId, vote);
-          resolve({ agentId, vote });
+          votes.set(_agentId, vote);
+          resolve({ _agentId, vote });
         });
         
         // Timeout for vote
         setTimeout(() => {
           if (!votes.has(agentId)) {
-            votes.set(agentId, null);
-            resolve({ agentId, vote: null });
+            votes.set(_agentId, null);
+            resolve({ _agentId, vote: null });
           }
         }, this.config.timeout);
       });
@@ -341,8 +337,8 @@ export class SwarmCommunication extends EventEmitter {
     await Promise.all(votePromises);
     
     // Phase 2: Tally and decide
-    const voteCount = {};
-    let totalVotes = 0;
+    const _voteCount = { /* empty */ };
+    let _totalVotes = 0;
     
     votes.forEach((vote) => {
       if (vote !== null) {
@@ -352,12 +348,12 @@ export class SwarmCommunication extends EventEmitter {
     });
     
     // Check if consensus reached
-    const sortedVotes = Object.entries(voteCount).sort((a, b) => b[1] - a[1]);
-    const winner = sortedVotes[0];
-    const consensusReached = winner && 
+    const _sortedVotes = Object.entries(voteCount).sort((_a, b) => b[1] - a[1]);
+    const _winner = sortedVotes[0];
+    const _consensusReached = winner && 
       (winner[1] / validators.length) >= this.config.consensusQuorum;
     
-    const result = {
+    const _result = {
       consensusId,
       proposal,
       validators: validators.length,
@@ -372,7 +368,7 @@ export class SwarmCommunication extends EventEmitter {
     // Phase 3: Announce result
     this.broadcast({
       phase: 'result',
-      consensusId,
+      _consensusId,
       result
     }, 'consensus');
     
@@ -388,7 +384,7 @@ export class SwarmCommunication extends EventEmitter {
     this.state.metrics.received++;
     
     // Update agent last seen
-    const agent = this.state.agents.get(envelope.from);
+    const _agent = this.state.agents.get(envelope.from);
     if (agent) {
       agent.lastSeen = Date.now();
       agent.messageCount++;
@@ -398,8 +394,8 @@ export class SwarmCommunication extends EventEmitter {
     if (envelope.encrypted && this.config.encryption) {
       try {
         envelope.message = this._decrypt(envelope.message);
-      } catch (error) {
-        this.emit('error', { type: 'decryption_failed', envelope, error });
+      } catch (_error) {
+        this.emit('error', { type: 'decryption_failed', _envelope, error });
         return;
       }
     }
@@ -407,24 +403,34 @@ export class SwarmCommunication extends EventEmitter {
     // Process based on protocol
     switch (envelope.protocol) {
       case PROTOCOLS.direct:
-        this._handleDirectMessage(envelope);
-        break;
+        {
+this._handleDirectMessage(envelope);
+        
+}break;
         
       case PROTOCOLS.broadcast:
-        this._handleBroadcastMessage(envelope);
-        break;
+        {
+this._handleBroadcastMessage(envelope);
+        
+}break;
         
       case PROTOCOLS.multicast:
-        this._handleMulticastMessage(envelope);
-        break;
+        {
+this._handleMulticastMessage(envelope);
+        
+}break;
         
       case PROTOCOLS.gossip:
-        this._handleGossipMessage(envelope);
-        break;
+        {
+this._handleGossipMessage(envelope);
+        
+}break;
         
       case PROTOCOLS.consensus:
-        this._handleConsensusMessage(envelope);
-        break;
+        {
+this._handleConsensusMessage(envelope);
+        
+}break;
         
       default:
         this.emit('error', { type: 'unknown_protocol', envelope });
@@ -439,7 +445,7 @@ export class SwarmCommunication extends EventEmitter {
    */
   _handleDirectMessage(envelope) {
     // Send acknowledgment
-    this._sendAck(envelope.id, envelope.from);
+    this._sendAck(envelope._id, envelope.from);
     
     // Emit specific event for message type
     this.emit(`message:${envelope.type}`, envelope);
@@ -458,7 +464,7 @@ export class SwarmCommunication extends EventEmitter {
    */
   _handleMulticastMessage(envelope) {
     // Send ack to original sender
-    this._sendAck(envelope.groupId, envelope.from);
+    this._sendAck(envelope._groupId, envelope.from);
     
     this.emit(`multicast:${envelope.type}`, envelope);
   }
@@ -467,7 +473,7 @@ export class SwarmCommunication extends EventEmitter {
    * Handle gossip message
    */
   _handleGossipMessage(envelope) {
-    const gossipData = envelope.message._gossip;
+    const _gossipData = envelope.message._gossip;
     
     // Check if we've seen this message
     if (gossipData.seen.includes(this.config.swarmId)) {
@@ -483,16 +489,16 @@ export class SwarmCommunication extends EventEmitter {
     
     // Continue spreading if hop count is low
     if (gossipData.hops < 3) {
-      const agents = Array.from(this.state.agents.keys())
+      const _agents = Array.from(this.state.agents.keys())
         .filter(id => !gossipData.seen.includes(id));
       
-      const selected = this._selectRandomAgents(agents, this.config.gossipFanout);
+      const _selected = this._selectRandomAgents(_agents, this.config.gossipFanout);
       
       selected.forEach(agentId => {
-        const newEnvelope = {
-          ...envelope,
+        const _newEnvelope = {
+          ..._envelope,
           id: `${gossipData.originalId}-${agentId}-hop${gossipData.hops}`,
-          to: agentId,
+          to: _agentId,
           from: this.config.swarmId
         };
         
@@ -509,27 +515,33 @@ export class SwarmCommunication extends EventEmitter {
     
     switch (phase) {
       case 'propose':
-        // Agent should vote on proposal
+        {
+// Agent should vote on proposal
         this.emit('consensus:proposal', envelope);
-        break;
+        
+}break;
         
       case 'vote':
-        // Collect vote
-        this.emit(`vote:${consensusId}:${envelope.from}`, envelope.message.vote);
+        {
+// Collect vote
+        this.emit(`vote:${consensusId
+}}:${envelope.from}`, envelope.message.vote);
         break;
         
       case 'result':
-        // Consensus result announced
+        {
+// Consensus result announced
         this.emit('consensus:result', envelope.message.result);
-        break;
+        
+}break;
     }
   }
   
   /**
    * Send acknowledgment
    */
-  _sendAck(messageId, toAgent) {
-    const ack = {
+  _sendAck(_messageId, toAgent) {
+    const _ack = {
       id: `ack-${messageId}`,
       from: this.config.swarmId,
       to: toAgent,
@@ -548,7 +560,7 @@ export class SwarmCommunication extends EventEmitter {
   _createChannel(agentId) {
     // In production, this would create actual network channels
     // For now, we simulate with event emitters
-    const channel = new EventEmitter();
+    const _channel = new EventEmitter();
     
     channel.send = (message) => {
       this.emit(`channel:${agentId}`, message);
@@ -558,7 +570,7 @@ export class SwarmCommunication extends EventEmitter {
       channel.removeAllListeners();
     };
     
-    this.state.channels.set(agentId, channel);
+    this.state.channels.set(_agentId, channel);
     
     return channel;
   }
@@ -571,7 +583,7 @@ export class SwarmCommunication extends EventEmitter {
     
     // Limit buffer size
     if (this.state.messageBuffer.length > this.config.bufferSize) {
-      const dropped = this.state.messageBuffer.shift();
+      const _dropped = this.state.messageBuffer.shift();
       this.emit('message:dropped', dropped);
     }
   }
@@ -580,7 +592,7 @@ export class SwarmCommunication extends EventEmitter {
    * Process message buffer
    */
   _processMessageBuffer() {
-    const toProcess = this.state.messageBuffer.splice(0, 10);
+    const _toProcess = this.state.messageBuffer.splice(_0, 10);
     
     toProcess.forEach(envelope => {
       // Simulate network delay
@@ -596,7 +608,7 @@ export class SwarmCommunication extends EventEmitter {
         }
         
         // Update message history
-        const history = this.state.messageHistory.get(envelope.id);
+        const _history = this.state.messageHistory.get(envelope.id);
         if (history) {
           history.status = 'sent';
           history.sentAt = Date.now();
@@ -610,9 +622,9 @@ export class SwarmCommunication extends EventEmitter {
    * Send heartbeats to all agents
    */
   _sendHeartbeats() {
-    const now = Date.now();
+    const _now = Date.now();
     
-    this.state.agents.forEach((agent, agentId) => {
+    this.state.agents.forEach((_agent, agentId) => {
       // Check if agent is still responsive
       if (now - agent.lastSeen > 30000) {
         agent.status = 'offline';
@@ -620,7 +632,7 @@ export class SwarmCommunication extends EventEmitter {
       }
       
       // Send heartbeat
-      const heartbeat = {
+      const _heartbeat = {
         id: `heartbeat-${now}-${agentId}`,
         from: 'system',
         to: agentId,
@@ -637,16 +649,16 @@ export class SwarmCommunication extends EventEmitter {
   /**
    * Select random agents
    */
-  _selectRandomAgents(agents, count) {
-    const shuffled = [...agents].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.min(count, agents.length));
+  _selectRandomAgents(_agents, count) {
+    const _shuffled = [...agents].sort(() => Math.random() - 0.5);
+    return shuffled.slice(_0, Math.min(_count, agents.length));
   }
   
   /**
    * Generate unique message ID
    */
   _generateMessageId() {
-    return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `msg-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
   }
   
   /**
@@ -655,10 +667,10 @@ export class SwarmCommunication extends EventEmitter {
   _encrypt(data) {
     if (!this.encryptionKey) return data;
     
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-256-cbc', this.encryptionKey, iv);
+    const _iv = crypto.randomBytes(16);
+    const _cipher = crypto.createCipheriv('aes-256-cbc', this._encryptionKey, iv);
     
-    let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
+    let _encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
     encrypted += cipher.final('hex');
     
     return {
@@ -673,10 +685,10 @@ export class SwarmCommunication extends EventEmitter {
   _decrypt(encrypted) {
     if (!this.encryptionKey) return encrypted;
     
-    const iv = Buffer.from(encrypted.iv, 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', this.encryptionKey, iv);
+    const _iv = Buffer.from(encrypted._iv, 'hex');
+    const _decipher = crypto.createDecipheriv('aes-256-cbc', this._encryptionKey, iv);
     
-    let decrypted = decipher.update(encrypted.data, 'hex', 'utf8');
+    let _decrypted = decipher.update(encrypted._data, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     
     return JSON.parse(decrypted);
@@ -686,8 +698,8 @@ export class SwarmCommunication extends EventEmitter {
    * Get communication statistics
    */
   getStatistics() {
-    const avgLatency = this.state.metrics.latency.length > 0
-      ? this.state.metrics.latency.reduce((a, b) => a + b, 0) / this.state.metrics.latency.length
+    const _avgLatency = this.state.metrics.latency.length > 0
+      ? this.state.metrics.latency.reduce((_a, b) => a + b, 0) / this.state.metrics.latency.length
       : 0;
     
     return {

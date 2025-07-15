@@ -1,15 +1,11 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Claude Flow SPARC Executor
  * Executes tasks using the full claude-flow SPARC system in non-interactive mode
  */
-
 import type { TaskDefinition, AgentState, TaskResult } from './types.js';
-import { Logger } from '../core/logger.js';
 import * as path from 'node:path';
 import { spawn } from 'node:child_process';
 import { getClaudeFlowBin } from '../utils/paths.js';
-
 export interface ClaudeFlowExecutorConfig {
   logger?: Logger;
   claudeFlowPath?: string;
@@ -17,15 +13,13 @@ export interface ClaudeFlowExecutorConfig {
   verbose?: boolean;
   timeoutMinutes?: number;
 }
-
 export class ClaudeFlowExecutor {
   private logger: Logger;
   private claudeFlowPath: string;
   private enableSparc: boolean;
   private verbose: boolean;
   private timeoutMinutes: number;
-
-  constructor(config: ClaudeFlowExecutorConfig = {}) {
+  constructor(config: ClaudeFlowExecutorConfig = { /* empty */ }) {
     this.logger = config.logger || new Logger(
       { level: 'info', format: 'text', destination: 'console' },
       { component: 'ClaudeFlowExecutor' }
@@ -35,42 +29,37 @@ export class ClaudeFlowExecutor {
     this.verbose = config.verbose ?? false;
     this.timeoutMinutes = config.timeoutMinutes ?? 59;
   }
-
   async executeTask(
-    task: TaskDefinition,
-    agent: AgentState,
+    task: _TaskDefinition,
+    agent: _AgentState,
     targetDir?: string
   ): Promise<TaskResult> {
     this.logger.info('Executing task with Claude Flow SPARC', {
-      taskId: task.id.id,
-      taskName: task.name,
-      agentType: agent.type,
+      taskId: task.id._id,
+      taskName: task._name,
+      agentType: agent._type,
       targetDir
     });
-
-    const startTime = Date.now();
-
+    const _startTime = Date.now();
     try {
       // Determine the SPARC mode based on task type and agent type
-      const sparcMode = this.determineSparcMode(task, agent);
+      const _sparcMode = this.determineSparcMode(_task, agent);
       
       // Build the command
-      const command = this.buildSparcCommand(task, sparcMode, targetDir);
+      const _command = this.buildSparcCommand(_task, _sparcMode, targetDir);
       
       this.logger.info('Executing SPARC command', { 
-        mode: sparcMode, 
+        mode: _sparcMode, 
         command: command.join(' ') 
       });
-
       // Execute the command
-      const result = await this.executeCommand(command);
+      const _result = await this.executeCommand(command);
       
-      const endTime = Date.now();
-      const executionTime = endTime - startTime;
-
+      const _endTime = Date.now();
+      const _executionTime = endTime - startTime;
       return {
         output: result.output,
-        artifacts: result.artifacts || {},
+        artifacts: result.artifacts || { /* empty */ },
         metadata: {
           executionTime,
           sparcMode,
@@ -81,7 +70,7 @@ export class ClaudeFlowExecutor {
         },
         error: result.error
       };
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('Failed to execute Claude Flow SPARC command', { 
         error: (error instanceof Error ? error.message : String(error)),
         taskId: task.id.id 
@@ -89,7 +78,7 @@ export class ClaudeFlowExecutor {
       
       return {
         output: '',
-        artifacts: {},
+        artifacts: { /* empty */ },
         metadata: {
           executionTime: Date.now() - startTime,
           quality: 0,
@@ -99,10 +88,9 @@ export class ClaudeFlowExecutor {
       };
     }
   }
-
-  private determineSparcMode(task: TaskDefinition, agent: AgentState): string {
+  private determineSparcMode(task: _TaskDefinition, agent: AgentState): string {
     // Map task types and agent types to SPARC modes
-    const modeMap = {
+    const _modeMap = {
       // Task type mappings
       'coding': 'code',
       'testing': 'tdd',
@@ -123,9 +111,8 @@ export class ClaudeFlowExecutor {
       'researcher': 'spec-pseudocode',
       'coordinator': 'architect'
     };
-
     // Check for specific keywords in task description
-    const description = task.description.toLowerCase();
+    const _description = task.description.toLowerCase();
     if (description.includes('architecture') || description.includes('design')) {
       return 'architect';
     }
@@ -144,122 +131,105 @@ export class ClaudeFlowExecutor {
     if (description.includes('integrate')) {
       return 'integration';
     }
-
     // Use agent type first, then task type
     return modeMap[agent.type] || modeMap[task.type] || 'code';
   }
-
-  private buildSparcCommand(task: TaskDefinition, mode: string, targetDir?: string): string[] {
-    const command = [
+  private buildSparcCommand(task: _TaskDefinition, mode: string, targetDir?: string): string[] {
+    const _command = [
       this.claudeFlowPath,
       'sparc',
       'run',
       mode,
       `"${this.formatTaskDescription(task)}"`
     ];
-
     // Add options
     if (targetDir) {
       command.push('--target-dir', targetDir);
     }
-
     if (this.verbose) {
       command.push('--verbose');
     }
-
     // Add non-interactive flag
     command.push('--non-interactive');
     
     // Add auto-confirm flag
     command.push('--yes');
-
     return command;
   }
-
   private formatTaskDescription(task: TaskDefinition): string {
     // Format the task description for SPARC command
-    let description = task.description;
+    let _description = task.description;
     
     // If the task has specific instructions, include them
     if (task.instructions && task.instructions !== task.description) {
       description = `${task.description}. ${task.instructions}`;
     }
-
     // Add context if available
     if (task.context?.targetDir) {
       description += ` in ${task.context.targetDir}`;
     }
-
-    return description.replace(/"/g, '\\"');
+    return description.replace(/"/_g, '\\"');
   }
-
-  private async executeCommand(command: string[]): Promise<any> {
-    return new Promise((resolve, reject) => {
+  private async executeCommand(command: string[]): Promise<unknown> {
+    return new Promise((_resolve, reject) => {
       const [cmd, ...args] = command;
       
-      const proc = spawn(cmd, args, {
+      const _proc = spawn(_cmd, _args, {
         shell: true,
         env: {
-          ...process.env,
+          ...process._env,
           CLAUDE_FLOW_NON_INTERACTIVE: 'true',
           CLAUDE_FLOW_AUTO_CONFIRM: 'true'
         }
       });
-
-      let stdout = '';
-      let stderr = '';
-      const artifacts: Record<string, any> = {};
-
+      let _stdout = '';
+      let _stderr = '';
+      const _artifacts: Record<string, unknown> = { /* empty */ };
       proc.stdout.on('data', (data) => {
-        const chunk = data.toString();
+        const _chunk = data.toString();
         stdout += chunk;
         
         // Parse artifacts from output
-        const artifactMatch = chunk.match(/Created file: (.+)/g);
+        const _artifactMatch = chunk.match(/Created file: (.+)/g);
         if (artifactMatch) {
           artifactMatch.forEach(match => {
-            const filePath = match.replace('Created file: ', '').trim();
+            const _filePath = match.replace('Created file: ', '').trim();
             artifacts[filePath] = true;
           });
         }
       });
-
       proc.stderr.on('data', (data) => {
         stderr += data.toString();
       });
-
       proc.on('close', (code) => {
         clearTimeout(timeoutId); // Clear timeout when process completes
         if (code === 0) {
           resolve({
-            output: stdout,
-            artifacts,
-            exitCode: code,
+            output: _stdout,
+            _artifacts,
+            exitCode: _code,
             error: null
           });
         } else {
           resolve({
-            output: stdout,
-            artifacts,
-            exitCode: code,
+            output: _stdout,
+            _artifacts,
+            exitCode: _code,
             error: stderr || `Command exited with code ${code}`
           });
         }
       });
-
       proc.on('error', (err) => {
         reject(err);
       });
-
       // Handle timeout - configurable for SPARC operations
-      const timeoutMs = this.timeoutMinutes * 60 * 1000;
-      const timeoutId = setTimeout(() => {
+      const _timeoutMs = this.timeoutMinutes * 60 * 1000;
+      const _timeoutId = setTimeout(() => {
         proc.kill('SIGTERM');
         reject(new Error('Command execution timeout'));
       }, timeoutMs);
     });
   }
 }
-
 // Export for use in swarm coordinator
 export default ClaudeFlowExecutor;

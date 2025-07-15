@@ -3,9 +3,8 @@
  * Command Handler for Claude Code Console
  * Processes and executes console commands
  */
-
 export class CommandHandler {
-  constructor(terminal, wsClient) {
+  constructor(_terminal, wsClient) {
     this.terminal = terminal;
     this.wsClient = wsClient;
     this.isProcessing = false;
@@ -39,16 +38,16 @@ export class CommandHandler {
     
     // Direct SPARC mode commands
     this.sparcModeCommands = {
-      'coder': this.executeSparcMode.bind(this, 'coder'),
-      'architect': this.executeSparcMode.bind(this, 'architect'),
-      'analyst': this.executeSparcMode.bind(this, 'analyst'),
-      'researcher': this.executeSparcMode.bind(this, 'researcher'),
-      'reviewer': this.executeSparcMode.bind(this, 'reviewer'),
-      'tester': this.executeSparcMode.bind(this, 'tester'),
-      'debugger': this.executeSparcMode.bind(this, 'debugger'),
-      'documenter': this.executeSparcMode.bind(this, 'documenter'),
-      'optimizer': this.executeSparcMode.bind(this, 'optimizer'),
-      'designer': this.executeSparcMode.bind(this, 'designer')
+      'coder': this.executeSparcMode.bind(_this, 'coder'),
+      'architect': this.executeSparcMode.bind(_this, 'architect'),
+      'analyst': this.executeSparcMode.bind(_this, 'analyst'),
+      'researcher': this.executeSparcMode.bind(_this, 'researcher'),
+      'reviewer': this.executeSparcMode.bind(_this, 'reviewer'),
+      'tester': this.executeSparcMode.bind(_this, 'tester'),
+      'debugger': this.executeSparcMode.bind(_this, 'debugger'),
+      'documenter': this.executeSparcMode.bind(_this, 'documenter'),
+      'optimizer': this.executeSparcMode.bind(_this, 'optimizer'),
+      'designer': this.executeSparcMode.bind(_this, 'designer')
     };
     
     this.allCommands = { ...this.builtinCommands, ...this.claudeFlowCommands, ...this.sparcModeCommands };
@@ -72,9 +71,9 @@ export class CommandHandler {
       if (this.allCommands[cmd]) {
         await this.allCommands[cmd](args);
       } else {
-        await this.executeRemoteCommand(cmd, args);
+        await this.executeRemoteCommand(_cmd, args);
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(error.message);
       console.error('Command execution error:', error);
     } finally {
@@ -87,9 +86,9 @@ export class CommandHandler {
    * Parse command string into command and arguments
    */
   parseCommand(commandString) {
-    const parts = commandString.trim().split(/\s+/);
-    const cmd = parts[0].toLowerCase();
-    const args = parts.slice(1);
+    const _parts = commandString.trim().split(/s+/);
+    const _cmd = parts[0].toLowerCase();
+    const _args = parts.slice(1);
     
     return { cmd, args };
   }
@@ -99,7 +98,7 @@ export class CommandHandler {
    */
   async showHelp(args) {
     if (args.length > 0) {
-      const command = args[0].toLowerCase();
+      const _command = args[0].toLowerCase();
       if (this.allCommands[command]) {
         this.showCommandHelp(command);
       } else {
@@ -125,23 +124,23 @@ export class CommandHandler {
     this.terminal.writeLine('');
     this.terminal.writeInfo('Tool Commands (from tools list):');
     this.terminal.writeLine('  system/health        - Get system health status');
-    this.terminal.writeLine('  memory/manage        - Manage memory (list, store <key> <value>, retrieve <key>)');
-    this.terminal.writeLine('  agents/manage        - Manage agents (list, create <type>, status <id>)');
-    this.terminal.writeLine('  swarm/orchestrate    - Swarm operations (status, create, start, stop)');
-    this.terminal.writeLine('  sparc/execute        - Execute SPARC modes (coder, architect, etc.)');
-    this.terminal.writeLine('  benchmark/run        - Run benchmarks (default, memory, cpu, network)');
+    this.terminal.writeLine('  memory/manage        - Manage memory (_list, store <key> <value>, retrieve <key>)');
+    this.terminal.writeLine('  agents/manage        - Manage agents (_list, create <type>, status <id>)');
+    this.terminal.writeLine('  swarm/orchestrate    - Swarm operations (_status, _create, _start, stop)');
+    this.terminal.writeLine('  sparc/execute        - Execute SPARC modes (_coder, _architect, etc.)');
+    this.terminal.writeLine('  benchmark/run        - Run benchmarks (_default, _memory, _cpu, network)');
     this.terminal.writeLine('  claude-flow/execute  - Execute Claude Flow commands');
     
     this.terminal.writeLine('');
     this.terminal.writeInfo('Use "help <command>" for detailed information about a specific command.');
-    this.terminal.writeInfo('Use Ctrl+L to clear console, Ctrl+C to interrupt, Tab for autocomplete.');
+    this.terminal.writeInfo('Use Ctrl+L to clear _console, Ctrl+C to _interrupt, Tab for autocomplete.');
   }
   
   /**
    * Get command description
    */
   getCommandDescription(command) {
-    const descriptions = {
+    const _descriptions = {
       'help': 'Show help information',
       'clear': 'Clear console output',
       'status': 'Show connection and system status',
@@ -170,11 +169,10 @@ export class CommandHandler {
    * Show detailed command help
    */
   showCommandHelp(command) {
-    const helpText = {
+    const _helpText = {
       'help': `
 Usage: help [command]
 Show help information for all commands or a specific command.
-
 Examples:
   help              - Show all commands
   help claude-flow  - Show help for claude-flow command`,
@@ -186,11 +184,9 @@ Clear the console output. You can also use Ctrl+L.`,
       'connect': `
 Usage: connect [url] [token]
 Connect to Claude Code server.
-
 Arguments:
   url     - WebSocket URL (default: ws://localhost:3000/ws)
   token   - Authentication token (optional)
-
 Examples:
   connect
   connect ws://localhost:3000/ws
@@ -199,7 +195,6 @@ Examples:
       'claude-flow': `
 Usage: claude-flow <subcommand> [options]
 Execute Claude Flow commands.
-
 Subcommands:
   start [mode]     - Start Claude Flow in specified mode
   stop             - Stop Claude Flow
@@ -214,7 +209,6 @@ Examples:
       'swarm': `
 Usage: swarm <action> [options]
 Manage and execute swarms.
-
 Actions:
   create <name>    - Create new swarm
   start <name>     - Start existing swarm
@@ -247,8 +241,8 @@ Examples:
    * Show status
    */
   async showStatus() {
-    const wsStatus = this.wsClient.getStatus();
-    const terminalStats = this.terminal.getStats();
+    const _wsStatus = this.wsClient.getStatus();
+    const _terminalStats = this.terminal.getStats();
     
     this.terminal.writeInfo('System Status:');
     this.terminal.writeLine('');
@@ -269,17 +263,17 @@ Examples:
     
     if (wsStatus.connected) {
       try {
-        const healthStatus = await this.wsClient.getHealthStatus();
+        const _healthStatus = await this.wsClient.getHealthStatus();
         this.terminal.writeLine('');
         this.terminal.writeInfo('Server Health:');
         this.terminal.writeLine(`  Status: ${healthStatus.healthy ? 'Healthy' : 'Unhealthy'}`);
         
         if (healthStatus.metrics) {
-          Object.entries(healthStatus.metrics).forEach(([key, value]) => {
+          Object.entries(healthStatus.metrics).forEach(([_key, value]) => {
             this.terminal.writeLine(`  ${key}: ${value}`);
           });
         }
-      } catch (error) {
+      } catch (_error) {
         this.terminal.writeWarning('Failed to get server health status');
       }
     }
@@ -289,20 +283,20 @@ Examples:
    * Connect to server
    */
   async connectToServer(args) {
-    const url = args[0] || 'ws://localhost:3000/ws';
-    const token = args[1] || '';
+    const _url = args[0] || 'ws://localhost:3000/ws';
+    const _token = args[1] || '';
     
     this.terminal.writeInfo(`Connecting to ${url}...`);
     
     try {
-      await this.wsClient.connect(url, token);
+      await this.wsClient.connect(_url, token);
       
       // Initialize session
       await this.wsClient.initializeSession();
       
       this.terminal.writeSuccess('Connected successfully');
       this.terminal.setPrompt('claude-flow>');
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Connection failed: ${error.message}`);
     }
   }
@@ -326,7 +320,7 @@ Examples:
     }
     
     try {
-      const tools = await this.wsClient.getAvailableTools();
+      const _tools = await this.wsClient.getAvailableTools();
       
       this.terminal.writeInfo('Available Tools:');
       this.terminal.writeLine('');
@@ -338,7 +332,7 @@ Examples:
       } else {
         this.terminal.writeWarning('No tools available');
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Failed to list tools: ${error.message}`);
     }
   }
@@ -353,7 +347,7 @@ Examples:
     }
     
     try {
-      const health = await this.wsClient.getHealthStatus();
+      const _health = await this.wsClient.getHealthStatus();
       
       if (health.healthy) {
         this.terminal.writeSuccess('Server is healthy');
@@ -364,11 +358,11 @@ Examples:
       if (health.metrics) {
         this.terminal.writeLine('');
         this.terminal.writeInfo('Metrics:');
-        Object.entries(health.metrics).forEach(([key, value]) => {
+        Object.entries(health.metrics).forEach(([_key, value]) => {
           this.terminal.writeLine(`  ${key}: ${value}`);
         });
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Health check failed: ${error.message}`);
     }
   }
@@ -377,7 +371,7 @@ Examples:
    * Show command history
    */
   async showHistory() {
-    const history = this.terminal.history;
+    const _history = this.terminal.history;
     
     if (history.length === 0) {
       this.terminal.writeInfo('No command history');
@@ -385,7 +379,7 @@ Examples:
     }
     
     this.terminal.writeInfo('Command History:');
-    history.forEach((cmd, index) => {
+    history.forEach((_cmd, index) => {
       this.terminal.writeLine(`  ${(index + 1).toString().padStart(3)}: ${cmd}`);
     });
   }
@@ -394,9 +388,9 @@ Examples:
    * Export session data
    */
   async exportSession(args) {
-    const format = args[0] || 'json';
+    const _format = args[0] || 'json';
     
-    const sessionData = {
+    const _sessionData = {
       timestamp: new Date().toISOString(),
       terminal: this.terminal.exportHistory(),
       history: this.terminal.history,
@@ -404,8 +398,8 @@ Examples:
     };
     
     if (format === 'json') {
-      const blob = new Blob([JSON.stringify(sessionData, null, 2)], { type: 'application/json' });
-      this.downloadFile(blob, `console-session-${Date.now()}.json`);
+      const _blob = new Blob([JSON.stringify(_sessionData, _null, 2)], { type: 'application/json' });
+      this.downloadFile(_blob, `console-session-${Date.now()}.json`);
       this.terminal.writeSuccess('Session exported as JSON');
     } else {
       this.terminal.writeError(`Unsupported export format: ${format}`);
@@ -416,8 +410,8 @@ Examples:
    * Change theme
    */
   async changeTheme(args) {
-    const theme = args[0];
-    const validThemes = ['dark', 'light', 'classic', 'matrix'];
+    const _theme = args[0];
+    const _validThemes = ['dark', 'light', 'classic', 'matrix'];
     
     if (!theme) {
       this.terminal.writeInfo(`Available themes: ${validThemes.join(', ')}`);
@@ -457,12 +451,12 @@ Examples:
       return;
     }
     
-    const subcommand = args[0];
-    const subArgs = args.slice(1);
+    const _subcommand = args[0];
+    const _subArgs = args.slice(1);
     
     try {
-      const result = await this.wsClient.executeCommand('claude-flow', {
-        subcommand,
+      const _result = await this.wsClient.executeCommand('claude-flow', {
+        _subcommand,
         args: subArgs
       });
       
@@ -470,7 +464,7 @@ Examples:
       if (result && result.output) {
         this.terminal.writeLine(result.output);
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Claude Flow command failed: ${error.message}`);
     }
   }
@@ -485,12 +479,12 @@ Examples:
     }
     
     try {
-      const action = args[0] || 'status';
+      const _action = args[0] || 'status';
       this.terminal.writeInfo(`Executing swarm ${action}...`);
       
-      const result = await this.wsClient.sendRequest('tools/call', {
+      const _result = await this.wsClient.sendRequest('tools/call', {
         name: 'swarm/status',
-        arguments: { action, args: args.slice(1) }
+        arguments: { _action, args: args.slice(1) }
       });
       
       if (result && result.content && result.content[0]) {
@@ -498,7 +492,7 @@ Examples:
       } else {
         this.terminal.writeSuccess('Swarm command executed successfully');
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Swarm command failed: ${error.message}`);
     }
   }
@@ -532,15 +526,15 @@ Examples:
     }
     
     try {
-      const operation = args[0] || 'list';
-      const key = args[1];
-      const value = args.slice(2).join(' ');
+      const _operation = args[0] || 'list';
+      const _key = args[1];
+      const _value = args.slice(2).join(' ');
       
       this.terminal.writeInfo(`Executing memory ${operation}...`);
       
-      const result = await this.wsClient.sendRequest('tools/call', {
+      const _result = await this.wsClient.sendRequest('tools/call', {
         name: 'memory/manage',
-        arguments: { operation, key, value }
+        arguments: { _operation, _key, value }
       });
       
       if (result && result.content && result.content[0]) {
@@ -548,7 +542,7 @@ Examples:
       } else {
         this.terminal.writeSuccess('Memory operation completed successfully');
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Memory command failed: ${error.message}`);
     }
   }
@@ -563,15 +557,15 @@ Examples:
     }
     
     try {
-      const action = args[0] || 'list';
-      const agentType = args[1];
-      const agentId = args[1];
+      const _action = args[0] || 'list';
+      const _agentType = args[1];
+      const _agentId = args[1];
       
       this.terminal.writeInfo(`Executing agents ${action}...`);
       
-      const result = await this.wsClient.sendRequest('tools/call', {
+      const _result = await this.wsClient.sendRequest('tools/call', {
         name: 'agents/manage',
-        arguments: { action, agentType, agentId }
+        arguments: { _action, _agentType, agentId }
       });
       
       if (result && result.content && result.content[0]) {
@@ -579,7 +573,7 @@ Examples:
       } else {
         this.terminal.writeSuccess('Agent operation completed successfully');
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Agent command failed: ${error.message}`);
     }
   }
@@ -594,14 +588,14 @@ Examples:
     }
     
     try {
-      const suite = args[0] || 'default';
-      const iterations = parseInt(args[1]) || 10;
+      const _suite = args[0] || 'default';
+      const _iterations = parseInt(args[1]) || 10;
       
       this.terminal.writeInfo(`Running benchmark suite: ${suite}...`);
       
-      const result = await this.wsClient.sendRequest('tools/call', {
+      const _result = await this.wsClient.sendRequest('tools/call', {
         name: 'benchmark/run',
-        arguments: { suite, iterations }
+        arguments: { _suite, iterations }
       });
       
       if (result && result.content && result.content[0]) {
@@ -609,7 +603,7 @@ Examples:
       } else {
         this.terminal.writeSuccess('Benchmark completed successfully');
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Benchmark failed: ${error.message}`);
     }
   }
@@ -625,7 +619,7 @@ Examples:
     
     if (args.length === 0) {
       this.terminal.writeInfo('Available SPARC modes:');
-      const modes = ['coder', 'architect', 'analyst', 'researcher', 'reviewer', 
+      const _modes = ['coder', 'architect', 'analyst', 'researcher', 'reviewer', 
                     'tester', 'debugger', 'documenter', 'optimizer', 'designer'];
       modes.forEach(mode => {
         this.terminal.writeLine(`  ${mode}`);
@@ -634,15 +628,15 @@ Examples:
     }
     
     try {
-      const mode = args[0];
-      const task = args.slice(1).join(' ') || 'General task execution';
-      const options = {};
+      const _mode = args[0];
+      const _task = args.slice(1).join(' ') || 'General task execution';
+      const _options = { /* empty */ };
       
       this.terminal.writeInfo(`Executing SPARC mode: ${mode}...`);
       
-      const result = await this.wsClient.sendRequest('tools/call', {
+      const _result = await this.wsClient.sendRequest('tools/call', {
         name: 'sparc/execute',
-        arguments: { mode, task, options }
+        arguments: { _mode, _task, options }
       });
       
       if (result && result.content && result.content[0]) {
@@ -650,7 +644,7 @@ Examples:
       } else {
         this.terminal.writeSuccess(`SPARC ${mode} mode executed successfully`);
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`SPARC execution failed: ${error.message}`);
     }
   }
@@ -658,21 +652,21 @@ Examples:
   /**
    * Execute specific SPARC mode
    */
-  async executeSparcMode(mode, args) {
+  async executeSparcMode(_mode, args) {
     if (!this.wsClient.isConnected) {
       this.terminal.writeError('Not connected to server');
       return;
     }
     
     try {
-      const task = args.join(' ') || `Execute ${mode} mode tasks`;
-      const options = {};
+      const _task = args.join(' ') || `Execute ${mode} mode tasks`;
+      const _options = { /* empty */ };
       
       this.terminal.writeInfo(`Executing SPARC ${mode} mode...`);
       
-      const result = await this.wsClient.sendRequest('tools/call', {
+      const _result = await this.wsClient.sendRequest('tools/call', {
         name: 'sparc/execute',
-        arguments: { mode, task, options }
+        arguments: { _mode, _task, options }
       });
       
       if (result && result.content && result.content[0]) {
@@ -680,7 +674,7 @@ Examples:
       } else {
         this.terminal.writeSuccess(`SPARC ${mode} mode executed successfully`);
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`SPARC ${mode} execution failed: ${error.message}`);
     }
   }
@@ -688,7 +682,7 @@ Examples:
   /**
    * Execute remote command via WebSocket
    */
-  async executeRemoteCommand(command, args) {
+  async executeRemoteCommand(_command, args) {
     if (!this.wsClient.isConnected) {
       this.terminal.writeError('Not connected to server. Use "connect" command first.');
       return;
@@ -697,89 +691,101 @@ Examples:
     try {
       // Check if this is a tool name (contains slash)
       if (command.includes('/')) {
-        return await this.executeToolDirect(command, args);
+        return await this.executeToolDirect(_command, args);
       }
       
       this.terminal.writeInfo(`Executing remote command: ${command}`);
       
-      const result = await this.wsClient.executeCommand(command, { args });
+      const _result = await this.wsClient.executeCommand(_command, { args });
       
       if (result && result.output) {
         this.terminal.writeLine(result.output);
       } else {
         this.terminal.writeSuccess('Command executed successfully');
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Remote command failed: ${error.message}`);
     }
   }
-
   /**
    * Execute tool directly by name
    */
-  async executeToolDirect(toolName, args) {
+  async executeToolDirect(_toolName, args) {
     try {
       this.terminal.writeInfo(`Executing tool: ${toolName}...`);
       
       // Prepare arguments based on tool
-      let toolArgs = {};
+      let _toolArgs = { /* empty */ };
       
       switch (toolName) {
         case 'system/health':
-          toolArgs = { detailed: args.includes('--detailed') };
+          {
+toolArgs = { detailed: args.includes('--detailed') 
+}};
           break;
           
         case 'memory/manage':
-          toolArgs = {
+          {
+toolArgs = {
             operation: args[0] || 'list',
             key: args[1],
             value: args.slice(2).join(' ')
-          };
+          
+}};
           break;
           
         case 'agents/manage':
-          toolArgs = {
+          {
+toolArgs = {
             action: args[0] || 'list',
             agentType: args[1],
             agentId: args[1]
-          };
+          
+}};
           break;
           
         case 'swarm/orchestrate':
-          toolArgs = {
+          {
+toolArgs = {
             action: args[0] || 'status',
             args: args.slice(1)
-          };
+          
+}};
           break;
           
         case 'sparc/execute':
-          toolArgs = {
+          {
+toolArgs = {
             mode: args[0] || 'coder',
             task: args.slice(1).join(' ') || 'General task execution',
-            options: {}
+            options: { /* empty */ }}
           };
           break;
           
         case 'benchmark/run':
-          toolArgs = {
-            suite: args[0] || 'default',
+          {
+toolArgs = {
+            suite: args[0] || '
+}default',
             iterations: parseInt(args[1]) || 10
           };
           break;
           
         case 'claude-flow/execute':
-          toolArgs = {
+          {
+toolArgs = {
             command: args[0] || 'status',
             args: args.slice(1)
-          };
+          
+}};
           break;
           
         default:
           toolArgs = { args };
       }
       
-      const result = await this.wsClient.sendRequest('tools/call', {
-        name: toolName,
+      const _result = await this.wsClient.sendRequest('tools/call', {
+        name: _toolName,
         arguments: toolArgs
       });
       
@@ -788,7 +794,7 @@ Examples:
       } else {
         this.terminal.writeSuccess(`Tool ${toolName} executed successfully`);
       }
-    } catch (error) {
+    } catch (_error) {
       this.terminal.writeError(`Tool execution failed: ${error.message}`);
     }
   }
@@ -796,9 +802,9 @@ Examples:
   /**
    * Download file helper
    */
-  downloadFile(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+  downloadFile(_blob, filename) {
+    const _url = URL.createObjectURL(blob);
+    const _a = document.createElement('a');
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -811,7 +817,7 @@ Examples:
    * Get command suggestions
    */
   getCommandSuggestions(input) {
-    const allCommands = Object.keys(this.allCommands);
+    const _allCommands = Object.keys(this.allCommands);
     return allCommands.filter(cmd => cmd.startsWith(input.toLowerCase()));
   }
   

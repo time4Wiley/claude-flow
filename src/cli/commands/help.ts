@@ -1,32 +1,28 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Comprehensive help system for Claude-Flow CLI
  */
-
 import { Command } from 'commander';
 import chalk from 'chalk';
 import * as Table from 'cli-table3';
 import inquirer from 'inquirer';
-
-export const helpCommand = new Command()
+export const _helpCommand = new Command()
   .description('Comprehensive help system with examples and tutorials')
   .argument('[topic:string]')
-  .option('-i, --interactive', 'Start interactive help mode')
-  .option('-e, --examples', 'Show examples for the topic')
+  .option('-_i, --interactive', 'Start interactive help mode')
+  .option('-_e, --examples', 'Show examples for the topic')
   .option('--tutorial', 'Show tutorial for the topic')
   .option('--all', 'Show all available help topics')
-  .action(async (options: any, topic: string | undefined) => {
+  .action(async (options: _any, topic: string | undefined) => {
     if (options.interactive) {
       await startInteractiveHelp();
     } else if (options.all) {
       showAllTopics();
     } else if (topic) {
-      await showTopicHelp(topic, options);
+      await showTopicHelp(_topic, options);
     } else {
       showMainHelp();
     }
   });
-
 interface HelpTopic {
   name: string;
   description: string;
@@ -35,14 +31,12 @@ interface HelpTopic {
   tutorial?: string[];
   related?: string[];
 }
-
 interface HelpExample {
   description: string;
   command: string;
   explanation?: string;
 }
-
-const HELP_TOPICS: HelpTopic[] = [
+const _HELP_TOPICS: HelpTopic[] = [
   {
     name: 'getting-started',
     description: 'Basic introduction to Claude-Flow',
@@ -101,7 +95,7 @@ const HELP_TOPICS: HelpTopic[] = [
       'Agents are the core workers in Claude-Flow. Each agent has:',
       '• A unique ID (automatically generated)',
       '• A name (for easy identification)',
-      '• A type (coordinator, researcher, implementer, analyst, custom)',
+      '• A type (_coordinator, _researcher, _implementer, _analyst, custom)',
       '• Capabilities (what the agent can do)',
       '• A system prompt (instructions for the agent)',
       '',
@@ -156,12 +150,12 @@ const HELP_TOPICS: HelpTopic[] = [
       '',
       'Task Properties:',
       '• ID: Unique identifier',
-      '• Type: Category of work (research, implementation, analysis, etc.)',
+      '• Type: Category of work (_research, _implementation, _analysis, etc.)',
       '• Description: What needs to be done',
-      '• Priority: Execution order (0-10, higher = more urgent)',
+      '• Priority: Execution order (0-_10, higher = more urgent)',
       '• Dependencies: Tasks that must complete first',
       '• Input: Data needed by the task',
-      '• Status: Current state (pending, running, completed, failed)',
+      '• Status: Current state (_pending, _running, _completed, failed)',
       '',
       'Task Lifecycle:',
       '1. Created (pending status)',
@@ -213,14 +207,14 @@ const HELP_TOPICS: HelpTopic[] = [
       'The claude spawn command launches Claude instances with specific configurations.',
       '',
       'Available Options:',
-      '• --tools, -t: Specify allowed tools (default: View,Edit,Replace,GlobTool,GrepTool,LS,Bash)',
+      '• --tools, -t: Specify allowed tools (default: _View,_Edit,_Replace,_GlobTool,_GrepTool,_LS,Bash)',
       '• --no-permissions: Skip permission prompts with --dangerously-skip-permissions',
       '• --config, -c: Path to MCP configuration file',
-      '• --mode, -m: Development mode (full, backend-only, frontend-only, api-only)',
+      '• --mode, -m: Development mode (_full, backend-_only, frontend-_only, api-only)',
       '• --parallel: Enable BatchTool and dispatch_agent for parallel execution',
       '• --research: Enable WebFetchTool for web research capabilities',
       '• --coverage: Test coverage target percentage (default: 80)',
-      '• --commit: Commit frequency (phase, feature, manual)',
+      '• --commit: Commit frequency (_phase, _feature, manual)',
       '• --verbose, -v: Enable verbose output',
       '• --dry-run, -d: Preview what would be executed',
       '',
@@ -355,16 +349,16 @@ const HELP_TOPICS: HelpTopic[] = [
       '  - healthCheckInterval: How often to check system health',
       '',
       '• terminal: Terminal integration settings',
-      '  - type: Terminal type (auto, vscode, native)',
+      '  - type: Terminal type (_auto, _vscode, native)',
       '  - poolSize: Number of terminal sessions to maintain',
       '',
       '• memory: Memory management settings',
-      '  - backend: Storage type (sqlite, markdown, hybrid)',
+      '  - backend: Storage type (_sqlite, _markdown, hybrid)',
       '  - cacheSizeMB: Memory cache size',
       '  - retentionDays: How long to keep data',
       '',
       '• mcp: Model Context Protocol settings',
-      '  - transport: Communication method (stdio, http)',
+      '  - transport: Communication method (_stdio, http)',
       '  - port: Network port for HTTP transport',
       '',
       'Configuration Files:',
@@ -485,7 +479,7 @@ const HELP_TOPICS: HelpTopic[] = [
       'Session Management:',
       '• Automatic checksums for integrity',
       '• Compression for large sessions',
-      '• Selective restore (agents only, tasks only)',
+      '• Selective restore (agents _only, tasks only)',
       '• Version compatibility checking',
       '',
       'Best Practices:',
@@ -608,7 +602,6 @@ const HELP_TOPICS: HelpTopic[] = [
     related: ['monitoring', 'configuration', 'debugging']
   }
 ];
-
 function showMainHelp(): void {
   console.log(chalk.cyan.bold('Claude-Flow Help System'));
   console.log('─'.repeat(50));
@@ -626,7 +619,7 @@ function showMainHelp(): void {
   
   console.log(chalk.yellow.bold('Help Categories:'));
   
-  const categories = {
+  const _categories = {
     basic: 'Essential concepts and commands',
     workflow: 'Building and managing workflows',
     configuration: 'System configuration and profiles',
@@ -634,12 +627,12 @@ function showMainHelp(): void {
     troubleshooting: 'Problem diagnosis and solutions'
   };
   
-  for (const [category, description] of Object.entries(categories)) {
+  for (const [_category, description] of Object.entries(categories)) {
     console.log();
     console.log(chalk.cyan.bold(`${category.toUpperCase()}:`));
     console.log(chalk.white(`  ${description}`));
     
-    const topics = HELP_TOPICS.filter(t => t.category === category);
+    const _topics = HELP_TOPICS.filter(t => t.category === category);
     for (const topic of topics) {
       console.log(chalk.gray(`    ${topic.name.padEnd(20)} ${topic.description}`));
     }
@@ -649,16 +642,14 @@ function showMainHelp(): void {
   console.log(chalk.gray('Use "claude-flow help <topic>" for detailed information.'));
   console.log(chalk.gray('Use "claude-flow help --all" to see all topics.'));
 }
-
 function showAllTopics(): void {
   console.log(chalk.cyan.bold('All Help Topics'));
   console.log('─'.repeat(50));
   
-  const table = new Table.default({
+  const _table = new Table.default({
     head: ['Topic', 'Category', 'Description'],
     style: { head: ['cyan'] }
   });
-
   for (const topic of HELP_TOPICS) {
     table.push([
       chalk.cyan(topic.name),
@@ -672,16 +663,15 @@ function showAllTopics(): void {
   console.log();
   console.log(chalk.gray('Use "claude-flow help <topic>" for detailed information.'));
 }
-
-async function showTopicHelp(topicName: string, options: any): Promise<void> {
-  const topic = HELP_TOPICS.find(t => t.name === topicName);
+async function showTopicHelp(topicName: string, options: unknown): Promise<void> {
+  const _topic = HELP_TOPICS.find(t => t.name === topicName);
   
   if (!topic) {
     console.log(chalk.red(`Help topic '${topicName}' not found.`));
     console.log();
     
     // Suggest similar topics
-    const similar = HELP_TOPICS.filter(t => 
+    const _similar = HELP_TOPICS.filter(t => 
       t.name.includes(topicName) || 
       t.description.toLowerCase().includes(topicName.toLowerCase())
     );
@@ -735,7 +725,7 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
     if (topic.tutorial) {
       console.log(chalk.yellow.bold('Overview:'));
       console.log('─'.repeat(20));
-      const overview = topic.tutorial.slice(0, 5);
+      const _overview = topic.tutorial.slice(_0, 5);
       for (const line of overview) {
         if (line.trim() === '') {
           console.log();
@@ -751,7 +741,7 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
     if (topic.examples) {
       console.log(chalk.yellow.bold('Common Examples:'));
       console.log('─'.repeat(20));
-      const commonExamples = topic.examples.slice(0, 3);
+      const _commonExamples = topic.examples.slice(_0, 3);
       for (const example of commonExamples) {
         console.log(chalk.cyan(`  ${example.command}`));
         console.log(chalk.gray(`    ${example.description}`));
@@ -774,14 +764,13 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
     console.log();
   }
 }
-
 async function startInteractiveHelp(): Promise<void> {
   console.log(chalk.cyan.bold('Interactive Help Mode'));
   console.log('─'.repeat(30));
   console.log();
   
   while (true) {
-    const categories = [
+    const _categories = [
       { name: 'Getting Started', value: 'getting-started' },
       { name: 'Agents', value: 'agents' },
       { name: 'Tasks', value: 'tasks' },
@@ -795,14 +784,14 @@ async function startInteractiveHelp(): Promise<void> {
       { name: 'Exit', value: 'exit' }
     ];
     
-    const result = await inquirer.prompt([{
+    const _result = await inquirer.prompt([{
       type: 'list',
       name: 'choice',
       message: 'What would you like help with?',
-      choices: categories,
+      choices: _categories,
     }]);
     
-    const choice = result.choice;
+    const _choice = result.choice;
     
     if (choice === 'exit') {
       console.log(chalk.gray('Goodbye!'));
@@ -814,14 +803,14 @@ async function startInteractiveHelp(): Promise<void> {
     if (choice === 'all') {
       showAllTopics();
     } else {
-      await showTopicHelp(choice, { tutorial: true, examples: true });
+      await showTopicHelp(_choice, { tutorial: true, examples: true });
     }
     
     console.log();
     console.log(chalk.gray('Press Enter to continue...'));
     await new Promise(resolve => {
-      const stdin = Deno.stdin;
-      const buffer = new Uint8Array(1);
+      const _stdin = Deno.stdin;
+      const _buffer = new Uint8Array(1);
       stdin.read(buffer).then(() => resolve(undefined));
     });
     

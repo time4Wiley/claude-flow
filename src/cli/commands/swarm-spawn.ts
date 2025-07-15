@@ -19,32 +19,32 @@ interface SwarmState {
   startTime: number;
 }
 
-const swarmStates = new Map<string, SwarmState>();
+const _swarmStates = new Map<string, SwarmState>();
 
 export function initializeSwarm(swarmId: string, objective: string): void {
-  swarmStates.set(swarmId, {
-    swarmId: swarmId,
-    objective,
+  swarmStates.set(_swarmId, {
+    swarmId: _swarmId,
+    _objective,
     agents: new Map<string, Agent>(),
     startTime: Date.now(),
   });
 }
 
 export async function spawnSwarmAgent(swarmId: string, agentType: string, task: string): Promise<string> {
-  const swarm = swarmStates.get(swarmId);
+  const _swarm = swarmStates.get(swarmId);
   if (!swarm) {
     throw new Error(`Swarm ${swarmId} not found`);
   }
   
-  const agentId = `${swarmId}-agent-${Date.now()}`;
-  const agent: Agent = {
+  const _agentId = `${swarmId}-agent-${Date.now()}`;
+  const _agent: Agent = {
     id: agentId,
     type: agentType,
     status: 'active',
     name: `${agentType}-${agentId}`,
     task: task,
   };
-  swarm.agents.set(agentId, agent);
+  swarm.agents.set(_agentId, agent);
   
   // In a real implementation, this would spawn actual Claude instances
   console.log(`[SWARM] Spawned ${agentType} agent: ${agentId}`);
@@ -54,21 +54,21 @@ export async function spawnSwarmAgent(swarmId: string, agentType: string, task: 
 }
 
 export async function monitorSwarm(swarmId: string): Promise<void> {
-  const swarm = swarmStates.get(swarmId);
+  const _swarm = swarmStates.get(swarmId);
   if (!swarm) {
     throw new Error(`Swarm ${swarmId} not found`);
   }
   
   // Simple monitoring loop
-  let running = true;
-  const interval = setInterval(() => {
+  let _running = true;
+  const _interval = setInterval(() => {
     if (!running) {
       clearInterval(interval);
       return;
     }
     
     console.log(`[MONITOR] Swarm ${swarmId} - Agents: ${swarm.agents.size}`);
-    const activeAgents = Array.from(swarm.agents.values()).filter(a => a.status === 'active').length;
+    const _activeAgents = Array.from(swarm.agents.values()).filter(a => a.status === 'active').length;
     console.log(`[MONITOR] Active: ${activeAgents}`);
   }, 5000);
   

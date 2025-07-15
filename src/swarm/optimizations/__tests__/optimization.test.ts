@@ -1,34 +1,30 @@
 /**
  * Tests for Swarm Optimizations
  */
-
 // Tests will skip ClaudeAPI-dependent tests for now
-
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { CircularBuffer } from '../circular-buffer.js';
 import { TTLMap } from '../ttl-map.js';
 import { ClaudeConnectionPool } from '../connection-pool.js';
 import { AsyncFileManager } from '../async-file-manager.js';
 import { OptimizedExecutor } from '../optimized-executor.js';
-import { generateId } from '../../../utils/helpers.js';
 import type { TaskDefinition, AgentId } from '../../types.js';
-
 describe('Swarm Optimizations', () => {
   describe('CircularBuffer', () => {
     it('should maintain fixed size', () => {
-      const buffer = new CircularBuffer<number>(5);
+      const _buffer = new CircularBuffer<number>(5);
       
       // Add more items than capacity
-      for (let i = 0; i < 10; i++) {
+      for (let _i = 0; i < 10; i++) {
         buffer.push(i);
       }
       
       expect(buffer.getSize()).toBe(5);
-      expect(buffer.getAll()).toEqual([5, 6, 7, 8, 9]);
+      expect(buffer.getAll()).toEqual([_5, 6, 7, 8, 9]);
     });
     
     it('should return recent items correctly', () => {
-      const buffer = new CircularBuffer<string>(3);
+      const _buffer = new CircularBuffer<string>(3);
       buffer.push('a');
       buffer.push('b');
       buffer.push('c');
@@ -39,8 +35,8 @@ describe('Swarm Optimizations', () => {
     });
     
     it('should track overwritten count', () => {
-      const buffer = new CircularBuffer<number>(3);
-      for (let i = 0; i < 5; i++) {
+      const _buffer = new CircularBuffer<number>(3);
+      for (let _i = 0; i < 5; i++) {
         buffer.push(i);
       }
       
@@ -59,7 +55,7 @@ describe('Swarm Optimizations', () => {
     });
     
     it('should expire items after TTL', () => {
-      const map = new TTLMap<string, string>({ defaultTTL: 1000 });
+      const _map = new TTLMap<string, string>({ defaultTTL: 1000 });
       
       map.set('key1', 'value1');
       expect(map.get('key1')).toBe('value1');
@@ -72,7 +68,7 @@ describe('Swarm Optimizations', () => {
     });
     
     it('should respect max size with LRU eviction', () => {
-      const map = new TTLMap<string, number>({ maxSize: 3 });
+      const _map = new TTLMap<string, number>({ maxSize: 3 });
       
       map.set('a', 1);
       jest.advanceTimersByTime(1);
@@ -95,7 +91,7 @@ describe('Swarm Optimizations', () => {
     });
     
     it('should update TTL on touch', () => {
-      const map = new TTLMap<string, string>({ defaultTTL: 1000 });
+      const _map = new TTLMap<string, string>({ defaultTTL: 1000 });
       
       map.set('key1', 'value1');
       
@@ -118,8 +114,8 @@ describe('Swarm Optimizations', () => {
   });
   
   describe('AsyncFileManager', () => {
-    const testDir = '/tmp/swarm-test';
-    let fileManager: AsyncFileManager;
+    const _testDir = '/tmp/swarm-test';
+    let _fileManager: AsyncFileManager; // TODO: Remove if unused
     
     beforeEach(() => {
       fileManager = new AsyncFileManager();
@@ -127,12 +123,12 @@ describe('Swarm Optimizations', () => {
     
     it('should handle concurrent write operations', async () => {
       // Mock file operations since real file system isn't needed
-      jest.spyOn(fileManager, 'writeFile').mockResolvedValue({ success: true, path: 'test-path' } as any);
+      jest.spyOn(_fileManager, 'writeFile').mockResolvedValue({ success: true, path: 'test-path' } as any);
       
-      const writes = [];
+      const _writes = [];
       
       // Queue multiple writes
-      for (let i = 0; i < 5; i++) {
+      for (let _i = 0; i < 5; i++) {
         writes.push(
           fileManager.writeFile(
             `${testDir}/test-${i}.txt`,
@@ -141,27 +137,27 @@ describe('Swarm Optimizations', () => {
         );
       }
       
-      const results = await Promise.all(writes);
+      const _results = await Promise.all(writes);
       
       expect(results).toHaveLength(5);
       expect(results.every(r => r.success)).toBe(true);
     });
     
     it('should write and read JSON files', async () => {
-      const testData = { id: 1, name: 'test', values: [1, 2, 3] };
-      const path = `${testDir}/test.json`;
+      const _testData = { id: 1, name: 'test', values: [1, 2, 3] };
+      const _path = `${testDir}/test.json`;
       
-      const writeResult = await fileManager.writeJSON(path, testData);
+      const _writeResult = await fileManager.writeJSON(_path, testData);
       expect(writeResult.success).toBe(true);
       
-      const readResult = await fileManager.readJSON(path);
+      const _readResult = await fileManager.readJSON(path);
       expect(readResult.success).toBe(true);
       expect(readResult.data).toEqual(testData);
     });
   });
   
   describe('ClaudeConnectionPool', () => {
-    let pool: ClaudeConnectionPool;
+    let _pool: ClaudeConnectionPool; // TODO: Remove if unused
     
     beforeEach(() => {
       pool = new ClaudeConnectionPool({ min: 2, max: 5 });
@@ -173,30 +169,30 @@ describe('Swarm Optimizations', () => {
     
     it('should reuse connections', async () => {
       // Mock connection behavior since ClaudeAPI isn't available
-      const mockConnection = { id: 'mock-conn-1', isHealthy: true };
-      jest.spyOn(pool, 'acquire').mockResolvedValue(mockConnection as any);
-      jest.spyOn(pool, 'release').mockResolvedValue(undefined);
+      const _mockConnection = { id: 'mock-conn-1', isHealthy: true };
+      jest.spyOn(_pool, 'acquire').mockResolvedValue(mockConnection as any);
+      jest.spyOn(_pool, 'release').mockResolvedValue(undefined);
       
-      const conn1 = await pool.acquire();
-      const id1 = conn1.id;
+      const _conn1 = await pool.acquire();
+      const _id1 = conn1.id;
       await pool.release(conn1);
       
-      const conn2 = await pool.acquire();
-      const id2 = conn2.id;
+      const _conn2 = await pool.acquire();
+      const _id2 = conn2.id;
       
       expect(id2).toBe(id1); // Same connection reused
       await pool.release(conn2);
     });
     
     it('should create new connections up to max', async () => {
-      const connections = [];
+      const _connections = [];
       
       // Acquire max connections
-      for (let i = 0; i < 5; i++) {
+      for (let _i = 0; i < 5; i++) {
         connections.push(await pool.acquire());
       }
       
-      const stats = pool.getStats();
+      const _stats = pool.getStats();
       expect(stats.total).toBe(5);
       expect(stats.inUse).toBe(5);
       
@@ -207,9 +203,9 @@ describe('Swarm Optimizations', () => {
     });
     
     it('should execute with automatic acquire/release', async () => {
-      let executionCount = 0;
+      let _executionCount = 0;
       
-      const result = await pool.execute(async (api) => {
+      const _result = await pool.execute(async (api) => {
         executionCount++;
         return 'test-result';
       });
@@ -217,13 +213,13 @@ describe('Swarm Optimizations', () => {
       expect(result).toBe('test-result');
       expect(executionCount).toBe(1);
       
-      const stats = pool.getStats();
+      const _stats = pool.getStats();
       expect(stats.inUse).toBe(0); // Connection released
     });
   });
   
   describe('OptimizedExecutor', () => {
-    let executor: OptimizedExecutor;
+    let _executor: OptimizedExecutor; // TODO: Remove if unused
     
     beforeEach(() => {
       executor = new OptimizedExecutor({
@@ -238,7 +234,7 @@ describe('Swarm Optimizations', () => {
     });
     
     it('should execute tasks successfully', async () => {
-      const task: TaskDefinition = {
+      const _task: TaskDefinition = {
         id: generateId('task'),
         parentId: generateId('swarm'),
         type: 'analysis',
@@ -258,22 +254,22 @@ describe('Swarm Optimizations', () => {
           maxRetries: 3,
           requiresApproval: false
         },
-        metadata: {},
+        metadata: { /* empty */ },
         context: undefined,
         statusHistory: [],
         attempts: []
       };
       
-      const agentId: AgentId = {
+      const _agentId: AgentId = {
         id: generateId('agent'),
         type: 'executor'
       };
       
       // Mock the API call since ClaudeAPI isn't available
-      const mockResult = { taskId: task.id, agentId: agentId.id, success: true };
-      jest.spyOn(executor, 'executeTask').mockResolvedValue(mockResult as any);
+      const _mockResult = { taskId: task.id, agentId: agentId.id, success: true };
+      jest.spyOn(_executor, 'executeTask').mockResolvedValue(mockResult as any);
       
-      const result = await executor.executeTask(task, agentId);
+      const _result = await executor.executeTask(_task, agentId);
       
       // In real tests, this would check actual results
       expect(result).toBeDefined();
@@ -282,7 +278,7 @@ describe('Swarm Optimizations', () => {
     });
     
     it('should cache results when enabled', async () => {
-      const task: TaskDefinition = {
+      const _task: TaskDefinition = {
         id: generateId('task'),
         parentId: generateId('swarm'),
         type: 'query',
@@ -303,33 +299,33 @@ describe('Swarm Optimizations', () => {
           requiresApproval: false,
           maxTokens: 4096
         },
-        metadata: {},
+        metadata: { /* empty */ },
         context: undefined,
         statusHistory: [],
         attempts: []
       };
       
-      const agentId: AgentId = {
+      const _agentId: AgentId = {
         id: generateId('agent'),
         type: 'analyst'
       };
       
       // First execution
-      const result1 = await executor.executeTask(task, agentId);
+      const _result1 = await executor.executeTask(_task, agentId);
       
       // Second execution should hit cache
-      const result2 = await executor.executeTask(task, agentId);
+      const _result2 = await executor.executeTask(_task, agentId);
       
-      const metrics = executor.getMetrics();
+      const _metrics = executor.getMetrics();
       expect(metrics.cacheHitRate).toBeGreaterThan(0);
     });
     
     it('should track metrics correctly', async () => {
-      const initialMetrics = executor.getMetrics();
+      const _initialMetrics = executor.getMetrics();
       expect(initialMetrics.totalExecuted).toBe(0);
       
       // Execute a task to update metrics
-      const task: TaskDefinition = {
+      const _task: TaskDefinition = {
         id: generateId('task'),
         parentId: generateId('swarm'),
         type: 'analysis',
@@ -350,24 +346,24 @@ describe('Swarm Optimizations', () => {
           requiresApproval: false,
           maxTokens: 4096
         },
-        metadata: {},
+        metadata: { /* empty */ },
         context: undefined,
         statusHistory: [],
         attempts: []
       };
       
-      const agentId: AgentId = {
+      const _agentId: AgentId = {
         id: generateId('agent'),
         type: 'executor'
       };
       
       // Mock the execution to return a result
-      const mockResult = { taskId: task.id, agentId: agentId.id, success: true };
-      jest.spyOn(executor, 'executeTask').mockResolvedValue(mockResult as any);
+      const _mockResult = { taskId: task.id, agentId: agentId.id, success: true };
+      jest.spyOn(_executor, 'executeTask').mockResolvedValue(mockResult as any);
       
-      await executor.executeTask(task, agentId);
+      await executor.executeTask(_task, agentId);
       
-      const updatedMetrics = executor.getMetrics();
+      const _updatedMetrics = executor.getMetrics();
       // Check that metrics object exists and has expected structure
       expect(updatedMetrics).toBeDefined();
       expect(typeof updatedMetrics.totalExecuted).toBe('number');

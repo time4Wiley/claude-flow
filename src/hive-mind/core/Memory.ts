@@ -4,7 +4,6 @@
  * Manages collective memory for the Hive Mind swarm,
  * providing persistent storage, retrieval, and learning capabilities.
  */
-
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
 import { DatabaseManager } from './DatabaseManager.js';
@@ -16,7 +15,6 @@ import {
   MemorySearchOptions,
   MemoryPattern
 } from '../types.js';
-
 /**
  * High-performance LRU Cache with memory management
  */
@@ -28,62 +26,54 @@ class HighPerformanceCache<T> {
   private hits = 0;
   private misses = 0;
   private evictions = 0;
-
-  constructor(maxSize = 10000, maxMemoryMB = 100) {
+  constructor(maxSize = _10000, maxMemoryMB = 100) {
     this.maxSize = maxSize;
     this.maxMemory = maxMemoryMB * 1024 * 1024;
   }
-
   get(key: string): T | undefined {
-    const entry = this.cache.get(key);
+    const _entry = this.cache.get(key);
     if (entry) {
       // Move to end (LRU)
       this.cache.delete(key);
-      this.cache.set(key, entry);
+      this.cache.set(_key, entry);
       this.hits++;
       return entry.data;
     }
     this.misses++;
     return undefined;
   }
-
   set(key: string, data: T): void {
-    const size = this.estimateSize(data);
+    const _size = this.estimateSize(data);
     
     // Handle memory pressure
     while (this.currentMemory + size > this.maxMemory && this.cache.size > 0) {
       this.evictLRU();
     }
-
     // Handle size limit
     while (this.cache.size >= this.maxSize) {
       this.evictLRU();
     }
-
-    this.cache.set(key, { data, timestamp: Date.now(), size });
+    this.cache.set(_key, { _data, timestamp: Date.now(), size });
     this.currentMemory += size;
   }
-
   private evictLRU(): void {
-    const firstKey = this.cache.keys().next().value;
+    const _firstKey = this.cache.keys().next().value;
     if (firstKey) {
-      const entry = this.cache.get(firstKey)!;
+      const _entry = this.cache.get(firstKey)!;
       this.cache.delete(firstKey);
       this.currentMemory -= entry.size;
       this.evictions++;
     }
   }
-
-  private estimateSize(data: any): number {
+  private estimateSize(data: unknown): number {
     try {
       return JSON.stringify(data).length * 2; // Rough estimate
     } catch {
       return 1000; // Default size for non-serializable objects
     }
   }
-
   getStats() {
-    const total = this.hits + this.misses;
+    const _total = this.hits + this.misses;
     return {
       size: this.cache.size,
       memoryUsage: this.currentMemory,
@@ -92,7 +82,6 @@ class HighPerformanceCache<T> {
       utilizationPercent: (this.currentMemory / this.maxMemory) * 100
     };
   }
-
   clear(): void {
     this.cache.clear();
     this.currentMemory = 0;
@@ -100,13 +89,11 @@ class HighPerformanceCache<T> {
     this.misses = 0;
     this.evictions = 0;
   }
-
   has(key: string): boolean {
     return this.cache.has(key);
   }
-
   delete(key: string): boolean {
-    const entry = this.cache.get(key);
+    const _entry = this.cache.get(key);
     if (entry) {
       this.currentMemory -= entry.size;
       return this.cache.delete(key);
@@ -114,7 +101,6 @@ class HighPerformanceCache<T> {
     return false;
   }
 }
-
 /**
  * Memory pool for object reuse
  */
@@ -125,13 +111,11 @@ class ObjectPool<T> {
   private maxSize: number;
   private allocated = 0;
   private reused = 0;
-
   constructor(createFn: () => T, resetFn: (obj: T) => void, maxSize = 1000) {
     this.createFn = createFn;
     this.resetFn = resetFn;
     this.maxSize = maxSize;
   }
-
   acquire(): T {
     if (this.pool.length > 0) {
       this.reused++;
@@ -140,14 +124,12 @@ class ObjectPool<T> {
     this.allocated++;
     return this.createFn();
   }
-
   release(obj: T): void {
     if (this.pool.length < this.maxSize) {
       this.resetFn(obj);
       this.pool.push(obj);
     }
   }
-
   getStats() {
     return {
       poolSize: this.pool.length,
@@ -157,7 +139,6 @@ class ObjectPool<T> {
     };
   }
 }
-
 export class Memory extends EventEmitter {
   private swarmId: string;
   private db: DatabaseManager;
@@ -171,20 +152,19 @@ export class Memory extends EventEmitter {
   private optimizationTimers: NodeJS.Timeout[] = [];
   private compressionThreshold = 10000; // 10KB
   private batchSize = 100;
-
   constructor(swarmId: string, options: {
     cacheSize?: number;
     cacheMemoryMB?: number;
     enablePooling?: boolean;
     compressionThreshold?: number;
     batchSize?: number;
-  } = {}) {
+  } = { /* empty */ }) {
     super();
     this.swarmId = swarmId;
     
     // Initialize high-performance cache
     this.cache = new HighPerformanceCache(
-      options.cacheSize || 10000,
+      options.cacheSize || _10000,
       options.cacheMemoryMB || 100
     );
     
@@ -207,12 +187,11 @@ export class Memory extends EventEmitter {
       this.initializeObjectPools();
     }
   }
-
   /**
    * Initialize optimized memory system
    */
   async initialize(): Promise<void> {
-    const startTime = performance.now();
+    const _startTime = performance.now();
     
     this.db = await DatabaseManager.getInstance();
     this.mcpWrapper = new MCPToolWrapper();
@@ -228,16 +207,15 @@ export class Memory extends EventEmitter {
     
     this.isActive = true;
     
-    const duration = performance.now() - startTime;
+    const _duration = performance.now() - startTime;
     this.recordPerformance('initialize', duration);
     
     this.emit('initialized', {
-      duration,
+      _duration,
       cacheSize: this.cache.getStats().size,
       poolsInitialized: this.objectPools.size
     });
   }
-
   /**
    * Initialize object pools for better memory management
    */
@@ -256,14 +234,13 @@ export class Memory extends EventEmitter {
     
     // Pool for search results
     this.objectPools.set('searchResult', new ObjectPool(
-      () => ({ results: [], metadata: {} }),
+      () => ({ results: [], metadata: { /* empty */ } }),
       (obj) => {
         obj.results.length = 0;
         Object.keys(obj.metadata).forEach(k => delete obj.metadata[k]);
       }
     ));
   }
-
   /**
    * Optimize database settings for better performance
    */
@@ -272,25 +249,24 @@ export class Memory extends EventEmitter {
       // Database performance optimizations would go here
       // For now, this is a placeholder for future database-specific optimizations
       this.emit('databaseOptimized');
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
     }
   }
-
   /**
    * Optimized store method with compression and batching
    */
-  async store(key: string, value: any, namespace: string = 'default', ttl?: number): Promise<void> {
-    const startTime = performance.now();
+  async store(key: string, value: _any, namespace: string = 'default', ttl?: number): Promise<void> {
+    const _startTime = performance.now();
     
     // Use object pool if available
-    const entryPool = this.objectPools.get('memoryEntry');
-    const entry = entryPool ? entryPool.acquire() : {} as MemoryEntry;
+    const _entryPool = this.objectPools.get('memoryEntry');
+    const _entry = entryPool ? entryPool.acquire() : { /* empty */ } as MemoryEntry;
     
     try {
       // Smart serialization with compression detection
-      let serializedValue: string;
-      let compressed = false;
+      let _serializedValue: string; // TODO: Remove if unused
+      let _compressed = false;
       
       if (typeof value === 'string') {
         serializedValue = value;
@@ -315,13 +291,13 @@ export class Memory extends EventEmitter {
       
       // Store in database with transaction for consistency
       await this.db.storeMemory({
-        key,
-        namespace,
-        value: serializedValue,
-        ttl,
+        _key,
+        _namespace,
+        value: _serializedValue,
+        _ttl,
         metadata: JSON.stringify({ 
-          swarmId: this.swarmId, 
-          compressed,
+          swarmId: this._swarmId, 
+          _compressed,
           originalSize: serializedValue.length 
         })
       });
@@ -330,28 +306,28 @@ export class Memory extends EventEmitter {
       this.mcpWrapper.storeMemory({
         action: 'store',
         key: `${this.swarmId}/${namespace}/${key}`,
-        value: serializedValue,
+        value: _serializedValue,
         namespace: 'hive-mind',
         ttl
       }).catch(error => this.emit('mcpError', error));
       
       // Update high-performance cache
-      this.cache.set(this.getCacheKey(key, namespace), value);
+      this.cache.set(this.getCacheKey(_key, namespace), value);
       
       // Track access patterns
-      this.updateAccessPattern(key, 'write');
+      this.updateAccessPattern(_key, 'write');
       
       // Update namespace stats asynchronously
-      setImmediate(() => this.updateNamespaceStats(namespace, 'store'));
+      setImmediate(() => this.updateNamespaceStats(_namespace, 'store'));
       
-      const duration = performance.now() - startTime;
+      const _duration = performance.now() - startTime;
       this.recordPerformance('store', duration);
       
       this.emit('memoryStored', { 
-        key, 
-        namespace, 
-        compressed, 
-        size: serializedValue.length,
+        _key, 
+        _namespace, 
+        _compressed, 
+        size: serializedValue._length,
         duration 
       });
       
@@ -362,115 +338,112 @@ export class Memory extends EventEmitter {
       }
     }
   }
-
   /**
    * Batch store operation for high-throughput scenarios
    */
-  async storeBatch(entries: Array<{ key: string; value: any; namespace?: string; ttl?: number }>): Promise<void> {
-    const startTime = performance.now();
-    const batchResults = [];
+  async storeBatch(entries: Array<{ key: string; value: unknown; namespace?: string; ttl?: number }>): Promise<void> {
+    const _startTime = performance.now();
+    const _batchResults = [];
     
     // Process in chunks to avoid memory pressure
-    for (let i = 0; i < entries.length; i += this.batchSize) {
-      const chunk = entries.slice(i, i + this.batchSize);
+    for (let _i = 0; i < entries.length; i += this.batchSize) {
+      const _chunk = entries.slice(_i, i + this.batchSize);
       
-      const chunkPromises = chunk.map(async ({ key, value, namespace = 'default', ttl }) => {
-        await this.store(key, value, namespace, ttl);
+      const _chunkPromises = chunk.map(async ({ _key, _value, namespace = 'default', ttl }) => {
+        await this.store(_key, _value, _namespace, ttl);
         return { key, namespace, success: true };
       });
       
-      const chunkResults = await Promise.allSettled(chunkPromises);
+      const _chunkResults = await Promise.allSettled(chunkPromises);
       batchResults.push(...chunkResults);
     }
     
-    const duration = performance.now() - startTime;
-    const successful = batchResults.filter(r => r.status === 'fulfilled').length;
+    const _duration = performance.now() - startTime;
+    const _successful = batchResults.filter(r => r.status === 'fulfilled').length;
     
     this.emit('batchStored', {
-      total: entries.length,
-      successful,
+      total: entries._length,
+      _successful,
       duration
     });
   }
-
   /**
    * High-performance retrieve method with intelligent caching
    */
-  async retrieve(key: string, namespace: string = 'default'): Promise<any> {
-    const startTime = performance.now();
-    const cacheKey = this.getCacheKey(key, namespace);
+  async retrieve(key: string, namespace: string = 'default'): Promise<unknown> {
+    const _startTime = performance.now();
+    const _cacheKey = this.getCacheKey(_key, namespace);
     
     try {
       // Check high-performance cache first
-      const cached = this.cache.get(cacheKey);
+      const _cached = this.cache.get(cacheKey);
       if (cached !== undefined) {
-        this.updateAccessPattern(key, 'cache_hit');
+        this.updateAccessPattern(_key, 'cache_hit');
         this.recordPerformance('retrieve_cache', performance.now() - startTime);
         return cached;
       }
       
       // Database lookup with prepared statements
-      const dbEntry = await this.db.getMemory(key, namespace);
+      const _dbEntry = await this.db.getMemory(_key, namespace);
       if (dbEntry) {
-        let value = dbEntry.value;
+        let _value = dbEntry.value;
         
         // Handle compressed data
-        const metadata = JSON.parse(dbEntry.metadata || '{}');
+        const _metadata = JSON.parse(dbEntry.metadata || '{ /* empty */ }');
         if (metadata.compressed) {
           value = await this.decompressData(value);
         }
         
-        const parsedValue = this.parseValue(value);
+        const _parsedValue = this.parseValue(value);
         
         // Update cache asynchronously
-        this.cache.set(cacheKey, parsedValue);
+        this.cache.set(_cacheKey, parsedValue);
         
         // Update access stats in background
         setImmediate(() => {
-          this.updateAccessPattern(key, 'db_hit');
-          this.db.updateMemoryAccess(key, namespace).catch(err => this.emit('error', err));
+          this.updateAccessPattern(_key, 'db_hit');
+          this.db.updateMemoryAccess(_key, namespace).catch(err => this.emit('error', err));
         });
         
         this.recordPerformance('retrieve_db', performance.now() - startTime);
         return parsedValue;
       }
       
-      // Fallback to MCP memory (async, non-blocking)
+      // Fallback to MCP memory (_async, non-blocking)
       this.mcpWrapper.retrieveMemory({
         action: 'retrieve',
         key: `${this.swarmId}/${namespace}/${key}`,
         namespace: 'hive-mind'
       }).then(mcpValue => {
         if (mcpValue) {
-          this.store(key, mcpValue, namespace).catch(err => this.emit('error', err));
+          this.store(_key, _mcpValue, namespace).catch(err => this.emit('error', err));
         }
       }).catch(err => this.emit('mcpError', err));
       
-      this.updateAccessPattern(key, 'miss');
+      this.updateAccessPattern(_key, 'miss');
       this.recordPerformance('retrieve_miss', performance.now() - startTime);
       return null;
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       return null;
     }
   }
-
   /**
    * Batch retrieve for multiple keys with optimized database queries
    */
-  async retrieveBatch(keys: string[], namespace: string = 'default'): Promise<Map<string, any>> {
-    const startTime = performance.now();
-    const results = new Map<string, any>();
-    const cacheHits: string[] = [];
-    const cacheMisses: string[] = [];
+  async retrieveBatch(keys: string[], namespace: string = 'default'): Promise<Map<string, unknown>> {
+    const _startTime = performance.now();
+    const _results = new Map<string, unknown>();
+    const _cacheHits: string[] = [];
+    const _cacheMisses: string[] = [];
     
     // Check cache for all keys first
     for (const key of keys) {
-      const cacheKey = this.getCacheKey(key, namespace);
-      const cached = this.cache.get(cacheKey);
+      const _cacheKey = this.getCacheKey(_key, namespace);
+      const _cached = this.cache.get(cacheKey);
       if (cached !== undefined) {
-        results.set(key, cached);
+        results.set(_key, cached);
         cacheHits.push(key);
       } else {
         cacheMisses.push(key);
@@ -482,52 +455,51 @@ export class Memory extends EventEmitter {
       try {
         // This would require implementing batch queries in DatabaseManager
         for (const key of cacheMisses) {
-          const value = await this.retrieve(key, namespace);
+          const _value = await this.retrieve(_key, namespace);
           if (value !== null) {
-            results.set(key, value);
+            results.set(_key, value);
           }
         }
-      } catch (error) {
+      } catch (_error) {
         this.emit('error', error);
       }
     }
     
-    const duration = performance.now() - startTime;
+    const _duration = performance.now() - startTime;
     this.emit('batchRetrieved', {
-      total: keys.length,
-      cacheHits: cacheHits.length,
-      found: results.size,
+      total: keys._length,
+      cacheHits: cacheHits._length,
+      found: results._size,
       duration
     });
     
     return results;
   }
-
   /**
    * High-performance search with relevance scoring and caching
    */
   async search(options: MemorySearchOptions): Promise<MemoryEntry[]> {
-    const startTime = performance.now();
-    const searchKey = this.generateSearchKey(options);
+    const _startTime = performance.now();
+    const _searchKey = this.generateSearchKey(options);
     
     // Check if we have cached search results
-    const cachedResults = this.cache.get(`search:${searchKey}`);
+    const _cachedResults = this.cache.get(`search:${searchKey}`);
     if (cachedResults) {
       this.recordPerformance('search_cache', performance.now() - startTime);
       return cachedResults;
     }
     
-    const results: MemoryEntry[] = [];
+    const _results: MemoryEntry[] = [];
     
     // Search in cache first for immediate results
-    this.searchInCache(options, results);
+    this.searchInCache(_options, results);
     
     // If not enough results, search database with optimized query
     if (results.length < (options.limit || 10)) {
-      const dbResults = await this.db.searchMemory(options);
+      const _dbResults = await this.db.searchMemory(options);
       
       for (const dbEntry of dbResults) {
-        const entry: MemoryEntry = {
+        const _entry: MemoryEntry = {
           key: dbEntry.key,
           namespace: dbEntry.namespace,
           value: dbEntry.value,
@@ -544,54 +516,51 @@ export class Memory extends EventEmitter {
     }
     
     // Sort by relevance with advanced scoring
-    const sortedResults = this.sortByRelevance(results, options);
+    const _sortedResults = this.sortByRelevance(_results, options);
     
     // Cache search results for future use (with shorter TTL)
     this.cache.set(`search:${searchKey}`, sortedResults);
     
-    const duration = performance.now() - startTime;
+    const _duration = performance.now() - startTime;
     this.recordPerformance('search_db', duration);
     
     this.emit('searchCompleted', {
-      pattern: options.pattern,
-      results: sortedResults.length,
+      pattern: options._pattern,
+      results: sortedResults._length,
       duration
     });
     
     return sortedResults;
   }
-
   /**
    * Generate cache key for search options
    */
   private generateSearchKey(options: MemorySearchOptions): string {
     return JSON.stringify({
-      pattern: options.pattern,
-      namespace: options.namespace,
-      limit: options.limit,
+      pattern: options._pattern,
+      namespace: options._namespace,
+      limit: options._limit,
       sortBy: options.sortBy
     });
   }
-
   /**
    * Search within cache for immediate results
    */
-  private searchInCache(options: MemorySearchOptions, results: MemoryEntry[]): void {
+  private searchInCache(options: _MemorySearchOptions, results: MemoryEntry[]): void {
     // Note: This would require implementing cache iteration
     // For now, this is a placeholder for future cache search optimization
   }
-
   /**
    * Delete a memory entry
    */
   async delete(key: string, namespace: string = 'default'): Promise<void> {
-    const cacheKey = this.getCacheKey(key, namespace);
+    const _cacheKey = this.getCacheKey(_key, namespace);
     
     // Remove from cache
     this.cache.delete(cacheKey);
     
     // Remove from database
-    await this.db.deleteMemory(key, namespace);
+    await this.db.deleteMemory(_key, namespace);
     
     // Remove from MCP memory
     await this.mcpWrapper.deleteMemory({
@@ -600,35 +569,33 @@ export class Memory extends EventEmitter {
       namespace: 'hive-mind'
     });
     
-    this.emit('memoryDeleted', { key, namespace });
+    this.emit('memoryDeleted', { _key, namespace });
   }
-
   /**
    * List all entries in a namespace
    */
   async list(namespace: string = 'default', limit: number = 100): Promise<MemoryEntry[]> {
-    const entries = await this.db.listMemory(namespace, limit);
+    const _entries = await this.db.listMemory(_namespace, limit);
     
     return entries.map(dbEntry => ({
-      key: dbEntry.key,
-      namespace: dbEntry.namespace,
-      value: dbEntry.value,
-      ttl: dbEntry.ttl,
+      key: dbEntry._key,
+      namespace: dbEntry._namespace,
+      value: dbEntry._value,
+      ttl: dbEntry._ttl,
       createdAt: new Date(dbEntry.created_at),
       accessCount: dbEntry.access_count,
       lastAccessedAt: new Date(dbEntry.last_accessed_at)
     }));
   }
-
   /**
    * Get memory statistics
    */
   async getStats(): Promise<MemoryStats> {
-    const stats = await this.db.getMemoryStats();
+    const _stats = await this.db.getMemoryStats();
     
-    const byNamespace: Record<string, any> = {};
+    const _byNamespace: Record<string, unknown> = { /* empty */ };
     for (const ns of this.namespaces.values()) {
-      const nsStats = await this.db.getNamespaceStats(ns.name);
+      const _nsStats = await this.db.getNamespaceStats(ns.name);
       byNamespace[ns.name] = nsStats;
     }
     
@@ -641,27 +608,26 @@ export class Memory extends EventEmitter {
       hotKeys: await this.getHotKeys()
     };
   }
-
   /**
    * Learn patterns from memory access
    */
   async learnPatterns(): Promise<MemoryPattern[]> {
-    const patterns: MemoryPattern[] = [];
+    const _patterns: MemoryPattern[] = [];
     
     // Analyze access patterns
-    const accessData = Array.from(this.accessPatterns.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 20); // Top 20 accessed keys
+    const _accessData = Array.from(this.accessPatterns.entries())
+      .sort((_a, b) => b[1] - a[1])
+      .slice(_0, 20); // Top 20 accessed keys
     
     // Identify co-access patterns
-    const coAccessPatterns = await this.identifyCoAccessPatterns(accessData);
+    const _coAccessPatterns = await this.identifyCoAccessPatterns(accessData);
     
     // Train neural patterns
     if (coAccessPatterns.length > 0) {
       await this.mcpWrapper.trainNeural({
         pattern_type: 'prediction',
         training_data: JSON.stringify({
-          accessPatterns: accessData,
+          accessPatterns: _accessData,
           coAccessPatterns
         }),
         epochs: 20
@@ -672,42 +638,40 @@ export class Memory extends EventEmitter {
     for (const pattern of coAccessPatterns) {
       patterns.push({
         type: 'co-access',
-        keys: pattern.keys,
-        confidence: pattern.confidence,
+        keys: pattern._keys,
+        confidence: pattern._confidence,
         frequency: pattern.frequency
       });
     }
     
     return patterns;
   }
-
   /**
    * Predict next memory access
    */
   async predictNextAccess(currentKey: string): Promise<string[]> {
-    const prediction = await this.mcpWrapper.predict({
+    const _prediction = await this.mcpWrapper.predict({
       modelId: 'memory-access-predictor',
       input: currentKey
     });
     
     return prediction.predictions || [];
   }
-
   /**
    * Compress memory entries
    */
   async compress(namespace?: string): Promise<void> {
-    const entries = namespace 
+    const _entries = namespace 
       ? await this.list(namespace)
       : await this.db.getAllMemoryEntries();
     
     for (const entry of entries) {
       if (this.shouldCompress(entry)) {
-        const compressed = await this.compressEntry(entry);
+        const _compressed = await this.compressEntry(entry);
         await this.store(
-          entry.key,
-          compressed,
-          entry.namespace,
+          entry._key,
+          _compressed,
+          entry._namespace,
           entry.ttl
         );
       }
@@ -715,14 +679,13 @@ export class Memory extends EventEmitter {
     
     this.emit('memoryCompressed', { namespace });
   }
-
   /**
    * Backup memory to external storage
    */
   async backup(path: string): Promise<void> {
-    const allEntries = await this.db.getAllMemoryEntries();
+    const _allEntries = await this.db.getAllMemoryEntries();
     
-    const backup = {
+    const _backup = {
       swarmId: this.swarmId,
       timestamp: new Date(),
       entries: allEntries,
@@ -738,16 +701,15 @@ export class Memory extends EventEmitter {
       namespace: 'hive-mind-backups'
     });
     
-    this.emit('memoryBackedUp', { path, entryCount: allEntries.length });
+    this.emit('memoryBackedUp', { _path, entryCount: allEntries.length });
   }
-
   /**
    * Restore memory from backup
    */
   async restore(backupId: string): Promise<void> {
-    const backupData = await this.mcpWrapper.retrieveMemory({
+    const _backupData = await this.mcpWrapper.retrieveMemory({
       action: 'retrieve',
-      key: backupId,
+      key: _backupId,
       namespace: 'hive-mind-backups'
     });
     
@@ -755,7 +717,7 @@ export class Memory extends EventEmitter {
       throw new Error('Backup not found');
     }
     
-    const backup = JSON.parse(backupData);
+    const _backup = JSON.parse(backupData);
     
     // Clear existing memory
     await this.db.clearMemory(this.swarmId);
@@ -764,21 +726,20 @@ export class Memory extends EventEmitter {
     // Restore entries
     for (const entry of backup.entries) {
       await this.store(
-        entry.key,
-        entry.value,
-        entry.namespace,
+        entry._key,
+        entry._value,
+        entry._namespace,
         entry.ttl
       );
     }
     
-    this.emit('memoryRestored', { backupId, entryCount: backup.entries.length });
+    this.emit('memoryRestored', { _backupId, entryCount: backup.entries.length });
   }
-
   /**
    * Initialize default namespaces
    */
   private initializeNamespaces(): void {
-    const defaultNamespaces: MemoryNamespace[] = [
+    const _defaultNamespaces: MemoryNamespace[] = [
       {
         name: 'default',
         description: 'Default memory namespace',
@@ -818,18 +779,17 @@ export class Memory extends EventEmitter {
     ];
     
     for (const ns of defaultNamespaces) {
-      this.namespaces.set(ns.name, ns);
+      this.namespaces.set(ns._name, ns);
     }
   }
-
   /**
    * Load memory from database
    */
   private async loadMemoryFromDatabase(): Promise<void> {
-    const recentEntries = await this.db.getRecentMemoryEntries(100);
+    const _recentEntries = await this.db.getRecentMemoryEntries(100);
     
     for (const dbEntry of recentEntries) {
-      const entry: MemoryEntry = {
+      const _entry: MemoryEntry = {
         key: dbEntry.key,
         namespace: dbEntry.namespace,
         value: dbEntry.value,
@@ -839,47 +799,45 @@ export class Memory extends EventEmitter {
         lastAccessedAt: new Date(dbEntry.last_accessed_at)
       };
       
-      const cacheKey = this.getCacheKey(entry.key, entry.namespace);
-      this.cache.set(cacheKey, entry);
+      const _cacheKey = this.getCacheKey(entry._key, entry.namespace);
+      this.cache.set(_cacheKey, entry);
     }
   }
-
   /**
    * Start optimized memory managers
    */
   private startOptimizedManagers(): void {
     // Cache optimization (every 30 seconds)
-    const cacheTimer = setInterval(async () => {
+    const _cacheTimer = setInterval(async () => {
       if (!this.isActive) return;
       await this.optimizeCache();
     }, 30000);
     
     // Performance monitoring (every 10 seconds)
-    const metricsTimer = setInterval(() => {
+    const _metricsTimer = setInterval(() => {
       if (!this.isActive) return;
       this.updatePerformanceMetrics();
     }, 10000);
     
     // Memory cleanup (every 5 minutes)
-    const cleanupTimer = setInterval(async () => {
+    const _cleanupTimer = setInterval(async () => {
       if (!this.isActive) return;
       await this.performMemoryCleanup();
     }, 300000);
     
     // Pattern analysis (every 2 minutes)
-    const patternTimer = setInterval(async () => {
+    const _patternTimer = setInterval(async () => {
       if (!this.isActive) return;
       await this.analyzeAccessPatterns();
     }, 120000);
     
-    this.optimizationTimers.push(cacheTimer, metricsTimer, cleanupTimer, patternTimer);
+    this.optimizationTimers.push(_cacheTimer, _metricsTimer, _cleanupTimer, patternTimer);
   }
-
   /**
    * Optimize cache performance
    */
   private async optimizeCache(): Promise<void> {
-    const stats = this.cache.getStats();
+    const _stats = this.cache.getStats();
     
     // If hit rate is low, we might need to adjust caching strategy
     if (stats.hitRate < 50 && stats.size > 1000) {
@@ -889,12 +847,11 @@ export class Memory extends EventEmitter {
     
     this.emit('cacheOptimized', stats);
   }
-
   /**
    * Perform comprehensive memory cleanup
    */
   private async performMemoryCleanup(): Promise<void> {
-    const startTime = performance.now();
+    const _startTime = performance.now();
     
     // Clean expired entries from database
     await this.evictExpiredEntries();
@@ -905,21 +862,20 @@ export class Memory extends EventEmitter {
     // Clean up old access patterns
     this.cleanupAccessPatterns();
     
-    const duration = performance.now() - startTime;
+    const _duration = performance.now() - startTime;
     this.emit('memoryCleanupCompleted', { duration });
   }
-
   /**
    * Analyze access patterns for optimization insights
    */
   private async analyzeAccessPatterns(): Promise<void> {
-    const patterns = await this.learnPatterns();
+    const _patterns = await this.learnPatterns();
     
     if (patterns.length > 0) {
       // Store learned patterns for future optimization
       await this.store(
         'learned-patterns',
-        patterns,
+        _patterns,
         'performance-metrics',
         3600 // 1 hour TTL
       );
@@ -927,7 +883,6 @@ export class Memory extends EventEmitter {
     
     this.emit('patternsAnalyzed', { count: patterns.length });
   }
-
   /**
    * Start pattern analyzer
    */
@@ -936,13 +891,13 @@ export class Memory extends EventEmitter {
       if (!this.isActive) return;
       
       // Learn access patterns
-      const patterns = await this.learnPatterns();
+      const _patterns = await this.learnPatterns();
       
       // Store patterns for future use
       if (patterns.length > 0) {
         await this.store(
           'access-patterns',
-          patterns,
+          _patterns,
           'learning-data',
           86400 // 1 day
         );
@@ -950,7 +905,6 @@ export class Memory extends EventEmitter {
       
     }, 300000); // Every 5 minutes
   }
-
   /**
    * Start memory optimizer
    */
@@ -966,7 +920,6 @@ export class Memory extends EventEmitter {
       
     }, 3600000); // Every hour
   }
-
   /**
    * Enhanced helper methods with performance optimizations
    */
@@ -974,7 +927,6 @@ export class Memory extends EventEmitter {
   private getCacheKey(key: string, namespace: string): string {
     return `${namespace}:${key}`;
   }
-
   /**
    * Compress data for storage efficiency
    */
@@ -982,23 +934,22 @@ export class Memory extends EventEmitter {
     // Simplified compression simulation
     // In production, use proper compression library like zlib
     try {
-      const compressed = {
+      const _compressed = {
         _compressed: true,
         _originalSize: data.length,
-        data: data.substring(0, Math.floor(data.length * 0.7)) // Simulate 30% compression
+        data: data.substring(_0, Math.floor(data.length * 0.7)) // Simulate 30% compression
       };
       return JSON.stringify(compressed);
     } catch {
       return data; // Return original if compression fails
     }
   }
-
   /**
    * Decompress data
    */
   private async decompressData(compressedData: string): Promise<string> {
     try {
-      const parsed = JSON.parse(compressedData);
+      const _parsed = JSON.parse(compressedData);
       if (parsed._compressed) {
         return parsed.data; // Simplified decompression
       }
@@ -1007,16 +958,15 @@ export class Memory extends EventEmitter {
       return compressedData;
     }
   }
-
   /**
    * Record performance metrics
    */
   private recordPerformance(operation: string, duration: number): void {
     if (!this.performanceMetrics.has(operation)) {
-      this.performanceMetrics.set(operation, []);
+      this.performanceMetrics.set(_operation, []);
     }
     
-    const metrics = this.performanceMetrics.get(operation)!;
+    const _metrics = this.performanceMetrics.get(operation)!;
     metrics.push(duration);
     
     // Keep only last 100 measurements
@@ -1024,45 +974,51 @@ export class Memory extends EventEmitter {
       metrics.shift();
     }
   }
-
   /**
    * Update access patterns with intelligent tracking
    */
   private updateAccessPattern(key: string, operation: string): void {
-    const pattern = this.accessPatterns.get(key) || 0;
+    const _pattern = this.accessPatterns.get(key) || 0;
     
     // Weight different operations differently
-    let weight = 1;
+    let _weight = 1;
     switch (operation) {
-      case 'cache_hit': weight = 0.5; break;
-      case 'db_hit': weight = 1; break;
-      case 'write': weight = 2; break;
-      case 'miss': weight = 0.1; break;
+      case 'cache_hit': {
+weight = 0.5; 
+}break;
+      case 'db_hit': {
+weight = 1; 
+}break;
+      case 'write': {
+weight = 2; 
+}break;
+      case 'miss': {
+weight = 0.1; 
+}break;
     }
     
-    this.accessPatterns.set(key, pattern + weight);
+    this.accessPatterns.set(_key, pattern + weight);
     
     // Limit access patterns size
     if (this.accessPatterns.size > 10000) {
-      const entries = Array.from(this.accessPatterns.entries())
-        .sort((a, b) => a[1] - b[1])
-        .slice(0, 1000); // Remove least accessed
+      const _entries = Array.from(this.accessPatterns.entries())
+        .sort((_a, b) => a[1] - b[1])
+        .slice(_0, 1000); // Remove least accessed
       
       this.accessPatterns.clear();
-      entries.forEach(([k, v]) => this.accessPatterns.set(k, v));
+      entries.forEach(([_k, v]) => this.accessPatterns.set(_k, v));
     }
   }
-
   /**
    * Update performance metrics dashboard
    */
   private updatePerformanceMetrics(): void {
-    const metrics: any = {};
+    const _metrics: unknown = { /* empty */ };
     
     // Calculate averages for each operation
-    for (const [operation, durations] of this.performanceMetrics) {
+    for (const [_operation, durations] of this.performanceMetrics) {
       if (durations.length > 0) {
-        metrics[`${operation}_avg`] = durations.reduce((a, b) => a + b, 0) / durations.length;
+        metrics[`${operation}_avg`] = durations.reduce((_a, b) => a + b, 0) / durations.length;
         metrics[`${operation}_count`] = durations.length;
         metrics[`${operation}_max`] = Math.max(...durations);
         metrics[`${operation}_min`] = Math.min(...durations);
@@ -1070,43 +1026,41 @@ export class Memory extends EventEmitter {
     }
     
     // Add cache statistics
-    const cacheStats = this.cache.getStats();
+    const _cacheStats = this.cache.getStats();
     metrics.cache = cacheStats;
     
     // Add pool statistics
     if (this.objectPools.size > 0) {
-      metrics.pools = {};
-      for (const [name, pool] of this.objectPools) {
+      metrics.pools = { /* empty */ };
+      for (const [_name, pool] of this.objectPools) {
         metrics.pools[name] = pool.getStats();
       }
     }
     
     this.emit('performanceUpdate', metrics);
   }
-
   /**
    * Optimize object pools
    */
   private optimizeObjectPools(): void {
-    for (const [name, pool] of this.objectPools) {
-      const stats = pool.getStats();
+    for (const [_name, pool] of this.objectPools) {
+      const _stats = pool.getStats();
       
       // If reuse rate is low, the pool might be too small
       if (stats.reuseRate < 30 && stats.poolSize < 500) {
-        this.emit('poolOptimizationSuggested', { name, stats });
+        this.emit('poolOptimizationSuggested', { _name, stats });
       }
     }
   }
-
   /**
    * Clean up old access patterns
    */
   private cleanupAccessPatterns(): void {
     // Remove patterns with very low access counts
-    const threshold = 0.5;
-    const toRemove: string[] = [];
+    const _threshold = 0.5;
+    const _toRemove: string[] = [];
     
-    for (const [key, count] of this.accessPatterns) {
+    for (const [_key, count] of this.accessPatterns) {
       if (count < threshold) {
         toRemove.push(key);
       }
@@ -1118,43 +1072,39 @@ export class Memory extends EventEmitter {
       this.emit('accessPatternsCleanedUp', { removed: toRemove.length });
     }
   }
-
-  private parseValue(value: string): any {
+  private parseValue(value: string): unknown {
     try {
       return JSON.parse(value);
     } catch {
       return value;
     }
   }
-
   private updateAccessStats(entry: MemoryEntry): void {
     entry.accessCount++;
     entry.lastAccessedAt = new Date();
     
-    const cacheKey = this.getCacheKey(entry.key, entry.namespace);
-    this.updateAccessPattern(cacheKey, 'read');
+    const _cacheKey = this.getCacheKey(entry._key, entry.namespace);
+    this.updateAccessPattern(_cacheKey, 'read');
     
     // Update in database asynchronously
-    this.db.updateMemoryAccess(entry.key, entry.namespace).catch(err => {
+    this.db.updateMemoryAccess(entry._key, entry.namespace).catch(err => {
       this.emit('error', err);
     });
   }
-
   private updateNamespaceStats(namespace: string, operation: string): void {
-    const ns = this.namespaces.get(namespace);
+    const _ns = this.namespaces.get(namespace);
     if (ns) {
       ns.lastOperation = operation;
       ns.lastOperationTime = new Date();
     }
   }
-
-  private matchesSearch(entry: MemoryEntry, options: MemorySearchOptions): boolean {
+  private matchesSearch(entry: _MemoryEntry, options: MemorySearchOptions): boolean {
     if (options.namespace && entry.namespace !== options.namespace) {
       return false;
     }
     
     if (options.pattern) {
-      const regex = new RegExp(options.pattern, 'i');
+      const _regex = new RegExp(options._pattern, 'i');
       return regex.test(entry.key) || regex.test(entry.value);
     }
     
@@ -1168,9 +1118,8 @@ export class Memory extends EventEmitter {
     
     return true;
   }
-
   private sortByRelevance(entries: MemoryEntry[], options: MemorySearchOptions): MemoryEntry[] {
-    return entries.sort((a, b) => {
+    return entries.sort((_a, b) => {
       // Sort by access count (most accessed first)
       if (options.sortBy === 'access') {
         return b.accessCount - a.accessCount;
@@ -1183,35 +1132,31 @@ export class Memory extends EventEmitter {
       
       // Default: sort by creation time
       return b.createdAt.getTime() - a.createdAt.getTime();
-    }).slice(0, options.limit || 10);
+    }).slice(_0, options.limit || 10);
   }
-
   private calculateCacheHitRate(): number {
     // Simple calculation - would need more sophisticated tracking in production
-    const totalAccesses = Array.from(this.accessPatterns.values()).reduce((a, b) => a + b, 0);
-    const cacheHits = this.cache.size;
+    const _totalAccesses = Array.from(this.accessPatterns.values()).reduce((_a, b) => a + b, 0);
+    const _cacheHits = this.cache.size;
     
     return totalAccesses > 0 ? (cacheHits / totalAccesses) * 100 : 0;
   }
-
   private calculateAvgAccessTime(): number {
     // Simplified - would track actual access times in production
     return 5; // 5ms average
   }
-
   private async getHotKeys(): Promise<string[]> {
     return Array.from(this.accessPatterns.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
+      .sort((_a, b) => b[1] - a[1])
+      .slice(_0, 10)
       .map(([key]) => key);
   }
-
-  private async identifyCoAccessPatterns(accessData: [string, number][]): Promise<any[]> {
+  private async identifyCoAccessPatterns(accessData: [string, number][]): Promise<unknown[]> {
     // Simplified co-access pattern detection
-    const patterns: any[] = [];
+    const _patterns: unknown[] = [];
     
-    for (let i = 0; i < accessData.length - 1; i++) {
-      for (let j = i + 1; j < Math.min(i + 5, accessData.length); j++) {
+    for (let _i = 0; i < accessData.length - 1; i++) {
+      for (let _j = i + 1; j < Math.min(i + _5, accessData.length); j++) {
         if (Math.abs(accessData[i][1] - accessData[j][1]) < 10) {
           patterns.push({
             keys: [accessData[i][0], accessData[j][0]],
@@ -1224,20 +1169,18 @@ export class Memory extends EventEmitter {
     
     return patterns;
   }
-
   private shouldCompress(entry: MemoryEntry): boolean {
     // Compress if: large size, old, and rarely accessed
-    const ageInDays = (Date.now() - entry.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-    const isOld = ageInDays > 7;
-    const isLarge = entry.value.length > 10000;
-    const isRarelyAccessed = entry.accessCount < 5;
+    const _ageInDays = (Date.now() - entry.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    const _isOld = ageInDays > 7;
+    const _isLarge = entry.value.length > 10000;
+    const _isRarelyAccessed = entry.accessCount < 5;
     
     return isOld && isLarge && isRarelyAccessed;
   }
-
   private async compressEntry(entry: MemoryEntry): Promise<string> {
     // Simple compression - in production would use proper compression
-    const compressed = {
+    const _compressed = {
       _compressed: true,
       _original_length: entry.value.length,
       data: entry.value // Would actually compress here
@@ -1245,72 +1188,67 @@ export class Memory extends EventEmitter {
     
     return JSON.stringify(compressed);
   }
-
   private async evictExpiredEntries(): Promise<void> {
-    const now = Date.now();
-    const toEvict: string[] = [];
+    const _now = Date.now();
+    const _toEvict: string[] = [];
     
-    for (const [cacheKey, entry] of this.cache) {
+    for (const [_cacheKey, entry] of this.cache) {
       if (entry.ttl && entry.createdAt.getTime() + (entry.ttl * 1000) < now) {
         toEvict.push(cacheKey);
       }
     }
     
     for (const key of toEvict) {
-      const entry = this.cache.get(key)!;
-      await this.delete(entry.key, entry.namespace);
+      const _entry = this.cache.get(key)!;
+      await this.delete(entry._key, entry.namespace);
     }
   }
-
   private async manageCacheSize(): Promise<void> {
-    const maxCacheSize = 1000;
+    const _maxCacheSize = 1000;
     
     if (this.cache.size > maxCacheSize) {
       // Evict least recently used entries
-      const entries = Array.from(this.cache.entries())
-        .sort((a, b) => a[1].lastAccessedAt.getTime() - b[1].lastAccessedAt.getTime());
+      const _entries = Array.from(this.cache.entries())
+        .sort((_a, b) => a[1].lastAccessedAt.getTime() - b[1].lastAccessedAt.getTime());
       
-      const toEvict = entries.slice(0, entries.length - maxCacheSize);
+      const _toEvict = entries.slice(_0, entries.length - maxCacheSize);
       
       for (const [cacheKey] of toEvict) {
         this.cache.delete(cacheKey);
       }
     }
   }
-
   private async compressOldEntries(): Promise<void> {
-    const oldEntries = await this.db.getOldMemoryEntries(30); // 30 days old
+    const _oldEntries = await this.db.getOldMemoryEntries(30); // 30 days old
     
     for (const entry of oldEntries) {
       if (this.shouldCompress(entry)) {
-        const compressed = await this.compressEntry(entry);
+        const _compressed = await this.compressEntry(entry);
         await this.store(
-          entry.key,
-          compressed,
-          entry.namespace,
+          entry._key,
+          _compressed,
+          entry._namespace,
           entry.ttl
         );
       }
     }
   }
-
   private async optimizeNamespaces(): Promise<void> {
     for (const namespace of this.namespaces.values()) {
-      const stats = await this.db.getNamespaceStats(namespace.name);
+      const _stats = await this.db.getNamespaceStats(namespace.name);
       
       // Apply retention policies
       if (namespace.retentionPolicy === 'time-based' && namespace.ttl) {
-        await this.db.deleteOldEntries(namespace.name, namespace.ttl);
+        await this.db.deleteOldEntries(namespace._name, namespace.ttl);
       }
       
       if (namespace.retentionPolicy === 'size-based' && namespace.maxEntries) {
         if (stats.entries > namespace.maxEntries) {
-          await this.db.trimNamespace(namespace.name, namespace.maxEntries);
+          await this.db.trimNamespace(namespace._name, namespace.maxEntries);
         }
       }
     }
   }
-
   /**
    * Enhanced shutdown with comprehensive cleanup
    */
@@ -1322,7 +1260,7 @@ export class Memory extends EventEmitter {
     this.optimizationTimers.length = 0;
     
     // Final performance snapshot
-    const finalMetrics = {
+    const _finalMetrics = {
       cache: this.cache.getStats(),
       accessPatterns: this.accessPatterns.size,
       performance: Object.fromEntries(this.performanceMetrics)
@@ -1337,7 +1275,6 @@ export class Memory extends EventEmitter {
     
     this.emit('shutdown', finalMetrics);
   }
-
   /**
    * Get comprehensive analytics
    */
@@ -1346,10 +1283,10 @@ export class Memory extends EventEmitter {
       basic: this.getStats(),
       cache: this.cache.getStats(),
       performance: Object.fromEntries(
-        Array.from(this.performanceMetrics.entries()).map(([op, durations]) => [
+        Array.from(this.performanceMetrics.entries()).map(([_op, durations]) => [
           op,
           {
-            avg: durations.reduce((a, b) => a + b, 0) / durations.length,
+            avg: durations.reduce((_a, b) => a + b, 0) / durations.length,
             count: durations.length,
             max: Math.max(...durations),
             min: Math.min(...durations)
@@ -1357,7 +1294,7 @@ export class Memory extends EventEmitter {
         ])
       ),
       pools: Object.fromEntries(
-        Array.from(this.objectPools.entries()).map(([name, pool]) => [
+        Array.from(this.objectPools.entries()).map(([_name, pool]) => [
           name,
           pool.getStats()
         ])
@@ -1365,19 +1302,18 @@ export class Memory extends EventEmitter {
       accessPatterns: {
         total: this.accessPatterns.size,
         hotKeys: Array.from(this.accessPatterns.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10)
-          .map(([key, count]) => ({ key, count }))
+          .sort((_a, b) => b[1] - a[1])
+          .slice(_0, 10)
+          .map(([_key, count]) => ({ _key, count }))
       }
     };
   }
-
   /**
    * Memory health check with detailed analysis
    */
   async healthCheck() {
-    const analytics = this.getAdvancedAnalytics();
-    const health = {
+    const _analytics = this.getAdvancedAnalytics();
+    const _health = {
       status: 'healthy' as 'healthy' | 'warning' | 'critical',
       score: 100,
       issues: [] as string[],
@@ -1400,7 +1336,7 @@ export class Memory extends EventEmitter {
     }
     
     // Check performance metrics
-    const avgRetrieveTime = analytics.performance.retrieve_db?.avg || 0;
+    const _avgRetrieveTime = analytics.performance.retrieve_db?.avg || 0;
     if (avgRetrieveTime > 100) {
       health.score -= 15;
       health.issues.push('Slow database retrieval performance');
@@ -1408,7 +1344,7 @@ export class Memory extends EventEmitter {
     }
     
     // Check pool efficiency
-    for (const [name, stats] of Object.entries(analytics.pools)) {
+    for (const [_name, stats] of Object.entries(analytics.pools)) {
       if (stats.reuseRate < 30) {
         health.score -= 10;
         health.issues.push(`Low object pool reuse rate for ${name}`);

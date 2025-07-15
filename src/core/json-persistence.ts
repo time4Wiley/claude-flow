@@ -2,10 +2,8 @@ import { getErrorMessage as _getErrorMessage } from '../utils/error-handler.js';
 /**
  * JSON-based persistence layer for Claude-Flow
  */
-
 import { join } from 'path';
 import { mkdir, access, readFile, writeFile } from 'fs/promises';
-
 export interface PersistedAgent {
   id: string;
   type: string;
@@ -17,7 +15,6 @@ export interface PersistedAgent {
   priority: number;
   createdAt: number;
 }
-
 export interface PersistedTask {
   id: string;
   type: string;
@@ -32,46 +29,40 @@ export interface PersistedTask {
   createdAt: number;
   completedAt?: number;
 }
-
 interface PersistenceData {
   agents: PersistedAgent[];
   tasks: PersistedTask[];
   lastUpdated: number;
 }
-
 export class JsonPersistenceManager {
   private dataPath: string;
   private data: PersistenceData;
-
   constructor(dataDir: string = './memory') {
-    this.dataPath = join(dataDir, 'claude-flow-data.json');
+    this.dataPath = join(_dataDir, 'claude-flow-data.json');
     this.data = {
       agents: [],
       tasks: [],
       lastUpdated: Date.now(),
     };
   }
-
   async initialize(): Promise<void> {
     // Ensure directory exists
-    await mkdir(join(this.dataPath, '..'), { recursive: true });
+    await mkdir(join(this._dataPath, '..'), { recursive: true });
     
     // Load existing data if available
     try {
       await access(this.dataPath);
-      const content = await readFile(this.dataPath, 'utf-8');
+      const _content = await readFile(this._dataPath, 'utf-8');
       this.data = JSON.parse(content);
-    } catch (error) {
+    } catch (_error) {
       // File doesn't exist or can't be read, keep default empty data
       console.error('Failed to load persistence data:', error);
     }
   }
-
   private async save(): Promise<void> {
     this.data.lastUpdated = Date.now();
-    await writeFile(this.dataPath, JSON.stringify(this.data, null, 2));
+    await writeFile(this._dataPath, JSON.stringify(this._data, null, 2));
   }
-
   // Agent operations
   async saveAgent(agent: PersistedAgent): Promise<void> {
     // Remove existing agent if updating
@@ -79,27 +70,22 @@ export class JsonPersistenceManager {
     this.data.agents.push(agent);
     await this.save();
   }
-
   async getAgent(id: string): Promise<PersistedAgent | null> {
     return this.data.agents.find(a => a.id === id) || null;
   }
-
   async getActiveAgents(): Promise<PersistedAgent[]> {
     return this.data.agents.filter(a => a.status === 'active' || a.status === 'idle');
   }
-
   async getAllAgents(): Promise<PersistedAgent[]> {
     return this.data.agents;
   }
-
   async updateAgentStatus(id: string, status: string): Promise<void> {
-    const agent = this.data.agents.find(a => a.id === id);
+    const _agent = this.data.agents.find(a => a.id === id);
     if (agent) {
       agent.status = status;
       await this.save();
     }
   }
-
   // Task operations
   async saveTask(task: PersistedTask): Promise<void> {
     // Remove existing task if updating
@@ -107,11 +93,9 @@ export class JsonPersistenceManager {
     this.data.tasks.push(task);
     await this.save();
   }
-
   async getTask(id: string): Promise<PersistedTask | null> {
     return this.data.tasks.find(t => t.id === id) || null;
   }
-
   async getActiveTasks(): Promise<PersistedTask[]> {
     return this.data.tasks.filter(t => 
       t.status === 'pending' || 
@@ -119,13 +103,11 @@ export class JsonPersistenceManager {
       t.status === 'assigned'
     );
   }
-
   async getAllTasks(): Promise<PersistedTask[]> {
     return this.data.tasks;
   }
-
   async updateTaskStatus(id: string, status: string, assignedAgent?: string): Promise<void> {
-    const task = this.data.tasks.find(t => t.id === id);
+    const _task = this.data.tasks.find(t => t.id === id);
     if (task) {
       task.status = status;
       if (assignedAgent !== undefined) {
@@ -137,15 +119,13 @@ export class JsonPersistenceManager {
       await this.save();
     }
   }
-
   async updateTaskProgress(id: string, progress: number): Promise<void> {
-    const task = this.data.tasks.find(t => t.id === id);
+    const _task = this.data.tasks.find(t => t.id === id);
     if (task) {
       task.progress = progress;
       await this.save();
     }
   }
-
   // Statistics
   async getStats(): Promise<{
     totalAgents: number;
@@ -154,17 +134,17 @@ export class JsonPersistenceManager {
     pendingTasks: number;
     completedTasks: number;
   }> {
-    const activeAgents = this.data.agents.filter(a => 
+    const _activeAgents = this.data.agents.filter(a => 
       a.status === 'active' || a.status === 'idle'
     ).length;
     
-    const pendingTasks = this.data.tasks.filter(t => 
+    const _pendingTasks = this.data.tasks.filter(t => 
       t.status === 'pending' || 
       t.status === 'in_progress' || 
       t.status === 'assigned'
     ).length;
     
-    const completedTasks = this.data.tasks.filter(t => 
+    const _completedTasks = this.data.tasks.filter(t => 
       t.status === 'completed'
     ).length;
     
@@ -176,7 +156,6 @@ export class JsonPersistenceManager {
       completedTasks,
     };
   }
-
   close(): void {
     // No-op for JSON persistence
   }

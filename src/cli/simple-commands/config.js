@@ -1,46 +1,58 @@
 // config.js - Configuration management commands
 import { printSuccess, printError, printWarning, readJsonFile, writeJsonFile, fileExists } from '../utils.js';
 
-export async function configCommand(subArgs, flags) {
-  const configCmd = subArgs[0];
+export async function configCommand(_subArgs, flags) {
+  const _configCmd = subArgs[0];
   
   switch (configCmd) {
     case 'init':
-      await initConfig(subArgs, flags);
-      break;
+      {
+await initConfig(_subArgs, flags);
+      
+}break;
       
     case 'show':
-      await showConfig(subArgs, flags);
-      break;
+      {
+await showConfig(_subArgs, flags);
+      
+}break;
       
     case 'get':
-      await getConfigValue(subArgs, flags);
-      break;
+      {
+await getConfigValue(_subArgs, flags);
+      
+}break;
       
     case 'set':
-      await setConfigValue(subArgs, flags);
-      break;
+      {
+await setConfigValue(_subArgs, flags);
+      
+}break;
       
     case 'validate':
-      await validateConfig(subArgs, flags);
-      break;
+      {
+await validateConfig(_subArgs, flags);
+      
+}break;
       
     case 'reset':
-      await resetConfig(subArgs, flags);
-      break;
+      {
+await resetConfig(_subArgs, flags);
+      
+}break;
       
     default:
       showConfigHelp();
   }
 }
 
-async function initConfig(subArgs, flags) {
-  const force = subArgs.includes('--force') || subArgs.includes('-f');
-  const configFile = 'claude-flow.config.json';
+async function initConfig(_subArgs, flags) {
+  const _force = subArgs.includes('--force') || subArgs.includes('-f');
+  const _configFile = 'claude-flow.config.json';
   
   try {
     // Check if config already exists
-    const exists = await fileExists(configFile);
+    const _exists = await fileExists(configFile);
     if (exists && !force) {
       printWarning('Configuration file already exists');
       console.log('Use --force to overwrite existing configuration');
@@ -50,7 +62,7 @@ async function initConfig(subArgs, flags) {
     printSuccess('Initializing Claude-Flow configuration...');
     
     // Create default configuration
-    const defaultConfig = {
+    const _defaultConfig = {
       version: '1.0.71',
       terminal: {
         poolSize: 10,
@@ -90,7 +102,7 @@ async function initConfig(subArgs, flags) {
       }
     };
     
-    await writeJsonFile(configFile, defaultConfig);
+    await writeJsonFile(_configFile, defaultConfig);
     console.log(`✓ Created ${configFile}`);
     console.log('✓ Default settings configured');
     console.log('\nNext steps:');
@@ -103,17 +115,17 @@ async function initConfig(subArgs, flags) {
   }
 }
 
-async function showConfig(subArgs, flags) {
-  const configFile = 'claude-flow.config.json';
-  const format = getFlag(subArgs, '--format') || 'pretty';
+async function showConfig(_subArgs, flags) {
+  const _configFile = 'claude-flow.config.json';
+  const _format = getFlag(_subArgs, '--format') || 'pretty';
   
   try {
-    const config = await readJsonFile(configFile);
+    const _config = await readJsonFile(configFile);
     
     printSuccess('Current configuration:');
     
     if (format === 'json') {
-      console.log(JSON.stringify(config, null, 2));
+      console.log(JSON.stringify(_config, null, 2));
     } else {
       // Pretty format
       console.log('\n📋 System Configuration:');
@@ -130,7 +142,7 @@ async function showConfig(subArgs, flags) {
       console.log(`   Path: ${config.memory?.path || './memory/claude-flow-data.json'}`);
       console.log('\n🤖 Agents:');
       console.log(`   Max Agents: ${config.agents?.maxAgents || 20}`);
-      console.log(`   Resource Limits: ${JSON.stringify(config.agents?.resourceLimits || {})}`);
+      console.log(`   Resource Limits: ${JSON.stringify(config.agents?.resourceLimits || { /* empty */ })}`);
     }
     
   } catch (err) {
@@ -139,9 +151,9 @@ async function showConfig(subArgs, flags) {
   }
 }
 
-async function getConfigValue(subArgs, flags) {
-  const key = subArgs[1];
-  const configFile = 'claude-flow.config.json';
+async function getConfigValue(_subArgs, flags) {
+  const _key = subArgs[1];
+  const _configFile = 'claude-flow.config.json';
   
   if (!key) {
     printError('Usage: config get <key>');
@@ -152,8 +164,8 @@ async function getConfigValue(subArgs, flags) {
   }
   
   try {
-    const config = await readJsonFile(configFile);
-    const value = getNestedValue(config, key);
+    const _config = await readJsonFile(configFile);
+    const _value = getNestedValue(_config, key);
     
     if (value !== undefined) {
       console.log(`${key}: ${JSON.stringify(value)}`);
@@ -167,10 +179,10 @@ async function getConfigValue(subArgs, flags) {
   }
 }
 
-async function setConfigValue(subArgs, flags) {
-  const key = subArgs[1];
-  const value = subArgs[2];
-  const configFile = 'claude-flow.config.json';
+async function setConfigValue(_subArgs, flags) {
+  const _key = subArgs[1];
+  const _value = subArgs[2];
+  const _configFile = 'claude-flow.config.json';
   
   if (!key || value === undefined) {
     printError('Usage: config set <key> <value>');
@@ -181,18 +193,18 @@ async function setConfigValue(subArgs, flags) {
   }
   
   try {
-    let config = await readJsonFile(configFile, {});
+    let _config = await readJsonFile(_configFile, { /* empty */ });
     
     // Parse value appropriately
-    let parsedValue = value;
+    let _parsedValue = value;
     if (value === 'true') parsedValue = true;
     else if (value === 'false') parsedValue = false;
     else if (!isNaN(value) && value.trim() !== '') parsedValue = Number(value);
     
     // Set nested value
-    setNestedValue(config, key, parsedValue);
+    setNestedValue(_config, _key, parsedValue);
     
-    await writeJsonFile(configFile, config);
+    await writeJsonFile(_configFile, config);
     printSuccess(`Set ${key} = ${JSON.stringify(parsedValue)}`);
     
   } catch (err) {
@@ -200,19 +212,19 @@ async function setConfigValue(subArgs, flags) {
   }
 }
 
-async function validateConfig(subArgs, flags) {
-  const configFile = 'claude-flow.config.json';
+async function validateConfig(_subArgs, flags) {
+  const _configFile = 'claude-flow.config.json';
   
   try {
-    const config = await readJsonFile(configFile);
+    const _config = await readJsonFile(configFile);
     
     printSuccess('Validating configuration...');
     
-    const errors = [];
-    const warnings = [];
+    const _errors = [];
+    const _warnings = [];
     
     // Validate required sections
-    const requiredSections = ['terminal', 'orchestrator', 'memory'];
+    const _requiredSections = ['terminal', 'orchestrator', 'memory'];
     for (const section of requiredSections) {
       if (!config[section]) {
         errors.push(`Missing required section: ${section}`);
@@ -253,8 +265,8 @@ async function validateConfig(subArgs, flags) {
   }
 }
 
-async function resetConfig(subArgs, flags) {
-  const force = subArgs.includes('--force') || subArgs.includes('-f');
+async function resetConfig(_subArgs, flags) {
+  const _force = subArgs.includes('--force') || subArgs.includes('-f');
   
   if (!force) {
     printWarning('This will reset configuration to defaults');
@@ -267,22 +279,22 @@ async function resetConfig(subArgs, flags) {
 }
 
 // Helper functions
-function getNestedValue(obj, path) {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+function getNestedValue(_obj, path) {
+  return path.split('.').reduce((_current, key) => current?.[key], obj);
 }
 
-function setNestedValue(obj, path, value) {
-  const keys = path.split('.');
-  const last = keys.pop();
-  const target = keys.reduce((current, key) => {
-    if (!current[key]) current[key] = {};
+function setNestedValue(_obj, _path, value) {
+  const _keys = path.split('.');
+  const _last = keys.pop();
+  const _target = keys.reduce((_current, key) => {
+    if (!current[key]) current[key] = { /* empty */ };
     return current[key];
   }, obj);
   target[last] = value;
 }
 
-function getFlag(args, flagName) {
-  const index = args.indexOf(flagName);
+function getFlag(_args, flagName) {
+  const _index = args.indexOf(flagName);
   return index !== -1 && index + 1 < args.length ? args[index + 1] : null;
 }
 

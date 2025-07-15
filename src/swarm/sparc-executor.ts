@@ -1,14 +1,10 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * SPARC-Enhanced Task Executor for Swarm
  * Implements the full SPARC methodology with TDD
  */
-
 import type { TaskDefinition, AgentState, TaskResult } from './types.js';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Logger } from '../core/logger.js';
-
 // Type definitions for SPARC phases
 export interface SparcPhaseResult {
   phase: string;
@@ -17,31 +13,26 @@ export interface SparcPhaseResult {
   artifacts?: Record<string, unknown>;
   [key: string]: unknown;
 }
-
 export interface Requirements {
   functional: string[];
   nonFunctional: string[];
   technical: string[];
   business: string[];
 }
-
 export interface UserStory {
   id: string;
   story: string;
   priority: string;
 }
-
 export interface AcceptanceCriteria {
   [category: string]: string[];
 }
-
 export interface TestSuite {
   unit: Record<string, string>;
   integration: Record<string, string>;
   fixtures: Record<string, unknown>;
   mocks: Record<string, string>;
 }
-
 export interface Implementation {
   modules: Record<string, string>;
   classes: Record<string, string>;
@@ -52,37 +43,31 @@ export interface Implementation {
   performance?: string;
   maintainability?: string;
 }
-
 export interface ProjectStructure {
   directories: string[];
   files: string[];
 }
-
 export interface CodeAssessment {
   [key: string]: string | number;
 }
-
 export interface SparcPhase {
   name: string;
   description: string;
   outputs: string[];
 }
-
 export interface SparcExecutorConfig {
   logger?: Logger;
   enableTDD?: boolean;
   qualityThreshold?: number;
   enableMemory?: boolean;
 }
-
 export class SparcTaskExecutor {
   private logger: Logger;
   private enableTDD: boolean;
   private qualityThreshold: number;
   private enableMemory: boolean;
   private phases: Map<string, SparcPhase>;
-
-  constructor(config: SparcExecutorConfig = {}) {
+  constructor(config: SparcExecutorConfig = { /* empty */ }) {
     this.logger = config.logger || new Logger(
       { level: 'info', format: 'text', destination: 'console' },
       { component: 'SparcTaskExecutor' }
@@ -92,7 +77,6 @@ export class SparcTaskExecutor {
     this.enableMemory = config.enableMemory ?? true;
     this.initializePhases();
   }
-
   private initializePhases() {
     this.phases = new Map([
       ['specification', {
@@ -122,36 +106,30 @@ export class SparcTaskExecutor {
       }]
     ]);
   }
-
   async executeTask(
-    task: TaskDefinition,
-    agent: AgentState,
+    task: _TaskDefinition,
+    agent: _AgentState,
     targetDir?: string
   ): Promise<TaskResult> {
     this.logger.info('Executing SPARC-enhanced task', {
-      taskId: task.id.id,
-      taskName: task.name,
-      agentType: agent.type,
+      taskId: task.id._id,
+      taskName: task._name,
+      agentType: agent._type,
       targetDir
     });
-
-    const startTime = Date.now();
-
+    const _startTime = Date.now();
     try {
       // Ensure target directory exists
       if (targetDir) {
-        await fs.mkdir(targetDir, { recursive: true });
+        await fs.mkdir(_targetDir, { recursive: true });
       }
-
       // Determine which SPARC phase to execute based on task and agent
-      const result = await this.executeSparcPhase(task, agent, targetDir);
-
-      const endTime = Date.now();
-      const executionTime = endTime - startTime;
-
+      const _result = await this.executeSparcPhase(_task, _agent, targetDir);
+      const _endTime = Date.now();
+      const _executionTime = endTime - startTime;
       return {
         output: result,
-        artifacts: result.artifacts || {},
+        artifacts: result.artifacts || { /* empty */ },
         metadata: {
           agentId: agent.id.id,
           agentType: agent.type,
@@ -173,105 +151,100 @@ export class SparcTaskExecutor {
         },
         validated: true
       };
-    } catch (error) {
+    } catch (_error) {
       this.logger.error('SPARC task execution failed', {
-        taskId: task.id.id,
+        taskId: task.id._id,
         error: (error instanceof Error ? error.message : String(error))
       });
       throw error;
     }
   }
-
   private async executeSparcPhase(
-    task: TaskDefinition,
-    agent: AgentState,
+    task: _TaskDefinition,
+    agent: _AgentState,
     targetDir?: string
   ): Promise<SparcPhaseResult> {
-    const objective = task.description.toLowerCase();
+    const _objective = task.description.toLowerCase();
     
     // Map agent types to SPARC phases
     switch (agent.type) {
       case 'analyst':
-        if (task.name.includes('Requirements') || task.name.includes('Plan')) {
-          return this.executeSpecificationPhase(task, targetDir);
+        {
+if (task.name.includes('Requirements') || task.name.includes('Plan')) { /* empty */ }return this.executeSpecificationPhase(_task, targetDir);
         }
-        return this.executeAnalysisPhase(task, targetDir);
+        return this.executeAnalysisPhase(_task, targetDir);
       
       case 'researcher':
-        return this.executePseudocodePhase(task, targetDir);
+        return this.executePseudocodePhase(_task, targetDir);
       
       case 'architect':
       case 'coordinator':
-        if (task.name.includes('Architecture') || objective.includes('design')) {
-          return this.executeArchitecturePhase(task, targetDir);
+        {
+if (task.name.includes('Architecture') || objective.includes('design')) { /* empty */ }return this.executeArchitecturePhase(_task, targetDir);
         }
-        return this.executeCoordinationPhase(task, targetDir);
+        return this.executeCoordinationPhase(_task, targetDir);
       
       case 'coder':
-        if (this.enableTDD && task.name.includes('Implement')) {
-          return this.executeTDDPhase(task, targetDir);
+        {
+if (this.enableTDD && task.name.includes('Implement')) { /* empty */ }return this.executeTDDPhase(_task, targetDir);
         }
-        return this.executeImplementationPhase(task, targetDir);
+        return this.executeImplementationPhase(_task, targetDir);
       
       case 'tester':
-        return this.executeTestingPhase(task, targetDir);
+        return this.executeTestingPhase(_task, targetDir);
       
       case 'reviewer':
-        return this.executeReviewPhase(task, targetDir);
+        return this.executeReviewPhase(_task, targetDir);
       
       case 'documenter':
-        return this.executeDocumentationPhase(task, targetDir);
+        return this.executeDocumentationPhase(_task, targetDir);
       
       default:
-        return this.executeGenericPhase(task, targetDir);
+        return this.executeGenericPhase(_task, targetDir);
     }
   }
-
-  private async executeSpecificationPhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+  private async executeSpecificationPhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
     this.logger.info('Executing Specification phase', { taskName: task.name });
     
-    const objective = task.description;
-    const appType = this.determineAppType(objective);
+    const _objective = task.description;
+    const _appType = this.determineAppType(objective);
     
-    const specifications = {
+    const _specifications = {
       phase: 'specification',
-      requirements: this.generateRequirements(objective, appType),
+      requirements: this.generateRequirements(_objective, appType),
       userStories: this.generateUserStories(appType),
       acceptanceCriteria: this.generateAcceptanceCriteria(appType),
       constraints: this.identifyConstraints(objective),
       quality: 0.9,
       completeness: 0.95
     };
-
     if (targetDir) {
-      const specsDir = path.join(targetDir, 'specs');
-      await fs.mkdir(specsDir, { recursive: true });
+      const _specsDir = path.join(_targetDir, 'specs');
+      await fs.mkdir(_specsDir, { recursive: true });
       
       await fs.writeFile(
-        path.join(specsDir, 'requirements.md'),
+        path.join(_specsDir, 'requirements.md'),
         this.formatRequirements(specifications.requirements)
       );
       
       await fs.writeFile(
-        path.join(specsDir, 'user-stories.md'),
+        path.join(_specsDir, 'user-stories.md'),
         this.formatUserStories(specifications.userStories)
       );
       
       await fs.writeFile(
-        path.join(specsDir, 'acceptance-criteria.md'),
+        path.join(_specsDir, 'acceptance-criteria.md'),
         this.formatAcceptanceCriteria(specifications.acceptanceCriteria)
       );
     }
-
     return specifications;
   }
-
-  private async executePseudocodePhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+  private async executePseudocodePhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
     this.logger.info('Executing Pseudocode phase', { taskName: task.name });
     
-    const appType = this.determineAppType(task.description);
+    const _appType = this.determineAppType(task.description);
     
-    const pseudocode = {
+    const _pseudocode = {
       phase: 'pseudocode',
       algorithms: this.generateAlgorithms(appType),
       dataStructures: this.generateDataStructures(appType),
@@ -279,31 +252,28 @@ export class SparcTaskExecutor {
       quality: 0.85,
       completeness: 0.9
     };
-
     if (targetDir) {
-      const designDir = path.join(targetDir, 'design');
-      await fs.mkdir(designDir, { recursive: true });
+      const _designDir = path.join(_targetDir, 'design');
+      await fs.mkdir(_designDir, { recursive: true });
       
       await fs.writeFile(
-        path.join(designDir, 'algorithms.md'),
+        path.join(_designDir, 'algorithms.md'),
         this.formatAlgorithms(pseudocode.algorithms)
       );
       
       await fs.writeFile(
-        path.join(designDir, 'data-structures.md'),
+        path.join(_designDir, 'data-structures.md'),
         this.formatDataStructures(pseudocode.dataStructures)
       );
     }
-
     return pseudocode;
   }
-
-  private async executeArchitecturePhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+  private async executeArchitecturePhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
     this.logger.info('Executing Architecture phase', { taskName: task.name });
     
-    const appType = this.determineAppType(task.description);
+    const _appType = this.determineAppType(task.description);
     
-    const architecture = {
+    const _architecture = {
       phase: 'architecture',
       components: this.designComponents(appType),
       interfaces: this.designInterfaces(appType),
@@ -312,71 +282,65 @@ export class SparcTaskExecutor {
       quality: 0.9,
       completeness: 0.85
     };
-
     if (targetDir) {
-      const archDir = path.join(targetDir, 'architecture');
-      await fs.mkdir(archDir, { recursive: true });
+      const _archDir = path.join(_targetDir, 'architecture');
+      await fs.mkdir(_archDir, { recursive: true });
       
       await fs.writeFile(
-        path.join(archDir, 'architecture.md'),
+        path.join(_archDir, 'architecture.md'),
         this.formatArchitecture(architecture)
       );
       
       await fs.writeFile(
-        path.join(archDir, 'component-diagram.md'),
+        path.join(_archDir, 'component-diagram.md'),
         this.formatComponentDiagram(architecture.components)
       );
     }
-
     return architecture;
   }
-
-  private async executeTDDPhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+  private async executeTDDPhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
     this.logger.info('Executing TDD phase (Red-Green-Refactor)', { taskName: task.name });
     
-    const appType = this.determineAppType(task.description);
-    const language = this.detectLanguage(task.description);
+    const _appType = this.determineAppType(task.description);
+    const _language = this.detectLanguage(task.description);
     
     // Red Phase: Write failing tests first
-    const tests = await this.generateFailingTests(appType, language);
+    const _tests = await this.generateFailingTests(_appType, language);
     
     // Green Phase: Implement minimal code to pass tests
-    const implementation = await this.generateMinimalImplementation(appType, language, tests);
+    const _implementation = await this.generateMinimalImplementation(_appType, _language, tests);
     
     // Refactor Phase: Optimize and clean up
-    const refactored = await this.refactorImplementation(implementation, tests);
+    const _refactored = await this.refactorImplementation(_implementation, tests);
     
-    const tddResult = {
+    const _tddResult = {
       phase: 'refinement-tdd',
       tests,
       implementation: refactored,
-      coverage: this.calculateCoverage(tests, refactored),
+      coverage: this.calculateCoverage(_tests, refactored),
       quality: 0.95,
       completeness: 0.9,
-      artifacts: {}
+      artifacts: { /* empty */ }
     };
-
     if (targetDir) {
       // Create proper project structure
-      await this.createProjectStructure(targetDir, appType, language);
+      await this.createProjectStructure(_targetDir, _appType, language);
       
       // Write test files
-      await this.writeTestFiles(targetDir, tests, language);
+      await this.writeTestFiles(_targetDir, _tests, language);
       
       // Write implementation files
-      await this.writeImplementationFiles(targetDir, refactored, language);
+      await this.writeImplementationFiles(_targetDir, _refactored, language);
       
       // Generate additional files
-      await this.generateProjectFiles(targetDir, appType, language);
+      await this.generateProjectFiles(_targetDir, _appType, language);
     }
-
     return tddResult;
   }
-
-  private async executeTestingPhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+  private async executeTestingPhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
     this.logger.info('Executing Testing phase', { taskName: task.name });
     
-    const testPlan = {
+    const _testPlan = {
       phase: 'testing',
       unitTests: this.generateUnitTests(task),
       integrationTests: this.generateIntegrationTests(task),
@@ -386,24 +350,21 @@ export class SparcTaskExecutor {
       quality: 0.9,
       completeness: 0.85
     };
-
     if (targetDir) {
-      const testsDir = path.join(targetDir, 'tests');
-      await fs.mkdir(testsDir, { recursive: true });
+      const _testsDir = path.join(_targetDir, 'tests');
+      await fs.mkdir(_testsDir, { recursive: true });
       
       await fs.writeFile(
-        path.join(testsDir, 'test-plan.md'),
+        path.join(_testsDir, 'test-plan.md'),
         this.formatTestPlan(testPlan)
       );
     }
-
     return testPlan;
   }
-
-  private async executeReviewPhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+  private async executeReviewPhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
     this.logger.info('Executing Review phase', { taskName: task.name });
     
-    const review = {
+    const _review = {
       phase: 'review',
       codeQuality: this.assessCodeQuality(task),
       security: this.assessSecurity(task),
@@ -413,21 +374,18 @@ export class SparcTaskExecutor {
       quality: 0.88,
       completeness: 0.9
     };
-
     if (targetDir) {
       await fs.writeFile(
-        path.join(targetDir, 'review-report.md'),
+        path.join(_targetDir, 'review-report.md'),
         this.formatReviewReport(review)
       );
     }
-
     return review;
   }
-
-  private async executeDocumentationPhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+  private async executeDocumentationPhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
     this.logger.info('Executing Documentation phase', { taskName: task.name });
     
-    const documentation = {
+    const _documentation = {
       phase: 'documentation',
       readme: this.generateReadme(task),
       apiDocs: this.generateApiDocs(task),
@@ -436,34 +394,30 @@ export class SparcTaskExecutor {
       quality: 0.92,
       completeness: 0.95
     };
-
     if (targetDir) {
-      const docsDir = path.join(targetDir, 'docs');
-      await fs.mkdir(docsDir, { recursive: true });
+      const _docsDir = path.join(_targetDir, 'docs');
+      await fs.mkdir(_docsDir, { recursive: true });
       
       await fs.writeFile(
-        path.join(targetDir, 'README.md'),
+        path.join(_targetDir, 'README.md'),
         documentation.readme
       );
       
       await fs.writeFile(
-        path.join(docsDir, 'api-reference.md'),
+        path.join(_docsDir, 'api-reference.md'),
         documentation.apiDocs
       );
       
       await fs.writeFile(
-        path.join(docsDir, 'user-guide.md'),
+        path.join(_docsDir, 'user-guide.md'),
         documentation.userGuide
       );
     }
-
     return documentation;
   }
-
   // Helper methods for generating content
-
   private determineAppType(description: string): string {
-    const desc = description.toLowerCase();
+    const _desc = description.toLowerCase();
     if (desc.includes('rest api') || desc.includes('api')) return 'rest-api';
     if (desc.includes('flask') || desc.includes('fastapi')) return 'python-web';
     if (desc.includes('pandas') || desc.includes('data')) return 'data-pipeline';
@@ -473,15 +427,13 @@ export class SparcTaskExecutor {
     if (desc.includes('dashboard')) return 'dashboard';
     return 'generic';
   }
-
   private detectLanguage(description: string): string {
-    const desc = description.toLowerCase();
+    const _desc = description.toLowerCase();
     if (desc.includes('python') || desc.includes('flask') || desc.includes('pandas')) return 'python';
     if (desc.includes('typescript') || desc.includes('ts')) return 'typescript';
     if (desc.includes('java')) return 'java';
     return 'javascript';
   }
-
   private generateRequirements(objective: string, appType: string): Requirements {
     return {
       functional: this.getFunctionalRequirements(appType),
@@ -490,9 +442,8 @@ export class SparcTaskExecutor {
       business: this.getBusinessRequirements(appType)
     };
   }
-
   private generateUserStories(appType: string): UserStory[] {
-    const stories = {
+    const _stories = {
       'rest-api': [
         { id: 'US001', story: 'As a developer, I want to create resources via POST endpoints', priority: 'high' },
         { id: 'US002', story: 'As a developer, I want to retrieve resources via GET endpoints', priority: 'high' },
@@ -516,9 +467,8 @@ export class SparcTaskExecutor {
       { id: 'US001', story: 'As a user, I want to use the main functionality', priority: 'high' }
     ];
   }
-
   private generateAcceptanceCriteria(appType: string): AcceptanceCriteria {
-    const criteria = {
+    const _criteria = {
       'rest-api': {
         endpoints: ['All CRUD operations return appropriate status codes', 'API responses follow consistent format'],
         performance: ['Response time < 200ms for simple queries', 'Can handle 100 concurrent requests'],
@@ -536,30 +486,27 @@ export class SparcTaskExecutor {
       quality: ['Code follows best practices']
     };
   }
-
   private async generateFailingTests(appType: string, language: string): Promise<TestSuite> {
-    const testFramework = this.getTestFramework(language);
+    const _testFramework = this.getTestFramework(language);
     
-    const tests = {
-      unit: this.generateUnitTestCases(appType, language, testFramework),
-      integration: this.generateIntegrationTestCases(appType, language, testFramework),
+    const _tests = {
+      unit: this.generateUnitTestCases(_appType, _language, testFramework),
+      integration: this.generateIntegrationTestCases(_appType, _language, testFramework),
       fixtures: this.generateTestFixtures(appType),
       mocks: this.generateMocks(appType)
     };
     
     return tests;
   }
-
   private async generateMinimalImplementation(appType: string, language: string, tests: TestSuite): Promise<Implementation> {
     return {
-      modules: this.generateModules(appType, language),
-      classes: this.generateClasses(appType, language),
-      functions: this.generateFunctions(appType, language),
-      config: this.generateConfig(appType, language)
+      modules: this.generateModules(_appType, language),
+      classes: this.generateClasses(_appType, language),
+      functions: this.generateFunctions(_appType, language),
+      config: this.generateConfig(_appType, language)
     };
   }
-
-  private async refactorImplementation(implementation: Implementation, tests: TestSuite): Promise<Implementation> {
+  private async refactorImplementation(implementation: _Implementation, tests: TestSuite): Promise<Implementation> {
     return {
       ...implementation,
       optimized: true,
@@ -568,49 +515,43 @@ export class SparcTaskExecutor {
       maintainability: 'Clean, readable code'
     };
   }
-
   private async createProjectStructure(targetDir: string, appType: string, language: string): Promise<void> {
-    const structure = this.getProjectStructure(appType, language);
+    const _structure = this.getProjectStructure(_appType, language);
     
     for (const dir of structure.directories) {
-      await fs.mkdir(path.join(targetDir, dir), { recursive: true });
+      await fs.mkdir(path.join(_targetDir, dir), { recursive: true });
     }
   }
-
-  private async writeTestFiles(targetDir: string, tests: TestSuite, language: string): Promise<void> {
-    const testDir = path.join(targetDir, this.getTestDirectory(language));
-    await fs.mkdir(testDir, { recursive: true });
+  private async writeTestFiles(targetDir: string, tests: _TestSuite, language: string): Promise<void> {
+    const _testDir = path.join(_targetDir, this.getTestDirectory(language));
+    await fs.mkdir(_testDir, { recursive: true });
     
     // Write unit tests
-    for (const [name, content] of Object.entries(tests.unit)) {
-      const filename = this.getTestFileName(name as string, language);
-      await fs.writeFile(path.join(testDir, filename), content as string);
+    for (const [_name, content] of Object.entries(tests.unit)) {
+      const _filename = this.getTestFileName(name as string, language);
+      await fs.writeFile(path.join(_testDir, filename), content as string);
     }
   }
-
-  private async writeImplementationFiles(targetDir: string, implementation: Implementation, language: string): Promise<void> {
-    const srcDir = path.join(targetDir, this.getSourceDirectory(language));
-    await fs.mkdir(srcDir, { recursive: true });
+  private async writeImplementationFiles(targetDir: string, implementation: _Implementation, language: string): Promise<void> {
+    const _srcDir = path.join(_targetDir, this.getSourceDirectory(language));
+    await fs.mkdir(_srcDir, { recursive: true });
     
     // Write implementation files
-    for (const [module, content] of Object.entries(implementation.modules)) {
-      const filename = this.getSourceFileName(module as string, language);
-      await fs.writeFile(path.join(srcDir, filename), content as string);
+    for (const [_module, content] of Object.entries(implementation.modules)) {
+      const _filename = this.getSourceFileName(module as string, language);
+      await fs.writeFile(path.join(_srcDir, filename), content as string);
     }
   }
-
   private async generateProjectFiles(targetDir: string, appType: string, language: string): Promise<void> {
-    const files = await this.getProjectFiles(appType, language);
+    const _files = await this.getProjectFiles(_appType, language);
     
-    for (const [filename, content] of Object.entries(files)) {
-      await fs.writeFile(path.join(targetDir, filename as string), content as string);
+    for (const [_filename, content] of Object.entries(files)) {
+      await fs.writeFile(path.join(_targetDir, filename as string), content as string);
     }
   }
-
   // Utility methods for language-specific details
-
   private getTestFramework(language: string): string {
-    const frameworks = {
+    const _frameworks = {
       python: 'pytest',
       javascript: 'jest',
       typescript: 'jest',
@@ -618,9 +559,8 @@ export class SparcTaskExecutor {
     };
     return frameworks[language] || 'generic';
   }
-
   private getProjectStructure(appType: string, language: string): ProjectStructure {
-    const structures = {
+    const _structures = {
       'python-rest-api': {
         directories: ['src', 'tests', 'docs', 'config', 'migrations', 'scripts'],
         files: ['requirements.txt', 'setup.py', 'pytest.ini', '.gitignore', 'Dockerfile']
@@ -636,22 +576,18 @@ export class SparcTaskExecutor {
       files: ['README.md', '.gitignore']
     };
   }
-
   private getTestDirectory(language: string): string {
     return language === 'python' ? 'tests' : '__tests__';
   }
-
   private getSourceDirectory(language: string): string {
     return 'src';
   }
-
   private getTestFileName(name: string, language: string): string {
     if (language === 'python') return `test_${name}.py`;
     return `${name}.test.${language === 'typescript' ? 'ts' : 'js'}`;
   }
-
   private getSourceFileName(name: string, language: string): string {
-    const extensions = {
+    const _extensions = {
       python: 'py',
       javascript: 'js',
       typescript: 'ts',
@@ -659,11 +595,9 @@ export class SparcTaskExecutor {
     };
     return `${name}.${extensions[language] || 'js'}`;
   }
-
   // Content generation methods
-
   private getFunctionalRequirements(appType: string): string[] {
-    const requirements = {
+    const _requirements = {
       'rest-api': [
         'Implement RESTful endpoints for all resources',
         'Support JSON request/response format',
@@ -689,7 +623,6 @@ export class SparcTaskExecutor {
     
     return requirements[appType] || ['Implement core functionality'];
   }
-
   private getNonFunctionalRequirements(appType: string): string[] {
     return [
       'Response time < 500ms for 95% of requests',
@@ -699,11 +632,10 @@ export class SparcTaskExecutor {
       'Comprehensive logging and monitoring'
     ];
   }
-
   private getTechnicalRequirements(appType: string): string[] {
-    const tech = {
+    const _tech = {
       'rest-api': [
-        'Use appropriate web framework (Express, Flask, FastAPI)',
+        'Use appropriate web framework (_Express, _Flask, FastAPI)',
         'Implement database ORM/ODM',
         'Use environment variables for configuration',
         'Implement proper error handling',
@@ -712,7 +644,7 @@ export class SparcTaskExecutor {
       'data-pipeline': [
         'Use pandas for data manipulation',
         'Implement parallel processing for large datasets',
-        'Use appropriate data storage (SQL, NoSQL)',
+        'Use appropriate data storage (_SQL, NoSQL)',
         'Implement data validation rules',
         'Add progress tracking for long operations'
       ]
@@ -720,7 +652,6 @@ export class SparcTaskExecutor {
     
     return tech[appType] || ['Follow best practices for the technology stack'];
   }
-
   private getBusinessRequirements(appType: string): string[] {
     return [
       'Meet project timeline and budget',
@@ -730,13 +661,11 @@ export class SparcTaskExecutor {
       'Enable easy maintenance and updates'
     ];
   }
-
   private generateUnitTestCases(appType: string, language: string, framework: string): Record<string, string> {
     if (language === 'python' && appType === 'rest-api') {
       return {
         'test_models': `import pytest
 from src.models import User, Product
-
 class TestUserModel:
     def test_create_user(self):
         """Test user creation with valid data"""
@@ -756,7 +685,6 @@ class TestUserModel:
         data = user.to_dict()
         assert data['username'] == "testuser"
         assert 'password' not in data  # Should not expose password
-
 class TestProductModel:
     def test_create_product(self):
         """Test product creation"""
@@ -767,13 +695,12 @@ class TestProductModel:
         'test_services': `import pytest
 from unittest.mock import Mock, patch
 from src.services import UserService, ProductService
-
 class TestUserService:
     @pytest.fixture
     def user_service(self):
         return UserService()
     
-    def test_create_user_success(self, user_service):
+    def test_create_user_success(_self, user_service):
         """Test successful user creation"""
         user_data = {"username": "newuser", "email": "new@example.com"}
         with patch('src.services.db') as mock_db:
@@ -781,10 +708,10 @@ class TestUserService:
             assert user.username == "newuser"
             mock_db.session.add.assert_called_once()
     
-    def test_get_user_by_id(self, user_service):
+    def test_get_user_by_id(_self, user_service):
         """Test retrieving user by ID"""
         with patch('src.services.User.query') as mock_query:
-            mock_query.get.return_value = Mock(id=1, username="testuser")
+            mock_query.get.return_value = Mock(id=_1, username="testuser")
             user = user_service.get_user(1)
             assert user.id == 1
             assert user.username == "testuser"
@@ -797,14 +724,12 @@ class TestUserService:
       'test_main': 'Test file content for main functionality'
     };
   }
-
   private generateIntegrationTestCases(appType: string, language: string, framework: string): Record<string, string> {
     if (language === 'python' && appType === 'rest-api') {
       return {
         'test_api': `import pytest
 from flask import Flask
 from src.app import create_app
-
 class TestAPI:
     @pytest.fixture
     def client(self):
@@ -812,13 +737,13 @@ class TestAPI:
         with app.test_client() as client:
             yield client
     
-    def test_health_endpoint(self, client):
+    def test_health_endpoint(_self, client):
         """Test health check endpoint"""
         response = client.get('/health')
         assert response.status_code == 200
         assert response.json['status'] == 'healthy'
     
-    def test_create_user_endpoint(self, client):
+    def test_create_user_endpoint(_self, client):
         """Test POST /users endpoint"""
         user_data = {
             "username": "testuser",
@@ -829,11 +754,11 @@ class TestAPI:
         assert response.status_code == 201
         assert response.json['username'] == "testuser"
     
-    def test_get_users_endpoint(self, client):
+    def test_get_users_endpoint(_self, client):
         """Test GET /users endpoint"""
         response = client.get('/api/users')
         assert response.status_code == 200
-        assert isinstance(response.json, list)
+        assert isinstance(response._json, list)
 `
       };
     }
@@ -842,7 +767,6 @@ class TestAPI:
       'test_integration': 'Integration test content'
     };
   }
-
   private generateTestFixtures(appType: string): Record<string, unknown> {
     return {
       users: [
@@ -855,7 +779,6 @@ class TestAPI:
       ]
     };
   }
-
   private generateMocks(appType: string): Record<string, string> {
     return {
       database: 'Mock database connection',
@@ -863,7 +786,6 @@ class TestAPI:
       fileSystem: 'Mock file system operations'
     };
   }
-
   private generateModules(appType: string, language: string): Record<string, string> {
     if (language === 'python' && appType === 'rest-api') {
       return {
@@ -872,7 +794,6 @@ from flask_cors import CORS
 from config import Config
 from models import db
 from routes import api_bp
-
 def create_app(config_name='development'):
     app = Flask(__name__)
     app.config.from_object(Config[config_name])
@@ -882,7 +803,7 @@ def create_app(config_name='development'):
     CORS(app)
     
     # Register blueprints
-    app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(_api_bp, url_prefix='/api')
     
     # Health check
     @app.route('/health')
@@ -890,7 +811,6 @@ def create_app(config_name='development'):
         return {'status': 'healthy', 'service': 'REST API'}
     
     return app
-
 if __name__ == '__main__':
     app = create_app()
     app.run(debug=True)
@@ -898,22 +818,20 @@ if __name__ == '__main__':
         'models': `from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-
 db = SQLAlchemy()
-
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db._Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db._DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db._DateTime, default=datetime._utcnow, onupdate=datetime.utcnow)
     
-    def set_password(self, password):
+    def set_password(_self, password):
         self.password_hash = generate_password_hash(password)
     
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    def check_password(_self, password):
+        return check_password_hash(self._password_hash, password)
     
     def to_dict(self):
         return {
@@ -923,14 +841,13 @@ class User(db.Model):
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
-
 class Product(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db._Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
-    price = db.Column(db.Float, nullable=False)
-    stock = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    price = db.Column(db._Float, nullable=False)
+    stock = db.Column(db._Integer, default=0)
+    created_at = db.Column(db._DateTime, default=datetime.utcnow)
     
     def to_dict(self):
         return {
@@ -945,30 +862,26 @@ class Product(db.Model):
         'routes': `from flask import Blueprint, request, jsonify
 from models import db, User, Product
 from services import UserService, ProductService
-
 api_bp = Blueprint('api', __name__)
 user_service = UserService()
 product_service = ProductService()
-
 # User routes
 @api_bp.route('/users', methods=['GET'])
 def get_users():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
-    users = User.query.paginate(page=page, per_page=per_page)
+    users = User.query.paginate(page=_page, per_page=per_page)
     return jsonify({
         'users': [u.to_dict() for u in users.items],
         'total': users.total,
         'pages': users.pages,
         'current_page': page
     })
-
 @api_bp.route('/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     user = User.query.get_or_404(user_id)
     return jsonify(user.to_dict())
-
 @api_bp.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json()
@@ -983,27 +896,23 @@ def create_user():
     
     user = user_service.create_user(data)
     return jsonify(user.to_dict()), 201
-
 @api_bp.route('/users/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     user = User.query.get_or_404(user_id)
     data = request.get_json()
     
-    user = user_service.update_user(user, data)
+    user = user_service.update_user(_user, data)
     return jsonify(user.to_dict())
-
 @api_bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     user_service.delete_user(user)
     return '', 204
-
 # Product routes
 @api_bp.route('/products', methods=['GET'])
 def get_products():
     products = Product.query.all()
     return jsonify([p.to_dict() for p in products])
-
 @api_bp.route('/products', methods=['POST'])
 def create_product():
     data = request.get_json()
@@ -1011,9 +920,8 @@ def create_product():
     return jsonify(product.to_dict()), 201
 `,
         'services': `from models import db, User, Product
-
 class UserService:
-    def create_user(self, data):
+    def create_user(_self, data):
         user = User(
             username=data['username'],
             email=data['email']
@@ -1025,7 +933,7 @@ class UserService:
         db.session.commit()
         return user
     
-    def update_user(self, user, data):
+    def update_user(_self, _user, data):
         if 'username' in data:
             user.username = data['username']
         if 'email' in data:
@@ -1036,15 +944,14 @@ class UserService:
         db.session.commit()
         return user
     
-    def delete_user(self, user):
+    def delete_user(_self, user):
         db.session.delete(user)
         db.session.commit()
     
-    def get_user(self, user_id):
+    def get_user(_self, user_id):
         return User.query.get(user_id)
-
 class ProductService:
-    def create_product(self, data):
+    def create_product(_self, data):
         product = Product(
             name=data['name'],
             description=data.get('description', ''),
@@ -1056,7 +963,7 @@ class ProductService:
         db.session.commit()
         return product
     
-    def update_product(self, product, data):
+    def update_product(_self, _product, data):
         if 'name' in data:
             product.name = data['name']
         if 'description' in data:
@@ -1071,9 +978,7 @@ class ProductService:
 `,
         'config': `import os
 from dotenv import load_dotenv
-
 load_dotenv()
-
 class BaseConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -1104,21 +1009,18 @@ Config = {
       'main': 'Main module implementation'
     };
   }
-
   private generateClasses(appType: string, language: string): Record<string, string> {
     return {
       'BaseClass': 'Base class implementation',
       'ServiceClass': 'Service class implementation'
     };
   }
-
   private generateFunctions(appType: string, language: string): Record<string, string> {
     return {
       'helpers': 'Helper functions',
       'validators': 'Validation functions'
     };
   }
-
   private generateConfig(appType: string, language: string): Record<string, string> {
     return {
       database: 'Database configuration',
@@ -1126,7 +1028,6 @@ Config = {
       logging: 'Logging configuration'
     };
   }
-
   private async getProjectFiles(appType: string, language: string): Promise<Record<string, string>> {
     if (language === 'python') {
       return {
@@ -1140,7 +1041,6 @@ black==23.7.0
 flake8==6.0.0
 `,
         'setup.py': `from setuptools import setup, find_packages
-
 setup(
     name="${appType}",
     version="1.0.0",
@@ -1182,20 +1082,14 @@ htmlcov/
 .pytest_cache/
 `,
         'Dockerfile': `FROM python:3.9-slim
-
 WORKDIR /app
-
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
 COPY . .
-
 EXPOSE 5000
-
 CMD ["python", "-m", "src.app"]
 `,
         'docker-compose.yml': `version: '3.8'
-
 services:
   app:
     build: .
@@ -1214,7 +1108,6 @@ services:
       - POSTGRES_DB=appdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
 volumes:
   postgres_data:
 `
@@ -1226,8 +1119,7 @@ volumes:
       '.gitignore': 'Git ignore file'
     };
   }
-
-  private calculateCoverage(tests: TestSuite, implementation: Implementation): Record<string, number> {
+  private calculateCoverage(tests: _TestSuite, implementation: Implementation): Record<string, number> {
     return {
       overall: 85,
       unit: 90,
@@ -1235,228 +1127,164 @@ volumes:
       e2e: 70
     };
   }
-
   // Formatting methods
-
   private formatRequirements(requirements: Requirements): string {
     return `# Requirements
-
 ## Functional Requirements
 ${requirements.functional.map((r: string) => `- ${r}`).join('\n')}
-
 ## Non-Functional Requirements
 ${requirements.nonFunctional.map((r: string) => `- ${r}`).join('\n')}
-
 ## Technical Requirements
 ${requirements.technical.map((r: string) => `- ${r}`).join('\n')}
-
 ## Business Requirements
 ${requirements.business.map((r: string) => `- ${r}`).join('\n')}
 `;
   }
-
   private formatUserStories(stories: UserStory[]): string {
     return `# User Stories
-
 ${stories.map(s => `## ${s.id}: ${s.story}
 Priority: ${s.priority}
 `).join('\n')}`;
   }
-
   private formatAcceptanceCriteria(criteria: AcceptanceCriteria): string {
     return `# Acceptance Criteria
-
-${Object.entries(criteria).map(([category, items]) => `## ${category}
+${Object.entries(criteria).map(([_category, items]) => `## ${category}
 ${(items as string[]).map(item => `- ${item}`).join('\n')}
 `).join('\n')}`;
   }
-
   private formatAlgorithms(algorithms: Record<string, string>): string {
     return `# Algorithms
-
-${JSON.stringify(algorithms, null, 2)}
+${JSON.stringify(_algorithms, null, 2)}
 `;
   }
-
   private formatDataStructures(structures: Record<string, string>): string {
     return `# Data Structures
-
-${JSON.stringify(structures, null, 2)}
+${JSON.stringify(_structures, null, 2)}
 `;
   }
-
   private formatArchitecture(architecture: SparcPhaseResult): string {
     return `# System Architecture
-
 ## Components
-${JSON.stringify(architecture.components, null, 2)}
-
+${JSON.stringify(architecture._components, null, 2)}
 ## Interfaces
-${JSON.stringify(architecture.interfaces, null, 2)}
-
+${JSON.stringify(architecture._interfaces, null, 2)}
 ## Design Patterns
 ${architecture.patterns.join('\n')}
-
 ## Infrastructure
-${JSON.stringify(architecture.infrastructure, null, 2)}
+${JSON.stringify(architecture._infrastructure, null, 2)}
 `;
   }
-
   private formatComponentDiagram(components: Record<string, string>): string {
     return `# Component Diagram
-
-\`\`\`mermaid
+```mermaid
 graph TD
     A[Client] --> B[API Gateway]
     B --> C[Application Server]
     C --> D[Database]
     C --> E[Cache]
     C --> F[Message Queue]
-\`\`\`
+```
 `;
   }
-
   private formatTestPlan(plan: SparcPhaseResult): string {
     return `# Test Plan
-
 ## Test Strategy
 - Unit Tests: ${plan.unitTests}
 - Integration Tests: ${plan.integrationTests}
 - E2E Tests: ${plan.e2eTests}
 - Performance Tests: ${plan.performanceTests}
-
 ## Coverage Target
 Target: ${plan.coverage.target}%
 Current: ${plan.coverage.current}%
 `;
   }
-
   private formatReviewReport(review: SparcPhaseResult): string {
     return `# Code Review Report
-
 ## Code Quality
-${JSON.stringify(review.codeQuality, null, 2)}
-
+${JSON.stringify(review._codeQuality, null, 2)}
 ## Security Assessment
-${JSON.stringify(review.security, null, 2)}
-
+${JSON.stringify(review._security, null, 2)}
 ## Performance Assessment
-${JSON.stringify(review.performance, null, 2)}
-
+${JSON.stringify(review._performance, null, 2)}
 ## Maintainability
-${JSON.stringify(review.maintainability, null, 2)}
-
+${JSON.stringify(review._maintainability, null, 2)}
 ## Recommendations
 ${review.recommendations.map((r: string) => `- ${r}`).join('\n')}
 `;
   }
-
   private generateReadme(task: TaskDefinition): string {
     return `# ${task.name}
-
 ${task.description}
-
 ## Installation
-
-\`\`\`bash
+```bash
 # Clone the repository
 git clone <repository-url>
 cd <project-directory>
-
 # Install dependencies
 pip install -r requirements.txt
 # or
 npm install
-\`\`\`
-
+```
 ## Usage
-
-\`\`\`bash
+```bash
 # Run the application
 python -m src.app
 # or
 npm start
-\`\`\`
-
+```
 ## Testing
-
-\`\`\`bash
+```bash
 # Run tests
 pytest
 # or
 npm test
-\`\`\`
-
+```
 ## Documentation
-
-See the \`docs/\` directory for detailed documentation.
-
+See the `docs/` directory for detailed documentation.
 ## License
-
 MIT
 `;
   }
-
   private generateApiDocs(task: TaskDefinition): string {
     return `# API Documentation
-
 ## Endpoints
-
 ### GET /api/users
 Retrieve all users
-
 ### POST /api/users
 Create a new user
-
 ### GET /api/users/:id
 Retrieve a specific user
-
 ### PUT /api/users/:id
 Update a user
-
 ### DELETE /api/users/:id
 Delete a user
 `;
   }
-
   private generateUserGuide(task: TaskDefinition): string {
     return `# User Guide
-
 ## Getting Started
-
 1. Install the application
 2. Configure your environment
 3. Start using the features
-
 ## Features
-
 - Feature 1: Description
 - Feature 2: Description
 - Feature 3: Description
 `;
   }
-
   private generateDeveloperGuide(task: TaskDefinition): string {
     return `# Developer Guide
-
 ## Architecture
-
 The application follows a modular architecture...
-
 ## Development Setup
-
 1. Clone the repository
 2. Install dependencies
 3. Set up development environment
-
 ## Contributing
-
 Please follow our contribution guidelines...
 `;
   }
-
   // Additional helper methods
-
   private assessCodeQuality(task: TaskDefinition): CodeAssessment {
     return {
       complexity: 'Low to Medium',
@@ -1465,7 +1293,6 @@ Please follow our contribution guidelines...
       linting: 'Passing'
     };
   }
-
   private assessSecurity(task: TaskDefinition): CodeAssessment {
     return {
       authentication: 'Implemented',
@@ -1474,7 +1301,6 @@ Please follow our contribution guidelines...
       encryption: 'At rest and in transit'
     };
   }
-
   private assessPerformance(task: TaskDefinition): CodeAssessment {
     return {
       responseTime: 'Average 150ms',
@@ -1483,7 +1309,6 @@ Please follow our contribution guidelines...
       caching: 'Implemented'
     };
   }
-
   private assessMaintainability(task: TaskDefinition): CodeAssessment {
     return {
       readability: 'High',
@@ -1492,7 +1317,6 @@ Please follow our contribution guidelines...
       dependencies: 'Up to date'
     };
   }
-
   private generateRecommendations(task: TaskDefinition): string[] {
     return [
       'Consider implementing rate limiting',
@@ -1502,23 +1326,18 @@ Please follow our contribution guidelines...
       'Consider using a CDN for static assets'
     ];
   }
-
   private generateUnitTests(task: TaskDefinition): string {
     return 'Comprehensive unit test suite';
   }
-
   private generateIntegrationTests(task: TaskDefinition): string {
     return 'Integration test scenarios';
   }
-
   private generateE2ETests(task: TaskDefinition): string {
     return 'End-to-end test scenarios';
   }
-
   private generatePerformanceTests(task: TaskDefinition): string {
     return 'Performance test suite';
   }
-
   private identifyConstraints(objective: string): string[] {
     return [
       'Must complete within timeline',
@@ -1527,7 +1346,6 @@ Please follow our contribution guidelines...
       'Must be maintainable'
     ];
   }
-
   private designComponents(appType: string): Record<string, string> {
     return {
       frontend: 'UI Components',
@@ -1536,7 +1354,6 @@ Please follow our contribution guidelines...
       infrastructure: 'Cloud Services'
     };
   }
-
   private designInterfaces(appType: string): Record<string, string> {
     return {
       api: 'REST/GraphQL interfaces',
@@ -1544,7 +1361,6 @@ Please follow our contribution guidelines...
       external: 'Third-party integrations'
     };
   }
-
   private selectPatterns(appType: string): string[] {
     return [
       'MVC/MVP Pattern',
@@ -1553,7 +1369,6 @@ Please follow our contribution guidelines...
       'Observer Pattern'
     ];
   }
-
   private designInfrastructure(appType: string): Record<string, string> {
     return {
       hosting: 'Cloud platform',
@@ -1562,7 +1377,6 @@ Please follow our contribution guidelines...
       monitoring: 'APM solution'
     };
   }
-
   private generateAlgorithms(appType: string): Record<string, string> {
     return {
       dataProcessing: 'Data processing algorithms',
@@ -1570,7 +1384,6 @@ Please follow our contribution guidelines...
       optimization: 'Performance optimization'
     };
   }
-
   private generateDataStructures(appType: string): Record<string, string> {
     return {
       models: 'Data models',
@@ -1578,7 +1391,6 @@ Please follow our contribution guidelines...
       interfaces: 'TypeScript interfaces'
     };
   }
-
   private generateFlowDiagrams(appType: string): Record<string, string> {
     return {
       userFlow: 'User interaction flow',
@@ -1586,28 +1398,22 @@ Please follow our contribution guidelines...
       systemFlow: 'System architecture flow'
     };
   }
-
-  private executeAnalysisPhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
-    return this.executeAnalyzerTask(task, targetDir);
+  private executeAnalysisPhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+    return this.executeAnalyzerTask(_task, targetDir);
   }
-
-  private executeImplementationPhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
-    return this.executeTDDPhase(task, targetDir);
+  private executeImplementationPhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+    return this.executeTDDPhase(_task, targetDir);
   }
-
-  private executeCoordinationPhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
-    return this.executeCoordinationTask(task, targetDir);
+  private executeCoordinationPhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+    return this.executeCoordinationTask(_task, targetDir);
   }
-
-  private executeGenericPhase(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
-    return this.executeGenericTask(task, targetDir);
+  private executeGenericPhase(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+    return this.executeGenericTask(_task, targetDir);
   }
-
-  private async executeAnalyzerTask(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
-    return this.executeSpecificationPhase(task, targetDir);
+  private async executeAnalyzerTask(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+    return this.executeSpecificationPhase(_task, targetDir);
   }
-
-  private async executeCoordinationTask(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+  private async executeCoordinationTask(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
     return {
       phase: 'coordination',
       status: 'Task coordinated',
@@ -1615,8 +1421,7 @@ Please follow our contribution guidelines...
       completeness: 0.95
     };
   }
-
-  private async executeGenericTask(task: TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
+  private async executeGenericTask(task: _TaskDefinition, targetDir?: string): Promise<SparcPhaseResult> {
     return {
       phase: 'generic',
       status: 'Task completed',

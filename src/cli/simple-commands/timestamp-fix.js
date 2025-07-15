@@ -8,15 +8,15 @@ import { getLocalTimestamp, convertToLocalTime, formatTimestampForDisplay, getTi
 /**
  * Fixed function to create session with proper timezone handling
  */
-export function createSessionWithProperTimezone(objective, options = {}) {
-  const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+export function createSessionWithProperTimezone(_objective, options = { /* empty */ }) {
+  const _sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
   
   // Store both UTC timestamp (for consistency) and timezone info
-  const utcTimestamp = new Date().toISOString();
-  const localTimestamp = getLocalTimestamp();
-  const timezoneInfo = getTimezoneInfo();
+  const _utcTimestamp = new Date().toISOString();
+  const _localTimestamp = getLocalTimestamp();
+  const _timezoneInfo = getTimezoneInfo();
   
-  const session = {
+  const _session = {
     id: sessionId,
     objective,
     createdAt: utcTimestamp,
@@ -33,7 +33,7 @@ export function createSessionWithProperTimezone(objective, options = {}) {
  * Fixed function to display session info with proper timezone
  */
 export function displaySessionInfo(session) {
-  const timeDisplay = formatTimestampForDisplay(session.createdAt);
+  const _timeDisplay = formatTimestampForDisplay(session.createdAt);
   
   console.log('🐝 Hive Mind Session');
   console.log(`📋 ID: ${session.id}`);
@@ -59,9 +59,9 @@ export function listSessionsWithTimezone(sessions) {
   console.log('-'.repeat(100));
   
   sessions.forEach(session => {
-    const timeDisplay = formatTimestampForDisplay(session.createdAt);
-    const id = session.id.length > 22 ? session.id.substr(0, 22) + '...' : session.id;
-    const objective = session.objective.length > 27 ? session.objective.substr(0, 27) + '...' : session.objective;
+    const _timeDisplay = formatTimestampForDisplay(session.createdAt);
+    const _id = session.id.length > 22 ? session.id.substr(_0, 22) + '...' : session.id;
+    const _objective = session.objective.length > 27 ? session.objective.substr(_0, 27) + '...' : session.objective;
     
     console.log(
       id.padEnd(25) + 
@@ -81,12 +81,12 @@ export function demonstrateTimezonefix() {
   console.log('🧪 Testing timezone fix for issue #246\n');
   
   // Show timezone info
-  const tz = getTimezoneInfo();
+  const _tz = getTimezoneInfo();
   console.log(`🌍 Your timezone: ${tz.name} (${tz.abbreviation})`);
   console.log(`⏰ UTC offset: ${tz.offset > 0 ? '+' : ''}${tz.offset} hours\n`);
   
   // Create sample session
-  const session = createSessionWithProperTimezone('Build microservices API', {
+  const _session = createSessionWithProperTimezone('Build microservices API', {
     queenType: 'strategic',
     maxWorkers: 6
   });

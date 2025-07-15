@@ -9,7 +9,7 @@
  * DANGEROUS PATTERN - DO NOT USE
  * This creates an infinite loop that can cost thousands of dollars!
  */
-export const DANGEROUS_PATTERN_EXAMPLE = {
+export const _DANGEROUS_PATTERN_EXAMPLE = {
   name: 'DANGEROUS: Stop hook calling claude command',
   description: '❌ NEVER USE THIS - Creates infinite recursion loop',
   pattern: {
@@ -35,7 +35,7 @@ export const DANGEROUS_PATTERN_EXAMPLE = {
  * SAFE PATTERN 1: Flag-based updates
  * Set a flag instead of calling claude directly
  */
-export const SAFE_FLAG_PATTERN = {
+export const _SAFE_FLAG_PATTERN = {
   name: 'Safe Pattern: Flag-based updates',
   description: '✅ Set flag when update needed, run manually',
   pattern: {
@@ -67,7 +67,7 @@ export const SAFE_FLAG_PATTERN = {
  * SAFE PATTERN 2: PostToolUse hooks instead of Stop hooks
  * React to specific tool usage rather than session end
  */
-export const SAFE_POST_TOOL_PATTERN = {
+export const _SAFE_POST_TOOL_PATTERN = {
   name: 'Safe Pattern: PostToolUse hooks',
   description: '✅ React to specific file operations instead of Stop events',
   pattern: {
@@ -99,7 +99,7 @@ export const SAFE_POST_TOOL_PATTERN = {
  * SAFE PATTERN 3: Conditional execution with skip-hooks
  * Check for hook context before executing claude commands
  */
-export const SAFE_CONDITIONAL_PATTERN = {
+export const _SAFE_CONDITIONAL_PATTERN = {
   name: 'Safe Pattern: Conditional execution with context check',
   description: '✅ Check if running in hook context before calling claude',
   pattern: {
@@ -131,7 +131,7 @@ export const SAFE_CONDITIONAL_PATTERN = {
  * SAFE PATTERN 4: Batch processing with scheduled execution
  * Accumulate changes and process them on a schedule
  */
-export const SAFE_BATCH_PATTERN = {
+export const _SAFE_BATCH_PATTERN = {
   name: 'Safe Pattern: Batch processing with scheduled execution',
   description: '✅ Accumulate changes and process them separately',
   pattern: {
@@ -185,7 +185,7 @@ rm "$LOCK_FILE"`
  * SAFE PATTERN 5: Database/file-based queue system
  * Use external queue for processing commands
  */
-export const SAFE_QUEUE_PATTERN = {
+export const _SAFE_QUEUE_PATTERN = {
   name: 'Safe Pattern: Queue-based command processing',
   description: '✅ Queue commands for external processing',
   pattern: {
@@ -215,7 +215,7 @@ def process_queue():
         return
     
     # Read and clear queue atomically
-    with open(QUEUE_FILE, 'r') as f:
+    with open(_QUEUE_FILE, 'r') as f:
         lines = f.readlines()
     
     # Clear the queue
@@ -252,7 +252,7 @@ if __name__ == '__main__':
 /**
  * Get all safe patterns for documentation generation
  */
-export const ALL_SAFE_PATTERNS = [
+export const _ALL_SAFE_PATTERNS = [
   SAFE_FLAG_PATTERN,
   SAFE_POST_TOOL_PATTERN,
   SAFE_CONDITIONAL_PATTERN,
@@ -272,9 +272,9 @@ export function generateSafeHooksGuide() {
 
 ${DANGEROUS_PATTERN_EXAMPLE.description}
 
-\`\`\`json
-${JSON.stringify(DANGEROUS_PATTERN_EXAMPLE.pattern, null, 2)}
-\`\`\`
+```json
+${JSON.stringify(DANGEROUS_PATTERN_EXAMPLE._pattern, null, 2)}
+```
 
 **Problems:**
 ${DANGEROUS_PATTERN_EXAMPLE.problems.map(p => `- ${p}`).join('\n')}
@@ -289,36 +289,36 @@ ${ALL_SAFE_PATTERNS.map(pattern => `
 ${pattern.description}
 
 **Configuration:**
-\`\`\`json
-${JSON.stringify(pattern.pattern, null, 2)}
-\`\`\`
+```json
+${JSON.stringify(pattern._pattern, null, 2)}
+```
 
 **Benefits:**
 ${pattern.benefits.map(b => `- ${b}`).join('\n')}
 
 ${pattern.usage ? `**Usage:**
-${pattern.usage.map((u, i) => `${i + 1}. ${u}`).join('\n')}` : ''}
+${pattern.usage.map((_u, i) => `${i + 1}. ${u}`).join('\n')}` : ''}
 
 ${pattern.additionalSetup ? `**Additional Setup:**
 ${pattern.additionalSetup.cronJob ? `
 **Cron Job:**
-\`\`\`bash
+```bash
 ${pattern.additionalSetup.cronJob}
-\`\`\`
+```
 ` : ''}
 
 ${pattern.additionalSetup.updateScript ? `
 **Update Script:**
-\`\`\`bash
+```bash
 ${pattern.additionalSetup.updateScript}
-\`\`\`
+```
 ` : ''}` : ''}
 
 ${pattern.processor ? `
 **Queue Processor:**
-\`\`\`python
+```python
 ${pattern.processor}
-\`\`\`
+```
 ` : ''}
 
 ---
@@ -327,28 +327,28 @@ ${pattern.processor}
 ## 🚀 Quick Migration Guide
 
 ### If you currently have this DANGEROUS pattern:
-\`\`\`json
+```json
 {
   "hooks": {
     "Stop": [{"hooks": [{"type": "command", "command": "claude -c -p 'Update history'"}]}]
   }
 }
-\`\`\`
+```
 
 ### Replace with this SAFE pattern:
-\`\`\`json
+```json
 {
   "hooks": {
     "Stop": [{"hooks": [{"type": "command", "command": "touch ~/.claude/needs_update && echo 'Run: claude -c -p \"Update history\"'"}]}]
   }
 }
-\`\`\`
+```
 
 ## 🛡️ Hook Safety Tools
 
 Use claude-flow's built-in safety tools:
 
-\`\`\`bash
+```bash
 # Check your configuration for dangerous patterns
 claude-flow hook-safety validate
 
@@ -360,7 +360,7 @@ claude-flow hook-safety status
 
 # Reset circuit breakers if triggered
 claude-flow hook-safety reset
-\`\`\`
+```
 
 ## 📚 Additional Resources
 

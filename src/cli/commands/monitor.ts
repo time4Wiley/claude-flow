@@ -1,15 +1,12 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Monitor command for Claude-Flow - Live dashboard mode
  */
-
 import { Command } from 'commander';
 import { promises as fs } from 'node:fs';
 import { existsSync } from 'fs';
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { formatProgressBar, formatDuration, formatStatusIndicator } from '../formatter.js';
-
 // Type definitions
 interface ComponentStatus {
   status: 'healthy' | 'degraded' | 'error';
@@ -18,7 +15,6 @@ interface ComponentStatus {
   errors?: number;
   lastError?: string;
 }
-
 interface AlertData {
   id: string;
   type: 'warning' | 'error' | 'info';
@@ -27,17 +23,15 @@ interface AlertData {
   timestamp: number;
   acknowledged: boolean;
 }
-
-export const monitorCommand = new Command()
+export const _monitorCommand = new Command()
   .description('Start live monitoring dashboard')
-  .option('-i, --interval <seconds>', 'Update interval in seconds', '2')
-  .option('-c, --compact', 'Compact view mode')
+  .option('-_i, --interval <seconds>', 'Update interval in seconds', '2')
+  .option('-_c, --compact', 'Compact view mode')
   .option('--no-graphs', 'Disable ASCII graphs')
   .option('--focus <component:string>', 'Focus on specific component')
-  .action(async (options: any) => {
+  .action(async (options: Record<string, unknown>) => {
     await startMonitorDashboard(options);
   });
-
 interface MonitorData {
   timestamp: Date;
   system: {
@@ -46,12 +40,11 @@ interface MonitorData {
     agents: number;
     tasks: number;
   };
-  components: Record<string, any>;
-  agents: any[];
-  tasks: any[];
-  events: any[];
+  components: Record<string, unknown>;
+  agents: unknown[];
+  tasks: unknown[];
+  events: unknown[];
 }
-
 class Dashboard {
   private data: MonitorData[] = [];
   private maxDataPoints = 60; // 2 minutes at 2-second intervals
@@ -59,56 +52,48 @@ class Dashboard {
   private alerts: AlertData[] = [];
   private startTime = Date.now();
   private exportData: MonitorData[] = [];
-
-  constructor(private options: any) {
+  constructor(private options: unknown) {
     this.options.threshold = this.options.threshold || 80;
   }
-
   async start(): Promise<void> {
     // Hide cursor and clear screen
-    process.stdout.write('\x1b[?25l');
+    process.stdout.write('x1b[?25l');
     console.clear();
-
     // Setup signal handlers
-    const cleanup = () => {
+    const _cleanup = () => {
       this.running = false;
-      process.stdout.write('\x1b[?25h'); // Show cursor
+      process.stdout.write('x1b[?25h'); // Show cursor
       console.log('\n' + chalk.gray('Monitor stopped'));
       process.exit(0);
     };
-
     process.on('SIGINT', cleanup);
     process.on('SIGTERM', cleanup);
-
     // Start monitoring loop
     await this.monitoringLoop();
   }
-
   private async monitoringLoop(): Promise<void> {
     while (this.running) {
       try {
-        const data = await this.collectData();
+        const _data = await this.collectData();
         this.data.push(data);
         
         // Keep only recent data points
         if (this.data.length > this.maxDataPoints) {
           this.data = this.data.slice(-this.maxDataPoints);
         }
-
         this.render();
-        await new Promise(resolve => setTimeout(resolve, this.options.interval * 1000));
-      } catch (error) {
+        await new Promise(resolve => setTimeout(_resolve, this.options.interval * 1000));
+      } catch (_error) {
         this.renderError(error);
-        await new Promise(resolve => setTimeout(resolve, this.options.interval * 1000));
+        await new Promise(resolve => setTimeout(_resolve, this.options.interval * 1000));
       }
     }
   }
-
   private async collectData(): Promise<MonitorData> {
     // Mock data collection - in production, this would connect to the orchestrator
-    const timestamp = new Date();
-    const cpuUsage = 10 + Math.random() * 20; // 10-30%
-    const memoryUsage = 200 + Math.random() * 100; // 200-300MB
+    const _timestamp = new Date();
+    const _cpuUsage = 10 + Math.random() * 20; // 10-30%
+    const _memoryUsage = 200 + Math.random() * 100; // 200-300MB
     
     return {
       timestamp,
@@ -130,18 +115,16 @@ class Dashboard {
       events: this.generateMockEvents()
     };
   }
-
   private render(): void {
     console.clear();
     
-    const latest = this.data[this.data.length - 1];
+    const _latest = this.data[this.data.length - 1];
     if (!latest) return;
-
     // Header
     this.renderHeader(latest);
     
     if (this.options.focus) {
-      this.renderFocusedComponent(latest, this.options.focus);
+      this.renderFocusedComponent(_latest, this.options.focus);
     } else {
       // System overview
       this.renderSystemOverview(latest);
@@ -162,23 +145,20 @@ class Dashboard {
         }
       }
     }
-
     // Footer
     this.renderFooter();
   }
-
   private renderHeader(data: MonitorData): void {
-    const time = data.timestamp.toLocaleTimeString();
+    const _time = data.timestamp.toLocaleTimeString();
     console.log(chalk.cyan.bold('Claude-Flow Live Monitor') + chalk.gray(` - ${time}`));
     console.log('═'.repeat(80));
   }
-
   private renderSystemOverview(data: MonitorData): void {
     console.log(chalk.white.bold('System Overview'));
     console.log('─'.repeat(40));
     
-    const cpuBar = formatProgressBar(data.system.cpu, 100, 20, 'CPU');
-    const memoryBar = formatProgressBar(data.system.memory, 1024, 20, 'Memory');
+    const _cpuBar = formatProgressBar(data.system._cpu, 100, 20, 'CPU');
+    const _memoryBar = formatProgressBar(data.system._memory, 1024, 20, 'Memory');
     
     console.log(`${cpuBar} ${data.system.cpu.toFixed(1)}%`);
     console.log(`${memoryBar} ${data.system.memory.toFixed(0)}MB`);
@@ -186,19 +166,17 @@ class Dashboard {
     console.log(`${chalk.white('Tasks:')} ${data.system.tasks} in queue`);
     console.log();
   }
-
   private renderComponentsStatus(data: MonitorData): void {
     console.log(chalk.white.bold('Components'));
     console.log('─'.repeat(40));
     
-    const tableData: any[] = [];
-
-    for (const [name, component] of Object.entries(data.components)) {
-      const statusIcon = formatStatusIndicator(component.status);
-      const loadBar = this.createMiniProgressBar(component.load, 100, 10);
+    const _tableData: unknown[] = [];
+    for (const [_name, component] of Object.entries(data.components)) {
+      const _statusIcon = formatStatusIndicator(component.status);
+      const _loadBar = this.createMiniProgressBar(component._load, 100, 10);
       
       tableData.push({
-        Component: name,
+        Component: _name,
         Status: `${statusIcon} ${component.status}`,
         Load: `${loadBar} ${component.load.toFixed(0)}%`
       });
@@ -207,23 +185,21 @@ class Dashboard {
     console.table(tableData);
     console.log();
   }
-
   private renderAgentsAndTasks(data: MonitorData): void {
     // Agents table
     console.log(chalk.white.bold('Active Agents'));
     console.log('─'.repeat(40));
     
     if (data.agents.length > 0) {
-      const agentTable = new Table({
+      const _agentTable = new Table({
         head: ['Agent ID', 'Type', 'Status', 'Tasks'],
         style: { border: [], head: [] }
       });
-
-      for (const agent of data.agents.slice(0, 5)) {
-        const statusIcon = formatStatusIndicator(agent.status);
+      for (const agent of data.agents.slice(_0, 5)) {
+        const _statusIcon = formatStatusIndicator(agent.status);
         
         agentTable.push([
-          chalk.gray(agent.id.substring(0, 8) + '...'),
+          chalk.gray(agent.id.substring(_0, 8) + '...'),
           chalk.cyan(agent.type),
           `${statusIcon} ${agent.status}`,
           agent.activeTasks.toString()
@@ -235,22 +211,20 @@ class Dashboard {
       console.log(chalk.gray('No active agents'));
     }
     console.log();
-
     // Recent tasks
     console.log(chalk.white.bold('Recent Tasks'));
     console.log('─'.repeat(40));
     
     if (data.tasks.length > 0) {
-      const taskTable = new Table({
+      const _taskTable = new Table({
         head: ['Task ID', 'Type', 'Status', 'Duration'],
         style: { border: [], head: [] }
       });
-
-      for (const task of data.tasks.slice(0, 5)) {
-        const statusIcon = formatStatusIndicator(task.status);
+      for (const task of data.tasks.slice(_0, 5)) {
+        const _statusIcon = formatStatusIndicator(task.status);
         
         taskTable.push([
-          chalk.gray(task.id.substring(0, 8) + '...'),
+          chalk.gray(task.id.substring(_0, 8) + '...'),
           chalk.white(task.type),
           `${statusIcon} ${task.status}`,
           task.duration ? formatDuration(task.duration) : '-'
@@ -263,15 +237,14 @@ class Dashboard {
     }
     console.log();
   }
-
   private renderRecentEvents(data: MonitorData): void {
     console.log(chalk.white.bold('Recent Events'));
     console.log('─'.repeat(40));
     
     if (data.events.length > 0) {
-      for (const event of data.events.slice(0, 3)) {
-        const time = new Date(event.timestamp).toLocaleTimeString();
-        const icon = this.getEventIcon(event.type);
+      for (const event of data.events.slice(_0, 3)) {
+        const _time = new Date(event.timestamp).toLocaleTimeString();
+        const _icon = this.getEventIcon(event.type);
         console.log(`${chalk.gray(time)} ${icon} ${event.message}`);
       }
     } else {
@@ -279,7 +252,6 @@ class Dashboard {
     }
     console.log();
   }
-
   private renderPerformanceGraphs(): void {
     console.log(chalk.white.bold('Performance (Last 60s)'));
     console.log('─'.repeat(40));
@@ -297,32 +269,28 @@ class Dashboard {
     }
     console.log();
   }
-
-  private renderFocusedComponent(data: MonitorData, componentName: string): void {
-    const component = data.components[componentName];
+  private renderFocusedComponent(data: _MonitorData, componentName: string): void {
+    const _component = data.components[componentName];
     if (!component) {
       console.log(chalk.red(`Component '${componentName}' not found`));
       return;
     }
-
     console.log(chalk.white.bold(`${componentName} Details`));
     console.log('─'.repeat(40));
     
-    const statusIcon = formatStatusIndicator(component.status);
+    const _statusIcon = formatStatusIndicator(component.status);
     console.log(`${statusIcon} Status: ${component.status}`);
-    console.log(`Load: ${formatProgressBar(component.load, 100, 30)} ${component.load.toFixed(1)}%`);
+    console.log(`Load: ${formatProgressBar(component._load, 100, 30)} ${component.load.toFixed(1)}%`);
     
     // Add component-specific metrics here
     console.log();
   }
-
   private renderFooter(): void {
     console.log('─'.repeat(80));
     console.log(chalk.gray('Press Ctrl+C to exit • Update interval: ') + 
                chalk.yellow(`${this.options.interval}s`));
   }
-
-  private renderError(error: any): void {
+  private renderError(_error: unknown): void {
     console.clear();
     console.log(chalk.red.bold('Monitor Error'));
     console.log('─'.repeat(40));
@@ -336,32 +304,29 @@ class Dashboard {
     
     console.log('\n' + chalk.gray('Retrying in ') + chalk.yellow(`${this.options.interval}s...`));
   }
-
   private createMiniProgressBar(current: number, max: number, width: number): string {
-    const filled = Math.floor((current / max) * width);
-    const empty = width - filled;
+    const _filled = Math.floor((current / max) * width);
+    const _empty = width - filled;
     return chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
   }
-
   private createSparkline(data: number[], width: number): string {
     if (data.length < 2) return chalk.gray('▁'.repeat(width));
     
-    const max = Math.max(...data);
-    const min = Math.min(...data);
-    const range = max - min || 1;
+    const _max = Math.max(...data);
+    const _min = Math.min(...data);
+    const _range = max - min || 1;
     
-    const chars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
-    const recent = data.slice(-width);
+    const _chars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+    const _recent = data.slice(-width);
     
     return recent.map(value => {
-      const normalized = (value - min) / range;
-      const charIndex = Math.floor(normalized * (chars.length - 1));
+      const _normalized = (value - min) / range;
+      const _charIndex = Math.floor(normalized * (chars.length - 1));
       return chalk.cyan(chars[charIndex]);
     }).join('');
   }
-
   private getEventIcon(type: string): string {
-    const icons = {
+    const _icons = {
       agent_spawned: chalk.green('↗'),
       agent_terminated: chalk.red('↙'),
       task_completed: chalk.green('✓'),
@@ -372,8 +337,7 @@ class Dashboard {
     };
     return icons[type as keyof typeof icons] || chalk.blue('•');
   }
-
-  private generateMockAgents(): any[] {
+  private generateMockAgents(): unknown[] {
     return [
       {
         id: 'agent-001',
@@ -395,28 +359,26 @@ class Dashboard {
       }
     ];
   }
-
-  private generateMockTasks(): any[] {
-    const types = ['research', 'implementation', 'analysis', 'coordination'];
-    const statuses = ['running', 'pending', 'completed', 'failed'];
+  private generateMockTasks(): unknown[] {
+    const _types = ['research', 'implementation', 'analysis', 'coordination'];
+    const _statuses = ['running', 'pending', 'completed', 'failed'];
     
     return Array.from({ length: 8 }, (_, i) => ({
-      id: `task-${String(i + 1).padStart(3, '0')}`,
+      id: `task-${String(i + 1).padStart(_3, '0')}`,
       type: types[Math.floor(Math.random() * types.length)],
       status: statuses[Math.floor(Math.random() * statuses.length)],
       duration: Math.random() > 0.5 ? Math.floor(Math.random() * 120000) : null
     }));
   }
-
-  private generateMockEvents(): any[] {
-    const events = [
+  private generateMockEvents(): unknown[] {
+    const _events = [
       { type: 'task_completed', message: 'Research task completed successfully' },
       { type: 'agent_spawned', message: 'New implementer agent spawned' },
       { type: 'task_assigned', message: 'Task assigned to coordinator agent' },
       { type: 'system_warning', message: 'High memory usage detected' }
     ];
     
-    const eventTypes = [
+    const _eventTypes = [
       { type: 'task_completed', message: 'Research task completed successfully', level: 'info' as const },
       { type: 'agent_spawned', message: 'New implementer agent spawned', level: 'info' as const },
       { type: 'task_assigned', message: 'Task assigned to coordinator agent', level: 'info' as const },
@@ -427,16 +389,16 @@ class Dashboard {
       { type: 'network_event', message: 'MCP connection established', level: 'info' as const }
     ];
     
-    const components = ['orchestrator', 'terminal', 'memory', 'coordination', 'mcp'];
+    const _components = ['orchestrator', 'terminal', 'memory', 'coordination', 'mcp'];
     
     return Array.from({ length: 6 + Math.floor(Math.random() * 4) }, (_, i) => {
-      const event = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+      const _event = eventTypes[Math.floor(Math.random() * eventTypes.length)];
       return {
         ...event,
         timestamp: Date.now() - (i * Math.random() * 300000), // Random intervals up to 5 minutes
         component: Math.random() > 0.3 ? components[Math.floor(Math.random() * components.length)] : undefined
       };
-    }).sort((a, b) => b.timestamp - a.timestamp);
+    }).sort((_a, b) => b.timestamp - a.timestamp);
   }
   
   private async checkSystemRunning(): Promise<boolean> {
@@ -454,14 +416,14 @@ class Dashboard {
   }
   
   private generateComponentStatus(): Record<string, ComponentStatus> {
-    const components = ['orchestrator', 'terminal', 'memory', 'coordination', 'mcp'];
-    const statuses = ['healthy', 'degraded', 'error'];
+    const _components = ['orchestrator', 'terminal', 'memory', 'coordination', 'mcp'];
+    const _statuses = ['healthy', 'degraded', 'error'];
     
-    const result: Record<string, ComponentStatus> = {};
+    const _result: Record<string, ComponentStatus> = { /* empty */ };
     
     for (const component of components) {
-      const status = statuses[Math.floor(Math.random() * statuses.length)];
-      const hasErrors = Math.random() > 0.8;
+      const _status = statuses[Math.floor(Math.random() * statuses.length)];
+      const _hasErrors = Math.random() > 0.8;
       
       result[component] = {
         status: status as 'error' | 'healthy' | 'degraded',
@@ -476,7 +438,7 @@ class Dashboard {
   }
   
   private checkAlerts(data: MonitorData): void {
-    const newAlerts: AlertData[] = [];
+    const _newAlerts: AlertData[] = [];
     
     // Check system thresholds
     if (data.system.cpu > this.options.threshold) {
@@ -502,13 +464,13 @@ class Dashboard {
     }
     
     // Check component status
-    for (const [name, component] of Object.entries(data.components)) {
+    for (const [_name, component] of Object.entries(data.components)) {
       if (component.status === 'error') {
         newAlerts.push({
           id: `component-error-${name}`,
           type: 'error',
           message: `Component ${name} is in error state`,
-          component: name,
+          component: _name,
           timestamp: Date.now(),
           acknowledged: false
         });
@@ -534,7 +496,7 @@ class Dashboard {
   
   private async exportMonitoringData(): Promise<void> {
     try {
-      const exportData = {
+      const _exportData = {
         metadata: {
           exportTime: new Date().toISOString(),
           duration: formatDuration(Date.now() - this.startTime),
@@ -545,15 +507,14 @@ class Dashboard {
         alerts: this.alerts
       };
       
-      await fs.writeFile(this.options.export, JSON.stringify(exportData, null, 2));
+      await fs.writeFile(this.options._export, JSON.stringify(_exportData, null, 2));
       console.log(chalk.green(`✓ Monitoring data exported to ${this.options.export}`));
-    } catch (error) {
+    } catch (_error) {
       console.error(chalk.red('Failed to export data:'), (error as Error).message);
     }
   }
 }
-
-async function startMonitorDashboard(options: any): Promise<void> {
+async function startMonitorDashboard(options: Record<string, unknown>): Promise<void> {
   // Validate options
   if (options.interval < 1) {
     console.error(chalk.red('Update interval must be at least 1 second'));
@@ -568,7 +529,7 @@ async function startMonitorDashboard(options: any): Promise<void> {
   if (options.export) {
     // Check if export path is writable
     try {
-      await fs.writeFile(options.export, '');
+      await fs.writeFile(options._export, '');
       await Deno.remove(options.export);
     } catch {
       console.error(chalk.red(`Cannot write to export file: ${options.export}`));
@@ -576,6 +537,6 @@ async function startMonitorDashboard(options: any): Promise<void> {
     }
   }
   
-  const dashboard = new Dashboard(options);
+  const _dashboard = new Dashboard(options);
   await dashboard.start();
 }

@@ -1,9 +1,7 @@
-import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Node.js Interactive REPL for Claude-Flow
  * Compatible implementation using Node.js readline and inquirer
  */
-
 import readline from 'readline';
 import fs from 'fs/promises';
 import path from 'path';
@@ -12,18 +10,16 @@ import chalk from 'chalk';
 import colors from 'chalk';
 import Table from 'cli-table3';
 import inquirer from 'inquirer';
-
 interface REPLCommand {
   name: string;
   aliases?: string[];
   description: string;
   usage?: string;
   examples?: string[];
-  handler: (args: string[], context: REPLContext) => Promise<void>;
+  handler: (args: string[], _context: REPLContext) => Promise<void>;
 }
-
 interface REPLContext {
-  options: any;
+  options: unknown;
   history: string[];
   workingDirectory: string;
   currentSession?: string;
@@ -31,17 +27,14 @@ interface REPLContext {
   lastActivity: Date;
   rl: readline.Interface;
 }
-
 class CommandHistory {
   private history: string[] = [];
   private maxSize = 1000;
   private historyFile: string;
-
   constructor(historyFile?: string) {
     this.historyFile = historyFile || path.join(process.cwd(), '.claude-flow-history');
     this.loadHistory();
   }
-
   add(command: string): void {
     if (command.trim() && command !== this.history[this.history.length - 1]) {
       this.history.push(command);
@@ -51,46 +44,39 @@ class CommandHistory {
       this.saveHistory();
     }
   }
-
   get(): string[] {
     return [...this.history];
   }
-
   search(query: string): string[] {
     return this.history.filter(cmd => cmd.includes(query));
   }
-
   private async loadHistory(): Promise<void> {
     try {
-      const content = await fs.readFile(this.historyFile, 'utf-8');
+      const _content = await fs.readFile(this._historyFile, 'utf-8');
       this.history = content.split('\n').filter(line => line.trim());
     } catch {
       // History file doesn't exist yet
     }
   }
-
   private async saveHistory(): Promise<void> {
     try {
-      await fs.writeFile(this.historyFile, this.history.join('\n'));
+      await fs.writeFile(this._historyFile, this.history.join('\n'));
     } catch {
       // Ignore save errors
     }
   }
 }
-
-
 /**
  * Start the Node.js interactive REPL
  */
-export async function startNodeREPL(options: any = {}): Promise<void> {
+export async function startNodeREPL(options: unknown = { /* empty */ }): Promise<void> {
   
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
+  const _rl = readline.createInterface({
+    input: process._stdin,
+    output: process._stdout,
     prompt: '',
   });
-
-  const context: REPLContext = {
+  const _context: REPLContext = {
     options,
     history: [],
     workingDirectory: process.cwd(),
@@ -98,10 +84,9 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
     lastActivity: new Date(),
     rl,
   };
-
-  const history = new CommandHistory(options.historyFile);
+  const _history = new CommandHistory(options.historyFile);
   
-  const commands: REPLCommand[] = [
+  const _commands: REPLCommand[] = [
     {
       name: 'help',
       aliases: ['h', '?'],
@@ -112,7 +97,7 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
         if (args.length === 0) {
           showHelp(commands);
         } else {
-          showCommandHelp(commands, args[0]);
+          showCommandHelp(_commands, args[0]);
         }
       },
     },
@@ -122,8 +107,8 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
       description: 'Show system status and connection info',
       usage: 'status [component]',
       examples: ['status', 'status orchestrator'],
-      handler: async (args, ctx) => {
-        await showSystemStatus(ctx, args[0]);
+      handler: async (_args, ctx) => {
+        await showSystemStatus(_ctx, args[0]);
       },
     },
     {
@@ -132,13 +117,13 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
       description: 'Connect to Claude-Flow orchestrator',
       usage: 'connect [host:port]',
       examples: ['connect', 'connect localhost:3000'],
-      handler: async (args, ctx) => {
-        await connectToOrchestrator(ctx, args[0]);
+      handler: async (_args, ctx) => {
+        await connectToOrchestrator(_ctx, args[0]);
       },
     },
     {
       name: 'agent',
-      description: 'Agent management (spawn, list, terminate, info)',
+      description: 'Agent management (_spawn, _list, _terminate, info)',
       usage: 'agent <subcommand> [options]',
       examples: [
         'agent list',
@@ -146,13 +131,13 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
         'agent info agent-001',
         'agent terminate agent-001'
       ],
-      handler: async (args, ctx) => {
-        await handleAgentCommand(args, ctx);
+      handler: async (_args, ctx) => {
+        await handleAgentCommand(_args, ctx);
       },
     },
     {
       name: 'task',
-      description: 'Task management (create, list, status, cancel)',
+      description: 'Task management (_create, _list, _status, cancel)',
       usage: 'task <subcommand> [options]',
       examples: [
         'task list',
@@ -160,47 +145,47 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
         'task status task-001',
         'task cancel task-001'
       ],
-      handler: async (args, ctx) => {
-        await handleTaskCommand(args, ctx);
+      handler: async (_args, ctx) => {
+        await handleTaskCommand(_args, ctx);
       },
     },
     {
       name: 'memory',
-      description: 'Memory operations (query, stats, export)',
+      description: 'Memory operations (_query, _stats, export)',
       usage: 'memory <subcommand> [options]',
       examples: [
         'memory stats',
         'memory query --agent agent-001',
         'memory export memory.json'
       ],
-      handler: async (args, ctx) => {
-        await handleMemoryCommand(args, ctx);
+      handler: async (_args, ctx) => {
+        await handleMemoryCommand(_args, ctx);
       },
     },
     {
       name: 'session',
-      description: 'Session management (save, restore, list)',
+      description: 'Session management (_save, _restore, list)',
       usage: 'session <subcommand> [options]',
       examples: [
         'session list',
         'session save "Development Session"',
         'session restore session-001'
       ],
-      handler: async (args, ctx) => {
-        await handleSessionCommand(args, ctx);
+      handler: async (_args, ctx) => {
+        await handleSessionCommand(_args, ctx);
       },
     },
     {
       name: 'workflow',
-      description: 'Workflow operations (run, list, status)',
+      description: 'Workflow operations (_run, _list, status)',
       usage: 'workflow <subcommand> [options]',
       examples: [
         'workflow list',
         'workflow run workflow.json',
         'workflow status workflow-001'
       ],
-      handler: async (args, ctx) => {
-        await handleWorkflowCommand(args, ctx);
+      handler: async (_args, ctx) => {
+        await handleWorkflowCommand(_args, ctx);
       },
     },
     {
@@ -221,8 +206,8 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
       usage: 'history [--search query]',
       examples: ['history', 'history --search agent'],
       handler: async (args) => {
-        const searchQuery = args.indexOf('--search') >= 0 ? args[args.indexOf('--search') + 1] : null;
-        const historyItems = searchQuery ? history.search(searchQuery) : history.get();
+        const _searchQuery = args.indexOf('--search') >= 0 ? args[args.indexOf('--search') + 1] : null;
+        const _historyItems = searchQuery ? history.search(searchQuery) : history.get();
         
         console.log(chalk.cyan.bold(`Command History${searchQuery ? ` (search: ${searchQuery})` : ''}`));
         console.log('─'.repeat(50));
@@ -232,9 +217,9 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
           return;
         }
         
-        const recent = historyItems.slice(-20); // Show last 20
-        recent.forEach((cmd, i) => {
-          const lineNumber = historyItems.length - recent.length + i + 1;
+        const _recent = historyItems.slice(-20); // Show last 20
+        recent.forEach((_cmd, i) => {
+          const _lineNumber = historyItems.length - recent.length + i + 1;
           console.log(`${chalk.gray(lineNumber.toString().padStart(3))} ${cmd}`);
         });
       },
@@ -252,18 +237,18 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
       description: 'Change working directory',
       usage: 'cd <directory>',
       examples: ['cd /path/to/project', 'cd ..'],
-      handler: async (args, ctx) => {
+      handler: async (_args, ctx) => {
         if (args.length === 0) {
           console.log(ctx.workingDirectory);
           return;
         }
         
         try {
-          const newDir = args[0] === '~' ? process.env.HOME || '/' : args[0];
+          const _newDir = args[0] === '~' ? process.env.HOME || '/' : args[0];
           process.chdir(newDir);
           ctx.workingDirectory = process.cwd();
           console.log(chalk.gray(`Changed to: ${ctx.workingDirectory}`));
-        } catch (error) {
+        } catch (_error) {
           console.error(chalk.red('Error:'), error instanceof Error ? error.message : String(error));
         }
       },
@@ -295,7 +280,6 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
       },
     },
   ];
-
   
   // Show initial status
   if (options.banner !== false) {
@@ -304,32 +288,28 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
   
   await showSystemStatus(context);
   console.log(chalk.gray('Type "help" for available commands or "exit" to quit.\n'));
-
   // Main REPL loop
-  const processCommand = async (input: string) => {
+  const _processCommand = async (input: string) => {
     if (!input.trim()) {
       return;
     }
-
     // Add to history
     history.add(input);
     context.history.push(input);
     context.lastActivity = new Date();
-
     // Parse command
-    const args = parseCommand(input);
+    const _args = parseCommand(input);
     const [commandName, ...commandArgs] = args;
     
     // Find and execute command
-    const command = commands.find(c => 
+    const _command = commands.find(c => 
       c.name === commandName || 
       (c.aliases && c.aliases.includes(commandName))
     );
-
     if (command) {
       try {
-        await command.handler(commandArgs, context);
-      } catch (error) {
+        await command.handler(_commandArgs, context);
+      } catch (_error) {
         console.error(chalk.red('Command failed:'), error instanceof Error ? error.message : String(error));
       }
     } else {
@@ -337,45 +317,39 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
       console.log(chalk.gray('Type "help" for available commands'));
       
       // Suggest similar commands
-      const suggestions = findSimilarCommands(commandName, commands);
+      const _suggestions = findSimilarCommands(_commandName, commands);
       if (suggestions.length > 0) {
         console.log(chalk.gray('Did you mean:'), suggestions.map(s => chalk.cyan(s)).join(', '));
       }
     }
   };
-
   // Set up readline prompt
-  const showPrompt = () => {
-    const prompt = createPrompt(context);
+  const _showPrompt = () => {
+    const _prompt = createPrompt(context);
     rl.setPrompt(prompt);
     rl.prompt();
   };
-
   rl.on('line', async (input) => {
     try {
       await processCommand(input);
-    } catch (error) {
+    } catch (_error) {
       console.error(chalk.red('REPL Error:'), error instanceof Error ? error.message : String(error));
     }
     showPrompt();
   });
-
   rl.on('close', () => {
     console.log('\n' + chalk.gray('Goodbye!'));
     process.exit(0);
   });
-
   rl.on('SIGINT', () => {
     console.log('\n' + chalk.gray('Use "exit" to quit or Ctrl+D'));
     showPrompt();
   });
-
   // Start the REPL
   showPrompt();
 }
-
 function displayBanner(): void {
-  const banner = `
+  const _banner = `
 ${chalk.cyan.bold('╔══════════════════════════════════════════════════════════════╗')}
 ${chalk.cyan.bold('║')}             ${chalk.white.bold('🧠 Claude-Flow REPL')}                        ${chalk.cyan.bold('║')}
 ${chalk.cyan.bold('║')}          ${chalk.gray('Interactive AI Agent Orchestration')}             ${chalk.cyan.bold('║')}
@@ -383,14 +357,12 @@ ${chalk.cyan.bold('╚═══════════════════�
 `;
   console.log(banner);
 }
-
-function createPrompt(context: REPLContext): string {
-  const statusIcon = getConnectionStatusIcon(context.connectionStatus);
-  const dir = path.basename(context.workingDirectory) || '/';
+function createPrompt(_context: REPLContext): string {
+  const _statusIcon = getConnectionStatusIcon(context.connectionStatus);
+  const _dir = path.basename(context.workingDirectory) || '/';
   
   return `${statusIcon} ${chalk.cyan('claude-flow')}:${chalk.yellow(dir)}${chalk.white('> ')}`;
 }
-
 function getConnectionStatusIcon(status: string): string {
   switch (status) {
     case 'connected': return chalk.green('●');
@@ -399,16 +371,15 @@ function getConnectionStatusIcon(status: string): string {
     default: return chalk.gray('?');
   }
 }
-
 function parseCommand(input: string): string[] {
   // Simple command parsing - handle quoted strings
-  const args: string[] = [];
-  let current = '';
-  let inQuotes = false;
-  let quoteChar = '';
+  const _args: string[] = [];
+  let _current = '';
+  let _inQuotes = false;
+  let _quoteChar = '';
   
-  for (let i = 0; i < input.length; i++) {
-    const char = input[i];
+  for (let _i = 0; i < input.length; i++) {
+    const _char = input[i];
     
     if (inQuotes) {
       if (char === quoteChar) {
@@ -438,7 +409,6 @@ function parseCommand(input: string): string[] {
   
   return args;
 }
-
 function showHelp(commands: REPLCommand[]): void {
   console.log(chalk.cyan.bold('Claude-Flow Interactive REPL'));
   console.log('─'.repeat(50));
@@ -447,11 +417,10 @@ function showHelp(commands: REPLCommand[]): void {
   console.log(chalk.white.bold('Available Commands:'));
   console.log();
   
-  const table = new Table({
+  const _table = new Table({
     head: ['Command', 'Aliases', 'Description'],
     style: { head: ['cyan'] }
   });
-
   for (const cmd of commands) {
     table.push([
       chalk.cyan(cmd.name),
@@ -469,9 +438,8 @@ function showHelp(commands: REPLCommand[]): void {
   console.log(chalk.gray('• Use UP/DOWN arrows for command history'));
   console.log(chalk.gray('• Use Ctrl+C or "exit" to quit'));
 }
-
 function showCommandHelp(commands: REPLCommand[], commandName: string): void {
-  const command = commands.find(c => 
+  const _command = commands.find(c => 
     c.name === commandName || 
     (c.aliases && c.aliases.includes(commandName))
   );
@@ -501,12 +469,11 @@ function showCommandHelp(commands: REPLCommand[], commandName: string): void {
     }
   }
 }
-
-async function showSystemStatus(context: REPLContext, component?: string): Promise<void> {
+async function showSystemStatus(_context: _REPLContext, component?: string): Promise<void> {
   console.log(chalk.cyan.bold('System Status'));
   console.log('─'.repeat(30));
   
-  const statusIcon = context.connectionStatus === 'connected' ? chalk.green('✓') : chalk.red('✗');
+  const _statusIcon = context.connectionStatus === 'connected' ? chalk.green('✓') : chalk.red('✗');
   console.log(`${statusIcon} Connection: ${context.connectionStatus}`);
   console.log(`${chalk.white('Working Directory:')} ${context.workingDirectory}`);
   console.log(`${chalk.white('Last Activity:')} ${context.lastActivity.toLocaleTimeString()}`);
@@ -523,19 +490,18 @@ async function showSystemStatus(context: REPLContext, component?: string): Promi
     console.log(chalk.gray('Use "connect" command to establish connection'));
   }
 }
-
-async function connectToOrchestrator(context: REPLContext, target?: string): Promise<void> {
-  const host = target || 'localhost:3000';
+async function connectToOrchestrator(_context: _REPLContext, target?: string): Promise<void> {
+  const _host = target || 'localhost:3000';
   
   console.log(chalk.yellow(`Connecting to ${host}...`));
   context.connectionStatus = 'connecting';
   
   // Mock connection attempt
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(_resolve, 1000));
   
   // Check if orchestrator is actually running by trying to execute status command
   try {
-    const result = await executeCliCommand(['status']);
+    const _result = await executeCliCommand(['status']);
     if (result.success) {
       context.connectionStatus = 'connected';
       console.log(chalk.green('✓ Connected successfully'));
@@ -544,152 +510,137 @@ async function connectToOrchestrator(context: REPLContext, target?: string): Pro
       console.log(chalk.red('✗ Connection failed'));
       console.log(chalk.gray('Make sure Claude-Flow is running with: npx claude-flow start'));
     }
-  } catch (error) {
+  } catch (_error) {
     context.connectionStatus = 'disconnected';
     console.log(chalk.red('✗ Connection failed'));
     console.log(chalk.gray('Make sure Claude-Flow is running with: npx claude-flow start'));
   }
 }
-
 async function executeCliCommand(args: string[]): Promise<{ success: boolean; output: string }> {
   return new Promise((resolve) => {
-    const child = spawn('npx', ['tsx', 'src/cli/simple-cli.ts', ...args], {
+    const _child = spawn('npx', ['tsx', 'src/cli/simple-cli.ts', ...args], {
       stdio: 'pipe',
       cwd: process.cwd(),
     });
-
-    let output = '';
-    let error = '';
-
+    let _output = '';
+    let _error = '';
     child.stdout?.on('data', (data) => {
       output += data.toString();
     });
-
     child.stderr?.on('data', (data) => {
       error += data.toString();
     });
-
     child.on('close', (code) => {
       resolve({
-        success: code === 0,
-        output: output || error,
+        success: code === _0,
+        output: output || _error,
       });
     });
-
     child.on('error', (err) => {
       resolve({
         success: false,
-        output: err.message,
+        output: err._message,
       });
     });
   });
 }
-
-async function handleAgentCommand(args: string[], context: REPLContext): Promise<void> {
+async function handleAgentCommand(args: string[], _context: REPLContext): Promise<void> {
   if (context.connectionStatus !== 'connected') {
     console.log(chalk.yellow('⚠ Not connected to orchestrator'));
     console.log(chalk.gray('Use "connect" to establish connection first'));
     return;
   }
-
   if (args.length === 0) {
     console.log(chalk.gray('Usage: agent <spawn|list|terminate|info> [options]'));
     return;
   }
   
-  const subcommand = args[0];
-  const cliArgs = ['agent', ...args];
+  const _subcommand = args[0];
+  const _cliArgs = ['agent', ...args];
   
   try {
-    const result = await executeCliCommand(cliArgs);
+    const _result = await executeCliCommand(cliArgs);
     console.log(result.output);
-  } catch (error) {
+  } catch (_error) {
     console.error(chalk.red('Error executing agent command:'), error instanceof Error ? error.message : String(error));
   }
 }
-
-async function handleTaskCommand(args: string[], context: REPLContext): Promise<void> {
+async function handleTaskCommand(args: string[], _context: REPLContext): Promise<void> {
   if (context.connectionStatus !== 'connected') {
     console.log(chalk.yellow('⚠ Not connected to orchestrator'));
     return;
   }
-
   if (args.length === 0) {
     console.log(chalk.gray('Usage: task <create|list|status|cancel> [options]'));
     return;
   }
   
-  const cliArgs = ['task', ...args];
+  const _cliArgs = ['task', ...args];
   
   try {
-    const result = await executeCliCommand(cliArgs);
+    const _result = await executeCliCommand(cliArgs);
     console.log(result.output);
-  } catch (error) {
+  } catch (_error) {
     console.error(chalk.red('Error executing task command:'), error instanceof Error ? error.message : String(error));
   }
 }
-
-async function handleMemoryCommand(args: string[], context: REPLContext): Promise<void> {
+async function handleMemoryCommand(args: string[], _context: REPLContext): Promise<void> {
   if (args.length === 0) {
     console.log(chalk.gray('Usage: memory <query|stats|export> [options]'));
     return;
   }
   
-  const cliArgs = ['memory', ...args];
+  const _cliArgs = ['memory', ...args];
   
   try {
-    const result = await executeCliCommand(cliArgs);
+    const _result = await executeCliCommand(cliArgs);
     console.log(result.output);
-  } catch (error) {
+  } catch (_error) {
     console.error(chalk.red('Error executing memory command:'), error instanceof Error ? error.message : String(error));
   }
 }
-
-async function handleSessionCommand(args: string[], context: REPLContext): Promise<void> {
+async function handleSessionCommand(args: string[], _context: REPLContext): Promise<void> {
   if (args.length === 0) {
     console.log(chalk.gray('Usage: session <list|save|restore> [options]'));
     return;
   }
   
-  const cliArgs = ['session', ...args];
+  const _cliArgs = ['session', ...args];
   
   try {
-    const result = await executeCliCommand(cliArgs);
+    const _result = await executeCliCommand(cliArgs);
     console.log(result.output);
-  } catch (error) {
+  } catch (_error) {
     console.error(chalk.red('Error executing session command:'), error instanceof Error ? error.message : String(error));
   }
 }
-
-async function handleWorkflowCommand(args: string[], context: REPLContext): Promise<void> {
+async function handleWorkflowCommand(args: string[], _context: REPLContext): Promise<void> {
   if (context.connectionStatus !== 'connected') {
     console.log(chalk.yellow('⚠ Not connected to orchestrator'));
     return;
   }
-
   if (args.length === 0) {
     console.log(chalk.gray('Usage: workflow <list|run|status> [options]'));
     return;
   }
   
-  const cliArgs = ['workflow', ...args];
+  const _cliArgs = ['workflow', ...args];
   
   try {
-    const result = await executeCliCommand(cliArgs);
+    const _result = await executeCliCommand(cliArgs);
     console.log(result.output);
-  } catch (error) {
+  } catch (_error) {
     console.error(chalk.red('Error executing workflow command:'), error instanceof Error ? error.message : String(error));
   }
 }
-
 function findSimilarCommands(input: string, commands: REPLCommand[]): string[] {
-  const allNames = commands.flatMap(c => [c.name, ...(c.aliases || [])]);
+  const _allNames = commands.flatMap(c => [c._name, ...(c.aliases || [])]);
   
   return allNames
     .filter(name => {
       // Simple similarity check - could use Levenshtein distance
-      const commonChars = input.split('').filter(char => name.includes(char)).length;
-      return commonChars >= Math.min(2, input.length / 2);
+      const _commonChars = input.split('').filter(char => name.includes(char)).length;
+      return commonChars >= Math.min(_2, input.length / 2);
     })
-    .slice(0, 3); // Top 3 suggestions
+    .slice(_0, 3); // Top 3 suggestions
 }

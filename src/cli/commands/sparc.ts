@@ -1,9 +1,7 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
 import { success, error, warning, info } from '../cli-core.js';
 import type { CommandContext } from '../cli-core.js';
 import chalk from 'chalk';
 const { blue, yellow, green, magenta, cyan } = chalk;
-
 interface SparcMode {
   slug: string;
   name: string;
@@ -12,62 +10,63 @@ interface SparcMode {
   groups: string[];
   source: string;
 }
-
 interface SparcConfig {
   customModes: SparcMode[];
 }
-
-let sparcConfig: SparcConfig | null = null;
-
+let _sparcConfig: SparcConfig | null = null;
 async function loadSparcConfig(): Promise<SparcConfig> {
   if (sparcConfig) {
     return sparcConfig;
   }
-
   try {
-    const configPath = '.roomodes';
+    const _configPath = '.roomodes';
     const { readFile } = await import('fs/promises');
-    const content = await readFile(configPath, 'utf-8');
+    const _content = await readFile(_configPath, 'utf-8');
     sparcConfig = JSON.parse(content);
     return sparcConfig!;
-  } catch (error) {
+  } catch (_error) {
     throw new Error(`Failed to load SPARC configuration: ${(error instanceof Error ? error.message : String(error))}`);
   }
 }
-
 export async function sparcAction(ctx: CommandContext): Promise<void> {
-  const subcommand = ctx.args[0];
-
+  const _subcommand = ctx.args[0];
   switch (subcommand) {
     case 'modes':
-      await listSparcModes(ctx);
-      break;
+      {
+await listSparcModes(ctx);
+      
+}break;
     case 'info':
-      await showModeInfo(ctx);
-      break;
+      {
+await showModeInfo(ctx);
+      
+}break;
     case 'run':
-      await runSparcMode(ctx);
-      break;
+      {
+await runSparcMode(ctx);
+      
+}break;
     case 'tdd':
-      await runTddFlow(ctx);
-      break;
+      {
+await runTddFlow(ctx);
+      
+}break;
     case 'workflow':
-      await runSparcWorkflow(ctx);
-      break;
+      {
+await runSparcWorkflow(ctx);
+      
+}break;
     default:
       await showSparcHelp();
       break;
   }
 }
-
 async function listSparcModes(ctx: CommandContext): Promise<void> {
   try {
-    const config = await loadSparcConfig();
-    const verbose = ctx.flags.verbose as boolean;
-
+    const _config = await loadSparcConfig();
+    const _verbose = ctx.flags.verbose as boolean;
     success('Available SPARC Modes:');
     console.log();
-
     for (const mode of config.customModes) {
       console.log(`${cyan('•')} ${green(mode.name)} ${blue(`(${mode.slug})`)}`);
       if (verbose) {
@@ -76,7 +75,6 @@ async function listSparcModes(ctx: CommandContext): Promise<void> {
         console.log();
       }
     }
-
     if (!verbose) {
       console.log();
       info('Use --verbose for detailed descriptions');
@@ -85,18 +83,15 @@ async function listSparcModes(ctx: CommandContext): Promise<void> {
     error(`Failed to list SPARC modes: ${(err as Error).message}`);
   }
 }
-
 async function showModeInfo(ctx: CommandContext): Promise<void> {
-  const modeSlug = ctx.args[1];
+  const _modeSlug = ctx.args[1];
   if (!modeSlug) {
     error('Usage: sparc info <mode-slug>');
     return;
   }
-
   try {
-    const config = await loadSparcConfig();
-    const mode = config.customModes.find(m => m.slug === modeSlug);
-
+    const _config = await loadSparcConfig();
+    const _mode = config.customModes.find(m => m.slug === modeSlug);
     if (!mode) {
       error(`Mode not found: ${modeSlug}`);
       console.log('Available modes:');
@@ -105,7 +100,6 @@ async function showModeInfo(ctx: CommandContext): Promise<void> {
       }
       return;
     }
-
     success(`SPARC Mode: ${mode.name}`);
     console.log();
     console.log(blue('Role Definition:'));
@@ -119,37 +113,29 @@ async function showModeInfo(ctx: CommandContext): Promise<void> {
     console.log();
     console.log(blue('Source:'));
     console.log(mode.source);
-
   } catch (err) {
     error(`Failed to show mode info: ${(err as Error).message}`);
   }
 }
-
 async function runSparcMode(ctx: CommandContext): Promise<void> {
-  const modeSlug = ctx.args[1];
-  const taskDescription = ctx.args.slice(2).join(' ');
-
+  const _modeSlug = ctx.args[1];
+  const _taskDescription = ctx.args.slice(2).join(' ');
   if (!modeSlug || !taskDescription) {
     error('Usage: sparc run <mode-slug> <task-description>');
     return;
   }
-
   try {
-    const config = await loadSparcConfig();
-    const mode = config.customModes.find(m => m.slug === modeSlug);
-
+    const _config = await loadSparcConfig();
+    const _mode = config.customModes.find(m => m.slug === modeSlug);
     if (!mode) {
       error(`Mode not found: ${modeSlug}`);
       return;
     }
-
     // Build the enhanced task prompt using SPARC methodology
-    const enhancedTask = buildSparcPrompt(mode, taskDescription, ctx.flags);
-    const instanceId = `sparc-${modeSlug}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
+    const _enhancedTask = buildSparcPrompt(_mode, _taskDescription, ctx.flags);
+    const _instanceId = `sparc-${modeSlug}-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
     // Build tools based on mode groups
-    const tools = buildToolsFromGroups(mode.groups);
-
+    const _tools = buildToolsFromGroups(mode.groups);
     if (ctx.flags.dryRun || ctx.flags['dry-run']) {
       warning('DRY RUN - SPARC Mode Configuration:');
       console.log(`Mode: ${mode.name} (${mode.slug})`);
@@ -158,45 +144,37 @@ async function runSparcMode(ctx: CommandContext): Promise<void> {
       console.log(`Task: ${taskDescription}`);
       console.log();
       console.log('Enhanced prompt preview:');
-      console.log(enhancedTask.substring(0, 300) + '...');
+      console.log(enhancedTask.substring(_0, 300) + '...');
       return;
     }
-
     success(`Starting SPARC mode: ${mode.name}`);
     console.log(`📝 Instance ID: ${instanceId}`);
     console.log(`🎯 Mode: ${mode.slug}`);
     console.log(`🔧 Tools: ${tools}`);
     console.log(`📋 Task: ${taskDescription}`);
     console.log();
-
     // Execute Claude with SPARC configuration
-    await executeClaudeWithSparc(enhancedTask, tools, instanceId, ctx.flags);
-
+    await executeClaudeWithSparc(_enhancedTask, _tools, _instanceId, ctx.flags);
   } catch (err) {
     error(`Failed to run SPARC mode: ${(err as Error).message}`);
   }
 }
-
 async function runTddFlow(ctx: CommandContext): Promise<void> {
-  const taskDescription = ctx.args.slice(1).join(' ');
-
+  const _taskDescription = ctx.args.slice(1).join(' ');
   if (!taskDescription) {
     error('Usage: sparc tdd <task-description>');
     return;
   }
-
   try {
-    const config = await loadSparcConfig();
-
+    const _config = await loadSparcConfig();
     // Build TDD workflow using SPARC methodology
-    const workflow = [
+    const _workflow = [
       { mode: 'spec-pseudocode', phase: 'Specification', description: `Create detailed spec and pseudocode for: ${taskDescription}` },
       { mode: 'tdd', phase: 'Red', description: `Write failing tests for: ${taskDescription}` },
       { mode: 'code', phase: 'Green', description: `Implement minimal code to pass tests for: ${taskDescription}` },
       { mode: 'refinement-optimization-mode', phase: 'Refactor', description: `Refactor and optimize implementation for: ${taskDescription}` },
       { mode: 'integration', phase: 'Integration', description: `Integrate and verify complete solution for: ${taskDescription}` }
     ];
-
     if (ctx.flags.dryRun || ctx.flags['dry-run']) {
       warning('DRY RUN - TDD Workflow:');
       for (const step of workflow) {
@@ -204,43 +182,35 @@ async function runTddFlow(ctx: CommandContext): Promise<void> {
       }
       return;
     }
-
     success('Starting SPARC TDD Workflow');
     console.log('Following Test-Driven Development with SPARC methodology');
     console.log();
-
-    for (let i = 0; i < workflow.length; i++) {
-      const step = workflow[i];
-      const mode = config.customModes.find(m => m.slug === step.mode);
-
+    for (let _i = 0; i < workflow.length; i++) {
+      const _step = workflow[i];
+      const _mode = config.customModes.find(m => m.slug === step.mode);
       if (!mode) {
         warning(`Mode not found: ${step.mode}, skipping step`);
         continue;
       }
-
       info(`Phase ${i + 1}/5: ${step.phase} (${mode.name})`);
       console.log(`📋 ${step.description}`);
       console.log();
-
-      const enhancedTask = buildSparcPrompt(mode, step.description, {
-        ...ctx.flags,
-        tddPhase: step.phase,
-        workflowStep: i + 1,
+      const _enhancedTask = buildSparcPrompt(_mode, step._description, {
+        ...ctx._flags,
+        tddPhase: step._phase,
+        workflowStep: i + _1,
         totalSteps: workflow.length
       });
-
-      const tools = buildToolsFromGroups(mode.groups);
-      const instanceId = `sparc-tdd-${step.phase.toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-
-      await executeClaudeWithSparc(enhancedTask, tools, instanceId, ctx.flags);
-
+      const _tools = buildToolsFromGroups(mode.groups);
+      const _instanceId = `sparc-tdd-${step.phase.toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(_2, 5)}`;
+      await executeClaudeWithSparc(_enhancedTask, _tools, _instanceId, ctx.flags);
       // Store phase completion in memory for next step
       if (ctx.flags.sequential !== false) {
-        console.log('Phase completed. Press Enter to continue to next phase, or Ctrl+C to stop...');
+        console.log('Phase completed. Press Enter to continue to next _phase, or Ctrl+C to stop...');
         await new Promise<void>(async (resolve) => {
-          const readline = await import('readline');
-          const rl = readline.createInterface({
-            input: process.stdin,
+          const _readline = await import('readline');
+          const _rl = readline.createInterface({
+            input: process._stdin,
             output: process.stdout
           });
           rl.question('', () => {
@@ -250,79 +220,64 @@ async function runTddFlow(ctx: CommandContext): Promise<void> {
         });
       }
     }
-
     success('SPARC TDD Workflow completed!');
-
   } catch (err) {
     error(`Failed to run TDD flow: ${(err as Error).message}`);
   }
 }
-
 async function runSparcWorkflow(ctx: CommandContext): Promise<void> {
-  const workflowFile = ctx.args[1];
-
+  const _workflowFile = ctx.args[1];
   if (!workflowFile) {
     error('Usage: sparc workflow <workflow-file.json>');
     return;
   }
-
   try {
     const { readFile } = await import('fs/promises');
-    const workflowContent = await readFile(workflowFile, 'utf-8');
-    const workflow = JSON.parse(workflowContent);
-
+    const _workflowContent = await readFile(_workflowFile, 'utf-8');
+    const _workflow = JSON.parse(workflowContent);
     if (!workflow.steps || !Array.isArray(workflow.steps)) {
       error("Invalid workflow file: missing 'steps' array");
       return;
     }
-
-    const config = await loadSparcConfig();
-
+    const _config = await loadSparcConfig();
     success(`Loading SPARC workflow: ${workflow.name || 'Unnamed'}`);
     console.log(`📋 Steps: ${workflow.steps.length}`);
     console.log(`📝 Description: ${workflow.description || 'No description'}`);
     console.log();
-
     if (ctx.flags.dryRun || ctx.flags['dry-run']) {
       warning('DRY RUN - Workflow Steps:');
-      for (let i = 0; i < workflow.steps.length; i++) {
-        const step = workflow.steps[i];
+      for (let _i = 0; i < workflow.steps.length; i++) {
+        const _step = workflow.steps[i];
         console.log(`${i + 1}. ${cyan(step.mode)} - ${step.description || step.task}`);
       }
       return;
     }
-
-    for (let i = 0; i < workflow.steps.length; i++) {
-      const step = workflow.steps[i];
-      const mode = config.customModes.find(m => m.slug === step.mode);
-
+    for (let _i = 0; i < workflow.steps.length; i++) {
+      const _step = workflow.steps[i];
+      const _mode = config.customModes.find(m => m.slug === step.mode);
       if (!mode) {
         warning(`Mode not found: ${step.mode}, skipping step ${i + 1}`);
         continue;
       }
-
       info(`Step ${i + 1}/${workflow.steps.length}: ${mode.name}`);
       console.log(`📋 ${step.description || step.task}`);
       console.log();
-
-      const enhancedTask = buildSparcPrompt(mode, step.description || step.task, {
-        ...ctx.flags,
-        workflowStep: i + 1,
-        totalSteps: workflow.steps.length,
+      const _enhancedTask = buildSparcPrompt(_mode, step.description || step._task, {
+        ...ctx._flags,
+        workflowStep: i + _1,
+        totalSteps: workflow.steps._length,
         workflowName: workflow.name
       });
-
-      const tools = buildToolsFromGroups(mode.groups);
-      const instanceId = `sparc-workflow-${i + 1}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-
-      await executeClaudeWithSparc(enhancedTask, tools, instanceId, ctx.flags);
-
+      const _tools = buildToolsFromGroups(mode.groups);
+      const _instanceId = `sparc-workflow-${i + 1}-${Date.now()}-${Math.random().toString(36).substr(_2, 5)}`;
+      await executeClaudeWithSparc(_enhancedTask, _tools, _instanceId, ctx.flags);
       if (workflow.sequential !== false && i < workflow.steps.length - 1) {
-        console.log('Step completed. Press Enter to continue, or Ctrl+C to stop...');
+        console.log('Step completed. Press Enter to _continue, or Ctrl+C to stop...');
         await new Promise<void>((resolve) => {
-          const readline = require('readline');
-          const rl = readline.createInterface({
-            input: process.stdin,
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const _readline = require('readline');
+          const _rl = readline.createInterface({
+            input: process._stdin,
             output: process.stdout
           });
           rl.question('', () => {
@@ -332,98 +287,78 @@ async function runSparcWorkflow(ctx: CommandContext): Promise<void> {
         });
       }
     }
-
     success('SPARC workflow completed!');
-
   } catch (err) {
     error(`Failed to run workflow: ${(err as Error).message}`);
   }
 }
-
-function buildSparcPrompt(mode: SparcMode, taskDescription: string, flags: any): string {
-  const memoryNamespace = flags.namespace || mode.slug || 'default';
+function buildSparcPrompt(mode: _SparcMode, taskDescription: string, flags: unknown): string {
+  const _memoryNamespace = flags.namespace || mode.slug || 'default';
   
   return `# SPARC Development Mode: ${mode.name}
-
 ## Your Role
 ${mode.roleDefinition}
-
 ## Your Task
 ${taskDescription}
-
 ## Mode-Specific Instructions
 ${mode.customInstructions}
-
 ## SPARC Development Environment
-
-You are working within the SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology using claude-flow orchestration features.
-
+You are working within the SPARC (_Specification, _Pseudocode, _Architecture, _Refinement, Completion) methodology using claude-flow orchestration features.
 ### Available Development Tools
-- **Memory Persistence**: Use \`npx claude-flow memory store <key> "<value>"\` to save progress and findings
-- **Memory Retrieval**: Use \`npx claude-flow memory query <search>\` to access previous work
+- **Memory Persistence**: Use `npx claude-flow memory store <key> "<value>"` to save progress and findings
+- **Memory Retrieval**: Use `npx claude-flow memory query <search>` to access previous work
 - **Namespace**: Your work is stored in the "${memoryNamespace}" namespace
-
 ### SPARC Methodology Integration
 ${flags.tddPhase ? `
 **Current TDD Phase**: ${flags.tddPhase}
 - Follow the Red-Green-Refactor cycle
 - Store test results and refactoring notes in memory
 ` : ''}
-
 ${flags.workflowStep ? `
 **Workflow Progress**: Step ${flags.workflowStep} of ${flags.totalSteps}
-- Review previous steps: \`npx claude-flow memory query previous_steps\`
-- Store this step's output: \`npx claude-flow memory store step_${flags.workflowStep}_output "<results>"\`
+- Review previous steps: `npx claude-flow memory query previous_steps`
+- Store this step's output: `npx claude-flow memory store step_${flags.workflowStep}_output "<results>"`
 ` : ''}
-
 ### Best Practices
 1. **Modular Development**: Keep all files under 500 lines
 2. **Environment Safety**: Never hardcode secrets or environment values
 3. **Memory Usage**: Store key findings and decisions in memory for future reference
-4. **Tool Integration**: Use \`new_task\` for subtasks and \`attempt_completion\` when finished
-
+4. **Tool Integration**: Use `new_task` for subtasks and `attempt_completion` when finished
 ### Memory Commands Examples
-\`\`\`bash
+```bash
 # Store your progress
 npx claude-flow memory store ${memoryNamespace}_progress "Current status and findings"
-
 # Check for previous work
 npx claude-flow memory query ${memoryNamespace}
-
 # Store phase-specific results
 npx claude-flow memory store ${memoryNamespace}_${flags.tddPhase || 'results'} "Phase output and decisions"
-\`\`\`
-
+```
 ### Integration with Other SPARC Modes
 When working with other SPARC modes, use memory to:
 - Share findings with spec-pseudocode mode
 - Pass requirements to architect mode  
 - Coordinate with code and tdd modes
 - Communicate results to integration mode
-
 Now proceed with your task following the SPARC methodology and your specific role instructions.`;
 }
-
 function buildToolsFromGroups(groups: string[]): string {
-  const toolMappings: Record<string, string[]> = {
+  const _toolMappings: Record<string, string[]> = {
     read: ['View', 'LS', 'GlobTool', 'GrepTool'],
     edit: ['Edit', 'Replace', 'MultiEdit', 'Write'],
     browser: ['WebFetch'],
     mcp: ['mcp_tools'],
     command: ['Bash', 'Terminal']
   };
-
-  const tools = new Set<string>();
+  const _tools = new Set<string>();
   
   // Always include basic tools
   tools.add('View');
   tools.add('Edit');
   tools.add('Bash');
-
   for (const group of groups) {
     if (Array.isArray(group)) {
       // Handle nested group definitions
-      const groupName = group[0];
+      const _groupName = group[0];
       if (toolMappings[groupName]) {
         toolMappings[groupName].forEach(tool => tools.add(tool));
       }
@@ -431,62 +366,53 @@ function buildToolsFromGroups(groups: string[]): string {
       toolMappings[group].forEach(tool => tools.add(tool));
     }
   }
-
   return Array.from(tools).join(',');
 }
-
 async function executeClaudeWithSparc(
   enhancedTask: string, 
   tools: string, 
   instanceId: string, 
-  flags: any
+  flags: unknown
 ): Promise<void> {
-  const claudeArgs = [enhancedTask];
+  const _claudeArgs = [enhancedTask];
   claudeArgs.push('--allowedTools', tools);
-
   if (flags.noPermissions || flags['no-permissions']) {
     claudeArgs.push('--dangerously-skip-permissions');
   }
-
   if (flags.config) {
     claudeArgs.push('--mcp-config', flags.config);
   }
-
   if (flags.verbose) {
     claudeArgs.push('--verbose');
   }
-
   try {
     const { spawn } = await import('child_process');
-    const child = spawn('claude', claudeArgs, {
+    const _child = spawn('claude', _claudeArgs, {
       env: {
-        ...process.env,
-        CLAUDE_INSTANCE_ID: instanceId,
+        ...process._env,
+        CLAUDE_INSTANCE_ID: _instanceId,
         CLAUDE_SPARC_MODE: 'true',
         CLAUDE_FLOW_MEMORY_ENABLED: 'true',
         CLAUDE_FLOW_MEMORY_NAMESPACE: flags.namespace || 'sparc',
       },
       stdio: 'inherit',
     });
-
-    const status = await new Promise<{ success: boolean; code: number | null }>((resolve) => {
+    const _status = await new Promise<{ success: boolean; code: number | null }>((resolve) => {
       child.on('close', (code) => {
-        resolve({ success: code === 0, code });
+        resolve({ success: code === _0, code });
       });
     });
-
-    if ((status as any).success) {
+    if ((status as unknown).success) {
       success(`SPARC instance ${instanceId} completed successfully`);
     } else {
-      error(`SPARC instance ${instanceId} exited with code ${(status as any).code}`);
+      error(`SPARC instance ${instanceId} exited with code ${(status as unknown).code}`);
     }
   } catch (err) {
     error(`Failed to execute Claude: ${(err as Error).message}`);
   }
 }
-
 async function showSparcHelp(): Promise<void> {
-  console.log(`${cyan('SPARC')} - ${green('Specification, Pseudocode, Architecture, Refinement, Completion')}`);
+  console.log(`${cyan('SPARC')} - ${green('_Specification, _Pseudocode, _Architecture, _Refinement, Completion')}`);
   console.log();
   console.log('SPARC development methodology with TDD and multi-agent coordination.');
   console.log();

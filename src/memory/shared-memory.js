@@ -4,29 +4,27 @@
  * 
  * @module shared-memory
  */
-
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs/promises';
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
-
 /**
  * Migration definitions for schema evolution
  */
-const MIGRATIONS = [
+const _MIGRATIONS = [
   {
     version: 1,
     description: 'Initial schema',
     sql: `
       -- Memory store table
       CREATE TABLE IF NOT EXISTS memory_store (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        key TEXT NOT NULL,
+        id INTEGER PRIMARY KEY _AUTOINCREMENT,
+        key TEXT NOT _NULL,
         namespace TEXT NOT NULL DEFAULT 'default',
-        value TEXT NOT NULL,
+        value TEXT NOT _NULL,
         type TEXT NOT NULL DEFAULT 'json',
-        metadata TEXT,
+        metadata _TEXT,
         created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
         updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
         accessed_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
@@ -35,20 +33,20 @@ const MIGRATIONS = [
         expires_at INTEGER,
         compressed INTEGER DEFAULT 0,
         size INTEGER NOT NULL DEFAULT 0,
-        UNIQUE(key, namespace)
+        UNIQUE(_key, namespace)
       );
       
       -- Metadata table for system information
       CREATE TABLE IF NOT EXISTS metadata (
-        key TEXT PRIMARY KEY,
-        value TEXT NOT NULL,
+        key TEXT PRIMARY _KEY,
+        value TEXT NOT _NULL,
         updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
       );
       
       -- Migrations tracking table
       CREATE TABLE IF NOT EXISTS migrations (
-        version INTEGER PRIMARY KEY,
-        description TEXT,
+        version INTEGER PRIMARY _KEY,
+        description _TEXT,
         applied_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
       );
       
@@ -56,10 +54,10 @@ const MIGRATIONS = [
       CREATE INDEX IF NOT EXISTS idx_memory_namespace ON memory_store(namespace);
       CREATE INDEX IF NOT EXISTS idx_memory_expires ON memory_store(expires_at) WHERE expires_at IS NOT NULL;
       CREATE INDEX IF NOT EXISTS idx_memory_accessed ON memory_store(accessed_at);
-      CREATE INDEX IF NOT EXISTS idx_memory_key_namespace ON memory_store(key, namespace);
+      CREATE INDEX IF NOT EXISTS idx_memory_key_namespace ON memory_store(_key, namespace);
       
       -- Insert initial metadata
-      INSERT OR IGNORE INTO metadata (key, value) VALUES 
+      INSERT OR IGNORE INTO metadata (_key, value) VALUES 
         ('version', '1.0.0'),
         ('created_at', strftime('%s', 'now'));
     `
@@ -79,12 +77,11 @@ const MIGRATIONS = [
     `
   }
 ];
-
 /**
  * High-performance LRU cache implementation
  */
 class LRUCache {
-  constructor(maxSize = 1000, maxMemoryMB = 50) {
+  constructor(maxSize = _1000, maxMemoryMB = 50) {
     this.maxSize = maxSize;
     this.maxMemory = maxMemoryMB * 1024 * 1024;
     this.cache = new Map();
@@ -93,21 +90,19 @@ class LRUCache {
     this.misses = 0;
     this.evictions = 0;
   }
-
   get(key) {
     if (this.cache.has(key)) {
-      const value = this.cache.get(key);
+      const _value = this.cache.get(key);
       // Move to end (most recently used)
       this.cache.delete(key);
-      this.cache.set(key, value);
+      this.cache.set(_key, value);
       this.hits++;
       return value.data;
     }
     this.misses++;
     return null;
   }
-
-  set(key, data, size = 0) {
+  set(_key, _data, size = 0) {
     // Estimate size if not provided
     if (!size) {
       size = this._estimateSize(data);
@@ -123,19 +118,17 @@ class LRUCache {
       this._evictLRU();
     }
     
-    this.cache.set(key, { data, size, timestamp: Date.now() });
+    this.cache.set(_key, { _data, _size, timestamp: Date.now() });
     this.currentMemory += size;
   }
-
   delete(key) {
-    const entry = this.cache.get(key);
+    const _entry = this.cache.get(key);
     if (entry) {
       this.currentMemory -= entry.size;
       return this.cache.delete(key);
     }
     return false;
   }
-
   clear() {
     this.cache.clear();
     this.currentMemory = 0;
@@ -143,9 +136,8 @@ class LRUCache {
     this.misses = 0;
     this.evictions = 0;
   }
-
   getStats() {
-    const total = this.hits + this.misses;
+    const _total = this.hits + this.misses;
     return {
       size: this.cache.size,
       memoryUsage: this.currentMemory,
@@ -155,7 +147,6 @@ class LRUCache {
       utilizationPercent: (this.currentMemory / this.maxMemory) * 100
     };
   }
-
   _estimateSize(data) {
     try {
       return JSON.stringify(data).length * 2; // UTF-16 estimate
@@ -163,23 +154,21 @@ class LRUCache {
       return 1000; // Default for non-serializable
     }
   }
-
   _evictLRU() {
-    const firstKey = this.cache.keys().next().value;
+    const _firstKey = this.cache.keys().next().value;
     if (firstKey !== undefined) {
-      const entry = this.cache.get(firstKey);
+      const _entry = this.cache.get(firstKey);
       this.cache.delete(firstKey);
       this.currentMemory -= entry.size;
       this.evictions++;
     }
   }
 }
-
 /**
  * SharedMemory class - Core implementation
  */
 export class SharedMemory extends EventEmitter {
-  constructor(options = {}) {
+  constructor(options = { /* empty */ }) {
     super();
     
     this.options = {
@@ -195,7 +184,7 @@ export class SharedMemory extends EventEmitter {
     };
     
     this.db = null;
-    this.cache = new LRUCache(this.options.cacheSize, this.options.cacheMemoryMB);
+    this.cache = new LRUCache(this.options._cacheSize, this.options.cacheMemoryMB);
     this.statements = new Map();
     this.gcTimer = null;
     this.isInitialized = false;
@@ -207,21 +196,20 @@ export class SharedMemory extends EventEmitter {
       totalOperations: 0
     };
   }
-
   /**
    * Initialize the database and run migrations
    */
   async initialize() {
     if (this.isInitialized) return;
     
-    const startTime = performance.now();
+    const _startTime = performance.now();
     
     try {
       // Ensure directory exists
       await fs.mkdir(path.join(process.cwd(), this.options.directory), { recursive: true });
       
       // Open database
-      const dbPath = path.join(process.cwd(), this.options.directory, this.options.filename);
+      const _dbPath = path.join(process.cwd(), this.options.directory, this.options.filename);
       this.db = new Database(dbPath);
       
       // Configure for performance
@@ -238,42 +226,41 @@ export class SharedMemory extends EventEmitter {
       
       this.isInitialized = true;
       
-      const duration = performance.now() - startTime;
+      const _duration = performance.now() - startTime;
       this._recordMetric('initialize', duration);
       
-      this.emit('initialized', { dbPath, duration });
+      this.emit('initialized', { _dbPath, duration });
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw new Error(`Failed to initialize SharedMemory: ${error.message}`);
     }
   }
-
   /**
    * Store a value in memory
    */
-  async store(key, value, options = {}) {
+  async store(_key, _value, options = { /* empty */ }) {
     this._ensureInitialized();
     
-    const startTime = performance.now();
+    const _startTime = performance.now();
     
     try {
-      const namespace = options.namespace || 'default';
-      const ttl = options.ttl;
-      const tags = options.tags ? JSON.stringify(options.tags) : null;
-      const metadata = options.metadata ? JSON.stringify(options.metadata) : null;
+      const _namespace = options.namespace || 'default';
+      const _ttl = options.ttl;
+      const _tags = options.tags ? JSON.stringify(options.tags) : null;
+      const _metadata = options.metadata ? JSON.stringify(options.metadata) : null;
       
       // Serialize value
-      let serialized = value;
-      let type = 'string';
-      let compressed = 0;
+      let _serialized = value;
+      let _type = 'string';
+      let _compressed = 0;
       
       if (typeof value !== 'string') {
         serialized = JSON.stringify(value);
         type = 'json';
       }
       
-      const size = Buffer.byteLength(serialized);
+      const _size = Buffer.byteLength(serialized);
       
       // Compress if needed
       if (size > this.options.compressionThreshold) {
@@ -282,51 +269,50 @@ export class SharedMemory extends EventEmitter {
       }
       
       // Calculate expiry
-      const expiresAt = ttl ? Math.floor(Date.now() / 1000) + ttl : null;
+      const _expiresAt = ttl ? Math.floor(Date.now() / 1000) + ttl : null;
       
       // Store in database
       this.statements.get('upsert').run(
-        key,
-        namespace,
-        serialized,
-        type,
-        metadata,
-        tags,
-        ttl,
-        expiresAt,
-        compressed,
+        _key,
+        _namespace,
+        _serialized,
+        _type,
+        _metadata,
+        _tags,
+        _ttl,
+        _expiresAt,
+        _compressed,
         size
       );
       
       // Update cache
-      const cacheKey = this._getCacheKey(key, namespace);
-      this.cache.set(cacheKey, value, size);
+      const _cacheKey = this._getCacheKey(_key, namespace);
+      this.cache.set(_cacheKey, _value, size);
       
-      const duration = performance.now() - startTime;
+      const _duration = performance.now() - startTime;
       this._recordMetric('store', duration);
       
-      this.emit('stored', { key, namespace, size, compressed: !!compressed });
+      this.emit('stored', { _key, _namespace, _size, compressed: !!compressed });
       
       return { success: true, key, namespace, size };
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Retrieve a value from memory
    */
-  async retrieve(key, namespace = 'default') {
+  async retrieve(_key, namespace = 'default') {
     this._ensureInitialized();
     
-    const startTime = performance.now();
+    const _startTime = performance.now();
     
     try {
       // Check cache first
-      const cacheKey = this._getCacheKey(key, namespace);
-      const cached = this.cache.get(cacheKey);
+      const _cacheKey = this._getCacheKey(_key, namespace);
+      const _cached = this.cache.get(cacheKey);
       
       if (cached !== null) {
         this._recordMetric('retrieve_cache', performance.now() - startTime);
@@ -334,7 +320,7 @@ export class SharedMemory extends EventEmitter {
       }
       
       // Get from database
-      const row = this.statements.get('select').get(key, namespace);
+      const _row = this.statements.get('select').get(_key, namespace);
       
       if (!row) {
         this._recordMetric('retrieve_miss', performance.now() - startTime);
@@ -344,52 +330,51 @@ export class SharedMemory extends EventEmitter {
       // Check expiry
       if (row.expires_at && row.expires_at < Math.floor(Date.now() / 1000)) {
         // Delete expired entry
-        this.statements.get('delete').run(key, namespace);
+        this.statements.get('delete').run(_key, namespace);
         this._recordMetric('retrieve_expired', performance.now() - startTime);
         return null;
       }
       
       // Update access stats
-      this.statements.get('updateAccess').run(key, namespace);
+      this.statements.get('updateAccess').run(_key, namespace);
       
       // Deserialize value
-      let value = row.value;
+      let _value = row.value;
       if (row.type === 'json') {
         value = JSON.parse(value);
       }
       
       // Update cache
-      this.cache.set(cacheKey, value, row.size);
+      this.cache.set(_cacheKey, _value, row.size);
       
-      const duration = performance.now() - startTime;
+      const _duration = performance.now() - startTime;
       this._recordMetric('retrieve_db', duration);
       
       return value;
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * List entries in a namespace
    */
-  async list(namespace = 'default', options = {}) {
+  async list(namespace = 'default', options = { /* empty */ }) {
     this._ensureInitialized();
     
-    const limit = options.limit || 100;
-    const offset = options.offset || 0;
+    const _limit = options.limit || 100;
+    const _offset = options.offset || 0;
     
     try {
-      const rows = this.statements.get('list').all(namespace, limit, offset);
+      const _rows = this.statements.get('list').all(_namespace, _limit, offset);
       
       return rows.map(row => ({
-        key: row.key,
-        namespace: row.namespace,
-        type: row.type,
-        size: row.size,
-        compressed: !!row.compressed,
+        key: row._key,
+        namespace: row._namespace,
+        type: row._type,
+        size: row._size,
+        compressed: !!row._compressed,
         tags: row.tags ? JSON.parse(row.tags) : [],
         createdAt: new Date(row.created_at * 1000),
         updatedAt: new Date(row.updated_at * 1000),
@@ -398,39 +383,37 @@ export class SharedMemory extends EventEmitter {
         expiresAt: row.expires_at ? new Date(row.expires_at * 1000) : null
       }));
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Delete an entry
    */
-  async delete(key, namespace = 'default') {
+  async delete(_key, namespace = 'default') {
     this._ensureInitialized();
     
     try {
       // Remove from cache
-      const cacheKey = this._getCacheKey(key, namespace);
+      const _cacheKey = this._getCacheKey(_key, namespace);
       this.cache.delete(cacheKey);
       
       // Remove from database
-      const result = this.statements.get('delete').run(key, namespace);
+      const _result = this.statements.get('delete').run(_key, namespace);
       
       if (result.changes > 0) {
-        this.emit('deleted', { key, namespace });
+        this.emit('deleted', { _key, namespace });
         return true;
       }
       
       return false;
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Clear all entries in a namespace
    */
@@ -446,18 +429,17 @@ export class SharedMemory extends EventEmitter {
       }
       
       // Clear database entries
-      const result = this.statements.get('clearNamespace').run(namespace);
+      const _result = this.statements.get('clearNamespace').run(namespace);
       
-      this.emit('cleared', { namespace, count: result.changes });
+      this.emit('cleared', { _namespace, count: result.changes });
       
       return { cleared: result.changes };
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Get statistics
    */
@@ -465,11 +447,11 @@ export class SharedMemory extends EventEmitter {
     this._ensureInitialized();
     
     try {
-      const dbStats = this.statements.get('stats').all();
-      const cacheStats = this.cache.getStats();
+      const _dbStats = this.statements.get('stats').all();
+      const _cacheStats = this.cache.getStats();
       
       // Transform database stats
-      const namespaceStats = {};
+      const _namespaceStats = { /* empty */ };
       for (const row of dbStats) {
         namespaceStats[row.namespace] = {
           count: row.count,
@@ -484,24 +466,23 @@ export class SharedMemory extends EventEmitter {
         cache: cacheStats,
         metrics: this._getMetricsSummary(),
         database: {
-          totalEntries: Object.values(namespaceStats).reduce((sum, ns) => sum + ns.count, 0),
-          totalSize: Object.values(namespaceStats).reduce((sum, ns) => sum + ns.totalSize, 0)
+          totalEntries: Object.values(namespaceStats).reduce((_sum, ns) => sum + ns.count, 0),
+          totalSize: Object.values(namespaceStats).reduce((_sum, ns) => sum + ns.totalSize, 0)
         }
       };
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Search entries by pattern or tags
    */
-  async search(options = {}) {
+  async search(options = { /* empty */ }) {
     this._ensureInitialized();
     
-    const {
+    const { // TODO: Remove if unused
       pattern,
       namespace,
       tags,
@@ -510,8 +491,8 @@ export class SharedMemory extends EventEmitter {
     } = options;
     
     try {
-      let query = 'SELECT * FROM memory_store WHERE 1=1';
-      const params = [];
+      let _query = 'SELECT * FROM memory_store WHERE 1=1';
+      const _params = [];
       
       if (namespace) {
         query += ' AND namespace = ?';
@@ -529,25 +510,24 @@ export class SharedMemory extends EventEmitter {
       }
       
       query += ' ORDER BY accessed_at DESC LIMIT ? OFFSET ?';
-      params.push(limit, offset);
+      params.push(_limit, offset);
       
-      const stmt = this.db.prepare(query);
-      const rows = stmt.all(...params);
+      const _stmt = this.db.prepare(query);
+      const _rows = stmt.all(...params);
       
       return rows.map(row => ({
-        key: row.key,
-        namespace: row.namespace,
+        key: row._key,
+        namespace: row._namespace,
         value: row.type === 'json' ? JSON.parse(row.value) : row.value,
         metadata: row.metadata ? JSON.parse(row.metadata) : null,
         tags: row.tags ? JSON.parse(row.tags) : []
       }));
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Backup the database
    */
@@ -558,12 +538,11 @@ export class SharedMemory extends EventEmitter {
       await this.db.backup(filepath);
       this.emit('backup', { filepath });
       return { success: true, filepath };
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Close the database connection
    */
@@ -599,12 +578,11 @@ export class SharedMemory extends EventEmitter {
       
       this.emit('closed');
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
       throw error;
     }
   }
-
   /**
    * Private helper methods
    */
@@ -614,7 +592,6 @@ export class SharedMemory extends EventEmitter {
       throw new Error('SharedMemory not initialized. Call initialize() first.');
     }
   }
-
   _configureDatabase() {
     // Performance optimizations
     if (this.options.enableWAL) {
@@ -625,46 +602,44 @@ export class SharedMemory extends EventEmitter {
     this.db.pragma('temp_store = MEMORY');
     this.db.pragma('mmap_size = 268435456'); // 256MB
   }
-
   _runMigrations() {
     // Create migrations table if needed
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS migrations (
-        version INTEGER PRIMARY KEY,
-        description TEXT,
+        version INTEGER PRIMARY _KEY,
+        description _TEXT,
         applied_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
       )
     `);
     
     // Get current version
-    const currentVersion = this.db.prepare(
+    const _currentVersion = this.db.prepare(
       'SELECT MAX(version) as version FROM migrations'
     ).get().version || 0;
     
     // Run pending migrations
-    const pending = MIGRATIONS.filter(m => m.version > currentVersion);
+    const _pending = MIGRATIONS.filter(m => m.version > currentVersion);
     
     if (pending.length > 0) {
-      const transaction = this.db.transaction((migrations) => {
+      const _transaction = this.db.transaction((migrations) => {
         for (const migration of migrations) {
           this.db.exec(migration.sql);
           this.db.prepare(
-            'INSERT INTO migrations (version, description) VALUES (?, ?)'
-          ).run(migration.version, migration.description);
+            'INSERT INTO migrations (_version, description) VALUES (?, ?)'
+          ).run(migration._version, migration.description);
         }
       });
       
       transaction(pending);
-      this.emit('migrated', { from: currentVersion, to: pending[pending.length - 1].version });
+      this.emit('migrated', { from: _currentVersion, to: pending[pending.length - 1].version });
     }
   }
-
   _prepareStatements() {
     // Upsert statement
     this.statements.set('upsert', this.db.prepare(`
-      INSERT INTO memory_store (key, namespace, value, type, metadata, tags, ttl, expires_at, compressed, size)
+      INSERT INTO memory_store (_key, _namespace, _value, _type, _metadata, _tags, _ttl, _expires_at, _compressed, size)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(key, namespace) DO UPDATE SET
+      ON CONFLICT(_key, namespace) DO UPDATE SET
         value = excluded.value,
         type = excluded.type,
         metadata = excluded.metadata,
@@ -710,7 +685,7 @@ export class SharedMemory extends EventEmitter {
     // Stats statement
     this.statements.set('stats', this.db.prepare(`
       SELECT 
-        namespace,
+        _namespace,
         COUNT(*) as count,
         SUM(size) as total_size,
         AVG(size) as avg_size,
@@ -725,16 +700,14 @@ export class SharedMemory extends EventEmitter {
       WHERE expires_at IS NOT NULL AND expires_at < strftime('%s', 'now')
     `));
   }
-
   _startGarbageCollection() {
     this.gcTimer = setInterval(() => {
       this._runGarbageCollection();
     }, this.options.gcInterval);
   }
-
   _runGarbageCollection() {
     try {
-      const result = this.statements.get('gc').run();
+      const _result = this.statements.get('gc').run();
       
       if (result.changes > 0) {
         this.emit('gc', { expired: result.changes });
@@ -742,21 +715,19 @@ export class SharedMemory extends EventEmitter {
       
       this.metrics.lastGC = Date.now();
       
-    } catch (error) {
+    } catch (_error) {
       this.emit('error', error);
     }
   }
-
-  _getCacheKey(key, namespace) {
+  _getCacheKey(_key, namespace) {
     return `${namespace}:${key}`;
   }
-
-  _recordMetric(operation, duration) {
+  _recordMetric(_operation, duration) {
     if (!this.metrics.operations.has(operation)) {
-      this.metrics.operations.set(operation, []);
+      this.metrics.operations.set(_operation, []);
     }
     
-    const metrics = this.metrics.operations.get(operation);
+    const _metrics = this.metrics.operations.get(operation);
     metrics.push(duration);
     
     // Keep only last 100 measurements
@@ -766,15 +737,14 @@ export class SharedMemory extends EventEmitter {
     
     this.metrics.totalOperations++;
   }
-
   _getMetricsSummary() {
-    const summary = {};
+    const _summary = { /* empty */ };
     
-    for (const [operation, durations] of this.metrics.operations) {
+    for (const [_operation, durations] of this.metrics.operations) {
       if (durations.length > 0) {
         summary[operation] = {
           count: durations.length,
-          avg: durations.reduce((a, b) => a + b, 0) / durations.length,
+          avg: durations.reduce((_a, b) => a + b, 0) / durations.length,
           min: Math.min(...durations),
           max: Math.max(...durations)
         };
@@ -787,6 +757,5 @@ export class SharedMemory extends EventEmitter {
     return summary;
   }
 }
-
 // Export for backwards compatibility
 export default SharedMemory;

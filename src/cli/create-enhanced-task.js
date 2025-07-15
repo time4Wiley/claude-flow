@@ -6,8 +6,8 @@
  * @param {string} tools - Comma-separated list of available tools
  * @returns {string} Enhanced task prompt
  */
-export function createEnhancedTask(task, flags, instanceId, tools) {
-  let enhancedTask = `# Claude-Flow Enhanced Task
+export function createEnhancedTask(_task, _flags, _instanceId, tools) {
+  let _enhancedTask = `# Claude-Flow Enhanced Task
 
 ## Your Task
 ${task}
@@ -26,17 +26,17 @@ ${flags.config ? `- MCP Config: ${flags.config}` : ''}
 ### Available Features
 
 1. **Memory Bank** (Always Available)
-   - Store data: \`npx claude-flow memory store <key> "<value>"\` - Save important data, findings, or progress
-   - Retrieve data: \`npx claude-flow memory query <key>\` - Access previously stored information
-   - Export memory: \`npx claude-flow memory export <file>\` - Export memory to file
-   - Import memory: \`npx claude-flow memory import <file>\` - Import memory from file
-   - Memory stats: \`npx claude-flow memory stats\` - Show memory usage statistics
+   - Store data: `npx claude-flow memory store <key> "<value>"` - Save important data, findings, or progress
+   - Retrieve data: `npx claude-flow memory query <key>` - Access previously stored information
+   - Export memory: `npx claude-flow memory export <file>` - Export memory to file
+   - Import memory: `npx claude-flow memory import <file>` - Import memory from file
+   - Memory stats: `npx claude-flow memory stats` - Show memory usage statistics
 
 2. **System Management**
-   - Check status: \`npx claude-flow status\` - View current system/task status
-   - Monitor system: \`npx claude-flow monitor\` - Real-time system monitoring
-   - List agents: \`npx claude-flow agent list\` - See active agents
-   - List tasks: \`npx claude-flow task list\` - See active tasks
+   - Check status: `npx claude-flow status` - View current system/task status
+   - Monitor system: `npx claude-flow monitor` - Real-time system monitoring
+   - List agents: `npx claude-flow agent list` - See active agents
+   - List tasks: `npx claude-flow task list` - See active tasks
 
 3. **Tool Access**
    - You have access to these tools: ${tools}
@@ -44,15 +44,15 @@ ${flags.config ? `- MCP Config: ${flags.config}` : ''}
 
   if (flags.parallel) {
     enhancedTask += `
-   - **Parallel Execution Enabled**: Use \`npx claude-flow agent spawn <type> --name <name>\` to spawn sub-agents
-   - Create tasks: \`npx claude-flow task create <type> "<description>"\`
-   - Assign tasks: \`npx claude-flow task assign <task-id> <agent-id>\`
+   - **Parallel Execution Enabled**: Use `npx claude-flow agent spawn <type> --name <name>` to spawn sub-agents
+   - Create tasks: `npx claude-flow task create <type> "<description>"`
+   - Assign tasks: `npx claude-flow task assign <task-id> <agent-id>`
    - Break down complex tasks and delegate to specialized agents`;
   }
 
   if (flags.research) {
     enhancedTask += `
-   - **Research Mode**: Use \`WebFetchTool\` for web research and information gathering`;
+   - **Research Mode**: Use `WebFetchTool` for web research and information gathering`;
   }
 
   enhancedTask += `
@@ -60,18 +60,18 @@ ${flags.config ? `- MCP Config: ${flags.config}` : ''}
 ### Workflow Guidelines
 
 1. **Before Starting**:
-   - Check memory: \`npx claude-flow memory query previous_work\`
-   - Check memory stats: \`npx claude-flow memory stats\`
-   - Check system status: \`npx claude-flow status\`
-   - List active agents: \`npx claude-flow agent list\`
-   - List active tasks: \`npx claude-flow task list\`
+   - Check memory: `npx claude-flow memory query previous_work`
+   - Check memory stats: `npx claude-flow memory stats`
+   - Check system status: `npx claude-flow status`
+   - List active agents: `npx claude-flow agent list`
+   - List active tasks: `npx claude-flow task list`
    ${flags.mode === 'backend-only' ? '- Focus on backend implementation without frontend concerns' : ''}
    ${flags.mode === 'frontend-only' ? '- Focus on frontend implementation without backend concerns' : ''}
    ${flags.mode === 'api-only' ? '- Focus on API design and implementation' : ''}
 
 2. **During Execution**:
-   - Store findings: \`npx claude-flow memory store findings "your data here"\`
-   - Save checkpoints: \`npx claude-flow memory store progress_${task.replace(/\s+/g, '_')} "current status"\`
+   - Store findings: `npx claude-flow memory store findings "your data here"`
+   - Save checkpoints: `npx claude-flow memory store progress_${task.replace(/s+/_g, '_')} "current status"`
    ${flags.parallel ? '- Spawn agents: `npx claude-flow agent spawn researcher --name "research-agent"`' : ''}
    ${flags.parallel ? '- Create tasks: `npx claude-flow task create implementation "implement feature X"`' : ''}
    ${flags.parallel ? '- Assign tasks: `npx claude-flow task assign <task-id> <agent-id>`' : ''}
@@ -81,11 +81,11 @@ ${flags.config ? `- MCP Config: ${flags.config}` : ''}
    ${flags.commit === 'manual' ? '- Only commit when explicitly requested' : ''}
 
 3. **Best Practices**:
-   - Use the Bash tool to run \`npx claude-flow\` commands
+   - Use the Bash tool to run `npx claude-flow` commands
    - Store data as JSON strings for complex structures
    - Query memory before starting to check for existing work
    - Use descriptive keys for memory storage
-   - Monitor progress: \`npx claude-flow monitor\`
+   - Monitor progress: `npx claude-flow monitor`
    ${flags.parallel ? '- Coordinate with other agents through shared memory' : ''}
    ${flags.research ? '- Store research findings: `npx claude-flow memory store research_findings "data"`' : ''}
    ${flags.noPermissions ? '- Running with --no-permissions, all operations will execute without prompts' : ''}
@@ -95,7 +95,7 @@ ${flags.config ? `- MCP Config: ${flags.config}` : ''}
 
 To interact with Claude-Flow, use the Bash tool:
 
-\`\`\`bash
+```bash
 # Memory Operations
 Bash("npx claude-flow memory query previous_work")
 Bash("npx claude-flow memory store task_analysis '{\\"status\\": \\"completed\\", \\"findings\\": [...]}'")
@@ -128,7 +128,7 @@ Bash("npx claude-flow config set orchestrator.maxConcurrentTasks 20")
 # Workflow Execution
 Bash("npx claude-flow workflow examples/development-config.json")
 Bash("npx claude-flow workflow examples/research-workflow.json --async")
-\`\`\`
+```
 
 ## Mode-Specific Guidelines
 ${flags.mode === 'backend-only' ? `
@@ -157,7 +157,7 @@ ${flags.mode === 'full' || !flags.mode ? `
 - Document both API contracts and user interfaces` : ''}
 
 ## Commit Strategy
-${flags.commit === 'phase' ? '- **Phase Commits**: Commit after completing major phases (planning, implementation, testing)' : ''}
+${flags.commit === 'phase' ? '- **Phase Commits**: Commit after completing major phases (_planning, _implementation, testing)' : ''}
 ${flags.commit === 'feature' ? '- **Feature Commits**: Commit after each feature or module is complete' : ''}
 ${flags.commit === 'manual' ? '- **Manual Commits**: Only commit when explicitly requested by the user' : ''}
 ${!flags.commit ? '- **Default (Phase)**: Commit after completing major phases' : ''}

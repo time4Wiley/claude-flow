@@ -3,11 +3,9 @@
  * Provides comprehensive interfaces for all 71+ missing MCP tools
  * Organized by tool categories with real-time updates
  */
-
 import ToolExecutionFramework from './tool-execution-framework.js';
-
 // Enhanced view modes with all missing tool categories
-const ENHANCED_VIEWS = {
+const _ENHANCED_VIEWS = {
   PROCESSES: 'processes',
   STATUS: 'status',
   ORCHESTRATION: 'orchestration',
@@ -23,7 +21,6 @@ const ENHANCED_VIEWS = {
   SYSTEM: 'system',           // System & Utilities tools (6+ tools)
   TOOLS: 'tools'              // Tool execution center
 };
-
 export class EnhancedUIViews {
   constructor(ui) {
     this.ui = ui;
@@ -38,7 +35,6 @@ export class EnhancedUIViews {
     // Setup auto-refresh for dynamic views
     this.setupAutoRefresh();
   }
-
   /**
    * Initialize data for all views
    */
@@ -91,7 +87,6 @@ export class EnhancedUIViews {
       security: []
     });
   }
-
   /**
    * Setup auto-refresh for dynamic views
    */
@@ -110,13 +105,12 @@ export class EnhancedUIViews {
       }
     }, 30000));
   }
-
   /**
    * Render Neural Network Tools View (15 tools)
    */
   renderNeuralView() {
-    const colors = this.ui.colors || this.getColors();
-    const data = this.viewData.get('neural');
+    const _colors = this.ui.colors || this.getColors();
+    const _data = this.viewData.get('neural');
     
     console.log(colors.white(colors.bold('🧠 Neural Network Management')));
     console.log();
@@ -131,7 +125,7 @@ export class EnhancedUIViews {
     
     // Neural tools grid
     console.log(colors.cyan('🔧 Neural Tools'));
-    const neuralTools = [
+    const _neuralTools = [
       { key: '1', tool: 'neural_train', desc: 'Train neural patterns' },
       { key: '2', tool: 'neural_predict', desc: 'Make predictions' },
       { key: '3', tool: 'neural_status', desc: 'Check model status' },
@@ -148,14 +142,14 @@ export class EnhancedUIViews {
       { key: 'e', tool: 'inference_run', desc: 'Run inference' }
     ];
     
-    this.renderToolGrid(neuralTools, colors);
+    this.renderToolGrid(_neuralTools, colors);
     
     // Recent training jobs
     console.log();
     console.log(colors.cyan('🎯 Recent Training Jobs'));
     if (data.trainingJobs.length > 0) {
-      data.trainingJobs.slice(0, 3).forEach(job => {
-        const status = job.status === 'completed' ? colors.green('✓') : 
+      data.trainingJobs.slice(_0, 3).forEach(job => {
+        const _status = job.status === 'completed' ? colors.green('✓') : 
                       job.status === 'running' ? colors.yellow('⟳') : colors.gray('○');
         console.log(`  ${status} ${job.pattern_type} - Accuracy: ${(job.accuracy * 100).toFixed(1)}% (${job.epochs} epochs)`);
       });
@@ -163,13 +157,12 @@ export class EnhancedUIViews {
       console.log(colors.gray('  No training jobs yet'));
     }
   }
-
   /**
    * Render Analysis & Monitoring View (13 tools)
    */
   renderAnalysisView() {
-    const colors = this.getColors();
-    const data = this.viewData.get('analysis');
+    const _colors = this.getColors();
+    const _data = this.viewData.get('analysis');
     
     console.log(colors.white(colors.bold('📊 Analysis & Monitoring')));
     console.log();
@@ -184,7 +177,7 @@ export class EnhancedUIViews {
     
     // Analysis tools grid
     console.log(colors.cyan('🔧 Analysis Tools'));
-    const analysisTools = [
+    const _analysisTools = [
       { key: '1', tool: 'performance_report', desc: 'Generate performance reports' },
       { key: '2', tool: 'bottleneck_analyze', desc: 'Identify bottlenecks' },
       { key: '3', tool: 'token_usage', desc: 'Analyze token consumption' },
@@ -200,29 +193,28 @@ export class EnhancedUIViews {
       { key: 'd', tool: 'task_results', desc: 'Get task results' }
     ];
     
-    this.renderToolGrid(analysisTools, colors);
+    this.renderToolGrid(_analysisTools, colors);
     
     // Recent reports
     console.log();
     console.log(colors.cyan('📋 Recent Reports'));
-    const mockReports = [
+    const _mockReports = [
       { name: 'Daily Performance', time: '2h ago', status: 'completed' },
       { name: 'Token Analysis', time: '4h ago', status: 'completed' },
       { name: 'System Health', time: '6h ago', status: 'completed' }
     ];
     
     mockReports.forEach(report => {
-      const status = colors.green('✓');
+      const _status = colors.green('✓');
       console.log(`  ${status} ${report.name} (${colors.gray(report.time)})`);
     });
   }
-
   /**
    * Render Workflow & Automation View (11 tools)
    */
   renderWorkflowView() {
-    const colors = this.getColors();
-    const workflows = this.toolFramework.getPredefinedWorkflows();
+    const _colors = this.getColors();
+    const _workflows = this.toolFramework.getPredefinedWorkflows();
     
     console.log(colors.white(colors.bold('🔄 Workflow & Automation')));
     console.log();
@@ -236,7 +228,7 @@ export class EnhancedUIViews {
     
     // Workflow tools
     console.log(colors.cyan('🔧 Workflow Tools'));
-    const workflowTools = [
+    const _workflowTools = [
       { key: '1', tool: 'workflow_create', desc: 'Create custom workflow' },
       { key: '2', tool: 'workflow_execute', desc: 'Execute workflow' },
       { key: '3', tool: 'sparc_mode', desc: 'SPARC development modes' },
@@ -250,24 +242,23 @@ export class EnhancedUIViews {
       { key: 'b', tool: 'workflow_export', desc: 'Export workflows' }
     ];
     
-    this.renderToolGrid(workflowTools, colors);
+    this.renderToolGrid(_workflowTools, colors);
     
     // Predefined workflows
     console.log();
     console.log(colors.cyan('📋 Predefined Workflows'));
-    Object.entries(workflows).forEach(([key, workflow], index) => {
-      const prefix = colors.yellow(`${index + 1}.`);
+    Object.entries(workflows).forEach(([_key, workflow], index) => {
+      const _prefix = colors.yellow(`${index + 1}.`);
       console.log(`  ${prefix} ${workflow.name}`);
       console.log(`     ${colors.gray(workflow.description)}`);
       console.log(`     ${colors.dim(`${workflow.steps.length} steps`)}`);
     });
   }
-
   /**
    * Render GitHub Integration View (8 tools)
    */
   renderGitHubView() {
-    const colors = this.getColors();
+    const _colors = this.getColors();
     
     console.log(colors.white(colors.bold('🐙 GitHub Integration')));
     console.log();
@@ -282,7 +273,7 @@ export class EnhancedUIViews {
     
     // GitHub tools
     console.log(colors.cyan('🔧 GitHub Tools'));
-    const githubTools = [
+    const _githubTools = [
       { key: '1', tool: 'github_repo_analyze', desc: 'Analyze repository' },
       { key: '2', tool: 'github_pr_manage', desc: 'Manage pull requests' },
       { key: '3', tool: 'github_issue_track', desc: 'Track issues' },
@@ -293,12 +284,12 @@ export class EnhancedUIViews {
       { key: '8', tool: 'github_metrics', desc: 'Repository metrics' }
     ];
     
-    this.renderToolGrid(githubTools, colors);
+    this.renderToolGrid(_githubTools, colors);
     
     // Recent activity
     console.log();
     console.log(colors.cyan('🔔 Recent Activity'));
-    const mockActivity = [
+    const _mockActivity = [
       { action: 'PR merged', repo: 'claude-code-flow', time: '1h ago' },
       { action: 'Issue closed', repo: 'ruv-swarm', time: '2h ago' },
       { action: 'Release created', repo: 'claude-code-flow', time: '4h ago' }
@@ -308,12 +299,11 @@ export class EnhancedUIViews {
       console.log(`  ${colors.green('✓')} ${activity.action} in ${colors.yellow(activity.repo)} (${colors.gray(activity.time)})`);
     });
   }
-
   /**
    * Render DAA (Dynamic Agent Architecture) View (8 tools)
    */
   renderDAAView() {
-    const colors = this.getColors();
+    const _colors = this.getColors();
     
     console.log(colors.white(colors.bold('🤖 Dynamic Agent Architecture')));
     console.log();
@@ -328,7 +318,7 @@ export class EnhancedUIViews {
     
     // DAA tools
     console.log(colors.cyan('🔧 DAA Tools'));
-    const daaTools = [
+    const _daaTools = [
       { key: '1', tool: 'daa_agent_create', desc: 'Create dynamic agent' },
       { key: '2', tool: 'daa_capability_match', desc: 'Match capabilities' },
       { key: '3', tool: 'daa_resource_alloc', desc: 'Resource allocation' },
@@ -339,12 +329,12 @@ export class EnhancedUIViews {
       { key: '8', tool: 'daa_optimization', desc: 'Performance optimization' }
     ];
     
-    this.renderToolGrid(daaTools, colors);
+    this.renderToolGrid(_daaTools, colors);
     
     // Agent pool
     console.log();
     console.log(colors.cyan('🎯 Agent Pool'));
-    const mockAgents = [
+    const _mockAgents = [
       { type: 'researcher', count: 4, status: 'active' },
       { type: 'coder', count: 6, status: 'active' },
       { type: 'analyst', count: 3, status: 'idle' },
@@ -352,16 +342,15 @@ export class EnhancedUIViews {
     ];
     
     mockAgents.forEach(agent => {
-      const status = agent.status === 'active' ? colors.green('●') : colors.gray('○');
+      const _status = agent.status === 'active' ? colors.green('●') : colors.gray('○');
       console.log(`  ${status} ${agent.type}: ${colors.yellow(agent.count)} agents`);
     });
   }
-
   /**
    * Render System & Utilities View (6+ tools)
    */
   renderSystemView() {
-    const colors = this.getColors();
+    const _colors = this.getColors();
     
     console.log(colors.white(colors.bold('🛠️ System & Utilities')));
     console.log();
@@ -376,7 +365,7 @@ export class EnhancedUIViews {
     
     // System tools
     console.log(colors.cyan('🔧 System Tools'));
-    const systemTools = [
+    const _systemTools = [
       { key: '1', tool: 'config_manage', desc: 'Configuration management' },
       { key: '2', tool: 'security_scan', desc: 'Security scanning' },
       { key: '3', tool: 'backup_create', desc: 'Create system backup' },
@@ -387,12 +376,12 @@ export class EnhancedUIViews {
       { key: '8', tool: 'features_detect', desc: 'Feature detection' }
     ];
     
-    this.renderToolGrid(systemTools, colors);
+    this.renderToolGrid(_systemTools, colors);
     
     // System health
     console.log();
     console.log(colors.cyan('❤️ System Health'));
-    const healthItems = [
+    const _healthItems = [
       { component: 'CPU', status: 'optimal', value: '12%' },
       { component: 'Memory', status: 'good', value: '68%' },
       { component: 'Disk', status: 'optimal', value: '45%' },
@@ -400,19 +389,18 @@ export class EnhancedUIViews {
     ];
     
     healthItems.forEach(item => {
-      const status = item.status === 'excellent' ? colors.green('🟢') :
+      const _status = item.status === 'excellent' ? colors.green('🟢') :
                     item.status === 'optimal' ? colors.green('🟢') :
                     item.status === 'good' ? colors.yellow('🟡') : colors.red('🔴');
       console.log(`  ${status} ${item.component}: ${colors.yellow(item.value)}`);
     });
   }
-
   /**
    * Render Tool Execution Center
    */
   renderToolsView() {
-    const colors = this.getColors();
-    const status = this.toolFramework.getStatus();
+    const _colors = this.getColors();
+    const _status = this.toolFramework.getStatus();
     
     console.log(colors.white(colors.bold('🎛️ Tool Execution Center')));
     console.log();
@@ -427,10 +415,10 @@ export class EnhancedUIViews {
     
     // Tool categories
     console.log(colors.cyan('📂 Tool Categories'));
-    const categories = this.toolFramework.getCategories();
-    categories.forEach((category, index) => {
-      const tools = this.toolFramework.getToolsByCategory(category);
-      const prefix = colors.yellow(`${index + 1}.`);
+    const _categories = this.toolFramework.getCategories();
+    categories.forEach((_category, index) => {
+      const _tools = this.toolFramework.getToolsByCategory(category);
+      const _prefix = colors.yellow(`${index + 1}.`);
       console.log(`  ${prefix} ${category.toUpperCase()}: ${colors.gray(`${tools.length} tools`)}`);
     });
     
@@ -442,29 +430,27 @@ export class EnhancedUIViews {
     console.log(`  ${colors.yellow('b')} - Batch execution`);
     console.log(`  ${colors.yellow('s')} - Show execution status`);
   }
-
   /**
    * Render tool grid helper
    */
-  renderToolGrid(tools, colors, columns = 2) {
-    for (let i = 0; i < tools.length; i += columns) {
-      let row = '';
-      for (let j = 0; j < columns && i + j < tools.length; j++) {
-        const tool = tools[i + j];
-        const keyLabel = colors.yellow(`[${tool.key}]`);
-        const toolName = colors.white(tool.tool);
-        const desc = colors.gray(tool.desc);
+  renderToolGrid(_tools, _colors, columns = 2) {
+    for (let _i = 0; i < tools.length; i += columns) {
+      let _row = '';
+      for (let _j = 0; j < columns && i + j < tools.length; j++) {
+        const _tool = tools[i + j];
+        const _keyLabel = colors.yellow(`[${tool.key}]`);
+        const _toolName = colors.white(tool.tool);
+        const _desc = colors.gray(tool.desc);
         row += `  ${keyLabel} ${toolName} - ${desc}`;
         if (j < columns - 1) row += '    ';
       }
       console.log(row);
     }
   }
-
   /**
    * Handle enhanced view input
    */
-  async handleEnhancedInput(key, currentView) {
+  async handleEnhancedInput(_key, currentView) {
     try {
       switch (currentView) {
         case ENHANCED_VIEWS.NEURAL:
@@ -484,17 +470,16 @@ export class EnhancedUIViews {
         default:
           return false;
       }
-    } catch (error) {
+    } catch (_error) {
       this.ui.addLog('error', `Input handling error: ${error.message}`);
       return true;
     }
   }
-
   /**
    * Handle neural view input
    */
   async handleNeuralInput(key) {
-    const neuralActions = {
+    const _neuralActions = {
       '1': () => this.promptNeuralTrain(),
       '2': () => this.promptNeuralPredict(),
       '3': () => this.executeQuickTool('neural_status'),
@@ -511,33 +496,31 @@ export class EnhancedUIViews {
       'e': () => this.promptInferenceRun()
     };
     
-    const action = neuralActions[key];
+    const _action = neuralActions[key];
     if (action) {
       await action();
       return true;
     }
     return false;
   }
-
   /**
    * Execute quick tool with default parameters
    */
-  async executeQuickTool(toolName, parameters = {}) {
+  async executeQuickTool(_toolName, parameters = { /* empty */ }) {
     try {
       this.ui.addLog('info', `Executing ${toolName}...`);
-      const result = await this.toolFramework.executeTool(toolName, parameters);
+      const _result = await this.toolFramework.executeTool(_toolName, parameters);
       this.ui.addLog('success', `${toolName} completed successfully`);
       this.displayToolResult(result);
-    } catch (error) {
+    } catch (_error) {
       this.ui.addLog('error', `${toolName} failed: ${error.message}`);
     }
   }
-
   /**
    * Display formatted tool result
    */
   displayToolResult(execution) {
-    const colors = this.getColors();
+    const _colors = this.getColors();
     if (execution.result) {
       console.log();
       console.log(colors.cyan('📋 Execution Result:'));
@@ -550,13 +533,12 @@ export class EnhancedUIViews {
       }
     }
   }
-
   /**
    * Prompt for neural training
    */
   async promptNeuralTrain() {
     // In a real implementation, this would show an interactive form
-    const params = {
+    const _params = {
       pattern_type: 'coordination',
       epochs: 50,
       training_data: 'recent_swarm_data'
@@ -564,53 +546,49 @@ export class EnhancedUIViews {
     
     await this.executeQuickTool('neural_train', params);
   }
-
   /**
    * Refresh neural data
    */
   async refreshNeuralData() {
     try {
-      const status = await this.toolFramework.executeTool('neural_status');
+      const _status = await this.toolFramework.executeTool('neural_status');
       // Update view data with fresh neural status
-      const data = this.viewData.get('neural');
+      const _data = this.viewData.get('neural');
       data.lastUpdate = new Date();
-    } catch (error) {
+    } catch (_error) {
       // Silently handle refresh errors
     }
   }
-
   /**
    * Refresh analysis data  
    */
   async refreshAnalysisData() {
     try {
-      const report = await this.toolFramework.executeTool('performance_report', { timeframe: '1h' });
+      const _report = await this.toolFramework.executeTool('performance_report', { timeframe: '1h' });
       // Update view data with fresh metrics
-      const data = this.viewData.get('analysis');
+      const _data = this.viewData.get('analysis');
       data.lastUpdate = new Date();
-    } catch (error) {
+    } catch (_error) {
       // Silently handle refresh errors
     }
   }
-
   /**
    * Get color utilities
    */
   getColors() {
     return {
-      cyan: (text) => `\x1b[36m${text}\x1b[0m`,
-      gray: (text) => `\x1b[90m${text}\x1b[0m`,
-      white: (text) => `\x1b[37m${text}\x1b[0m`,
-      yellow: (text) => `\x1b[33m${text}\x1b[0m`,
-      green: (text) => `\x1b[32m${text}\x1b[0m`,
-      red: (text) => `\x1b[31m${text}\x1b[0m`,
-      blue: (text) => `\x1b[34m${text}\x1b[0m`,
-      magenta: (text) => `\x1b[35m${text}\x1b[0m`,
-      bold: (text) => `\x1b[1m${text}\x1b[0m`,
-      dim: (text) => `\x1b[2m${text}\x1b[0m`
+      cyan: (text) => `x1b[36m${text}x1b[0m`,
+      gray: (text) => `x1b[90m${text}x1b[0m`,
+      white: (text) => `x1b[37m${text}x1b[0m`,
+      yellow: (text) => `x1b[33m${text}x1b[0m`,
+      green: (text) => `x1b[32m${text}x1b[0m`,
+      red: (text) => `x1b[31m${text}x1b[0m`,
+      blue: (text) => `x1b[34m${text}x1b[0m`,
+      magenta: (text) => `x1b[35m${text}x1b[0m`,
+      bold: (text) => `x1b[1m${text}x1b[0m`,
+      dim: (text) => `x1b[2m${text}x1b[0m`
     };
   }
-
   /**
    * Cleanup resources
    */
@@ -622,6 +600,5 @@ export class EnhancedUIViews {
     this.refreshIntervals.clear();
   }
 }
-
 export { EnhancedUIViews, ENHANCED_VIEWS };
 export default EnhancedUIViews;

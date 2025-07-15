@@ -1,11 +1,8 @@
 /**
  * Simple Swarm Executor - Provides basic swarm functionality without TypeScript dependencies
  */
-
-import { generateId } from '../../utils/helpers.js';
 import { promises as fs } from 'fs';
 import path from 'path';
-
 // Simple SwarmCoordinator implementation
 export class SwarmCoordinator {
   constructor(config) {
@@ -16,7 +13,6 @@ export class SwarmCoordinator {
     this.status = 'initializing';
     this.startTime = Date.now();
   }
-
   async initialize() {
     console.log(`\n🚀 Swarm initialized: ${this.id}`);
     console.log(`📋 Description: ${this.config.description}`);
@@ -27,20 +23,19 @@ export class SwarmCoordinator {
     this.status = 'active';
     
     // Create swarm directory
-    const swarmDir = `./swarm-runs/${this.id}`;
-    await fs.mkdir(swarmDir, { recursive: true });
+    const _swarmDir = `./swarm-runs/${this.id}`;
+    await fs.mkdir(_swarmDir, { recursive: true });
     
     // Save configuration
     await fs.writeFile(
-      path.join(swarmDir, 'config.json'),
-      JSON.stringify(this.config, null, 2)
+      path.join(_swarmDir, 'config.json'),
+      JSON.stringify(this._config, null, 2)
     );
     
     return this;
   }
-
-  async addAgent(type, name) {
-    const agent = {
+  async addAgent(_type, name) {
+    const _agent = {
       id: generateId('agent'),
       type,
       name: name || `${type}-${this.agents.length + 1}`,
@@ -53,9 +48,8 @@ export class SwarmCoordinator {
     
     return agent;
   }
-
   async executeTask(task) {
-    const taskObj = {
+    const _taskObj = {
       id: generateId('task'),
       description: task,
       status: 'in_progress',
@@ -84,39 +78,33 @@ export class SwarmCoordinator {
     
     return taskObj;
   }
-
   async createAPIProject() {
     console.log(`  🏗️  Creating API project structure...`);
     
-    const projectDir = './api-project';
-    await fs.mkdir(projectDir, { recursive: true });
+    const _projectDir = './api-project';
+    await fs.mkdir(_projectDir, { recursive: true });
     
     // Create basic Express server
-    const serverCode = `const express = require('express');
-const app = express();
-const port = process.env.PORT || 3000;
-
+    const _serverCode = `const _express = require('express');
+const _app = express();
+const _port = process.env.PORT || 3000;
 app.use(express.json());
-
-app.get('/health', (req, res) => {
+app.get('/health', (_req, _res) => {
   res.json({ status: 'healthy', swarm: '${this.id}' });
 });
-
-app.get('/api/items', (req, res) => {
+app.get('/api/items', (_req, _res) => {
   res.json({ items: [], count: 0 });
 });
-
-app.listen(port, () => {
-  console.log(\`API server running on port \${port}\`);
+app.listen(_port, () => {
+  console.log(`API server running on port ${port}`);
 });
-
 module.exports = app;
 `;
     
-    await fs.writeFile(path.join(projectDir, 'server.js'), serverCode);
+    await fs.writeFile(path.join(_projectDir, 'server.js'), serverCode);
     
     // Create package.json
-    const packageJson = {
+    const _packageJson = {
       name: "api-project",
       version: "1.0.0",
       description: "API created by Claude Flow Swarm",
@@ -134,27 +122,24 @@ module.exports = app;
     };
     
     await fs.writeFile(
-      path.join(projectDir, 'package.json'),
-      JSON.stringify(packageJson, null, 2)
+      path.join(_projectDir, 'package.json'),
+      JSON.stringify(_packageJson, null, 2)
     );
     
     console.log(`  ✅ Created API project in ${projectDir}`);
   }
-
   async runTests() {
     console.log(`  🧪 Running tests...`);
     console.log(`  ✅ All tests passed (0 tests)`);
   }
-
   async genericTaskExecution(task) {
     console.log(`  🔄 Executing: ${task}`);
     
     // Simulate work being done
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(_resolve, 1000));
     
     console.log(`  ✅ Generic task completed`);
   }
-
   async getStatus() {
     return {
       id: this.id,
@@ -168,11 +153,10 @@ module.exports = app;
       runtime: Math.floor((Date.now() - this.startTime) / 1000)
     };
   }
-
   async complete() {
     this.status = 'completed';
     
-    const summary = await this.getStatus();
+    const _summary = await this.getStatus();
     console.log(`\n✅ Swarm completed successfully!`);
     console.log(`📊 Summary:`);
     console.log(`  • Swarm ID: ${summary.id}`);
@@ -181,21 +165,20 @@ module.exports = app;
     console.log(`  • Runtime: ${summary.runtime}s`);
     
     // Save summary
-    const swarmDir = `./swarm-runs/${this.id}`;
+    const _swarmDir = `./swarm-runs/${this.id}`;
     await fs.writeFile(
-      path.join(swarmDir, 'summary.json'),
-      JSON.stringify(summary, null, 2)
+      path.join(_swarmDir, 'summary.json'),
+      JSON.stringify(_summary, null, 2)
     );
     
     return summary;
   }
 }
-
 // Main execution function
-export async function executeSwarm(objective, flags = {}) {
+export async function executeSwarm(_objective, flags = { /* empty */ }) {
   try {
     // Parse configuration from flags
-    const config = {
+    const _config = {
       name: generateId('swarm'),
       description: objective,
       mode: flags.mode || 'centralized',
@@ -218,11 +201,9 @@ export async function executeSwarm(objective, flags = {}) {
         encryptionEnabled: flags.encryption || false
       }
     };
-
     // Initialize swarm coordinator
-    const coordinator = new SwarmCoordinator(config);
+    const _coordinator = new SwarmCoordinator(config);
     await coordinator.initialize();
-
     // Spawn agents based on strategy
     if (config.strategy === 'development' || config.strategy === 'auto') {
       await coordinator.addAgent('architect', 'System Architect');
@@ -239,20 +220,16 @@ export async function executeSwarm(objective, flags = {}) {
       await coordinator.addAgent('tester', 'Integration Tester');
       await coordinator.addAgent('tester', 'Performance Tester');
     }
-
     // Execute the main objective
     await coordinator.executeTask(objective);
-
     // Complete and return summary
-    const summary = await coordinator.complete();
+    const _summary = await coordinator.complete();
     
     return { success: true, summary };
-
-  } catch (error) {
+  } catch (_error) {
     console.error(`❌ Swarm execution failed: ${error.message}`);
     return { success: false, error: error.message };
   }
 }
-
 // Export for use in swarm.js
 export { SwarmCoordinator, executeSwarm };

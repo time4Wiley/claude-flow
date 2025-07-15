@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { getErrorMessage } from '../../utils/error-handler.js';
 import { CLI, success, error, warning, info, VERSION } from '../cli-core.js';
 import type { Command, CommandContext } from '../cli-core.js';
 import colors from 'chalk';
@@ -8,24 +7,20 @@ import { Orchestrator } from '../../core/orchestrator-fixed.js';
 import { ConfigManager } from '../../core/config.js';
 import type { MemoryManager } from '../../memory/manager.js';
 import { EventBus } from '../../core/event-bus.js';
-import { Logger } from '../../core/logger.js';
 import { JsonPersistenceManager } from '../../core/json-persistence.js';
 import { swarmAction } from './swarm.js';
 import { SimpleMemoryManager } from './memory.js';
 import { sparcAction } from './sparc.js';
 import { createMigrateCommand } from './migrate.js';
 import { enterpriseCommands } from './enterprise.js';
-
 // Import enhanced orchestration commands
 import { startCommand } from './start.js';
 import { statusCommand } from './status.js';
 import { monitorCommand } from './monitor.js';
 import { sessionCommand } from './session.js';
-
-let orchestrator: Orchestrator | null = null;
-let configManager: ConfigManager | null = null;
-let persistence: JsonPersistenceManager | null = null;
-
+let _orchestrator: Orchestrator | null = null;
+let _configManager: ConfigManager | null = null;
+let _persistence: JsonPersistenceManager | null = null;
 async function getPersistence(): Promise<JsonPersistenceManager> {
   if (!persistence) {
     persistence = new JsonPersistenceManager();
@@ -33,17 +28,15 @@ async function getPersistence(): Promise<JsonPersistenceManager> {
   }
   return persistence;
 }
-
 async function getOrchestrator(): Promise<Orchestrator> {
   if (!orchestrator) {
-    const config = await getConfigManager();
-    const eventBus = EventBus.getInstance();
-    const logger = new Logger({ level: 'info', format: 'text', destination: 'console' });
-    orchestrator = new Orchestrator(config, eventBus, logger);
+    const _config = await getConfigManager();
+    const _eventBus = EventBus.getInstance();
+    const _logger = new Logger({ level: 'info', format: 'text', destination: 'console' });
+    orchestrator = new Orchestrator(_config, _eventBus, logger);
   }
   return orchestrator;
 }
-
 async function getConfigManager(): Promise<ConfigManager> {
   if (!configManager) {
     configManager = ConfigManager.getInstance();
@@ -51,7 +44,6 @@ async function getConfigManager(): Promise<ConfigManager> {
   }
   return configManager;
 }
-
 export function setupCommands(cli: CLI): void {
   // Init command
   cli.command({
@@ -75,16 +67,16 @@ export function setupCommands(cli: CLI): void {
       try {
         success('Initializing Claude Code integration files...');
         
-        const force = ctx.flags.force as boolean || ctx.flags.f as boolean;
-        const minimal = ctx.flags.minimal as boolean || ctx.flags.m as boolean;
+        const _force = ctx.flags.force as boolean || ctx.flags.f as boolean;
+        const _minimal = ctx.flags.minimal as boolean || ctx.flags.m as boolean;
         
         // Check if files already exist
-        const files = ['CLAUDE.md', 'memory-bank.md', 'coordination.md'];
-        const existingFiles = [];
+        const _files = ['CLAUDE.md', 'memory-bank.md', 'coordination.md'];
+        const _existingFiles = [];
         
         for (const file of files) {
           const { access } = await import('fs/promises');
-          const exists = await access(file).then(() => true).catch(() => false);
+          const _exists = await access(file).then(() => true).catch(() => false);
           if (exists) {
             existingFiles.push(file);
           }
@@ -97,23 +89,23 @@ export function setupCommands(cli: CLI): void {
         }
         
         // Create CLAUDE.md
-        const claudeMd = minimal ? createMinimalClaudeMd() : createFullClaudeMd();
+        const _claudeMd = minimal ? createMinimalClaudeMd() : createFullClaudeMd();
         const { writeFile } = await import('fs/promises');
         await writeFile('CLAUDE.md', claudeMd);
         console.log('  ✓ Created CLAUDE.md');
         
         // Create memory-bank.md  
-        const memoryBankMd = minimal ? createMinimalMemoryBankMd() : createFullMemoryBankMd();
+        const _memoryBankMd = minimal ? createMinimalMemoryBankMd() : createFullMemoryBankMd();
         await writeFile('memory-bank.md', memoryBankMd);
         console.log('  ✓ Created memory-bank.md');
         
         // Create coordination.md
-        const coordinationMd = minimal ? createMinimalCoordinationMd() : createFullCoordinationMd();
+        const _coordinationMd = minimal ? createMinimalCoordinationMd() : createFullCoordinationMd();
         await writeFile('coordination.md', coordinationMd);
         console.log('  ✓ Created coordination.md');
         
         // Create directory structure
-        const directories = [
+        const _directories = [
           'memory',
           'memory/agents', 
           'memory/sessions',
@@ -131,31 +123,31 @@ export function setupCommands(cli: CLI): void {
         const { mkdir } = await import('fs/promises');
         for (const dir of directories) {
           try {
-            await mkdir(dir, { recursive: true });
+            await mkdir(_dir, { recursive: true });
             console.log(`  ✓ Created ${dir}/ directory`);
           } catch (err) {
-            if ((err as any).code !== 'EEXIST') {
+            if ((err as unknown).code !== 'EEXIST') {
               throw err;
             }
           }
         }
         
         // Create placeholder files for memory directories
-        const agentsReadme = createAgentsReadme();
+        const _agentsReadme = createAgentsReadme();
         await writeFile('memory/agents/README.md', agentsReadme);
         console.log('  ✓ Created memory/agents/README.md');
         
-        const sessionsReadme = createSessionsReadme();
+        const _sessionsReadme = createSessionsReadme();
         await writeFile('memory/sessions/README.md', sessionsReadme);
         console.log('  ✓ Created memory/sessions/README.md');
         
         // Initialize the persistence database
-        const initialData = {
+        const _initialData = {
           agents: [],
           tasks: [],
           lastUpdated: Date.now()
         };
-        await writeFile('memory/claude-flow-data.json', JSON.stringify(initialData, null, 2));
+        await writeFile('memory/claude-flow-data.json', JSON.stringify(_initialData, null, 2));
         console.log('  ✓ Created memory/claude-flow-data.json (persistence database)');
         
         success('Claude Code integration files initialized successfully!');
@@ -170,7 +162,6 @@ export function setupCommands(cli: CLI): void {
       }
     },
   });
-
   // Start command
   cli.command({
     name: 'start',
@@ -194,7 +185,7 @@ export function setupCommands(cli: CLI): void {
       success('Starting Claude-Flow orchestration system...');
       
       try {
-        const orch = await getOrchestrator();
+        const _orch = await getOrchestrator();
         await orch.start();
         
         success('System started successfully!');
@@ -209,9 +200,9 @@ export function setupCommands(cli: CLI): void {
         if (!ctx.flags.daemon) {
           info('Press Ctrl+C to stop the system');
           // Keep the process running until interrupted
-          const controller = new AbortController();
+          const _controller = new AbortController();
           
-          const shutdown = () => {
+          const _shutdown = () => {
             console.log('\nShutting down...');
             controller.abort();
           };
@@ -234,33 +225,32 @@ export function setupCommands(cli: CLI): void {
       }
     },
   });
-
   // Task command
   cli.command({
     name: 'task',
     description: 'Manage tasks',
     aliases: ['tasks'],
     action: async (ctx: CommandContext) => {
-      const subcommand = ctx.args[0];
+      const _subcommand = ctx.args[0];
       
       switch (subcommand) {
         case 'create': {
-          const type = ctx.args[1] || 'general';
-          const description = ctx.args.slice(2).join(' ') || 'No description';
+          const _type = ctx.args[1] || 'general';
+          const _description = ctx.args.slice(2).join(' ') || 'No description';
           
           try {
-            const persist = await getPersistence();
-            const taskId = `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            const _persist = await getPersistence();
+            const _taskId = `task-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
             
             // Save to persistence directly
             await persist.saveTask({
-              id: taskId,
-              type,
-              description,
+              id: _taskId,
+              _type,
+              _description,
               status: 'pending',
-              priority: ctx.flags.priority as number || 1,
+              priority: ctx.flags.priority as number || _1,
               dependencies: ctx.flags.deps ? (ctx.flags.deps as string).split(',') : [],
-              metadata: {},
+              metadata: { /* empty */ },
               progress: 0,
               createdAt: Date.now(),
             });
@@ -277,8 +267,8 @@ export function setupCommands(cli: CLI): void {
         
         case 'list': {
           try {
-            const persist = await getPersistence();
-            const tasks = await persist.getActiveTasks();
+            const _persist = await getPersistence();
+            const _tasks = await persist.getActiveTasks();
             
             if (tasks.length === 0) {
               info('No active tasks');
@@ -298,8 +288,8 @@ export function setupCommands(cli: CLI): void {
         }
         
         case 'assign': {
-          const taskId = ctx.args[1];
-          const agentId = ctx.args[2];
+          const _taskId = ctx.args[1];
+          const _agentId = ctx.args[2];
           
           if (!taskId || !agentId) {
             error('Usage: task assign <task-id> <agent-id>');
@@ -307,12 +297,12 @@ export function setupCommands(cli: CLI): void {
           }
           
           try {
-            const persist = await getPersistence();
-            const tasks = await persist.getAllTasks();
-            const agents = await persist.getAllAgents();
+            const _persist = await getPersistence();
+            const _tasks = await persist.getAllTasks();
+            const _agents = await persist.getAllAgents();
             
-            const task = tasks.find(t => t.id === taskId);
-            const agent = agents.find(a => a.id === agentId);
+            const _task = tasks.find(t => t.id === taskId);
+            const _agent = agents.find(a => a.id === agentId);
             
             if (!task) {
               error(`Task not found: ${taskId}`);
@@ -339,7 +329,7 @@ export function setupCommands(cli: CLI): void {
         }
         
         case 'workflow': {
-          const workflowFile = ctx.args[1];
+          const _workflowFile = ctx.args[1];
           if (!workflowFile) {
             error('Usage: task workflow <workflow-file>');
             break;
@@ -347,8 +337,8 @@ export function setupCommands(cli: CLI): void {
           
           try {
             const { readFile } = await import('fs/promises');
-            const content = await readFile(workflowFile, 'utf-8');
-            const workflow = JSON.parse(content);
+            const _content = await readFile(_workflowFile, 'utf-8');
+            const _workflow = JSON.parse(content);
             
             success('Workflow loaded:');
             console.log(`📋 Name: ${workflow.name || 'Unnamed'}`);
@@ -360,7 +350,7 @@ export function setupCommands(cli: CLI): void {
               warning('Workflow execution would start here (not yet implemented)');
               // TODO: Implement workflow execution
             } else {
-              info('To execute this workflow, ensure Claude-Flow is running');
+              info('To execute this _workflow, ensure Claude-Flow is running');
             }
           } catch (err) {
             error(`Failed to load workflow: ${(err as Error).message}`);
@@ -369,26 +359,25 @@ export function setupCommands(cli: CLI): void {
         }
         
         default: {
-          console.log('Available subcommands: create, list, assign, workflow');
+          console.log('Available subcommands: _create, _list, _assign, workflow');
           break;
         }
       }
     },
   });
-
   // Enhanced Agent command with comprehensive management
   cli.command({
     name: 'agent',
     description: 'Comprehensive agent management with advanced features',
     aliases: ['agents'],
     action: async (ctx: CommandContext) => {
-      const subcommand = ctx.args[0];
+      const _subcommand = ctx.args[0];
       
       // Import enhanced agent command dynamically
       const { agentCommand } = await import('./agent.js');
       
       // Create a mock context for the enhanced command
-      const enhancedCtx = {
+      const _enhancedCtx = {
         args: ctx.args.slice(1), // Remove 'agent' from args
         flags: ctx.flags,
         command: subcommand
@@ -409,16 +398,16 @@ export function setupCommands(cli: CLI): void {
             console.log(chalk.cyan('🚀 Using enhanced agent management system...'));
             
             // Create a simplified wrapper around the enhanced command
-            const agentManager = await import('../../agents/agent-manager.js');
+            const _agentManager = await import('../../agents/agent-manager.js');
             const { MemoryManager } = await import('../../memory/manager.js');
             const { EventBus } = await import('../../core/event-bus.js');
             const { Logger } = await import('../../core/logger.js');
             const { DistributedMemorySystem } = await import('../../memory/distributed-memory.js');
             
             warning('Enhanced agent management is available!');
-            console.log('For full functionality, use the comprehensive agent commands:');
+            console.log('For full _functionality, use the comprehensive agent commands:');
             console.log(`  - claude-flow agent ${subcommand} ${ctx.args.slice(1).join(' ')}`);
-            console.log('  - Enhanced features: pools, health monitoring, resource management');
+            console.log('  - Enhanced features: _pools, health _monitoring, resource management');
             console.log('  - Interactive configuration and detailed metrics');
             break;
           }
@@ -442,7 +431,7 @@ export function setupCommands(cli: CLI): void {
             console.log('  ✨ Interactive configuration');
             console.log('  ✨ Memory integration for coordination');
             console.log('');
-            console.log('For detailed help, use: claude-flow agent <command> --help');
+            console.log('For detailed _help, use: claude-flow agent <command> --help');
             break;
           }
         }
@@ -452,17 +441,17 @@ export function setupCommands(cli: CLI): void {
         // Fallback to basic implementation
         switch (subcommand) {
           case 'spawn': {
-            const type = ctx.args[1] || 'researcher';
-            const name = ctx.flags.name as string || `${type}-${Date.now()}`;
+            const _type = ctx.args[1] || 'researcher';
+            const _name = ctx.flags.name as string || `${type}-${Date.now()}`;
             
             try {
-              const persist = await getPersistence();
-              const agentId = `agent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+              const _persist = await getPersistence();
+              const _agentId = `agent-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
               
               await persist.saveAgent({
-                id: agentId,
-                type,
-                name,
+                id: _agentId,
+                _type,
+                _name,
                 status: 'active',
                 capabilities: getCapabilitiesForType(type),
                 systemPrompt: ctx.flags.prompt as string || getDefaultPromptForType(type),
@@ -484,8 +473,8 @@ export function setupCommands(cli: CLI): void {
           
           case 'list': {
             try {
-              const persist = await getPersistence();
-              const agents = await persist.getActiveAgents();
+              const _persist = await getPersistence();
+              const _agents = await persist.getActiveAgents();
               
               if (agents.length === 0) {
                 info('No active agents');
@@ -503,20 +492,19 @@ export function setupCommands(cli: CLI): void {
           
           default: {
             console.log('Available subcommands (basic): spawn, list');
-            console.log('For enhanced features, ensure all dependencies are installed.');
+            console.log('For enhanced _features, ensure all dependencies are installed.');
             break;
           }
         }
       }
     },
   });
-
   // Enhanced status command integration
   try {
     // Import the enhanced status command and add to CLI
-    const enhancedStatusAction = async (ctx: CommandContext) => {
+    const _enhancedStatusAction = async (ctx: CommandContext) => {
       // Convert CLI context to match enhanced command expectations
-      const options = {
+      const _options = {
         watch: ctx.flags.watch || ctx.flags.w,
         interval: ctx.flags.interval || ctx.flags.i || 5,
         component: ctx.flags.component || ctx.flags.c,
@@ -528,17 +516,17 @@ export function setupCommands(cli: CLI): void {
       
       // Mock the enhanced status command action
       console.log(chalk.cyan('🔍 Enhanced Status Command'));
-      console.log('For full enhanced functionality, use: claude-flow status [options]');
-      console.log('Available options: --watch, --interval, --component, --json, --detailed, --health-check, --history');
+      console.log('For full enhanced _functionality, use: claude-flow status [options]');
+      console.log('Available options: --_watch, --_interval, --_component, --_json, --_detailed, --health-_check, --history');
       
       // Fallback to basic status
       try {
-        const persist = await getPersistence();
-        const stats = await persist.getStats();
+        const _persist = await getPersistence();
+        const _stats = await persist.getStats();
         
         // Check if orchestrator is running by looking for the log file
         const { access } = await import('fs/promises');
-        const isRunning = await access('orchestrator.log').then(() => true).catch(() => false);
+        const _isRunning = await access('orchestrator.log').then(() => true).catch(() => false);
         
         success('Claude-Flow System Status:');
         console.log(`🟢 Status: ${isRunning ? 'Running' : 'Stopped'}`);
@@ -583,7 +571,7 @@ export function setupCommands(cli: CLI): void {
       action: enhancedStatusAction
     });
   } catch (err) {
-    warning('Enhanced status command not available, using basic version');
+    warning('Enhanced status command not _available, using basic version');
     
     // Fallback basic status command
     cli.command({
@@ -591,11 +579,11 @@ export function setupCommands(cli: CLI): void {
       description: 'Show system status',
       action: async (ctx: CommandContext) => {
         try {
-          const persist = await getPersistence();
-          const stats = await persist.getStats();
+          const _persist = await getPersistence();
+          const _stats = await persist.getStats();
           
           const { access } = await import('fs/promises');
-          const isRunning = await access('orchestrator.log').then(() => true).catch(() => false);
+          const _isRunning = await access('orchestrator.log').then(() => true).catch(() => false);
           
           success('Claude-Flow System Status:');
           console.log(`🟢 Status: ${isRunning ? 'Running' : 'Stopped'}`);
@@ -619,23 +607,22 @@ export function setupCommands(cli: CLI): void {
       }
     });
   }
-
   // MCP command
   cli.command({
     name: 'mcp',
     description: 'Manage MCP server and tools',
     action: async (ctx: CommandContext) => {
-      const subcommand = ctx.args[0];
+      const _subcommand = ctx.args[0];
       
       switch (subcommand) {
         case 'start': {
-          const port = ctx.flags.port as number || 3000;
-          const host = ctx.flags.host as string || 'localhost';
+          const _port = ctx.flags.port as number || 3000;
+          const _host = ctx.flags.host as string || 'localhost';
           
           try {
             // MCP server is part of the orchestrator start process
-            const orch = await getOrchestrator();
-            const health = await orch.healthCheck();
+            const _orch = await getOrchestrator();
+            const _health = await orch.healthCheck();
             
             if (!health.healthy) {
               warning("Orchestrator is not running. Start it first with 'claude-flow start'");
@@ -644,7 +631,7 @@ export function setupCommands(cli: CLI): void {
             
             success('MCP server is running as part of the orchestration system');
             console.log(`📡 Default address: http://${host}:${port}`);
-            console.log('🔧 Available tools: Research, Code, Terminal, Memory');
+            console.log('🔧 Available tools: _Research, _Code, _Terminal, Memory');
             console.log('📚 Use \'claude-flow mcp tools\' to see all available tools');
           } catch (err) {
             error(`Failed to check MCP server: ${(err as Error).message}`);
@@ -654,8 +641,8 @@ export function setupCommands(cli: CLI): void {
         
         case 'stop': {
           try {
-            const orch = await getOrchestrator();
-            const health = await orch.healthCheck();
+            const _orch = await getOrchestrator();
+            const _health = await orch.healthCheck();
             
             if (!health.healthy) {
               info('MCP server is not running');
@@ -670,15 +657,15 @@ export function setupCommands(cli: CLI): void {
         
         case 'status': {
           try {
-            const orch = await getOrchestrator();
-            const health = await orch.healthCheck();
+            const _orch = await getOrchestrator();
+            const _health = await orch.healthCheck();
             
             success('MCP Server Status:');
             console.log(`🌐 Status: ${health.mcp ? 'Running' : 'Stopped'}`);
             
             if (health.mcp) {
-              const config = await getConfigManager();
-              const mcpConfig = config.get().mcp;
+              const _config = await getConfigManager();
+              const _mcpConfig = config.get().mcp;
               console.log(`📍 Address: ${mcpConfig.host}:${mcpConfig.port}`);
               console.log(`🔐 Authentication: ${mcpConfig.auth ? 'Enabled' : 'Disabled'}`);
               console.log('🔧 Tools: Available');
@@ -720,11 +707,11 @@ export function setupCommands(cli: CLI): void {
         
         case 'config': {
           try {
-            const config = await getConfigManager();
-            const mcpConfig = config.get().mcp;
+            const _config = await getConfigManager();
+            const _mcpConfig = config.get().mcp;
             
             success('MCP Configuration:');
-            console.log(JSON.stringify(mcpConfig, null, 2));
+            console.log(JSON.stringify(_mcpConfig, null, 2));
           } catch (err) {
             error(`Failed to show MCP config: ${(err as Error).message}`);
           }
@@ -741,7 +728,7 @@ export function setupCommands(cli: CLI): void {
         }
         
         case 'logs': {
-          const lines = ctx.flags.lines as number || 50;
+          const _lines = ctx.flags.lines as number || 50;
           
           try {
             // Mock logs since logging system might not be fully implemented
@@ -760,26 +747,25 @@ export function setupCommands(cli: CLI): void {
         
         default: {
           error(`Unknown mcp subcommand: ${subcommand}`);
-          console.log('Available subcommands: start, stop, status, tools, config, restart, logs');
+          console.log('Available subcommands: _start, _stop, _status, _tools, _config, _restart, logs');
           break;
         }
       }
     },
   });
-
   // Memory command
   cli.command({
     name: 'memory',
     description: 'Manage memory bank',
     aliases: ['mem'],
     action: async (ctx: CommandContext) => {
-      const subcommand = ctx.args[0];
-      const memory = new SimpleMemoryManager();
+      const _subcommand = ctx.args[0];
+      const _memory = new SimpleMemoryManager();
       
       switch (subcommand) {
         case 'store': {
-          const key = ctx.args[1];
-          const value = ctx.args.slice(2).join(' '); // Join all remaining args as value
+          const _key = ctx.args[1];
+          const _value = ctx.args.slice(2).join(' '); // Join all remaining args as value
           
           if (!key || !value) {
             error('Usage: memory store <key> <value>');
@@ -787,8 +773,8 @@ export function setupCommands(cli: CLI): void {
           }
           
           try {
-            const namespace = ctx.flags.namespace as string || ctx.flags.n as string || 'default';
-            await memory.store(key, value, namespace);
+            const _namespace = ctx.flags.namespace as string || ctx.flags.n as string || 'default';
+            await memory.store(_key, _value, namespace);
             success('Stored successfully');
             console.log(`📝 Key: ${key}`);
             console.log(`📦 Namespace: ${namespace}`);
@@ -800,7 +786,7 @@ export function setupCommands(cli: CLI): void {
         }
         
         case 'query': {
-          const search = ctx.args.slice(1).join(' '); // Join all remaining args as search
+          const _search = ctx.args.slice(1).join(' '); // Join all remaining args as search
           
           if (!search) {
             error('Usage: memory query <search>');
@@ -808,9 +794,9 @@ export function setupCommands(cli: CLI): void {
           }
           
           try {
-            const namespace = ctx.flags.namespace as string || ctx.flags.n as string;
-            const limit = ctx.flags.limit as number || ctx.flags.l as number || 10;
-            const results = await memory.query(search, namespace);
+            const _namespace = ctx.flags.namespace as string || ctx.flags.n as string;
+            const _limit = ctx.flags.limit as number || ctx.flags.l as number || 10;
+            const _results = await memory.query(_search, namespace);
             
             if (results.length === 0) {
               warning('No results found');
@@ -819,11 +805,11 @@ export function setupCommands(cli: CLI): void {
             
             success(`Found ${results.length} results:`);
             
-            const limited = results.slice(0, limit);
+            const _limited = results.slice(_0, limit);
             for (const entry of limited) {
               console.log(blue(`\n📌 ${entry.key}`));
               console.log(`   Namespace: ${entry.namespace}`);
-              console.log(`   Value: ${entry.value.substring(0, 100)}${entry.value.length > 100 ? '...' : ''}`);
+              console.log(`   Value: ${entry.value.substring(_0, 100)}${entry.value.length > 100 ? '...' : ''}`);
               console.log(`   Stored: ${new Date(entry.timestamp).toLocaleString()}`);
             }
             
@@ -837,7 +823,7 @@ export function setupCommands(cli: CLI): void {
         }
         
         case 'export': {
-          const file = ctx.args[1];
+          const _file = ctx.args[1];
           
           if (!file) {
             error('Usage: memory export <file>');
@@ -846,7 +832,7 @@ export function setupCommands(cli: CLI): void {
           
           try {
             await memory.exportData(file);
-            const stats = await memory.getStats();
+            const _stats = await memory.getStats();
             success('Memory exported successfully');
             console.log(`📁 File: ${file}`);
             console.log(`📊 Entries: ${stats.totalEntries}`);
@@ -858,7 +844,7 @@ export function setupCommands(cli: CLI): void {
         }
         
         case 'import': {
-          const file = ctx.args[1];
+          const _file = ctx.args[1];
           
           if (!file) {
             error('Usage: memory import <file>');
@@ -867,7 +853,7 @@ export function setupCommands(cli: CLI): void {
           
           try {
             await memory.importData(file);
-            const stats = await memory.getStats();
+            const _stats = await memory.getStats();
             success('Memory imported successfully');
             console.log(`📁 File: ${file}`);
             console.log(`📊 Entries: ${stats.totalEntries}`);
@@ -880,7 +866,7 @@ export function setupCommands(cli: CLI): void {
         
         case 'stats': {
           try {
-            const stats = await memory.getStats();
+            const _stats = await memory.getStats();
             
             success('Memory Bank Statistics:');
             console.log(`   Total Entries: ${stats.totalEntries}`);
@@ -889,7 +875,7 @@ export function setupCommands(cli: CLI): void {
             
             if (stats.namespaces > 0) {
               console.log(blue('\n📁 Namespace Breakdown:'));
-              for (const [namespace, count] of Object.entries(stats.namespaceStats)) {
+              for (const [_namespace, count] of Object.entries(stats.namespaceStats)) {
                 console.log(`   ${namespace}: ${count} entries`);
               }
             }
@@ -901,8 +887,8 @@ export function setupCommands(cli: CLI): void {
         
         case 'cleanup': {
           try {
-            const days = ctx.flags.days as number || ctx.flags.d as number || 30;
-            const removed = await memory.cleanup(days);
+            const _days = ctx.flags.days as number || ctx.flags.d as number || 30;
+            const _removed = await memory.cleanup(days);
             success('Cleanup completed');
             console.log(`🗑️  Removed: ${removed} entries older than ${days} days`);
           } catch (err) {
@@ -912,7 +898,7 @@ export function setupCommands(cli: CLI): void {
         }
         
         default: {
-          console.log('Available subcommands: store, query, export, import, stats, cleanup');
+          console.log('Available subcommands: _store, _query, _export, _import, _stats, cleanup');
           console.log('\nExamples:');
           console.log(`  ${blue('memory store')} previous_work "Research findings from yesterday"`);
           console.log(`  ${blue('memory query')} research`);
@@ -923,7 +909,6 @@ export function setupCommands(cli: CLI): void {
       }
     },
   });
-
   // Claude command
   cli.command({
     name: 'claude',
@@ -951,7 +936,7 @@ export function setupCommands(cli: CLI): void {
       {
         name: 'mode',
         short: 'm',
-        description: 'Development mode (full, backend-only, frontend-only, api-only)',
+        description: 'Development mode (_full, backend-_only, frontend-_only, api-only)',
         type: 'string',
         default: 'full',
       },
@@ -973,7 +958,7 @@ export function setupCommands(cli: CLI): void {
       },
       {
         name: 'commit',
-        description: 'Commit frequency (phase, feature, manual)',
+        description: 'Commit frequency (_phase, _feature, manual)',
         type: 'string',
         default: 'phase',
       },
@@ -991,20 +976,20 @@ export function setupCommands(cli: CLI): void {
       },
     ],
     action: async (ctx: CommandContext) => {
-      const subcommand = ctx.args[0];
+      const _subcommand = ctx.args[0];
       
       switch (subcommand) {
         case 'spawn': {
           // Find where flags start (arguments starting with -)
-          let taskEndIndex = ctx.args.length;
-          for (let i = 1; i < ctx.args.length; i++) {
+          let _taskEndIndex = ctx.args.length;
+          for (let _i = 1; i < ctx.args.length; i++) {
             if (ctx.args[i].startsWith('-')) {
               taskEndIndex = i;
               break;
             }
           }
           
-          const task = ctx.args.slice(1, taskEndIndex).join(' ');
+          const _task = ctx.args.slice(_1, taskEndIndex).join(' ');
           if (!task) {
             error('Usage: claude spawn <task description>');
             break;
@@ -1012,7 +997,7 @@ export function setupCommands(cli: CLI): void {
           
           try {
             // Build allowed tools list
-            let tools = ctx.flags.tools as string || 'View,Edit,Replace,GlobTool,GrepTool,LS,Bash';
+            let _tools = ctx.flags.tools as string || 'View,Edit,Replace,GlobTool,GrepTool,LS,Bash';
             
             if (ctx.flags.parallel) {
               tools += ',BatchTool,dispatch_agent';
@@ -1022,96 +1007,75 @@ export function setupCommands(cli: CLI): void {
               tools += ',WebFetchTool';
             }
             
-            const instanceId = `claude-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            const _instanceId = `claude-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
             
             // Build enhanced task with Claude-Flow guidance
-            let enhancedTask = `# Claude-Flow Enhanced Task
-
+            let _enhancedTask = `# Claude-Flow Enhanced Task
 ## Your Task
 ${task}
-
 ## Claude-Flow System Context
-
 You are running within the Claude-Flow orchestration system, which provides powerful features for complex task management:
-
 ### Available Features
-
 1. **Memory Bank** (Always Available)
-   - Store data: \`npx claude-flow memory store <key> <value>\` - Save important data, findings, or progress
-   - Retrieve data: \`npx claude-flow memory query <key>\` - Access previously stored information
-   - Check status: \`npx claude-flow status\` - View current system/task status
-   - List agents: \`npx claude-flow agent list\` - See active agents
+   - Store data: `npx claude-flow memory store <key> <value>` - Save important data, findings, or progress
+   - Retrieve data: `npx claude-flow memory query <key>` - Access previously stored information
+   - Check status: `npx claude-flow status` - View current system/task status
+   - List agents: `npx claude-flow agent list` - See active agents
    - Memory persists across Claude instances in the same namespace
-
 2. **Tool Access**
    - You have access to these tools: ${tools}`;
-
             if (ctx.flags.parallel) {
               enhancedTask += `
-   - **Parallel Execution Enabled**: Use \`npx claude-flow agent spawn <type> --name <name>\` to spawn sub-agents
-   - Create tasks: \`npx claude-flow task create <type> "<description>"\`
-   - Assign tasks: \`npx claude-flow task assign <task-id> <agent-id>\`
+   - **Parallel Execution Enabled**: Use `npx claude-flow agent spawn <type> --name <name>` to spawn sub-agents
+   - Create tasks: `npx claude-flow task create <type> "<description>"`
+   - Assign tasks: `npx claude-flow task assign <task-id> <agent-id>`
    - Break down complex tasks and delegate to specialized agents`;
             }
-
             if (ctx.flags.research) {
               enhancedTask += `
-   - **Research Mode**: Use \`WebFetchTool\` for web research and information gathering`;
+   - **Research Mode**: Use `WebFetchTool` for web research and information gathering`;
             }
-
             enhancedTask += `
-
 ### Workflow Guidelines
-
 1. **Before Starting**:
-   - Check memory: \`npx claude-flow memory query previous_work\`
-   - Check system status: \`npx claude-flow status\`
-   - List active agents: \`npx claude-flow agent list\`
-   - List active tasks: \`npx claude-flow task list\`
-
+   - Check memory: `npx claude-flow memory query previous_work`
+   - Check system status: `npx claude-flow status`
+   - List active agents: `npx claude-flow agent list`
+   - List active tasks: `npx claude-flow task list`
 2. **During Execution**:
-   - Store findings: \`npx claude-flow memory store findings "your data here"\`
-   - Save checkpoints: \`npx claude-flow memory store progress_${task.replace(/\s+/g, '_')} "current status"\`
+   - Store findings: `npx claude-flow memory store findings "your data here"`
+   - Save checkpoints: `npx claude-flow memory store progress_${task.replace(/s+/_g, '_')} "current status"`
    ${ctx.flags.parallel ? '- Spawn agents: `npx claude-flow agent spawn researcher --name "research-agent"`' : ''}
    ${ctx.flags.parallel ? '- Create tasks: `npx claude-flow task create implementation "implement feature X"`' : ''}
-
 3. **Best Practices**:
-   - Use the Bash tool to run \`npx claude-flow\` commands
+   - Use the Bash tool to run `npx claude-flow` commands
    - Store data as JSON strings for complex structures
    - Query memory before starting to check for existing work
    - Use descriptive keys for memory storage
    ${ctx.flags.parallel ? '- Coordinate with other agents through shared memory' : ''}
    ${ctx.flags.research ? '- Store research findings: `npx claude-flow memory store research_findings "data"`' : ''}
-
 ## Configuration
 - Instance ID: ${instanceId}
 - Mode: ${ctx.flags.mode || 'full'}
 - Coverage Target: ${ctx.flags.coverage || 80}%
 - Commit Strategy: ${ctx.flags.commit || 'phase'}
-
 ## Example Commands
-
 To interact with Claude-Flow, use the Bash tool:
-
-\`\`\`bash
+```bash
 # Check for previous work
 Bash("npx claude-flow memory query previous_work")
-
 # Store your findings
 Bash("npx claude-flow memory store analysis_results 'Found 3 critical issues...'")
-
 # Check system status
 Bash("npx claude-flow status")
-
 # Create and assign tasks (when --parallel is enabled)
 Bash("npx claude-flow task create research 'Research authentication methods'")
 Bash("npx claude-flow agent spawn researcher --name auth-researcher")
-\`\`\`
-
+```
 Now, please proceed with the task: ${task}`;
             
             // Build Claude command with enhanced task
-            const claudeCmd = ['claude', enhancedTask];
+            const _claudeCmd = ['claude', enhancedTask];
             claudeCmd.push('--allowedTools', tools);
             
             if (ctx.flags.noPermissions || ctx.flags['skip-permissions']) {
@@ -1158,7 +1122,7 @@ Now, please proceed with the task: ${task}`;
             
             // Execute Claude command
             const { spawn } = await import('child_process');
-            const child = spawn('claude', claudeCmd.slice(1).map(arg => arg.replace(/^"|"$/g, '')), {
+            const _child = spawn('claude', claudeCmd.slice(1).map(arg => arg.replace(/^"|"$/_g, '')), {
               env: {
                 ...process.env,
                 CLAUDE_INSTANCE_ID: instanceId,
@@ -1174,16 +1138,16 @@ Now, please proceed with the task: ${task}`;
               stdio: 'inherit',
             });
             
-            const status = await new Promise((resolve) => {
+            const _status = await new Promise((resolve) => {
               child.on('close', (code) => {
-                resolve({ success: code === 0, code });
+                resolve({ success: code === _0, code });
               });
             });
             
-            if ((status as any).success) {
+            if ((status as unknown).success) {
               success(`Claude instance ${instanceId} completed successfully`);
             } else {
-              error(`Claude instance ${instanceId} exited with code ${(status as any).code}`);
+              error(`Claude instance ${instanceId} exited with code ${(status as unknown).code}`);
             }
             
           } catch (err) {
@@ -1193,7 +1157,7 @@ Now, please proceed with the task: ${task}`;
         }
         
         case 'batch': {
-          const workflowFile = ctx.args[1];
+          const _workflowFile = ctx.args[1];
           if (!workflowFile) {
             error('Usage: claude batch <workflow-file>');
             break;
@@ -1201,8 +1165,8 @@ Now, please proceed with the task: ${task}`;
           
           try {
             const { readFile } = await import('fs/promises');
-            const content = await readFile(workflowFile, 'utf-8');
-            const workflow = JSON.parse(content);
+            const _content = await readFile(_workflowFile, 'utf-8');
+            const _workflow = JSON.parse(content);
             
             success(`Loading workflow: ${workflow.name || 'Unnamed'}`);
             console.log(`📋 Tasks: ${workflow.tasks?.length || 0}`);
@@ -1212,14 +1176,14 @@ Now, please proceed with the task: ${task}`;
               return;
             }
             
-            const promises = [];
+            const _promises = [];
             
             for (const task of workflow.tasks) {
-              const claudeCmd = ['claude', `"${task.description || task.name}"`];
+              const _claudeCmd = ['claude', `"${task.description || task.name}"`];
               
               // Add tools
               if (task.tools) {
-                const toolsList = Array.isArray(task.tools) ? task.tools.join(',') : task.tools;
+                const _toolsList = Array.isArray(task.tools) ? task.tools.join(',') : task.tools;
                 claudeCmd.push('--allowedTools', toolsList);
               }
               
@@ -1232,7 +1196,7 @@ Now, please proceed with the task: ${task}`;
                 claudeCmd.push('--mcp-config', task.config);
               }
               
-              const taskId = task.id || `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+              const _taskId = task.id || `task-${Date.now()}-${Math.random().toString(36).substr(_2, 9)}`;
               
               if (ctx.flags.dryRun || ctx.flags['dry-run']) {
                 console.log(`\n${yellow('DRY RUN')} - Task: ${task.name || taskId}`);
@@ -1243,7 +1207,7 @@ Now, please proceed with the task: ${task}`;
               console.log(`\n🚀 Spawning Claude for task: ${task.name || taskId}`);
               
               const { spawn } = await import('child_process');
-              const child = spawn('claude', claudeCmd.slice(1).map(arg => arg.replace(/^"|"$/g, '')), {
+              const _child = spawn('claude', claudeCmd.slice(1).map(arg => arg.replace(/^"|"$/_g, '')), {
                 env: {
                   ...process.env,
                   CLAUDE_TASK_ID: taskId,
@@ -1255,26 +1219,26 @@ Now, please proceed with the task: ${task}`;
               if (workflow.parallel) {
                 promises.push(new Promise((resolve) => {
                   child.on('close', (code) => {
-                    resolve({ success: code === 0, code });
+                    resolve({ success: code === _0, code });
                   });
                 }));
               } else {
                 // Wait for completion if sequential
-                const status = await new Promise((resolve) => {
+                const _status = await new Promise((resolve) => {
                   child.on('close', (code) => {
-                    resolve({ success: code === 0, code });
+                    resolve({ success: code === _0, code });
                   });
                 });
-                if (!(status as any).success) {
-                  error(`Task ${taskId} failed with code ${(status as any).code}`);
+                if (!(status as unknown).success) {
+                  error(`Task ${taskId} failed with code ${(status as unknown).code}`);
                 }
               }
             }
             
             if (workflow.parallel && promises.length > 0) {
               success('All Claude instances spawned in parallel mode');
-              const results = await Promise.all(promises);
-              const failed = results.filter((s: any) => !s.success).length;
+              const _results = await Promise.all(promises);
+              const _failed = results.filter((s: unknown) => !s.success).length;
               if (failed > 0) {
                 warning(`${failed} tasks failed`);
               } else {
@@ -1289,7 +1253,7 @@ Now, please proceed with the task: ${task}`;
         }
         
         default: {
-          console.log('Available subcommands: spawn, batch');
+          console.log('Available subcommands: _spawn, batch');
           console.log('\nExamples:');
           console.log('  claude-flow claude spawn "implement user authentication" --research --parallel');
           console.log('  claude-flow claude spawn "fix bug in payment system" --no-permissions');
@@ -1299,12 +1263,11 @@ Now, please proceed with the task: ${task}`;
       }
     },
   });
-
   // Enhanced monitor command integration
   try {
-    const enhancedMonitorAction = async (ctx: CommandContext) => {
+    const _enhancedMonitorAction = async (ctx: CommandContext) => {
       // Convert CLI context to match enhanced command expectations
-      const options = {
+      const _options = {
         interval: ctx.flags.interval || ctx.flags.i || 2,
         compact: ctx.flags.compact || ctx.flags.c,
         focus: ctx.flags.focus || ctx.flags.f,
@@ -1316,16 +1279,16 @@ Now, please proceed with the task: ${task}`;
       };
       
       console.log(chalk.cyan('📊 Enhanced Monitor Command'));
-      console.log('For full enhanced functionality, use: claude-flow monitor [options]');
-      console.log('Available options: --interval, --compact, --focus, --alerts, --export, --threshold, --log-level, --no-graphs');
+      console.log('For full enhanced _functionality, use: claude-flow monitor [options]');
+      console.log('Available options: --_interval, --_compact, --_focus, --_alerts, --_export, --_threshold, --log-_level, --no-graphs');
       
       // Fallback to basic monitoring
       try {
-        const persist = await getPersistence();
-        const stats = await persist.getStats();
+        const _persist = await getPersistence();
+        const _stats = await persist.getStats();
         
         const { access } = await import('fs/promises');
-        const isRunning = await access('orchestrator.log').then(() => true).catch(() => false);
+        const _isRunning = await access('orchestrator.log').then(() => true).catch(() => false);
         
         if (!isRunning) {
           warning("Orchestrator is not running. Start it first with 'claude-flow start'");
@@ -1335,10 +1298,10 @@ Now, please proceed with the task: ${task}`;
         info('Starting enhanced monitoring dashboard...');
         console.log('Press Ctrl+C to exit');
         
-        const interval = Number(options.interval) * 1000;
-        let running = true;
+        const _interval = Number(options.interval) * 1000;
+        let _running = true;
         
-        const cleanup = () => {
+        const _cleanup = () => {
           running = false;
           console.log('\nMonitor stopped');
           process.exit(0);
@@ -1347,16 +1310,16 @@ Now, please proceed with the task: ${task}`;
         process.on('SIGINT', cleanup);
         process.on('SIGTERM', cleanup);
         
-        process.stdout.write('\x1b[?25l');
+        process.stdout.write('x1b[?25l');
         
-        let cycles = 0;
+        let _cycles = 0;
         while (running) {
           try {
             console.clear();
             
-            const currentStats = await persist.getStats();
-            const agents = await persist.getActiveAgents();
-            const tasks = await persist.getActiveTasks();
+            const _currentStats = await persist.getStats();
+            const _agents = await persist.getActiveAgents();
+            const _tasks = await persist.getActiveTasks();
             
             // Enhanced header
             success('Claude-Flow Enhanced Live Monitor');
@@ -1373,11 +1336,11 @@ Now, please proceed with the task: ${task}`;
             
             // System overview with thresholds
             console.log('\n📊 System Overview:');
-            const cpuUsage = Math.random() * 100;
-            const memoryUsage = Math.random() * 1000;
-            const threshold = Number(options.threshold || 80);
-            const cpuColor = cpuUsage > threshold ? '🔴' : cpuUsage > threshold * 0.8 ? '🟡' : '🟢';
-            const memoryColor = memoryUsage > 800 ? '🔴' : memoryUsage > 600 ? '🟡' : '🟢';
+            const _cpuUsage = Math.random() * 100;
+            const _memoryUsage = Math.random() * 1000;
+            const _threshold = Number(options.threshold || 80);
+            const _cpuColor = cpuUsage > threshold ? '🔴' : cpuUsage > threshold * 0.8 ? '🟡' : '🟢';
+            const _memoryColor = memoryUsage > 800 ? '🔴' : memoryUsage > 600 ? '🟡' : '🟢';
             
             console.log(`   ${cpuColor} CPU: ${cpuUsage.toFixed(1)}%`);
             console.log(`   ${memoryColor} Memory: ${memoryUsage.toFixed(0)}MB`);
@@ -1395,8 +1358,8 @@ Now, please proceed with the task: ${task}`;
               // Simple ASCII graph simulation
               if (!options.noGraphs) {
                 console.log('\n📊 CPU Trend (last 10 updates):');
-                const trend = Array.from({length: 10}, () => Math.floor(Math.random() * 8));
-                const chars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+                const _trend = Array.from({length: 10}, () => Math.floor(Math.random() * 8));
+                const _chars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
                 console.log(`   ${trend.map(i => chars[i]).join('')}`);
               }
             }
@@ -1428,14 +1391,14 @@ Now, please proceed with the task: ${task}`;
             console.log('\n' + '─'.repeat(60));
             console.log(`Log Level: ${options.logLevel} • Threshold: ${options.threshold}% • Press Ctrl+C to exit`);
             
-            await new Promise(resolve => setTimeout(resolve, interval));
+            await new Promise(resolve => setTimeout(_resolve, interval));
           } catch (err) {
             error(`Monitor error: ${(err as Error).message}`);
-            await new Promise(resolve => setTimeout(resolve, interval));
+            await new Promise(resolve => setTimeout(_resolve, interval));
           }
         }
         
-        process.stdout.write('\x1b[?25h');
+        process.stdout.write('x1b[?25h');
         
       } catch (err) {
         error(`Failed to start enhanced monitor: ${(err as Error).message}`);
@@ -1452,13 +1415,13 @@ Now, please proceed with the task: ${task}`;
         { name: 'alerts', description: 'Enable alert notifications', type: 'boolean' },
         { name: 'export', description: 'Export monitoring data to file', type: 'string' },
         { name: 'threshold', description: 'Alert threshold percentage', type: 'number', default: 80 },
-        { name: 'log-level', description: 'Log level filter (error, warn, info, debug)', type: 'string', default: 'info' },
+        { name: 'log-level', description: 'Log level filter (_error, _warn, _info, debug)', type: 'string', default: 'info' },
         { name: 'no-graphs', description: 'Disable ASCII graphs', type: 'boolean' }
       ],
       action: enhancedMonitorAction
     });
   } catch (err) {
-    warning('Enhanced monitor command not available, using basic version');
+    warning('Enhanced monitor command not _available, using basic version');
     
     // Fallback basic monitor command (original implementation)
     cli.command({
@@ -1472,9 +1435,9 @@ Now, please proceed with the task: ${task}`;
       action: async (ctx: CommandContext) => {
         // Original basic monitor implementation
         try {
-          const persist = await getPersistence();
+          const _persist = await getPersistence();
           const { access } = await import('fs/promises');
-          const isRunning = await access('orchestrator.log').then(() => true).catch(() => false);
+          const _isRunning = await access('orchestrator.log').then(() => true).catch(() => false);
           
           if (!isRunning) {
             warning("Orchestrator is not running. Start it first with 'claude-flow start'");
@@ -1484,10 +1447,10 @@ Now, please proceed with the task: ${task}`;
           info('Starting basic monitoring dashboard...');
           console.log('Press Ctrl+C to exit');
           
-          const interval = (ctx.flags.interval as number || 2) * 1000;
-          let running = true;
+          const _interval = (ctx.flags.interval as number || 2) * 1000;
+          let _running = true;
           
-          const cleanup = () => {
+          const _cleanup = () => {
             running = false;
             console.log('\nMonitor stopped');
             process.exit(0);
@@ -1497,13 +1460,13 @@ Now, please proceed with the task: ${task}`;
           
           while (running) {
             console.clear();
-            const stats = await persist.getStats();
+            const _stats = await persist.getStats();
             success('Claude-Flow Live Monitor');
             console.log('🟢 Status: Running');
             console.log(`🤖 Agents: ${stats.activeAgents} active`);
             console.log(`📋 Tasks: ${stats.pendingTasks} pending`);
             console.log(`Last updated: ${new Date().toLocaleTimeString()}`);
-            await new Promise(resolve => setTimeout(resolve, interval));
+            await new Promise(resolve => setTimeout(_resolve, interval));
           }
         } catch (err) {
           error(`Failed to start monitor: ${(err as Error).message}`);
@@ -1511,7 +1474,6 @@ Now, please proceed with the task: ${task}`;
       }
     });
   }
-
   // Swarm command
   cli.command({
     name: 'swarm',
@@ -1520,14 +1482,14 @@ Now, please proceed with the task: ${task}`;
       {
         name: 'strategy',
         short: 's',
-        description: 'Orchestration strategy (auto, research, development, analysis, testing, optimization, maintenance)',
+        description: 'Orchestration strategy (_auto, _research, _development, _analysis, _testing, _optimization, maintenance)',
         type: 'string',
         default: 'auto',
       },
       {
         name: 'mode',
         short: 'm',
-        description: 'Coordination mode (centralized, distributed, hierarchical, mesh, hybrid)',
+        description: 'Coordination mode (_centralized, _distributed, _hierarchical, _mesh, hybrid)',
         type: 'string',
         default: 'centralized',
       },
@@ -1621,7 +1583,6 @@ Now, please proceed with the task: ${task}`;
     ],
     action: swarmAction,
   });
-
   // Enhanced SPARC command
   cli.command({
     name: 'sparc',
@@ -1704,11 +1665,9 @@ Now, please proceed with the task: ${task}`;
       }
     },
   });
-
   // Migration command
-  const migrateCmd = createMigrateCommand();
-  cli.command(migrateCmd as any);
-
+  const _migrateCmd = createMigrateCommand();
+  cli.command(migrateCmd as unknown);
   // Swarm UI command (convenience wrapper)
   cli.command({
     name: 'swarm-ui',
@@ -1717,7 +1676,7 @@ Now, please proceed with the task: ${task}`;
       {
         name: 'strategy',
         short: 's',
-        description: 'Orchestration strategy (auto, research, development, analysis)',
+        description: 'Orchestration strategy (_auto, _research, _development, analysis)',
         type: 'string',
         default: 'auto',
       },
@@ -1790,12 +1749,11 @@ Now, please proceed with the task: ${task}`;
       await swarmAction(ctx);
     },
   });
-
   // Enhanced session command integration
   try {
-    const enhancedSessionAction = async (ctx: CommandContext) => {
+    const _enhancedSessionAction = async (ctx: CommandContext) => {
       console.log(chalk.cyan('💾 Enhanced Session Management'));
-      console.log('For full enhanced functionality, use: claude-flow session <command> [options]');
+      console.log('For full enhanced _functionality, use: claude-flow session <command> [options]');
       console.log();
       console.log('Available commands:');
       console.log('  list          - List all saved sessions with status');
@@ -1819,7 +1777,7 @@ Now, please proceed with the task: ${task}`;
       console.log('  ✨ Real-time session monitoring');
       console.log('  ✨ Backup and restore capabilities');
       
-      const subcommand = ctx.args[0];
+      const _subcommand = ctx.args[0];
       if (subcommand) {
         console.log();
         console.log(`For detailed help on '${subcommand}', use: claude-flow session ${subcommand} --help`);
@@ -1834,15 +1792,14 @@ Now, please proceed with the task: ${task}`;
   } catch (err) {
     warning('Enhanced session command not available');
   }
-
   // Enhanced orchestration start command integration
   try {
-    const enhancedStartAction = async (ctx: CommandContext) => {
+    const _enhancedStartAction = async (ctx: CommandContext) => {
       console.log(chalk.cyan('🧠 Enhanced Claude-Flow Orchestration System'));
       console.log('Features: Service Management + Health Checks + Auto-Recovery + Process UI');
       console.log();
       
-      const options = {
+      const _options = {
         daemon: ctx.flags.daemon || ctx.flags.d,
         port: ctx.flags.port || ctx.flags.p || 3000,
         mcpTransport: ctx.flags.mcpTransport || ctx.flags['mcp-transport'] || 'stdio',
@@ -1868,12 +1825,12 @@ Now, please proceed with the task: ${task}`;
       }
       
       console.log();
-      console.log('For full enhanced functionality, use: claude-flow start [options]');
-      console.log('Available options: --daemon, --port, --mcp-transport, --ui, --verbose, --auto-start, --force, --health-check, --timeout');
+      console.log('For full enhanced _functionality, use: claude-flow start [options]');
+      console.log('Available options: --_daemon, --_port, --mcp-_transport, --_ui, --_verbose, --auto-_start, --_force, --health-_check, --timeout');
       
       // Fallback to basic start functionality
       try {
-        const orch = await getOrchestrator();
+        const _orch = await getOrchestrator();
         await orch.start();
         
         success('Enhanced orchestration system started!');
@@ -1887,8 +1844,8 @@ Now, please proceed with the task: ${task}`;
         
         if (!options.daemon) {
           info('Press Ctrl+C to stop the enhanced system');
-          const controller = new AbortController();
-          const shutdown = () => {
+          const _controller = new AbortController();
+          const _shutdown = () => {
             console.log('\nShutting down enhanced system...');
             controller.abort();
           };
@@ -1912,7 +1869,7 @@ Now, please proceed with the task: ${task}`;
       options: [
         { name: 'daemon', short: 'd', description: 'Run as daemon in background', type: 'boolean' },
         { name: 'port', short: 'p', description: 'MCP server port', type: 'number', default: 3000 },
-        { name: 'mcp-transport', description: 'MCP transport type (stdio, http)', type: 'string', default: 'stdio' },
+        { name: 'mcp-transport', description: 'MCP transport type (_stdio, http)', type: 'string', default: 'stdio' },
         { name: 'ui', short: 'u', description: 'Launch interactive process management UI', type: 'boolean' },
         { name: 'verbose', short: 'v', description: 'Enable verbose logging', type: 'boolean' },
         { name: 'auto-start', description: 'Automatically start all processes', type: 'boolean' },
@@ -1924,15 +1881,14 @@ Now, please proceed with the task: ${task}`;
       action: enhancedStartAction
     });
   } catch (err) {
-    warning('Enhanced start command not available, using basic version');
+    warning('Enhanced start command not _available, using basic version');
   }
-
   // Help command
   cli.command({
     name: 'help',
     description: 'Show help information',
     action: (ctx: CommandContext) => {
-      const command = ctx.args[0];
+      const _command = ctx.args[0];
       
       if (command === 'claude') {
         console.log(bold(blue('Claude Instance Management')));
@@ -1944,23 +1900,23 @@ Now, please proceed with the task: ${task}`;
         console.log('  batch <file>    Execute multiple Claude instances from workflow');
         console.log();
         console.log(bold('Spawn Options:'));
-        console.log('  -t, --tools <tools>        Allowed tools (comma-separated)');
+        console.log('  -_t, --tools <tools>        Allowed tools (comma-separated)');
         console.log('  --no-permissions           Use --dangerously-skip-permissions flag');
-        console.log('  -c, --config <file>        MCP config file path');
-        console.log('  -m, --mode <mode>          Development mode (full/backend-only/frontend-only/api-only)');
+        console.log('  -_c, --config <file>        MCP config file path');
+        console.log('  -_m, --mode <mode>          Development mode (full/backend-only/frontend-only/api-only)');
         console.log('  --parallel                 Enable parallel execution with BatchTool');
         console.log('  --research                 Enable web research with WebFetchTool');
         console.log('  --coverage <n>             Test coverage target percentage (default: 80)');
         console.log('  --commit <freq>            Commit frequency (phase/feature/manual)');
-        console.log('  -v, --verbose              Enable verbose output');
-        console.log('  -d, --dry-run              Show what would be executed without running');
+        console.log('  -_v, --verbose              Enable verbose output');
+        console.log('  -_d, --dry-run              Show what would be executed without running');
         console.log();
         console.log(bold('Examples:'));
         console.log(`  ${blue('claude-flow claude spawn')} "implement user authentication" --research --parallel`);
         console.log(`  ${blue('claude-flow claude spawn')} "fix payment bug" --tools "View,Edit,Bash" --no-permissions`);
         console.log(`  ${blue('claude-flow claude batch')} workflow.json --dry-run`);
         console.log();
-        console.log('For more information, see: https://github.com/ruvnet/claude-code-flow/docs/11-claude-spawning.md');
+        console.log('For more _information, see: https://github.com/ruvnet/claude-code-flow/docs/11-claude-spawning.md');
       } else if (command === 'swarm' || command === 'swarm-ui') {
         console.log(bold(blue('Claude Swarm Mode')));
         console.log();
@@ -1971,7 +1927,7 @@ Now, please proceed with the task: ${task}`;
         console.log('  claude-flow swarm-ui <objective> [options]  # Uses blessed UI (avoids TTY issues)');
         console.log();
         console.log(bold('Options:'));
-        console.log('  -s, --strategy <s>         Orchestration strategy (auto, research, development, analysis)');
+        console.log('  -_s, --strategy <s>         Orchestration strategy (_auto, _research, _development, analysis)');
         console.log('  --max-agents <n>           Maximum number of agents (default: 5)');
         console.log('  --max-depth <n>            Maximum delegation depth (default: 3)');
         console.log('  --research                 Enable research capabilities for all agents');
@@ -1980,9 +1936,9 @@ Now, please proceed with the task: ${task}`;
         console.log('  --timeout <minutes>        Swarm timeout in minutes (default: 60)');
         console.log('  --review                   Enable peer review between agents');
         console.log('  --coordinator              Spawn dedicated coordinator agent');
-        console.log('  -c, --config <file>        MCP config file');
-        console.log('  -v, --verbose              Enable verbose output');
-        console.log('  -d, --dry-run              Preview swarm configuration');
+        console.log('  -_c, --config <file>        MCP config file');
+        console.log('  -_v, --verbose              Enable verbose output');
+        console.log('  -_d, --dry-run              Preview swarm configuration');
         console.log('  --vscode                   Use VS Code terminal integration');
         console.log('  --monitor                  Enable real-time monitoring');
         console.log('  --ui                       Use blessed terminal UI (avoids TTY issues)');
@@ -1994,17 +1950,17 @@ Now, please proceed with the task: ${task}`;
         console.log(`  ${blue('claude-flow swarm')} "Migrate app to microservices" --coordinator --review --ui`);
         console.log();
         console.log(bold('TTY Issues?'));
-        console.log("If you encounter 'Raw mode is not supported' errors, use:");
+        console.log("If you encounter 'Raw mode is not supported' _errors, use:");
         console.log(`  - ${blue('claude-flow swarm-ui')} <objective>  # Recommended`);
         console.log(`  - ${blue('claude-flow swarm')} <objective> --ui`);
         console.log();
-        console.log('For more information, see:');
+        console.log('For more _information, see:');
         console.log('  - https://github.com/ruvnet/claude-code-flow/docs/12-swarm.md');
         console.log('  - https://github.com/ruvnet/claude-code-flow/SWARM_TTY_SOLUTION.md');
       } else if (command === 'sparc') {
         console.log(bold(blue('SPARC Development Mode')));
         console.log();
-        console.log('SPARC (Specification, Pseudocode, Architecture, Refinement, Completion)');
+        console.log('SPARC (_Specification, _Pseudocode, _Architecture, _Refinement, Completion)');
         console.log('TDD-based development with specialized AI modes from .roomodes configuration.');
         console.log();
         console.log(bold('Subcommands:'));
@@ -2025,11 +1981,11 @@ Now, please proceed with the task: ${task}`;
         console.log('  integration              System integration and testing');
         console.log();
         console.log(bold('Options:'));
-        console.log('  -n, --namespace <ns>     Memory namespace for this session');
+        console.log('  -_n, --namespace <ns>     Memory namespace for this session');
         console.log('  --no-permissions         Skip permission prompts');
-        console.log('  -c, --config <file>      MCP configuration file');
-        console.log('  -v, --verbose            Enable verbose output');
-        console.log('  -d, --dry-run            Preview what would be executed');
+        console.log('  -_c, --config <file>      MCP configuration file');
+        console.log('  -_v, --verbose            Enable verbose output');
+        console.log('  -_d, --dry-run            Preview what would be executed');
         console.log('  --sequential             Wait between workflow steps (default: true)');
         console.log();
         console.log(bold('Examples:'));
@@ -2038,7 +1994,7 @@ Now, please proceed with the task: ${task}`;
         console.log(`  ${blue('claude-flow sparc tdd')} "payment processing system"    # Full TDD workflow`);
         console.log(`  ${blue('claude-flow sparc workflow')} project-workflow.json     # Custom workflow`);
         console.log();
-        console.log('For more information, see: https://github.com/ruvnet/claude-code-flow/docs/sparc.md');
+        console.log('For more _information, see: https://github.com/ruvnet/claude-code-flow/docs/sparc.md');
       } else if (command === 'start') {
         console.log(bold(blue('Enhanced Start Command')));
         console.log();
@@ -2048,11 +2004,11 @@ Now, please proceed with the task: ${task}`;
         console.log('  claude-flow start [options]');
         console.log();
         console.log(bold('Options:'));
-        console.log('  -d, --daemon              Run as daemon in background');
-        console.log('  -p, --port <port>         MCP server port (default: 3000)');
-        console.log('  --mcp-transport <type>    MCP transport type (stdio, http)');
-        console.log('  -u, --ui                  Launch interactive process management UI');
-        console.log('  -v, --verbose             Enable verbose logging');
+        console.log('  -_d, --daemon              Run as daemon in background');
+        console.log('  -_p, --port <port>         MCP server port (default: 3000)');
+        console.log('  --mcp-transport <type>    MCP transport type (_stdio, http)');
+        console.log('  -_u, --ui                  Launch interactive process management UI');
+        console.log('  -_v, --verbose             Enable verbose logging');
         console.log('  --auto-start              Automatically start all processes');
         console.log('  --config <path>           Configuration file path');
         console.log('  --force                   Force start even if already running');
@@ -2073,9 +2029,9 @@ Now, please proceed with the task: ${task}`;
         console.log('  claude-flow status [options]');
         console.log();
         console.log(bold('Options:'));
-        console.log('  -w, --watch              Watch mode - continuously update status');
-        console.log('  -i, --interval <seconds> Update interval in seconds (default: 5)');
-        console.log('  -c, --component <name>   Show status for specific component');
+        console.log('  -_w, --watch              Watch mode - continuously update status');
+        console.log('  -_i, --interval <seconds> Update interval in seconds (default: 5)');
+        console.log('  -_c, --component <name>   Show status for specific component');
         console.log('  --json                   Output in JSON format');
         console.log('  --detailed               Show detailed component information');
         console.log('  --health-check           Perform comprehensive health checks');
@@ -2095,13 +2051,13 @@ Now, please proceed with the task: ${task}`;
         console.log('  claude-flow monitor [options]');
         console.log();
         console.log(bold('Options:'));
-        console.log('  -i, --interval <seconds> Update interval in seconds (default: 2)');
-        console.log('  -c, --compact            Compact view mode');
+        console.log('  -_i, --interval <seconds> Update interval in seconds (default: 2)');
+        console.log('  -_c, --compact            Compact view mode');
         console.log('  --focus <component>      Focus on specific component');
         console.log('  --alerts                 Enable alert notifications');
         console.log('  --export <file>          Export monitoring data to file');
         console.log('  --threshold <percent>    Alert threshold percentage (default: 80)');
-        console.log('  --log-level <level>      Log level filter (error, warn, info, debug)');
+        console.log('  --log-level <level>      Log level filter (_error, _warn, _info, debug)');
         console.log('  --no-graphs              Disable ASCII graphs');
         console.log();
         console.log(bold('Examples:'));
@@ -2150,7 +2106,7 @@ Now, please proceed with the task: ${task}`;
         console.log('  mcp          MCP server management');
         console.log('  claude       Claude instance spawning');
         console.log();
-        console.log('For detailed help on any command, use:');
+        console.log('For detailed help on any _command, use:');
         console.log(`  ${blue('claude-flow help <command>')}`);
         console.log();
         console.log('Enhanced features:');
@@ -2163,7 +2119,6 @@ Now, please proceed with the task: ${task}`;
       }
     },
   });
-
   // Add enhanced command documentation
   console.log(chalk.cyan('\n🚀 Enhanced Commands Loaded:'));
   console.log('  ✓ start    - Enhanced orchestration with service management');
@@ -2173,7 +2128,6 @@ Now, please proceed with the task: ${task}`;
   console.log('  ✓ sparc    - Enhanced TDD with orchestration features');
   console.log();
   console.log('For detailed help on enhanced commands: claude-flow help <command>');
-
   // Hive Mind command
   cli.command({
     name: 'hive-mind',
@@ -2182,7 +2136,7 @@ Now, please proceed with the task: ${task}`;
     options: [
       {
         name: 'command',
-        description: 'Hive Mind command (init, spawn, status, task, wizard)',
+        description: 'Hive Mind command (_init, _spawn, _status, _task, wizard)',
         type: 'string'
       },
       {
@@ -2194,7 +2148,7 @@ Now, please proceed with the task: ${task}`;
       {
         name: 'topology',
         short: 't', 
-        description: 'Swarm topology (mesh, hierarchical, ring, star)',
+        description: 'Swarm topology (_mesh, _hierarchical, _ring, star)',
         type: 'string',
         default: 'hierarchical'
       },
@@ -2214,7 +2168,7 @@ Now, please proceed with the task: ${task}`;
     ],
     action: async (ctx: CommandContext) => {
       try {
-        const subcommand = ctx.args[0] || 'wizard';
+        const _subcommand = ctx.args[0] || 'wizard';
         
         // Import hive-mind commands dynamically
         const { hiveMindCommand } = await import('./hive-mind/index.js');
@@ -2253,7 +2207,6 @@ Now, please proceed with the task: ${task}`;
       }
     }
   });
-
   // Hook command for ruv-swarm integration
   cli.command({
     name: 'hook',
@@ -2263,14 +2216,14 @@ Now, please proceed with the task: ${task}`;
         const { spawn } = await import('child_process');
         
         // Pass all arguments to ruv-swarm hook command
-        const args = ctx.args.length > 0 ? ctx.args : ['--help'];
+        const _args = ctx.args.length > 0 ? ctx.args : ['--help'];
         
-        const child = spawn('npx', ['ruv-swarm', 'hook', ...args], {
+        const _child = spawn('npx', ['ruv-swarm', 'hook', ...args], {
           stdio: 'inherit',
           shell: true
         });
         
-        await new Promise<void>((resolve, reject) => {
+        await new Promise<void>((_resolve, reject) => {
           child.on('exit', (code) => {
             if (code === 0) {
               resolve();
@@ -2290,83 +2243,69 @@ Now, please proceed with the task: ${task}`;
       }
     }
   });
-
   // Add enterprise commands
   for (const command of enterpriseCommands) {
     cli.command(command);
   }
 }
-
 function getCapabilitiesForType(type: string): string[] {
-  const capabilities: Record<string, string[]> = {
+  const _capabilities: Record<string, string[]> = {
     coordinator: ['task-assignment', 'planning', 'delegation'],
     researcher: ['web-search', 'information-gathering', 'analysis'],
     implementer: ['code-generation', 'file-manipulation', 'testing'],
     analyst: ['data-analysis', 'pattern-recognition', 'reporting'],
     custom: ['user-defined'],
   };
-
   return capabilities[type] || capabilities.custom;
 }
-
 function getDefaultPromptForType(type: string): string {
-  const prompts: Record<string, string> = {
+  const _prompts: Record<string, string> = {
     coordinator: 'You are a coordination agent responsible for planning and delegating tasks.',
     researcher: 'You are a research agent specialized in gathering and analyzing information.',
     implementer: 'You are an implementation agent focused on writing code and creating solutions.',
     analyst: 'You are an analysis agent that identifies patterns and generates insights.',
     custom: 'You are a custom agent. Follow the user\'s instructions.',
   };
-
   return prompts[type] || prompts.custom;
 }
-
 // Template creation functions
 function createMinimalClaudeMd(): string {
   return `# Claude Code Configuration
-
 ## Build Commands
-- \`npm run build\`: Build the project
-- \`npm run test\`: Run tests
-- \`npm run lint\`: Run linter
-
+- `npm run build`: Build the project
+- `npm run test`: Run tests
+- `npm run lint`: Run linter
 ## Code Style
 - Use TypeScript/ES modules
 - Follow project conventions
 - Run typecheck before committing
-
 ## Project Info
 This is a Claude-Flow AI agent orchestration system.
 `;
 }
-
 function createFullClaudeMd(): string {
   return `# Claude Code Configuration
-
 ## Build Commands
-- \`npm run build\`: Build the project using Deno compile
-- \`npm run test\`: Run the full test suite
-- \`npm run lint\`: Run ESLint and format checks
-- \`npm run typecheck\`: Run TypeScript type checking
-- \`npx claude-flow start\`: Start the orchestration system
-- \`npx claude-flow --help\`: Show all available commands
-
+- `npm run build`: Build the project using Deno compile
+- `npm run test`: Run the full test suite
+- `npm run lint`: Run ESLint and format checks
+- `npm run typecheck`: Run TypeScript type checking
+- `npx claude-flow start`: Start the orchestration system
+- `npx claude-flow --help`: Show all available commands
 ## Code Style Preferences
 - Use ES modules (import/export) syntax, not CommonJS (require)
-- Destructure imports when possible (e.g., \`import { foo } from 'bar'\`)
+- Destructure imports when possible (e.g., `import { foo } from 'bar'`)
 - Use TypeScript for all new code
-- Follow existing naming conventions (camelCase for variables, PascalCase for classes)
+- Follow existing naming conventions (camelCase for _variables, PascalCase for classes)
 - Add JSDoc comments for public APIs
 - Use async/await instead of Promise chains
 - Prefer const/let over var
-
 ## Workflow Guidelines
 - Always run typecheck after making code changes
 - Run tests before committing changes
 - Use meaningful commit messages following conventional commits
 - Create feature branches for new functionality
 - Ensure all tests pass before merging
-
 ## Project Architecture
 This is a Claude-Flow AI agent orchestration system with the following components:
 - **CLI Interface**: Command-line tools for managing the system
@@ -2375,61 +2314,50 @@ This is a Claude-Flow AI agent orchestration system with the following component
 - **Terminal Management**: Automated terminal session handling
 - **MCP Integration**: Model Context Protocol server for Claude integration
 - **Agent Coordination**: Multi-agent task distribution and management
-
 ## Important Notes
-- Use \`claude --dangerously-skip-permissions\` for unattended operation
+- Use `claude --dangerously-skip-permissions` for unattended operation
 - The system supports both daemon and interactive modes
 - Memory persistence is handled automatically
 - All components are event-driven for scalability
-
 ## Debugging
-- Check logs in \`./claude-flow.log\`
-- Use \`npx claude-flow status\` to check system health
-- Monitor with \`npx claude-flow monitor\` for real-time updates
-- Verbose output available with \`--verbose\` flag on most commands
+- Check logs in `./claude-flow.log`
+- Use `npx claude-flow status` to check system health
+- Monitor with `npx claude-flow monitor` for real-time updates
+- Verbose output available with `--verbose` flag on most commands
 `;
 }
-
 function createMinimalMemoryBankMd(): string {
   return `# Memory Bank
-
 ## Quick Reference
 - Project uses SQLite for memory persistence
 - Memory is organized by namespaces
-- Query with \`npx claude-flow memory query <search>\`
-
+- Query with `npx claude-flow memory query <search>`
 ## Storage Location
-- Database: \`./memory/claude-flow-data.json\`
-- Sessions: \`./memory/sessions/\`
+- Database: `./memory/claude-flow-data.json`
+- Sessions: `./memory/sessions/`
 `;
 }
-
 function createFullMemoryBankMd(): string {
   return `# Memory Bank Configuration
-
 ## Overview
 The Claude-Flow memory system provides persistent storage and intelligent retrieval of information across agent sessions. It uses a hybrid approach combining SQL databases with semantic search capabilities.
-
 ## Storage Backends
-- **Primary**: JSON database (\`./memory/claude-flow-data.json\`)
-- **Sessions**: File-based storage in \`./memory/sessions/\`
+- **Primary**: JSON database (`./memory/claude-flow-data.json`)
+- **Sessions**: File-based storage in `./memory/sessions/`
 - **Cache**: In-memory cache for frequently accessed data
-
 ## Memory Organization
 - **Namespaces**: Logical groupings of related information
 - **Sessions**: Time-bound conversation contexts
 - **Indexing**: Automatic content indexing for fast retrieval
 - **Replication**: Optional distributed storage support
-
 ## Commands
-- \`npx claude-flow memory query <search>\`: Search stored information
-- \`npx claude-flow memory stats\`: Show memory usage statistics
-- \`npx claude-flow memory export <file>\`: Export memory to file
-- \`npx claude-flow memory import <file>\`: Import memory from file
-
+- `npx claude-flow memory query <search>`: Search stored information
+- `npx claude-flow memory stats`: Show memory usage statistics
+- `npx claude-flow memory export <file>`: Export memory to file
+- `npx claude-flow memory import <file>`: Import memory from file
 ## Configuration
-Memory settings are configured in \`claude-flow.config.json\`:
-\`\`\`json
+Memory settings are configured in `claude-flow.config.json`:
+```json
 {
   "memory": {
     "backend": "json",
@@ -2444,20 +2372,17 @@ Memory settings are configured in \`claude-flow.config.json\`:
     }
   }
 }
-\`\`\`
-
+```
 ## Best Practices
 - Use descriptive namespaces for different data types
 - Regular memory exports for backup purposes
 - Monitor memory usage with stats command
 - Clean up old sessions periodically
-
 ## Memory Types
 - **Episodic**: Conversation and interaction history
 - **Semantic**: Factual knowledge and relationships
 - **Procedural**: Task patterns and workflows
 - **Meta**: System configuration and preferences
-
 ## Integration Notes
 - Memory is automatically synchronized across agents
 - Search supports both exact match and semantic similarity
@@ -2465,74 +2390,61 @@ Memory settings are configured in \`claude-flow.config.json\`:
 - No data is sent to external services without explicit commands
 `;
 }
-
 function createMinimalCoordinationMd(): string {
   return `# Agent Coordination
-
 ## Quick Commands
-- \`npx claude-flow agent spawn <type>\`: Create new agent
-- \`npx claude-flow agent list\`: Show active agents
-- \`npx claude-flow task create <type> <description>\`: Create task
-
+- `npx claude-flow agent spawn <type>`: Create new agent
+- `npx claude-flow agent list`: Show active agents
+- `npx claude-flow task create <type> <description>`: Create task
 ## Agent Types
 - researcher, coder, analyst, coordinator, general
 `;
 }
-
 function createFullCoordinationMd(): string {
   return `# Agent Coordination System
-
 ## Overview
 The Claude-Flow coordination system manages multiple AI agents working together on complex tasks. It provides intelligent task distribution, resource management, and inter-agent communication.
-
 ## Agent Types and Capabilities
 - **Researcher**: Web search, information gathering, knowledge synthesis
 - **Coder**: Code analysis, development, debugging, testing
 - **Analyst**: Data processing, pattern recognition, insights generation
 - **Coordinator**: Task planning, resource allocation, workflow management
 - **General**: Multi-purpose agent with balanced capabilities
-
 ## Task Management
 - **Priority Levels**: 1 (lowest) to 10 (highest)
 - **Dependencies**: Tasks can depend on completion of other tasks
 - **Parallel Execution**: Independent tasks run concurrently
 - **Load Balancing**: Automatic distribution based on agent capacity
-
 ## Coordination Commands
-\`\`\`bash
+```bash
 # Agent Management
 npx claude-flow agent spawn <type> --name <name> --priority <1-10>
 npx claude-flow agent list
 npx claude-flow agent info <agent-id>
 npx claude-flow agent terminate <agent-id>
-
 # Task Management  
 npx claude-flow task create <type> <description> --priority <1-10> --deps <task-ids>
 npx claude-flow task list --verbose
 npx claude-flow task status <task-id>
 npx claude-flow task cancel <task-id>
-
 # System Monitoring
 npx claude-flow status --verbose
 npx claude-flow monitor --interval 5000
-\`\`\`
-
+```
 ## Workflow Execution
 Workflows are defined in JSON format and can orchestrate complex multi-agent operations:
-\`\`\`bash
+```bash
 npx claude-flow workflow examples/research-workflow.json
 npx claude-flow workflow examples/development-config.json --async
-\`\`\`
-
+```
 ## Advanced Features
 - **Circuit Breakers**: Automatic failure handling and recovery
 - **Work Stealing**: Dynamic load redistribution for efficiency
 - **Resource Limits**: Memory and CPU usage constraints
 - **Metrics Collection**: Performance monitoring and optimization
-
 ## Configuration
-Coordination settings in \`claude-flow.config.json\`:
-\`\`\`json
+Coordination settings in `claude-flow.config.json`:
+```json
 {
   "orchestrator": {
     "maxConcurrentTasks": 10,
@@ -2548,39 +2460,32 @@ Coordination settings in \`claude-flow.config.json\`:
     }
   }
 }
-\`\`\`
-
+```
 ## Communication Patterns
 - **Direct Messaging**: Agent-to-agent communication
 - **Event Broadcasting**: System-wide notifications
 - **Shared Memory**: Common information access
 - **Task Handoff**: Seamless work transfer between agents
-
 ## Best Practices
 - Start with general agents and specialize as needed
 - Use descriptive task names and clear requirements
 - Monitor system resources during heavy workloads
 - Implement proper error handling in workflows
 - Regular cleanup of completed tasks and inactive agents
-
 ## Troubleshooting
-- Check agent health with \`npx claude-flow status\`
-- View detailed logs with \`npx claude-flow monitor\`
+- Check agent health with `npx claude-flow status`
+- View detailed logs with `npx claude-flow monitor`
 - Restart stuck agents with terminate/spawn cycle
-- Use \`--verbose\` flags for detailed diagnostic information
+- Use `--verbose` flags for detailed diagnostic information
 `;
 }
-
 function createAgentsReadme(): string {
   return `# Agent Memory Storage
-
 ## Purpose
 This directory stores agent-specific memory data, configurations, and persistent state information for individual Claude agents in the orchestration system.
-
 ## Structure
 Each agent gets its own subdirectory for isolated memory storage:
-
-\`\`\`
+```
 memory/agents/
 ├── agent_001/
 │   ├── state.json           # Agent state and configuration
@@ -2592,30 +2497,24 @@ memory/agents/
 └── shared/
     ├── common_knowledge.md  # Shared knowledge across agents
     └── global_config.json  # Global agent configurations
-\`\`\`
-
+```
 ## Usage Guidelines
 1. **Agent Isolation**: Each agent should only read/write to its own directory
-2. **Shared Resources**: Use the \`shared/\` directory for cross-agent information
+2. **Shared Resources**: Use the `shared/` directory for cross-agent information
 3. **State Persistence**: Update state.json whenever agent status changes
 4. **Knowledge Sharing**: Document discoveries in knowledge.md files
 5. **Cleanup**: Remove directories for terminated agents periodically
-
 ## Last Updated
 ${new Date().toISOString()}
 `;
 }
-
 function createSessionsReadme(): string {
   return `# Session Memory Storage
-
 ## Purpose
 This directory stores session-based memory data, conversation history, and contextual information for development sessions using the Claude-Flow orchestration system.
-
 ## Structure
 Sessions are organized by date and session ID for easy retrieval:
-
-\`\`\`
+```
 memory/sessions/
 ├── 2024-01-10/
 │   ├── session_001/
@@ -2628,15 +2527,13 @@ memory/sessions/
 └── shared/
     ├── patterns.md              # Common session patterns
     └── templates/               # Session template files
-\`\`\`
-
+```
 ## Usage Guidelines
 1. **Session Isolation**: Each session gets its own directory
 2. **Metadata Completeness**: Always fill out session metadata
 3. **Conversation Logging**: Document all significant interactions
 4. **Artifact Organization**: Structure generated files clearly
 5. **State Preservation**: Snapshot coordination state regularly
-
 ## Last Updated
 ${new Date().toISOString()}
 `;

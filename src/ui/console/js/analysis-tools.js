@@ -1,4 +1,5 @@
 /* eslint-env browser */
+/* global Chart */
 /**
  * Analysis & Monitoring Tools for Claude Flow Web UI
  * Agent 2 - Analysis & Monitoring Tools Developer
@@ -10,25 +11,22 @@
  * - Export functionality for reports
  * - 4 main tabs: Metrics, Reports, Analysis, Health
  */
-
 class AnalysisTools {
     constructor() {
         this.ws = null;
-        this.charts = {};
+        this.charts = { /* empty */ };
         this.currentTab = 'metrics';
         this.isConnected = false;
         this.metricsCache = new Map();
         this.updateInterval = null;
         this.init();
     }
-
     init() {
         this.setupWebSocket();
         this.setupEventListeners();
         this.initializeCharts();
         this.startRealTimeUpdates();
     }
-
     setupWebSocket() {
         try {
             this.ws = new WebSocket('ws://localhost:3000/analysis');
@@ -38,29 +36,25 @@ class AnalysisTools {
                 console.log('Analysis WebSocket connected');
                 this.updateConnectionStatus('connected');
             };
-
-            this.ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
+            this.ws.onmessage = (_event) => {
+                const _data = JSON.parse(event.data);
                 this.handleWebSocketData(data);
             };
-
             this.ws.onclose = () => {
                 this.isConnected = false;
                 console.log('Analysis WebSocket disconnected');
                 this.updateConnectionStatus('disconnected');
                 setTimeout(() => this.setupWebSocket(), 5000);
             };
-
-            this.ws.onerror = (error) => {
+            this.ws.onerror = (_error) => {
                 console.error('Analysis WebSocket error:', error);
                 this.updateConnectionStatus('error');
             };
-        } catch (error) {
+        } catch (_error) {
             console.error('Failed to setup WebSocket:', error);
             this.updateConnectionStatus('error');
         }
     }
-
     setupEventListeners() {
         // Tab switching
         document.querySelectorAll('.analysis-tab').forEach(tab => {
@@ -68,33 +62,29 @@ class AnalysisTools {
                 this.switchTab(e.target.dataset.tab);
             });
         });
-
         // Export buttons
         document.querySelectorAll('.export-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const format = e.target.dataset.format;
-                const type = e.target.dataset.type;
-                this.exportData(type, format);
+                const _format = e.target.dataset.format;
+                const _type = e.target.dataset.type;
+                this.exportData(_type, format);
             });
         });
-
         // Tool buttons
         document.querySelectorAll('.tool-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const tool = e.target.dataset.tool;
+                const _tool = e.target.dataset.tool;
                 this.executeTool(tool);
             });
         });
-
         // Refresh buttons
         document.querySelectorAll('.refresh-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const section = e.target.dataset.section;
+                const _section = e.target.dataset.section;
                 this.refreshSection(section);
             });
         });
     }
-
     initializeCharts() {
         // Performance metrics chart
         this.charts.performance = new Chart(document.getElementById('performance-chart'), {
@@ -105,13 +95,13 @@ class AnalysisTools {
                     label: 'Response Time (ms)',
                     data: [],
                     borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    backgroundColor: 'rgba(_59, _130, _246, 0.1)',
                     tension: 0.4
                 }, {
                     label: 'Throughput (req/s)',
                     data: [],
                     borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    backgroundColor: 'rgba(_16, _185, _129, 0.1)',
                     tension: 0.4
                 }]
             },
@@ -141,7 +131,6 @@ class AnalysisTools {
                 }
             }
         });
-
         // Token usage chart
         this.charts.tokenUsage = new Chart(document.getElementById('token-usage-chart'), {
             type: 'doughnut',
@@ -163,7 +152,6 @@ class AnalysisTools {
                 }
             }
         });
-
         // System health chart
         this.charts.systemHealth = new Chart(document.getElementById('system-health-chart'), {
             type: 'radar',
@@ -173,7 +161,7 @@ class AnalysisTools {
                     label: 'Health Score',
                     data: [100, 100, 100, 100, 100, 100],
                     borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    backgroundColor: 'rgba(_16, _185, _129, 0.2)',
                     pointBackgroundColor: '#10b981',
                     pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff',
@@ -191,7 +179,6 @@ class AnalysisTools {
                 }
             }
         });
-
         // Load monitoring chart
         this.charts.loadMonitor = new Chart(document.getElementById('load-monitor-chart'), {
             type: 'bar',
@@ -200,7 +187,7 @@ class AnalysisTools {
                 datasets: [{
                     label: 'Average Load',
                     data: [0, 0, 0, 0, 0, 0],
-                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    backgroundColor: 'rgba(_59, _130, _246, 0.7)',
                     borderColor: '#3b82f6',
                     borderWidth: 1
                 }]
@@ -221,7 +208,6 @@ class AnalysisTools {
             }
         });
     }
-
     startRealTimeUpdates() {
         this.updateInterval = setInterval(() => {
             if (this.isConnected) {
@@ -229,7 +215,6 @@ class AnalysisTools {
             }
         }, 5000);
     }
-
     requestMetricsUpdate() {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({
@@ -238,30 +223,34 @@ class AnalysisTools {
             }));
         }
     }
-
     handleWebSocketData(data) {
         switch (data.type) {
             case 'metrics_update':
-                this.updateMetrics(data.payload);
-                break;
+                {
+this.updateMetrics(data.payload);
+                
+}break;
             case 'alert':
-                this.handleAlert(data.payload);
-                break;
+                {
+this.handleAlert(data.payload);
+                
+}break;
             case 'health_status':
-                this.updateHealthStatus(data.payload);
-                break;
+                {
+this.updateHealthStatus(data.payload);
+                
+}break;
             default:
                 console.log('Unknown WebSocket message type:', data.type);
         }
     }
-
     updateMetrics(metrics) {
         this.metricsCache.set('latest', metrics);
         
         // Update performance chart
         if (this.charts.performance && metrics.performance) {
-            const chart = this.charts.performance;
-            const now = new Date().toLocaleTimeString();
+            const _chart = this.charts.performance;
+            const _now = new Date().toLocaleTimeString();
             
             chart.data.labels.push(now);
             chart.data.datasets[0].data.push(metrics.performance.responseTime);
@@ -276,10 +265,9 @@ class AnalysisTools {
             
             chart.update('none');
         }
-
         // Update token usage chart
         if (this.charts.tokenUsage && metrics.tokens) {
-            const chart = this.charts.tokenUsage;
+            const _chart = this.charts.tokenUsage;
             chart.data.datasets[0].data = [
                 metrics.tokens.input,
                 metrics.tokens.output,
@@ -287,10 +275,9 @@ class AnalysisTools {
             ];
             chart.update('none');
         }
-
         // Update system health chart
         if (this.charts.systemHealth && metrics.health) {
-            const chart = this.charts.systemHealth;
+            const _chart = this.charts.systemHealth;
             chart.data.datasets[0].data = [
                 metrics.health.cpu,
                 metrics.health.memory,
@@ -301,10 +288,9 @@ class AnalysisTools {
             ];
             chart.update('none');
         }
-
         // Update load monitor chart
         if (this.charts.loadMonitor && metrics.load) {
-            const chart = this.charts.loadMonitor;
+            const _chart = this.charts.loadMonitor;
             chart.data.datasets[0].data = [
                 metrics.load.oneMin,
                 metrics.load.fiveMin,
@@ -315,14 +301,12 @@ class AnalysisTools {
             ];
             chart.update('none');
         }
-
         // Update metric displays
         this.updateMetricDisplays(metrics);
     }
-
     updateMetricDisplays(metrics) {
         // Performance metrics
-        const perfSection = document.getElementById('performance-metrics');
+        const _perfSection = document.getElementById('performance-metrics');
         if (perfSection && metrics.performance) {
             perfSection.innerHTML = `
                 <div class="metric-card">
@@ -343,11 +327,10 @@ class AnalysisTools {
                 </div>
             `;
         }
-
         // Token usage metrics
-        const tokenSection = document.getElementById('token-metrics');
+        const _tokenSection = document.getElementById('token-metrics');
         if (tokenSection && metrics.tokens) {
-            const total = metrics.tokens.input + metrics.tokens.output + metrics.tokens.cached;
+            const _total = metrics.tokens.input + metrics.tokens.output + metrics.tokens.cached;
             tokenSection.innerHTML = `
                 <div class="metric-card">
                     <div class="metric-label">Total Tokens</div>
@@ -367,11 +350,10 @@ class AnalysisTools {
                 </div>
             `;
         }
-
         // System health status
-        const healthSection = document.getElementById('health-status');
+        const _healthSection = document.getElementById('health-status');
         if (healthSection && metrics.health) {
-            const overallHealth = Math.round(
+            const _overallHealth = Math.round(
                 (metrics.health.cpu + metrics.health.memory + metrics.health.disk + 
                  metrics.health.network + metrics.health.api + metrics.health.database) / 6
             );
@@ -412,18 +394,16 @@ class AnalysisTools {
             `;
         }
     }
-
     getHealthClass(score) {
         if (score >= 90) return 'health-excellent';
         if (score >= 70) return 'health-good';
         if (score >= 50) return 'health-warning';
         return 'health-critical';
     }
-
     handleAlert(alert) {
-        const alertsContainer = document.getElementById('alerts-container');
+        const _alertsContainer = document.getElementById('alerts-container');
         if (alertsContainer) {
-            const alertElement = document.createElement('div');
+            const _alertElement = document.createElement('div');
             alertElement.className = `alert alert-${alert.severity}`;
             alertElement.innerHTML = `
                 <div class="alert-header">
@@ -433,7 +413,7 @@ class AnalysisTools {
                 <div class="alert-message">${alert.message}</div>
                 <button class="alert-dismiss" onclick="this.parentElement.remove()">×</button>
             `;
-            alertsContainer.insertBefore(alertElement, alertsContainer.firstChild);
+            alertsContainer.insertBefore(_alertElement, alertsContainer.firstChild);
             
             // Auto-dismiss after 10 seconds for info alerts
             if (alert.severity === 'info') {
@@ -445,7 +425,6 @@ class AnalysisTools {
             }
         }
     }
-
     switchTab(tabName) {
         this.currentTab = tabName;
         
@@ -470,60 +449,84 @@ class AnalysisTools {
             });
         }, 100);
     }
-
     // Tool execution methods
     async executeTool(toolName) {
-        const button = document.querySelector(`[data-tool="${toolName}"]`);
+        const _button = document.querySelector(`[data-tool="${toolName}"]`);
         if (button) {
             button.classList.add('loading');
             button.disabled = true;
         }
-
         try {
             switch (toolName) {
                 case 'performance_report':
-                    await this.performanceReport();
-                    break;
+                    {
+await this.performanceReport();
+                    
+}break;
                 case 'bottleneck_analyze':
-                    await this.bottleneckAnalyze();
-                    break;
+                    {
+await this.bottleneckAnalyze();
+                    
+}break;
                 case 'token_usage':
-                    await this.tokenUsage();
-                    break;
+                    {
+await this.tokenUsage();
+                    
+}break;
                 case 'benchmark_run':
-                    await this.benchmarkRun();
-                    break;
+                    {
+await this.benchmarkRun();
+                    
+}break;
                 case 'metrics_collect':
-                    await this.metricsCollect();
-                    break;
+                    {
+await this.metricsCollect();
+                    
+}break;
                 case 'trend_analysis':
-                    await this.trendAnalysis();
-                    break;
+                    {
+await this.trendAnalysis();
+                    
+}break;
                 case 'cost_analysis':
-                    await this.costAnalysis();
-                    break;
+                    {
+await this.costAnalysis();
+                    
+}break;
                 case 'quality_assess':
-                    await this.qualityAssess();
-                    break;
+                    {
+await this.qualityAssess();
+                    
+}break;
                 case 'error_analysis':
-                    await this.errorAnalysis();
-                    break;
+                    {
+await this.errorAnalysis();
+                    
+}break;
                 case 'usage_stats':
-                    await this.usageStats();
-                    break;
+                    {
+await this.usageStats();
+                    
+}break;
                 case 'health_check':
-                    await this.healthCheck();
-                    break;
+                    {
+await this.healthCheck();
+                    
+}break;
                 case 'load_monitor':
-                    await this.loadMonitor();
-                    break;
+                    {
+await this.loadMonitor();
+                    
+}break;
                 case 'capacity_plan':
-                    await this.capacityPlan();
-                    break;
+                    {
+await this.capacityPlan();
+                    
+}break;
                 default:
                     console.warn('Unknown tool:', toolName);
             }
-        } catch (error) {
+        } catch (_error) {
             console.error(`Error executing tool ${toolName}:`, error);
             this.showError(`Failed to execute ${toolName}: ${error.message}`);
         } finally {
@@ -533,102 +536,87 @@ class AnalysisTools {
             }
         }
     }
-
     // Tool implementations
     async performanceReport() {
-        const report = await this.fetchAnalysisData('/api/analysis/performance-report');
+        const _report = await this.fetchAnalysisData('/api/analysis/performance-report');
         this.displayReport('performance-report-output', report);
         await this.notifyToolCompletion('performance_report');
     }
-
     async bottleneckAnalyze() {
-        const analysis = await this.fetchAnalysisData('/api/analysis/bottleneck-analyze');
+        const _analysis = await this.fetchAnalysisData('/api/analysis/bottleneck-analyze');
         this.displayAnalysis('bottleneck-analysis-output', analysis);
         await this.notifyToolCompletion('bottleneck_analyze');
     }
-
     async tokenUsage() {
-        const usage = await this.fetchAnalysisData('/api/analysis/token-usage');
+        const _usage = await this.fetchAnalysisData('/api/analysis/token-usage');
         this.displayUsage('token-usage-output', usage);
         await this.notifyToolCompletion('token_usage');
     }
-
     async benchmarkRun() {
-        const benchmark = await this.fetchAnalysisData('/api/analysis/benchmark-run');
+        const _benchmark = await this.fetchAnalysisData('/api/analysis/benchmark-run');
         this.displayBenchmark('benchmark-output', benchmark);
         await this.notifyToolCompletion('benchmark_run');
     }
-
     async metricsCollect() {
-        const metrics = await this.fetchAnalysisData('/api/analysis/metrics-collect');
+        const _metrics = await this.fetchAnalysisData('/api/analysis/metrics-collect');
         this.displayMetrics('metrics-output', metrics);
         await this.notifyToolCompletion('metrics_collect');
     }
-
     async trendAnalysis() {
-        const trends = await this.fetchAnalysisData('/api/analysis/trend-analysis');
+        const _trends = await this.fetchAnalysisData('/api/analysis/trend-analysis');
         this.displayTrends('trends-output', trends);
         await this.notifyToolCompletion('trend_analysis');
     }
-
     async costAnalysis() {
-        const costs = await this.fetchAnalysisData('/api/analysis/cost-analysis');
+        const _costs = await this.fetchAnalysisData('/api/analysis/cost-analysis');
         this.displayCosts('costs-output', costs);
         await this.notifyToolCompletion('cost_analysis');
     }
-
     async qualityAssess() {
-        const quality = await this.fetchAnalysisData('/api/analysis/quality-assess');
+        const _quality = await this.fetchAnalysisData('/api/analysis/quality-assess');
         this.displayQuality('quality-output', quality);
         await this.notifyToolCompletion('quality_assess');
     }
-
     async errorAnalysis() {
-        const errors = await this.fetchAnalysisData('/api/analysis/error-analysis');
+        const _errors = await this.fetchAnalysisData('/api/analysis/error-analysis');
         this.displayErrors('errors-output', errors);
         await this.notifyToolCompletion('error_analysis');
     }
-
     async usageStats() {
-        const stats = await this.fetchAnalysisData('/api/analysis/usage-stats');
+        const _stats = await this.fetchAnalysisData('/api/analysis/usage-stats');
         this.displayStats('stats-output', stats);
         await this.notifyToolCompletion('usage_stats');
     }
-
     async healthCheck() {
-        const health = await this.fetchAnalysisData('/api/analysis/health-check');
+        const _health = await this.fetchAnalysisData('/api/analysis/health-check');
         this.displayHealth('health-output', health);
         await this.notifyToolCompletion('health_check');
     }
-
     async loadMonitor() {
-        const load = await this.fetchAnalysisData('/api/analysis/load-monitor');
+        const _load = await this.fetchAnalysisData('/api/analysis/load-monitor');
         this.displayLoad('load-output', load);
         await this.notifyToolCompletion('load_monitor');
     }
-
     async capacityPlan() {
-        const capacity = await this.fetchAnalysisData('/api/analysis/capacity-plan');
+        const _capacity = await this.fetchAnalysisData('/api/analysis/capacity-plan');
         this.displayCapacity('capacity-output', capacity);
         await this.notifyToolCompletion('capacity_plan');
     }
-
     async fetchAnalysisData(endpoint) {
         try {
-            const response = await fetch(endpoint);
+            const _response = await fetch(endpoint);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return await response.json();
-        } catch (error) {
+        } catch (_error) {
             console.error('Fetch error:', error);
             // Return mock data for development
             return this.getMockData(endpoint);
         }
     }
-
     getMockData(endpoint) {
-        const mockData = {
+        const _mockData = {
             '/api/analysis/performance-report': {
                 summary: 'System performance is within acceptable ranges',
                 metrics: {
@@ -665,11 +653,9 @@ class AnalysisTools {
         };
         return mockData[endpoint] || { message: 'No data available' };
     }
-
-    displayReport(containerId, report) {
-        const container = document.getElementById(containerId);
+    displayReport(_containerId, report) {
+        const _container = document.getElementById(containerId);
         if (!container) return;
-
         container.innerHTML = `
             <div class="report-summary">
                 <h3>Performance Report</h3>
@@ -703,11 +689,9 @@ class AnalysisTools {
             </div>
         `;
     }
-
-    displayAnalysis(containerId, analysis) {
-        const container = document.getElementById(containerId);
+    displayAnalysis(_containerId, analysis) {
+        const _container = document.getElementById(containerId);
         if (!container) return;
-
         container.innerHTML = `
             <div class="analysis-results">
                 <h3>Bottleneck Analysis</h3>
@@ -729,11 +713,9 @@ class AnalysisTools {
             </div>
         `;
     }
-
-    displayUsage(containerId, usage) {
-        const container = document.getElementById(containerId);
+    displayUsage(_containerId, usage) {
+        const _container = document.getElementById(containerId);
         if (!container) return;
-
         container.innerHTML = `
             <div class="usage-overview">
                 <h3>Token Usage Analysis</h3>
@@ -766,90 +748,87 @@ class AnalysisTools {
             </div>
         `;
     }
-
-    exportData(type, format) {
-        const data = this.metricsCache.get('latest') || {};
-        const timestamp = new Date().toISOString().split('T')[0];
-        const filename = `${type}_${timestamp}.${format}`;
-
+    exportData(_type, format) {
+        const _data = this.metricsCache.get('latest') || { /* empty */ };
+        const _timestamp = new Date().toISOString().split('T')[0];
+        const _filename = `${type}_${timestamp}.${format}`;
         if (format === 'json') {
-            this.downloadJSON(data, filename);
+            this.downloadJSON(_data, filename);
         } else if (format === 'csv') {
-            this.downloadCSV(data, filename);
+            this.downloadCSV(_data, filename);
         }
     }
-
-    downloadJSON(data, filename) {
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+    downloadJSON(_data, filename) {
+        const _blob = new Blob([JSON.stringify(_data, _null, 2)], { type: 'application/json' });
+        const _url = URL.createObjectURL(blob);
+        const _a = document.createElement('a');
         a.href = url;
         a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
     }
-
-    downloadCSV(data, filename) {
-        const csv = this.jsonToCSV(data);
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+    downloadCSV(_data, filename) {
+        const _csv = this.jsonToCSV(data);
+        const _blob = new Blob([csv], { type: 'text/csv' });
+        const _url = URL.createObjectURL(blob);
+        const _a = document.createElement('a');
         a.href = url;
         a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
     }
-
     jsonToCSV(json) {
-        const flatten = (obj, prefix = '') => {
-            const flattened = {};
+        const _flatten = (_obj, prefix = '') => {
+            const _flattened = { /* empty */ };
             for (const key in obj) {
                 if (typeof obj[key] === 'object' && obj[key] !== null) {
-                    Object.assign(flattened, flatten(obj[key], prefix + key + '.'));
+                    Object.assign(_flattened, flatten(obj[key], prefix + key + '.'));
                 } else {
                     flattened[prefix + key] = obj[key];
                 }
             }
             return flattened;
         };
-
-        const flattened = flatten(json);
-        const headers = Object.keys(flattened);
-        const values = Object.values(flattened);
+        const _flattened = flatten(json);
+        const _headers = Object.keys(flattened);
+        const _values = Object.values(flattened);
         
         return [headers.join(','), values.join(',')].join('\n');
     }
-
     refreshSection(section) {
         switch (section) {
             case 'metrics':
-                this.requestMetricsUpdate();
-                break;
+                {
+this.requestMetricsUpdate();
+                
+}break;
             case 'charts':
-                Object.values(this.charts).forEach(chart => {
+                {
+Object.values(this.charts).forEach(chart => {
                     if (chart && chart.update) {
                         chart.update();
-                    }
+                    
+}}
                 });
                 break;
             case 'alerts':
-                document.getElementById('alerts-container').innerHTML = '';
-                break;
+                {
+document.getElementById('alerts-container').innerHTML = '';
+                
+}break;
             default:
                 console.warn('Unknown section:', section);
         }
     }
-
     updateConnectionStatus(status) {
-        const statusElement = document.getElementById('connection-status');
+        const _statusElement = document.getElementById('connection-status');
         if (statusElement) {
             statusElement.className = `connection-status ${status}`;
             statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
         }
     }
-
     showError(message) {
-        const errorElement = document.createElement('div');
+        const _errorElement = document.createElement('div');
         errorElement.className = 'error-message';
         errorElement.textContent = message;
         document.body.appendChild(errorElement);
@@ -858,11 +837,10 @@ class AnalysisTools {
             errorElement.remove();
         }, 5000);
     }
-
     async notifyToolCompletion(toolName) {
         try {
             // Notify swarm of tool completion
-            const response = await fetch('/api/swarm/notify', {
+            const _response = await fetch('/api/swarm/notify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -877,11 +855,10 @@ class AnalysisTools {
             if (!response.ok) {
                 console.warn('Failed to notify swarm');
             }
-        } catch (error) {
+        } catch (_error) {
             console.error('Error notifying swarm:', error);
         }
     }
-
     destroy() {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
@@ -898,12 +875,10 @@ class AnalysisTools {
         });
     }
 }
-
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.analysisTools = new AnalysisTools();
 });
-
 // Export for module use
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AnalysisTools;

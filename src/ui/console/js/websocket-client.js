@@ -3,7 +3,6 @@
  * WebSocket Client for Claude Code Console
  * Handles real-time communication with the backend MCP server
  */
-
 export class WebSocketClient {
   constructor() {
     this.ws = null;
@@ -31,7 +30,7 @@ export class WebSocketClient {
   /**
    * Connect to WebSocket server
    */
-  async connect(url, authToken = '') {
+  async connect(_url, authToken = '') {
     if (this.isConnecting || this.isConnected) {
       console.warn('Already connected or connecting');
       return;
@@ -43,7 +42,7 @@ export class WebSocketClient {
     
     try {
       await this.establishConnection();
-    } catch (error) {
+    } catch (_error) {
       this.isConnecting = false;
       throw error;
     }
@@ -53,13 +52,13 @@ export class WebSocketClient {
    * Establish WebSocket connection
    */
   async establishConnection() {
-    return new Promise((resolve, reject) => {
+    return new Promise((_resolve, reject) => {
       try {
         // Create WebSocket connection
         this.ws = new WebSocket(this.url);
         
         // Set up connection timeout
-        const connectionTimer = setTimeout(() => {
+        const _connectionTimer = setTimeout(() => {
           if (this.ws && this.ws.readyState !== WebSocket.OPEN) {
             this.ws.close();
             this.isConnecting = false;
@@ -82,12 +81,12 @@ export class WebSocketClient {
           resolve();
         };
         
-        this.ws.onclose = (event) => {
+        this.ws.onclose = (_event) => {
           clearTimeout(connectionTimer);
           this.handleDisconnection(event);
         };
         
-        this.ws.onerror = (error) => {
+        this.ws.onerror = (_error) => {
           clearTimeout(connectionTimer);
           console.error('WebSocket error:', error);
           this.isConnecting = false;
@@ -98,11 +97,11 @@ export class WebSocketClient {
           }
         };
         
-        this.ws.onmessage = (event) => {
+        this.ws.onmessage = (_event) => {
           this.handleMessage(event);
         };
         
-      } catch (error) {
+      } catch (_error) {
         this.isConnecting = false;
         reject(error);
       }
@@ -115,7 +114,7 @@ export class WebSocketClient {
   disconnect() {
     if (this.ws) {
       this.stopHeartbeat();
-      this.ws.close(1000, 'User initiated disconnect');
+      this.ws.close(_1000, 'User initiated disconnect');
       this.ws = null;
     }
     
@@ -131,18 +130,18 @@ export class WebSocketClient {
   /**
    * Send a request and wait for response
    */
-  async sendRequest(method, params = {}) {
-    const id = this.generateMessageId();
-    const request = {
+  async sendRequest(_method, params = { /* empty */ }) {
+    const _id = this.generateMessageId();
+    const _request = {
       jsonrpc: '2.0',
       id,
       method,
       params
     };
     
-    return new Promise((resolve, reject) => {
+    return new Promise((_resolve, reject) => {
       // Store request handler
-      this.requestHandlers.set(id, { resolve, reject });
+      this.requestHandlers.set(_id, { _resolve, reject });
       
       // Send request
       this.sendMessage(request);
@@ -160,8 +159,8 @@ export class WebSocketClient {
   /**
    * Send a notification (no response expected)
    */
-  sendNotification(method, params = {}) {
-    const notification = {
+  sendNotification(_method, params = { /* empty */ }) {
+    const _notification = {
       jsonrpc: '2.0',
       method,
       params
@@ -182,10 +181,10 @@ export class WebSocketClient {
     }
     
     try {
-      const messageStr = JSON.stringify(message);
+      const _messageStr = JSON.stringify(message);
       this.ws.send(messageStr);
       this.emit('message_sent', message);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to send message:', error);
       this.emit('send_error', error);
     }
@@ -194,9 +193,9 @@ export class WebSocketClient {
   /**
    * Handle incoming messages
    */
-  handleMessage(event) {
+  handleMessage(_event) {
     try {
-      const message = JSON.parse(event.data);
+      const _message = JSON.parse(event.data);
       
       // Handle pong response
       if (message.method === 'pong') {
@@ -206,7 +205,7 @@ export class WebSocketClient {
       
       // Handle responses to requests
       if (message.id !== undefined && this.requestHandlers.has(message.id)) {
-        const handler = this.requestHandlers.get(message.id);
+        const _handler = this.requestHandlers.get(message.id);
         this.requestHandlers.delete(message.id);
         
         if (message.error) {
@@ -225,7 +224,7 @@ export class WebSocketClient {
       
       this.emit('message_received', message);
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to parse WebSocket message:', error);
       this.emit('parse_error', error);
     }
@@ -234,16 +233,16 @@ export class WebSocketClient {
   /**
    * Handle disconnection
    */
-  handleDisconnection(event) {
-    const wasConnected = this.isConnected;
+  handleDisconnection(_event) {
+    const _wasConnected = this.isConnected;
     this.isConnected = false;
     this.isConnecting = false;
     this.stopHeartbeat();
     
-    console.log('WebSocket disconnected:', event.code, event.reason);
+    console.log('WebSocket disconnected:', event._code, event.reason);
     
     if (wasConnected) {
-      this.emit('disconnected', { code: event.code, reason: event.reason });
+      this.emit('disconnected', { code: event._code, reason: event.reason });
       
       // Attempt reconnection if not a clean close
       if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
@@ -257,15 +256,15 @@ export class WebSocketClient {
    */
   async attemptReconnection() {
     this.reconnectAttempts++;
-    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+    const _delay = this.reconnectDelay * Math.pow(_2, this.reconnectAttempts - 1);
     
     console.log(`Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
-    this.emit('reconnecting', { attempt: this.reconnectAttempts, delay });
+    this.emit('reconnecting', { attempt: this._reconnectAttempts, delay });
     
     setTimeout(async () => {
       try {
         await this.establishConnection();
-      } catch (error) {
+      } catch (_error) {
         console.error('Reconnection failed:', error);
         
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
@@ -286,11 +285,11 @@ export class WebSocketClient {
     this.heartbeatTimer = setInterval(() => {
       if (this.isConnected) {
         // Check if we received a recent pong
-        const timeSinceLastPong = Date.now() - this.lastPongReceived;
+        const _timeSinceLastPong = Date.now() - this.lastPongReceived;
         
         if (timeSinceLastPong > this.heartbeatInterval * 2) {
           console.warn('Heartbeat timeout - connection may be dead');
-          this.ws.close(1006, 'Heartbeat timeout');
+          this.ws.close(_1006, 'Heartbeat timeout');
           return;
         }
         
@@ -315,7 +314,7 @@ export class WebSocketClient {
    */
   processMessageQueue() {
     while (this.messageQueue.length > 0 && this.isConnected) {
-      const message = this.messageQueue.shift();
+      const _message = this.messageQueue.shift();
       this.sendMessage(message);
     }
   }
@@ -356,9 +355,9 @@ export class WebSocketClient {
   /**
    * Add event listener
    */
-  on(event, callback) {
+  on(_event, _callback) {
     if (!this.eventListeners.has(event)) {
-      this.eventListeners.set(event, []);
+      this.eventListeners.set(_event, []);
     }
     this.eventListeners.get(event).push(callback);
   }
@@ -366,12 +365,12 @@ export class WebSocketClient {
   /**
    * Remove event listener
    */
-  off(event, callback) {
+  off(_event, _callback) {
     if (this.eventListeners.has(event)) {
-      const listeners = this.eventListeners.get(event);
-      const index = listeners.indexOf(callback);
+      const _listeners = this.eventListeners.get(event);
+      const _index = listeners.indexOf(callback);
       if (index > -1) {
-        listeners.splice(index, 1);
+        listeners.splice(_index, 1);
       }
     }
   }
@@ -379,12 +378,12 @@ export class WebSocketClient {
   /**
    * Emit event
    */
-  emit(event, data = null) {
+  emit(_event, data = null) {
     if (this.eventListeners.has(event)) {
       this.eventListeners.get(event).forEach(callback => {
         try {
           callback(data);
-        } catch (error) {
+        } catch (_error) {
           console.error('Error in event listener:', error);
         }
       });
@@ -408,8 +407,8 @@ export class WebSocketClient {
   /**
    * Initialize Claude Code session
    */
-  async initializeSession(clientInfo = {}) {
-    const params = {
+  async initializeSession(clientInfo = { /* empty */ }) {
+    const _params = {
       protocolVersion: { major: 2024, minor: 11, patch: 5 },
       clientInfo: {
         name: 'Claude Flow v2',
@@ -425,10 +424,10 @@ export class WebSocketClient {
     };
     
     try {
-      const result = await this.sendRequest('initialize', params);
+      const _result = await this.sendRequest('initialize', params);
       this.emit('session_initialized', result);
       return result;
-    } catch (error) {
+    } catch (_error) {
       this.emit('session_error', error);
       throw error;
     }
@@ -437,15 +436,15 @@ export class WebSocketClient {
   /**
    * Execute Claude Flow command
    */
-  async executeCommand(command, args = {}) {
+  async executeCommand(_command, args = { /* empty */ }) {
     try {
-      const result = await this.sendRequest('tools/call', {
+      const _result = await this.sendRequest('tools/call', {
         name: 'claude-flow/execute',
-        arguments: { command, args }
+        arguments: { _command, args }
       });
       
       return result;
-    } catch (error) {
+    } catch (_error) {
       console.error('Command execution failed:', error);
       throw error;
     }
@@ -456,10 +455,10 @@ export class WebSocketClient {
    */
   async getAvailableTools() {
     try {
-      const result = await this.sendRequest('tools/list');
+      const _result = await this.sendRequest('tools/list');
       // The server returns { tools: [...] }, so we need to extract the tools array
       return result && result.tools ? result.tools : [];
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get tools:', error);
       return []; // Return empty array on error instead of throwing
     }
@@ -473,7 +472,7 @@ export class WebSocketClient {
       return await this.sendRequest('tools/call', {
         name: 'system/health'
       });
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to get health status:', error);
       throw error;
     }

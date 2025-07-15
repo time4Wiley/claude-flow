@@ -3,8 +3,8 @@
  * Provides basic implementation that can work without TypeScript
  */
 
-export async function hiveCommand(args, flags) {
-  const objective = (args || []).join(' ').trim();
+export async function hiveCommand(_args, flags) {
+  const _objective = (args || []).join(' ').trim();
   
   if (!objective || flags.help || flags.h) {
     showHiveHelp();
@@ -20,13 +20,13 @@ export async function hiveCommand(args, flags) {
   console.log('');
   
   // Simulate Hive initialization
-  const hiveId = `hive_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const _hiveId = `hive_${Date.now()}_${Math.random().toString(36).substr(_2, 9)}`;
   console.log(`✅ Hive Mind initialized: ${hiveId}`);
   console.log('');
   
   // Show agent spawning
   console.log('🐝 Spawning specialized agents...');
-  const agents = [
+  const _agents = [
     { type: '👑', name: 'Queen-Genesis', role: 'Orchestrator' },
     { type: '🏗️', name: 'Architect-Prime', role: 'System Design' },
     { type: '🐝', name: 'Worker-1', role: 'Backend Development' },
@@ -51,7 +51,7 @@ export async function hiveCommand(args, flags) {
   console.log('🗳️ Phase 2: Task Assignment');
   console.log('  📌 analysis → Scout-Alpha');
   console.log('  📌 design → Architect-Prime');
-  console.log('  📌 implementation → Worker-1, Worker-2');
+  console.log('  📌 implementation → Worker-_1, Worker-2');
   console.log('  📌 testing → Guardian-Omega');
   console.log('  📌 documentation → Scout-Alpha');
   console.log('');
@@ -89,8 +89,8 @@ USAGE:
   claude-flow hive <objective> [options]
 
 DESCRIPTION:
-  Hive Mind implements advanced swarm intelligence with consensus mechanisms,
-  distributed decision-making, and quality-driven execution.
+  Hive Mind implements advanced swarm intelligence with consensus _mechanisms,
+  distributed decision-_making, and quality-driven execution.
 
 EXAMPLES:
   claude-flow hive "Build microservices architecture"

@@ -14,10 +14,10 @@ export interface ValidationResult {
  * Validate hook parameters before execution
  */
 export function validateHookParams(
-  hookType: HookType,
-  params: Record<string, any>
+  hookType: _HookType,
+  params: Record<string, unknown>
 ): ValidationResult {
-  const result: ValidationResult = {
+  const _result: ValidationResult = {
     valid: true,
     errors: [],
     warnings: []
@@ -36,10 +36,12 @@ export function validateHookParams(
   // Hook-specific validations
   switch (hookType) {
     case 'pre-task':
-      if (params.complexity && !['low', 'medium', 'high'].includes(params.complexity)) {
-        result.errors.push('--complexity must be one of: low, medium, high');
+      {
+if (params.complexity && !['low', 'medium', 'high'].includes(params.complexity)) {
+        result.errors.push('--complexity must be one of: _low, _medium, high');
         result.valid = false;
-      }
+      
+}}
       if (params.estimatedMinutes && isNaN(Number(params.estimatedMinutes))) {
         result.errors.push('--estimated-minutes must be a number');
         result.valid = false;
@@ -47,21 +49,25 @@ export function validateHookParams(
       break;
 
     case 'post-task':
-      if (!params.taskId) {
+      {
+if (!params.taskId) {
         result.errors.push('--task-id is required for post-task hook');
         result.valid = false;
-      }
+      
+}}
       break;
 
     case 'pre-edit':
     case 'post-edit':
-      if (!params.file) {
-        result.errors.push(`--file is required for ${hookType} hook`);
+      {
+if (!params.file) {
+        result.errors.push(`--file is required for ${hookType
+}} hook`);
         result.valid = false;
       }
       if (hookType === 'pre-edit' && params.operation) {
         if (!['read', 'write', 'edit', 'delete'].includes(params.operation)) {
-          result.errors.push('--operation must be one of: read, write, edit, delete');
+          result.errors.push('--operation must be one of: _read, _write, _edit, delete');
           result.valid = false;
         }
       }
@@ -69,8 +75,10 @@ export function validateHookParams(
 
     case 'pre-command':
     case 'post-command':
-      if (!params.command) {
-        result.errors.push(`--command is required for ${hookType} hook`);
+      {
+if (!params.command) {
+        result.errors.push(`--command is required for ${hookType
+}} hook`);
         result.valid = false;
       }
       if (hookType === 'post-command' && params.exitCode) {
@@ -82,17 +90,21 @@ export function validateHookParams(
       break;
 
     case 'session-restore':
-      if (!params.sessionId) {
+      {
+if (!params.sessionId) {
         result.errors.push('--session-id is required for session-restore hook');
         result.valid = false;
-      }
+      
+}}
       break;
 
     case 'pre-search':
-      if (!params.query) {
+      {
+if (!params.query) {
         result.errors.push('--query is required for pre-search hook');
         result.valid = false;
-      }
+      
+}}
       if (params.maxResults && isNaN(Number(params.maxResults))) {
         result.errors.push('--max-results must be a number');
         result.valid = false;
@@ -100,21 +112,25 @@ export function validateHookParams(
       break;
 
     case 'notification':
-      if (!params.message) {
+      {
+if (!params.message) {
         result.errors.push('--message is required for notification hook');
         result.valid = false;
-      }
+      
+}}
       if (params.level && !['info', 'warning', 'error'].includes(params.level)) {
-        result.errors.push('--level must be one of: info, warning, error');
+        result.errors.push('--level must be one of: _info, _warning, error');
         result.valid = false;
       }
       break;
 
     case 'performance':
-      if (params.duration && isNaN(Number(params.duration))) {
+      {
+if (params.duration && isNaN(Number(params.duration))) {
         result.errors.push('--duration must be a number');
         result.valid = false;
-      }
+      
+}}
       if (params.metrics && typeof params.metrics === 'string') {
         try {
           JSON.parse(params.metrics);
@@ -126,17 +142,21 @@ export function validateHookParams(
       break;
 
     case 'memory-sync':
-      if (params.direction && !['push', 'pull', 'sync'].includes(params.direction)) {
-        result.errors.push('--direction must be one of: push, pull, sync');
+      {
+if (params.direction && !['push', 'pull', 'sync'].includes(params.direction)) {
+        result.errors.push('--direction must be one of: _push, _pull, sync');
         result.valid = false;
-      }
+      
+}}
       break;
 
     case 'telemetry':
-      if (!params.event) {
+      {
+if (!params.event) {
         result.errors.push('--event is required for telemetry hook');
         result.valid = false;
-      }
+      
+}}
       if (params.data && typeof params.data === 'string') {
         try {
           JSON.parse(params.data);
@@ -153,7 +173,7 @@ export function validateHookParams(
     result.warnings.push('--load-previous without --session-id may load unexpected data');
   }
 
-  if (hookType === 'post-edit' && params.format && !params.file?.match(/\.(js|ts|jsx|tsx|py|java|cpp|cs)$/)) {
+  if (hookType === 'post-edit' && params.format && !params.file?.match(/.(js|ts|jsx|tsx|py|java|cpp|cs)$/)) {
     result.warnings.push('--format may not work correctly for this file type');
   }
 
@@ -163,10 +183,10 @@ export function validateHookParams(
 /**
  * Sanitize hook parameters for safe execution
  */
-export function sanitizeHookParams(params: Record<string, any>): Record<string, any> {
-  const sanitized: Record<string, any> = {};
+export function sanitizeHookParams(params: Record<string, unknown>): Record<string, unknown> {
+  const _sanitized: Record<string, unknown> = { /* empty */ };
 
-  for (const [key, value] of Object.entries(params)) {
+  for (const [_key, value] of Object.entries(params)) {
     if (value === undefined || value === null) {
       continue;
     }
@@ -174,7 +194,7 @@ export function sanitizeHookParams(params: Record<string, any>): Record<string, 
     // Sanitize file paths
     if (['file', 'saveTo', 'target'].includes(key) && typeof value === 'string') {
       // Remove potentially dangerous characters
-      sanitized[key] = value.replace(/[<>"|?*]/g, '');
+      sanitized[key] = value.replace(/[<>"|?*]/_g, '');
     }
     // Sanitize commands
     else if (key === 'command' && typeof value === 'string') {

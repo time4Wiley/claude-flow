@@ -2,9 +2,8 @@
 import { printSuccess, printError, printInfo, printWarning } from '../utils.js';
 import { PROJECT_TEMPLATES, ENVIRONMENT_CONFIGS } from './init/batch-init.js';
 import { Deno, cwd, exit, existsSync } from '../node-compat.js';
-
-export async function batchManagerCommand(subArgs, flags) {
-  const command = subArgs[0];
+export async function batchManagerCommand(_subArgs, flags) {
+  const _command = subArgs[0];
   
   switch (command) {
     case 'create-config':
@@ -22,17 +21,16 @@ export async function batchManagerCommand(subArgs, flags) {
       return showBatchManagerHelp();
   }
 }
-
-async function createBatchConfig(args, flags) {
-  const outputFile = args[0] || 'batch-config.json';
-  const interactive = flags.interactive || flags.i;
+async function createBatchConfig(_args, flags) {
+  const _outputFile = args[0] || 'batch-config.json';
+  const _interactive = flags.interactive || flags.i;
   
   if (interactive) {
     return await createInteractiveConfig(outputFile);
   }
   
   // Create basic template
-  const config = {
+  const _config = {
     projects: ['project1', 'project2', 'project3'],
     baseOptions: {
       sparc: true,
@@ -44,21 +42,20 @@ async function createBatchConfig(args, flags) {
   };
   
   try {
-    await Deno.writeTextFile(outputFile, JSON.stringify(config, null, 2));
+    await Deno.writeTextFile(_outputFile, JSON.stringify(_config, null, 2));
     printSuccess(`Created batch configuration template: ${outputFile}`);
     console.log('Edit the file to customize your batch initialization setup.');
-  } catch (error) {
+  } catch (_error) {
     printError(`Failed to create config file: ${error.message}`);
   }
 }
-
 async function createInteractiveConfig(outputFile) {
   console.log('🚀 Interactive Batch Configuration Creator');
   console.log('==========================================\n');
   
   // This would require a proper CLI prompt library in a real implementation
   // For now, we'll create a comprehensive template with comments
-  const config = {
+  const _config = {
     '_comment': 'Batch initialization configuration',
     '_templates': Object.keys(PROJECT_TEMPLATES),
     '_environments': Object.keys(ENVIRONMENT_CONFIGS),
@@ -98,20 +95,19 @@ async function createInteractiveConfig(outputFile) {
   };
   
   try {
-    await Deno.writeTextFile(outputFile, JSON.stringify(config, null, 2));
+    await Deno.writeTextFile(_outputFile, JSON.stringify(_config, null, 2));
     printSuccess(`Created interactive batch configuration: ${outputFile}`);
     console.log('\nNext steps:');
     console.log('1. Edit the configuration file to match your needs');
     console.log('2. Remove the "_comment" and example entries');
     console.log('3. Use either "projects" array OR "projectConfigs" object');
     console.log(`4. Run: claude-flow init --config ${outputFile}`);
-  } catch (error) {
+  } catch (_error) {
     printError(`Failed to create interactive config: ${error.message}`);
   }
 }
-
-async function validateBatchConfig(args, flags) {
-  const configFile = args[0];
+async function validateBatchConfig(_args, flags) {
+  const _configFile = args[0];
   
   if (!configFile) {
     printError('Please specify a configuration file to validate');
@@ -119,14 +115,14 @@ async function validateBatchConfig(args, flags) {
   }
   
   try {
-    const content = await Deno.readTextFile(configFile);
-    const config = JSON.parse(content);
+    const _content = await Deno.readTextFile(configFile);
+    const _config = JSON.parse(content);
     
     console.log(`📋 Validating batch configuration: ${configFile}`);
     console.log('================================================\n');
     
-    const issues = [];
-    const warnings = [];
+    const _issues = [];
+    const _warnings = [];
     
     // Validate structure
     if (!config.projects && !config.projectConfigs) {
@@ -160,7 +156,7 @@ async function validateBatchConfig(args, flags) {
     
     // Validate project configs
     if (config.projectConfigs) {
-      for (const [projectName, projectConfig] of Object.entries(config.projectConfigs)) {
+      for (const [_projectName, projectConfig] of Object.entries(config.projectConfigs)) {
         if (projectConfig.template && !PROJECT_TEMPLATES[projectConfig.template]) {
           issues.push(`Project ${projectName}: Unknown template ${projectConfig.template}`);
         }
@@ -182,7 +178,7 @@ async function validateBatchConfig(args, flags) {
       
       // Summary
       console.log('\n📊 Configuration Summary:');
-      const projectCount = config.projects ? config.projects.length : 
+      const _projectCount = config.projects ? config.projects.length : 
                           config.projectConfigs ? Object.keys(config.projectConfigs).length : 0;
       console.log(`  Projects: ${projectCount}`);
       
@@ -203,7 +199,7 @@ async function validateBatchConfig(args, flags) {
       }
     }
     
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof Deno.errors.NotFound) {
       printError(`Configuration file not found: ${configFile}`);
     } else if (error instanceof SyntaxError) {
@@ -213,12 +209,11 @@ async function validateBatchConfig(args, flags) {
     }
   }
 }
-
 function listTemplates() {
   console.log('📋 Available Project Templates');
   console.log('==============================\n');
   
-  for (const [key, template] of Object.entries(PROJECT_TEMPLATES)) {
+  for (const [_key, template] of Object.entries(PROJECT_TEMPLATES)) {
     console.log(`🏗️  ${key}`);
     console.log(`   Name: ${template.name}`);
     console.log(`   Description: ${template.description}`);
@@ -227,12 +222,11 @@ function listTemplates() {
     console.log();
   }
 }
-
 function listEnvironments() {
   console.log('🌍 Available Environment Configurations');
   console.log('=======================================\n');
   
-  for (const [key, env] of Object.entries(ENVIRONMENT_CONFIGS)) {
+  for (const [_key, env] of Object.entries(ENVIRONMENT_CONFIGS)) {
     console.log(`⚙️  ${key}`);
     console.log(`   Name: ${env.name}`);
     console.log(`   Features: ${env.features.join(', ')}`);
@@ -240,9 +234,8 @@ function listEnvironments() {
     console.log();
   }
 }
-
-async function estimateBatchOperation(args, flags) {
-  const configFile = args[0];
+async function estimateBatchOperation(_args, flags) {
+  const _configFile = args[0];
   
   if (!configFile) {
     printError('Please specify a configuration file to estimate');
@@ -250,30 +243,30 @@ async function estimateBatchOperation(args, flags) {
   }
   
   try {
-    const content = await Deno.readTextFile(configFile);
-    const config = JSON.parse(content);
+    const _content = await Deno.readTextFile(configFile);
+    const _config = JSON.parse(content);
     
     console.log('⏱️  Batch Operation Estimation');
     console.log('=============================\n');
     
-    let projectCount = 0;
-    let totalEnvironments = 0;
+    let _projectCount = 0;
+    let _totalEnvironments = 0;
     
     if (config.projects) {
       projectCount = config.projects.length;
-      const environments = config.baseOptions?.environments || ['dev'];
+      const _environments = config.baseOptions?.environments || ['dev'];
       totalEnvironments = projectCount * environments.length;
     } else if (config.projectConfigs) {
       projectCount = Object.keys(config.projectConfigs).length;
       totalEnvironments = projectCount; // Each project has its own environment
     }
     
-    const parallel = config.baseOptions?.parallel !== false;
-    const maxConcurrency = config.baseOptions?.maxConcurrency || 5;
-    const avgTimePerProject = 15; // seconds estimate
+    const _parallel = config.baseOptions?.parallel !== false;
+    const _maxConcurrency = config.baseOptions?.maxConcurrency || 5;
+    const _avgTimePerProject = 15; // seconds estimate
     
-    const sequentialTime = totalEnvironments * avgTimePerProject;
-    const parallelTime = parallel ? Math.ceil(totalEnvironments / maxConcurrency) * avgTimePerProject : sequentialTime;
+    const _sequentialTime = totalEnvironments * avgTimePerProject;
+    const _parallelTime = parallel ? Math.ceil(totalEnvironments / maxConcurrency) * avgTimePerProject : sequentialTime;
     
     console.log(`📊 Project Count: ${projectCount}`);
     console.log(`🌍 Total Environments: ${totalEnvironments}`);
@@ -289,11 +282,10 @@ async function estimateBatchOperation(args, flags) {
     console.log('   Per Project: ~50-200 MB');
     console.log(`   Total: ~${Math.ceil(totalEnvironments * 125 / 1024)} GB`);
     
-  } catch (error) {
+  } catch (_error) {
     printError(`Failed to estimate batch operation: ${error.message}`);
   }
 }
-
 function showBatchManagerHelp() {
   console.log('🛠️  Batch Manager - Configuration and Estimation Tools');
   console.log('====================================================\n');
@@ -310,8 +302,8 @@ function showBatchManagerHelp() {
   console.log('  help                    Show this help message\n');
   
   console.log('OPTIONS:');
-  console.log('  --interactive, -i       Create interactive configuration');
-  console.log('  --help, -h             Show command help\n');
+  console.log('  --_interactive, -i       Create interactive configuration');
+  console.log('  --_help, -h             Show command help\n');
   
   console.log('EXAMPLES:');
   console.log('  claude-flow batch create-config my-batch.json');
@@ -323,5 +315,5 @@ function showBatchManagerHelp() {
   
   console.log('INTEGRATION:');
   console.log('  Use created configs with: claude-flow init --config <file>');
-  console.log('  Or batch init directly: claude-flow init --batch-init project1,project2');
+  console.log('  Or batch init directly: claude-flow init --batch-init _project1,project2');
 }

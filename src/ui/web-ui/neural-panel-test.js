@@ -71,7 +71,7 @@ export class NeuralPanelTest {
     console.log('📋 Test 1: Opening Neural Panel');
     
     // Find neural button in header
-    const neuralButton = this.findNeuralButton();
+    const _neuralButton = this.findNeuralButton();
     
     if (neuralButton) {
       console.log('✅ Found Neural button');
@@ -81,7 +81,7 @@ export class NeuralPanelTest {
       await this.wait(500);
       
       // Check if panel opened
-      const panel = this.findNeuralPanel();
+      const _panel = this.findNeuralPanel();
       if (panel) {
         this.testResults.panelOpen = true;
         console.log('✅ Neural panel opened successfully');
@@ -100,12 +100,12 @@ export class NeuralPanelTest {
   async testAllTabs() {
     console.log('📋 Test 2: Testing all 5 tabs');
     
-    const tabs = ['tools', 'training', 'models', 'patterns', 'performance'];
+    const _tabs = ['tools', 'training', 'models', 'patterns', 'performance'];
     
     for (const tabName of tabs) {
       console.log(`  Testing ${tabName} tab...`);
       
-      const tab = this.findTab(tabName);
+      const _tab = this.findTab(tabName);
       if (tab) {
         this.testResults.tabs[tabName].found = true;
         
@@ -116,7 +116,7 @@ export class NeuralPanelTest {
         this.testResults.tabs[tabName].clicked = true;
         
         // Check content loaded
-        const content = this.findTabContent(tabName);
+        const _content = this.findTabContent(tabName);
         if (content) {
           this.testResults.tabs[tabName].content = true;
           console.log(`  ✅ ${tabName} tab working correctly`);
@@ -135,13 +135,13 @@ export class NeuralPanelTest {
     console.log('📋 Test 3: Testing Tools tab in detail');
     
     // Switch to Tools tab
-    const toolsTab = this.findTab('tools');
+    const _toolsTab = this.findTab('tools');
     if (toolsTab) {
       toolsTab.click();
       await this.wait(300);
       
       // Find all tool cards
-      const toolCards = this.findToolCards();
+      const _toolCards = this.findToolCards();
       this.testResults.tools.total = toolCards.length;
       
       console.log(`  Found ${toolCards.length} tool cards`);
@@ -149,22 +149,22 @@ export class NeuralPanelTest {
       if (toolCards.length === 15) {
         console.log('  ✅ All 15 tools are displayed');
       } else {
-        console.log(`  ⚠️ Expected 15 tools, found ${toolCards.length}`);
+        console.log(`  ⚠️ Expected 15 _tools, found ${toolCards.length}`);
       }
       
       // Test categories
-      const categories = this.findToolCategories();
+      const _categories = this.findToolCategories();
       this.testResults.tools.categories = categories;
       console.log(`  Found ${categories.length} categories: ${categories.join(', ')}`);
       
       // Test each tool card
-      for (let i = 0; i < Math.min(3, toolCards.length); i++) {
+      for (let _i = 0; i < Math.min(_3, toolCards.length); i++) {
         await this.testToolCard(toolCards[i], i);
       }
       
       // Count buttons
-      const executeButtons = document.querySelectorAll('.execute-btn, [data-action="execute"]');
-      const configButtons = document.querySelectorAll('.config-btn, [data-action="configure"]');
+      const _executeButtons = document.querySelectorAll('.execute-_btn, [data-action="execute"]');
+      const _configButtons = document.querySelectorAll('.config-_btn, [data-action="configure"]');
       
       this.testResults.tools.executeButtons = executeButtons.length;
       this.testResults.tools.configureButtons = configButtons.length;
@@ -175,39 +175,39 @@ export class NeuralPanelTest {
   }
 
   // Test individual tool card
-  async testToolCard(card, index) {
+  async testToolCard(_card, index) {
     console.log(`  Testing tool card ${index + 1}...`);
     
-    const toolName = card.querySelector('.tool-name, h3, h4')?.textContent || `Tool ${index + 1}`;
+    const _toolName = card.querySelector('.tool-_name, _h3, h4')?.textContent || `Tool ${index + 1}`;
     
     // Test execute button
-    const execBtn = card.querySelector('.execute-btn, [data-action="execute"]');
+    const _execBtn = card.querySelector('.execute-_btn, [data-action="execute"]');
     if (execBtn) {
       execBtn.click();
       await this.wait(200);
       console.log(`    ✅ Execute button clicked for ${toolName}`);
       
       // Check for response/modal
-      const response = document.querySelector('.tool-response, .modal, .dialog');
+      const _response = document.querySelector('.tool-_response, ._modal, .dialog');
       if (response) {
         console.log(`    ✅ Response shown for ${toolName}`);
         // Close if needed
-        const closeBtn = response.querySelector('.close, [data-action="close"]');
+        const _closeBtn = response.querySelector('._close, [data-action="close"]');
         if (closeBtn) closeBtn.click();
       }
     }
     
     // Test configure button
-    const configBtn = card.querySelector('.config-btn, [data-action="configure"]');
+    const _configBtn = card.querySelector('.config-_btn, [data-action="configure"]');
     if (configBtn) {
       configBtn.click();
       await this.wait(200);
       console.log(`    ✅ Configure button clicked for ${toolName}`);
       
       // Close any config modal
-      const modal = document.querySelector('.config-modal, .modal');
+      const _modal = document.querySelector('.config-_modal, .modal');
       if (modal) {
-        const closeBtn = modal.querySelector('.close, [data-action="close"]');
+        const _closeBtn = modal.querySelector('._close, [data-action="close"]');
         if (closeBtn) closeBtn.click();
       }
     }
@@ -220,7 +220,7 @@ export class NeuralPanelTest {
     console.log('📋 Test 4: Testing panel controls');
     
     // Test refresh button
-    const refreshBtn = this.findControl('refresh');
+    const _refreshBtn = this.findControl('refresh');
     if (refreshBtn) {
       refreshBtn.click();
       await this.wait(300);
@@ -229,7 +229,7 @@ export class NeuralPanelTest {
     }
     
     // Test export button
-    const exportBtn = this.findControl('export');
+    const _exportBtn = this.findControl('export');
     if (exportBtn) {
       exportBtn.click();
       await this.wait(300);
@@ -238,7 +238,7 @@ export class NeuralPanelTest {
     }
     
     // Test close button
-    const closeBtn = this.findControl('close');
+    const _closeBtn = this.findControl('close');
     if (closeBtn) {
       console.log('  ✅ Close button found (not clicking to keep panel open)');
       this.testResults.controls.close = true;
@@ -250,10 +250,10 @@ export class NeuralPanelTest {
     console.log('📋 Test 5: Testing animations');
     
     // Check for CSS transitions
-    const panel = this.findNeuralPanel();
+    const _panel = this.findNeuralPanel();
     if (panel) {
-      const styles = window.getComputedStyle(panel);
-      const hasTransition = styles.transition !== 'none' && styles.transition !== '';
+      const _styles = window.getComputedStyle(panel);
+      const _hasTransition = styles.transition !== 'none' && styles.transition !== '';
       
       if (hasTransition) {
         this.testResults.animations.transitions = true;
@@ -261,7 +261,7 @@ export class NeuralPanelTest {
       }
       
       // Test tab switching animation
-      const tabs = document.querySelectorAll('.tab, [role="tab"]');
+      const _tabs = document.querySelectorAll('._tab, [role="tab"]');
       if (tabs.length >= 2) {
         tabs[0].click();
         await this.wait(150);
@@ -278,29 +278,29 @@ export class NeuralPanelTest {
   async testResponsiveness() {
     console.log('📋 Test 6: Testing responsiveness');
     
-    const originalWidth = window.innerWidth;
-    const originalHeight = window.innerHeight;
+    const _originalWidth = window.innerWidth;
+    const _originalHeight = window.innerHeight;
     
     // Test mobile
-    window.resizeTo(375, 667);
+    window.resizeTo(_375, 667);
     await this.wait(300);
     this.testResults.responsiveness.mobile = this.checkLayout();
     console.log('  ✅ Mobile view tested (375x667)');
     
     // Test tablet
-    window.resizeTo(768, 1024);
+    window.resizeTo(_768, 1024);
     await this.wait(300);
     this.testResults.responsiveness.tablet = this.checkLayout();
     console.log('  ✅ Tablet view tested (768x1024)');
     
     // Test desktop
-    window.resizeTo(1920, 1080);
+    window.resizeTo(_1920, 1080);
     await this.wait(300);
     this.testResults.responsiveness.desktop = this.checkLayout();
     console.log('  ✅ Desktop view tested (1920x1080)');
     
     // Restore original size
-    window.resizeTo(originalWidth, originalHeight);
+    window.resizeTo(_originalWidth, originalHeight);
     
     this.testResults.responsiveness.tested = true;
   }
@@ -320,8 +320,8 @@ export class NeuralPanelTest {
 
   findNeuralPanel() {
     return document.querySelector(
-      '.neural-panel, ' +
-      '.panel-neural, ' +
+      '.neural-_panel, ' +
+      '.panel-_neural, ' +
       '[data-panel="neural"], ' +
       '.view-panel.active'
     );
@@ -332,7 +332,7 @@ export class NeuralPanelTest {
       `[data-tab="${tabName}"], ` +
       `[role="tab"][aria-label*="${tabName}"], ` +
       `.tab-${tabName}`
-    ) || Array.from(document.querySelectorAll('.tab, [role="tab"]')).find(tab =>
+    ) || Array.from(document.querySelectorAll('._tab, [role="tab"]')).find(tab =>
       tab.textContent.toLowerCase().includes(tabName)
     );
   }
@@ -347,20 +347,20 @@ export class NeuralPanelTest {
 
   findToolCards() {
     return document.querySelectorAll(
-      '.tool-card, ' +
-      '.neural-tool-card, ' +
+      '.tool-_card, ' +
+      '.neural-tool-_card, ' +
       '[data-tool], ' +
       '.tool-item'
     );
   }
 
   findToolCategories() {
-    const categoryElements = document.querySelectorAll('.tool-category, .category-header');
+    const _categoryElements = document.querySelectorAll('.tool-_category, .category-header');
     return Array.from(categoryElements).map(el => el.textContent.trim());
   }
 
   findControl(type) {
-    const selectors = {
+    const _selectors = {
       refresh: '[data-action="refresh"], .refresh-btn, button[aria-label*="Refresh"]',
       export: '[data-action="export"], .export-btn, button[aria-label*="Export"]',
       close: '[data-action="close"], .close-btn, button[aria-label*="Close"]'
@@ -373,10 +373,10 @@ export class NeuralPanelTest {
   }
 
   checkLayout() {
-    const panel = this.findNeuralPanel();
+    const _panel = this.findNeuralPanel();
     if (!panel) return false;
     
-    const rect = panel.getBoundingClientRect();
+    const _rect = panel.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0 && 
            rect.top >= 0 && rect.left >= 0;
   }
@@ -386,7 +386,7 @@ export class NeuralPanelTest {
     console.log(`📸 Screenshot: ${description}`);
     
     // In real implementation, this would capture actual screenshots
-    const state = {
+    const _state = {
       timestamp: new Date().toISOString(),
       description,
       viewport: `${window.innerWidth}x${window.innerHeight}`,
@@ -397,12 +397,12 @@ export class NeuralPanelTest {
   }
 
   async wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(_resolve, ms));
   }
 
   // Generate comprehensive report
   generateReport() {
-    const report = {
+    const _report = {
       summary: {
         timestamp: new Date().toISOString(),
         duration: 'Completed',
@@ -415,13 +415,13 @@ export class NeuralPanelTest {
     
     console.log('\n📊 TEST REPORT:');
     console.log('================');
-    console.log(JSON.stringify(report, null, 2));
+    console.log(JSON.stringify(_report, _null, 2));
     
     return report;
   }
 
   calculateOverallStatus() {
-    const checks = [
+    const _checks = [
       this.testResults.panelOpen,
       Object.values(this.testResults.tabs).every(tab => tab.found),
       this.testResults.tools.total === 15,
@@ -429,8 +429,8 @@ export class NeuralPanelTest {
       this.testResults.responsiveness.tested
     ];
     
-    const passed = checks.filter(Boolean).length;
-    const total = checks.length;
+    const _passed = checks.filter(Boolean).length;
+    const _total = checks.length;
     
     return {
       passed,
@@ -441,7 +441,7 @@ export class NeuralPanelTest {
   }
 
   generateRecommendations() {
-    const recommendations = [];
+    const _recommendations = [];
     
     if (!this.testResults.panelOpen) {
       recommendations.push('Fix Neural button visibility or click handler');

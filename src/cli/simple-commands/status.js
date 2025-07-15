@@ -1,22 +1,20 @@
 // status.js - System status and monitoring commands
 import { printSuccess, printError, printWarning } from '../utils.js';
 import { Deno } from '../node-compat.js';
-
-export async function statusCommand(subArgs, flags) {
-  const verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
-  const json = subArgs.includes('--json') || flags.json;
+export async function statusCommand(_subArgs, flags) {
+  const _verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
+  const _json = subArgs.includes('--json') || flags.json;
   
-  const status = await getSystemStatus(verbose);
+  const _status = await getSystemStatus(verbose);
   
   if (json) {
-    console.log(JSON.stringify(status, null, 2));
+    console.log(JSON.stringify(_status, null, 2));
   } else {
-    displayStatus(status, verbose);
+    displayStatus(_status, verbose);
   }
 }
-
 async function getSystemStatus(verbose = false) {
-  const status = {
+  const _status = {
     timestamp: Date.now(),
     version: '1.0.71',
     orchestrator: {
@@ -27,7 +25,7 @@ async function getSystemStatus(verbose = false) {
     agents: {
       active: 0,
       total: 0,
-      types: {}
+      types: { /* empty */ }
     },
     tasks: {
       queued: 0,
@@ -55,14 +53,13 @@ async function getSystemStatus(verbose = false) {
   
   return status;
 }
-
 async function getMemoryStats() {
   try {
-    const memoryStore = './memory/memory-store.json';
-    const content = await Deno.readTextFile(memoryStore);
-    const data = JSON.parse(content);
+    const _memoryStore = './memory/memory-store.json';
+    const _content = await Deno.readTextFile(memoryStore);
+    const _data = JSON.parse(content);
     
-    let totalEntries = 0;
+    let _totalEntries = 0;
     for (const entries of Object.values(data)) {
       totalEntries += entries.length;
     }
@@ -72,12 +69,11 @@ async function getMemoryStats() {
     return 0;
   }
 }
-
 async function getResourceUsage() {
   // Get system resource information
   try {
     // Dynamic import for cross-platform compatibility
-    let os;
+    let os; // TODO: Remove if unused
     try {
       os = await import('node:os');
     } catch {
@@ -94,9 +90,9 @@ async function getResourceUsage() {
     }
     
     // Node.js doesn't have systemMemoryInfo, use os module instead
-    const totalMem = os.totalmem();
-    const freeMem = os.freemem();
-    const memInfo = {
+    const _totalMem = os.totalmem();
+    const _freeMem = os.freemem();
+    const _memInfo = {
       total: totalMem,
       free: freeMem,
       available: freeMem,
@@ -107,11 +103,11 @@ async function getResourceUsage() {
     };
     
     // Get CPU info
-    let cpuCores = os.cpus().length;
-    let loadAvg = 'N/A';
+    let _cpuCores = os.cpus().length;
+    let _loadAvg = 'N/A';
     
     try {
-      const loadAvgData = os.loadavg();
+      const _loadAvgData = os.loadavg();
       loadAvg = `${loadAvgData[0].toFixed(2)}, ${loadAvgData[1].toFixed(2)}, ${loadAvgData[2].toFixed(2)}`;
     } catch (e) {
       // Load average not available on all platforms
@@ -136,7 +132,7 @@ async function getResourceUsage() {
         uptime: formatUptime(os.uptime() * 1000)
       }
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       memory: { usage: 'Unknown' },
       cpu: { cores: 'Unknown', load: 'Unknown' },
@@ -144,12 +140,11 @@ async function getResourceUsage() {
     };
   }
 }
-
-function displayStatus(status, verbose) {
+function displayStatus(_status, verbose) {
   printSuccess('Claude-Flow System Status:');
   
   // Overall status
-  const overallStatus = status.orchestrator.running ? '🟢 Running' : '🟡 Not Running';
+  const _overallStatus = status.orchestrator.running ? '🟢 Running' : '🟡 Not Running';
   console.log(`${overallStatus} (orchestrator ${status.orchestrator.running ? 'active' : 'not started'})`);
   
   // Core components
@@ -173,7 +168,7 @@ function displayStatus(status, verbose) {
     console.log(`   Currently Active: ${status.agents.active}`);
     if (Object.keys(status.agents.types).length > 0) {
       console.log('   Types:');
-      for (const [type, count] of Object.entries(status.agents.types)) {
+      for (const [_type, count] of Object.entries(status.agents.types)) {
         console.log(`     ${type}: ${count}`);
       }
     } else {
@@ -239,11 +234,10 @@ function displayStatus(status, verbose) {
     console.log('   Run "claude-flow memory store key value" to test memory');
   }
 }
-
 function formatBytes(bytes) {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let size = bytes;
-  let unitIndex = 0;
+  const _units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let _size = bytes;
+  let _unitIndex = 0;
   
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
@@ -252,33 +246,31 @@ function formatBytes(bytes) {
   
   return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
-
 function formatUptime(milliseconds) {
   if (milliseconds === 0) return '0s';
   
-  const seconds = Math.floor(milliseconds / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
+  const _seconds = Math.floor(milliseconds / 1000);
+  const _minutes = Math.floor(seconds / 60);
+  const _hours = Math.floor(minutes / 60);
+  const _days = Math.floor(hours / 24);
   
   if (days > 0) return `${days}d ${hours % 24}h ${minutes % 60}m`;
   if (hours > 0) return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
   if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
   return `${seconds}s`;
 }
-
 // Allow direct execution for testing
 if (import.meta.main) {
-  const args = [];
-  const flags = {};
+  const _args = [];
+  const _flags = { /* empty */ };
   
   // Parse arguments and flags from Deno.args if available
   if (typeof Deno !== 'undefined' && Deno.args) {
-    for (let i = 0; i < Deno.args.length; i++) {
-      const arg = Deno.args[i];
+    for (let _i = 0; i < Deno.args.length; i++) {
+      const _arg = Deno.args[i];
       if (arg.startsWith('--')) {
-        const flagName = arg.substring(2);
-        const nextArg = Deno.args[i + 1];
+        const _flagName = arg.substring(2);
+        const _nextArg = Deno.args[i + 1];
         
         if (nextArg && !nextArg.startsWith('--')) {
           flags[flagName] = nextArg;
@@ -292,5 +284,5 @@ if (import.meta.main) {
     }
   }
   
-  await statusCommand(args, flags);
+  await statusCommand(_args, flags);
 }
