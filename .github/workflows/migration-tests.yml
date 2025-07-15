@@ -29,14 +29,14 @@ jobs:
         run: npm ci
       
       - name: Run local execution tests
-        run: node test/migration/local/test-local-execution.js
+        run: node tests/migration/local/test-local-execution.js
       
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: local-test-results-${{ matrix.os }}-node${{ matrix.node }}
-          path: test/migration/local/local-test-results.json
+          path: tests/migration/local/local-test-results.json
 
   remote-npx-tests:
     name: Remote NPX Tests
@@ -62,14 +62,14 @@ jobs:
         run: npm pack
       
       - name: Run remote NPX tests
-        run: node test/migration/remote/test-remote-npx.js
+        run: node tests/migration/remote/test-remote-npx.js
       
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: remote-npx-test-results
-          path: test/migration/remote/remote-npx-test-results.json
+          path: tests/migration/remote/remote-npx-test-results.json
 
   docker-tests:
     name: Docker Tests
@@ -83,14 +83,14 @@ jobs:
         uses: docker/setup-buildx-action@v3
       
       - name: Run Docker tests
-        run: node test/migration/docker/test-docker-execution.js
+        run: node tests/migration/docker/test-docker-execution.js
       
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: docker-test-results
-          path: test/migration/docker/docker-test-results.json
+          path: tests/migration/docker/docker-test-results.json
 
   integration-tests:
     name: Integration Tests
@@ -112,7 +112,7 @@ jobs:
           npm install -g ruv-swarm
       
       - name: Run integration tests
-        run: node test/migration/integration/test-integration.js
+        run: node tests/migration/integration/test-integration.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -121,7 +121,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: integration-test-results
-          path: test/migration/integration/integration-test-results.json
+          path: tests/migration/integration/integration-test-results.json
 
   performance-tests:
     name: Performance Tests
@@ -141,14 +141,14 @@ jobs:
         run: npm ci
       
       - name: Run performance tests
-        run: node test/migration/performance/test-performance.js
+        run: node tests/migration/performance/test-performance.js
       
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: performance-test-results
-          path: test/migration/performance/performance-test-results.json
+          path: tests/migration/performance/performance-test-results.json
       
       - name: Comment PR with performance results
         if: github.event_name == 'pull_request'
@@ -157,7 +157,7 @@ jobs:
           script: |
             const fs = require('fs');
             const results = JSON.parse(
-              fs.readFileSync('test/migration/performance/performance-test-results.json', 'utf8')
+              fs.readFileSync('tests/migration/performance/performance-test-results.json', 'utf8')
             );
             
             const comment = `## Performance Test Results

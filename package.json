@@ -41,6 +41,7 @@
     "test:health": "NODE_OPTIONS='--experimental-vm-modules' jest tests/integration/system-integration.test.ts --testNamePattern='Health'",
     "test:swarm": "NODE_OPTIONS='--experimental-vm-modules' jest tests/integration/workflow-engine.test.ts",
     "test:benchmark": "NODE_OPTIONS='--experimental-vm-modules' jest tests/performance",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.js",
     "format": "prettier --write src",
     "diagnostics": "node -e \"import('./dist/monitoring/diagnostics.js').then(m => m.DiagnosticManager.quickDiagnostic().then(console.log))\"",
