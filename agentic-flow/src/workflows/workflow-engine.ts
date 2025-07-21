@@ -443,9 +443,11 @@ export class WorkflowEngine extends EventEmitter {
     execution.logs.push(log);
     this.emit('workflow:log', { executionId: execution.id, log });
     
-    // Persist logs periodically (every 10 logs)
+    // Persist logs periodically (every 10 logs) - handle async without blocking
     if (this.enablePersistence && execution.logs.length % 10 === 0) {
-      await this.stateManager.updateExecution(execution);
+      this.stateManager.updateExecution(execution).catch(error => {
+        console.error('Failed to persist execution logs:', error);
+      });
     }
   }
 

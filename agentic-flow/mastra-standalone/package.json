@@ -1,0 +1,18 @@
+{
+  "name": "agentic-flow-mastra",
+  "version": "1.0.0",
+  "description": "Standalone Mastra integration for Agentic Flow",
+  "main": "src/mastra/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "mastra dev",
+    "start": "mastra start"
+  },
+  "dependencies": {
+    "@mastra/core": "^0.10.15"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
