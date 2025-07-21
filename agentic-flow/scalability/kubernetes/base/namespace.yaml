@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agentic-flow
+  labels:
+    name: agentic-flow
+    app.kubernetes.io/name: agentic-flow
+    app.kubernetes.io/part-of: agentic-flow-platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agentic-flow-monitoring
+  labels:
+    name: agentic-flow-monitoring
+    app.kubernetes.io/name: agentic-flow-monitoring
+    app.kubernetes.io/part-of: agentic-flow-platform

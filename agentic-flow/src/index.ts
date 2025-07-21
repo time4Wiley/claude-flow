@@ -23,14 +23,29 @@ export { MessageQueue } from './communication/message-queue';
 // Coordination system
 export { TeamCoordinator } from './coordination/team-coordinator';
 
+// Workflow system
+export { WorkflowEngine } from './workflows/engine/workflow-engine';
+export { WorkflowExecutor } from './workflows/engine/workflow-executor';
+export { WorkflowConverter } from './workflows/engine/workflow-converter';
+
+// Webhook system
+export { WebhookManager } from './webhooks/webhook-manager';
+
+// Plugin system
+export { PluginManager } from './plugins/plugin-manager';
+
+// API server
+export { app as apiServer, server as httpServer } from './api/server';
+
 // Utilities
 export { Logger } from './utils/logger';
 
 // Type exports
 export * from './types';
+export * from './api/types';
 
 // Version
-export const VERSION = '1.0.0';
+export const VERSION = '2.0.0';
 
 /**
  * Quick start example:

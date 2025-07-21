@@ -1,0 +1,820 @@
+openapi: 3.0.3
+info:
+  title: Agentic Flow API
+  description: |
+    Comprehensive API for the Agentic Flow autonomous agent framework.
+    
+    This API provides access to agent management, workflow orchestration,
+    goal processing, and inter-agent communication capabilities.
+  version: 1.0.0
+  contact:
+    name: Agentic Flow Team
+    email: api@agenticflow.dev
+    url: https://agenticflow.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.agenticflow.dev/v1
+    description: Production server
+  - url: https://staging-api.agenticflow.dev/v1
+    description: Staging server
+  - url: http://localhost:3000/v1
+    description: Local development server
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+tags:
+  - name: Agents
+    description: Agent lifecycle management and operations
+  - name: Workflows
+    description: Workflow creation and execution
+  - name: Goals
+    description: Goal processing and management
+  - name: Communication
+    description: Inter-agent messaging and events
+  - name: Webhooks
+    description: Webhook subscription management
+  - name: Plugins
+    description: Plugin management and execution
+
+paths:
+  /agents:
+    get:
+      tags: [Agents]
+      summary: List all agents
+      operationId: listAgents
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, initializing, error]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [coordinator, executor, specialized]
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+    post:
+      tags: [Agents]
+      summary: Create a new agent
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentCreateRequest'
+      responses:
+        '201':
+          description: Agent created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /agents/{agentId}:
+    get:
+      tags: [Agents]
+      summary: Get agent details
+      operationId: getAgent
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Agents]
+      summary: Update agent configuration
+      operationId: updateAgent
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentUpdateRequest'
+      responses:
+        '200':
+          description: Agent updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Agents]
+      summary: Delete an agent
+      operationId: deleteAgent
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '204':
+          description: Agent deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agents/{agentId}/start:
+    post:
+      tags: [Agents]
+      summary: Start an agent
+      operationId: startAgent
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Agent started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '409':
+          description: Agent already running
+
+  /agents/{agentId}/stop:
+    post:
+      tags: [Agents]
+      summary: Stop an agent
+      operationId: stopAgent
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Agent stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+
+  /workflows:
+    get:
+      tags: [Workflows]
+      summary: List workflows
+      operationId: listWorkflows
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, active, completed, failed]
+      responses:
+        '200':
+          description: List of workflows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowList'
+
+    post:
+      tags: [Workflows]
+      summary: Create a new workflow
+      operationId: createWorkflow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowCreateRequest'
+      responses:
+        '201':
+          description: Workflow created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+
+  /workflows/{workflowId}/execute:
+    post:
+      tags: [Workflows]
+      summary: Execute a workflow
+      operationId: executeWorkflow
+      parameters:
+        - $ref: '#/components/parameters/WorkflowId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Workflow execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowExecution'
+
+  /goals:
+    post:
+      tags: [Goals]
+      summary: Parse and create a goal
+      operationId: createGoal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [description]
+              properties:
+                description:
+                  type: string
+                  description: Natural language goal description
+                priority:
+                  type: string
+                  enum: [low, medium, high, critical]
+                constraints:
+                  type: object
+      responses:
+        '201':
+          description: Goal created and parsed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+
+  /messages:
+    post:
+      tags: [Communication]
+      summary: Send a message between agents
+      operationId: sendMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageRequest'
+      responses:
+        '200':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /webhooks:
+    get:
+      tags: [Webhooks]
+      summary: List webhook subscriptions
+      operationId: listWebhooks
+      responses:
+        '200':
+          description: List of webhook subscriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookList'
+
+    post:
+      tags: [Webhooks]
+      summary: Create webhook subscription
+      operationId: createWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookCreateRequest'
+      responses:
+        '201':
+          description: Webhook created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+
+  /plugins:
+    get:
+      tags: [Plugins]
+      summary: List installed plugins
+      operationId: listPlugins
+      responses:
+        '200':
+          description: List of plugins
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginList'
+
+    post:
+      tags: [Plugins]
+      summary: Install a plugin
+      operationId: installPlugin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PluginInstallRequest'
+      responses:
+        '201':
+          description: Plugin installed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plugin'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    AgentId:
+      name: agentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    WorkflowId:
+      name: workflowId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    Agent:
+      type: object
+      required: [id, name, type, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [coordinator, executor, specialized]
+        status:
+          type: string
+          enum: [active, inactive, initializing, error]
+        capabilities:
+          type: array
+          items:
+            type: string
+        configuration:
+          type: object
+          additionalProperties: true
+        metrics:
+          $ref: '#/components/schemas/AgentMetrics'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AgentList:
+      type: object
+      required: [agents, totalCount]
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+        totalCount:
+          type: integer
+        nextOffset:
+          type: integer
+
+    AgentCreateRequest:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [coordinator, executor, specialized]
+        capabilities:
+          type: array
+          items:
+            type: string
+        configuration:
+          type: object
+          additionalProperties: true
+
+    AgentUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        configuration:
+          type: object
+          additionalProperties: true
+
+    AgentMetrics:
+      type: object
+      properties:
+        tasksCompleted:
+          type: integer
+        successRate:
+          type: number
+        averageResponseTime:
+          type: number
+        lastActivity:
+          type: string
+          format: date-time
+
+    Workflow:
+      type: object
+      required: [id, name, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, completed, failed]
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowStep'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    WorkflowList:
+      type: object
+      required: [workflows, totalCount]
+      properties:
+        workflows:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workflow'
+        totalCount:
+          type: integer
+        nextOffset:
+          type: integer
+
+    WorkflowCreateRequest:
+      type: object
+      required: [name, steps]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowStep'
+
+    WorkflowStep:
+      type: object
+      required: [name, type, action]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [agent, condition, parallel, sequential]
+        action:
+          type: string
+        parameters:
+          type: object
+          additionalProperties: true
+        dependencies:
+          type: array
+          items:
+            type: string
+
+    WorkflowExecution:
+      type: object
+      required: [id, workflowId, status, startedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        workflowId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [running, completed, failed, cancelled]
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        results:
+          type: object
+          additionalProperties: true
+
+    Goal:
+      type: object
+      required: [id, description, status, parsedIntent]
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        status:
+          type: string
+          enum: [pending, analyzing, executing, completed, failed]
+        parsedIntent:
+          $ref: '#/components/schemas/ParsedIntent'
+        subtasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subtask'
+        createdAt:
+          type: string
+          format: date-time
+
+    ParsedIntent:
+      type: object
+      properties:
+        action:
+          type: string
+        entities:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              value:
+                type: string
+        constraints:
+          type: object
+          additionalProperties: true
+
+    Subtask:
+      type: object
+      required: [id, description, status]
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, assigned, executing, completed, failed]
+        assignedAgent:
+          type: string
+          format: uuid
+
+    MessageRequest:
+      type: object
+      required: [from, to, type, content]
+      properties:
+        from:
+          type: string
+          format: uuid
+        to:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [task, result, query, response, event]
+        content:
+          type: object
+          additionalProperties: true
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+
+    Message:
+      type: object
+      required: [id, from, to, type, content, timestamp]
+      properties:
+        id:
+          type: string
+          format: uuid
+        from:
+          type: string
+          format: uuid
+        to:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [task, result, query, response, event]
+        content:
+          type: object
+          additionalProperties: true
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        timestamp:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+
+    WebhookList:
+      type: object
+      required: [webhooks, totalCount]
+      properties:
+        webhooks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhook'
+        totalCount:
+          type: integer
+
+    Webhook:
+      type: object
+      required: [id, url, events, active, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        secret:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    WebhookCreateRequest:
+      type: object
+      required: [url, events]
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        secret:
+          type: string
+
+    PluginList:
+      type: object
+      required: [plugins, totalCount]
+      properties:
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plugin'
+        totalCount:
+          type: integer
+
+    Plugin:
+      type: object
+      required: [id, name, version, enabled]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        description:
+          type: string
+        enabled:
+          type: boolean
+        configuration:
+          type: object
+          additionalProperties: true
+
+    PluginInstallRequest:
+      type: object
+      required: [source]
+      properties:
+        source:
+          type: string
+          description: NPM package name or URL
+        configuration:
+          type: object
+          additionalProperties: true

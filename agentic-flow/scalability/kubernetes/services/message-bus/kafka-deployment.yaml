@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-headless
+  namespace: agentic-flow
+  labels:
+    app: kafka
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - port: 9092
+    targetPort: 9092
+    name: broker
+  - port: 9093
+    targetPort: 9093
+    name: controller
+  selector:
+    app: kafka
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: agentic-flow
+spec:
+  serviceName: kafka-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+      - name: kafka
+        image: confluentinc/cp-kafka:7.5.0
+        ports:
+        - containerPort: 9092
+          name: broker
+        - containerPort: 9093
+          name: controller
+        env:
+        - name: KAFKA_NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: KAFKA_PROCESS_ROLES
+          value: "broker,controller"
+        - name: KAFKA_LISTENERS
+          value: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: "PLAINTEXT"
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+          value: "0@kafka-0.kafka-headless.agentic-flow.svc.cluster.local:9093,1@kafka-1.kafka-headless.agentic-flow.svc.cluster.local:9093,2@kafka-2.kafka-headless.agentic-flow.svc.cluster.local:9093"
+        - name: KAFKA_LOG_DIRS
+          value: "/var/lib/kafka/data"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "12"
+        - name: KAFKA_DEFAULT_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_MIN_INSYNC_REPLICAS
+          value: "2"
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+          value: "2"
+        - name: KAFKA_LOG_RETENTION_HOURS
+          value: "168"
+        - name: KAFKA_LOG_SEGMENT_BYTES
+          value: "1073741824"
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+          value: "false"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/kafka
+        livenessProbe:
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 30
+          periodSeconds: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "fast-ssd"
+      resources:
+        requests:
+          storage: 100Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-topics
+  namespace: agentic-flow
+data:
+  topics.sh: |
+    #!/bin/bash
+    # Create topics for Agentic Flow
+    
+    KAFKA_BROKERS="kafka-0.kafka-headless:9092,kafka-1.kafka-headless:9092,kafka-2.kafka-headless:9092"
+    
+    # Agent events topic
+    kafka-topics.sh --create --bootstrap-server $KAFKA_BROKERS \
+      --topic agent-events \
+      --partitions 24 \
+      --replication-factor 3 \
+      --config retention.ms=604800000 \
+      --config compression.type=lz4
+    
+    # Coordination events topic
+    kafka-topics.sh --create --bootstrap-server $KAFKA_BROKERS \
+      --topic coordination-events \
+      --partitions 12 \
+      --replication-factor 3 \
+      --config retention.ms=604800000
+    
+    # Workflow events topic
+    kafka-topics.sh --create --bootstrap-server $KAFKA_BROKERS \
+      --topic workflow-events \
+      --partitions 12 \
+      --replication-factor 3 \
+      --config retention.ms=259200000
+    
+    # Message bus topic
+    kafka-topics.sh --create --bootstrap-server $KAFKA_BROKERS \
+      --topic agent-messages \
+      --partitions 48 \
+      --replication-factor 3 \
+      --config retention.ms=86400000 \
+      --config max.message.bytes=10485760
+    
+    # Dead letter queue
+    kafka-topics.sh --create --bootstrap-server $KAFKA_BROKERS \
+      --topic dlq \
+      --partitions 6 \
+      --replication-factor 3 \
+      --config retention.ms=2592000000

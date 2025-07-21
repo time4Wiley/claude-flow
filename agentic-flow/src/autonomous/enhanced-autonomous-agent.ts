@@ -4,8 +4,8 @@
 
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
-import { QLearningAgent, QLearningAction, QLearningState } from '../src/mcp/src/core/q-learning-agent';
-import { ProductionMLEngine } from '../src/mcp/src/core/production-ml-engine';
+import { QLearningAgent, QLearningAction, QLearningState } from '../mcp/src/core/q-learning-agent';
+import { ProductionMLEngine } from '../mcp/src/core/production-ml-engine';
 import { 
   Goal, 
   Experience, 

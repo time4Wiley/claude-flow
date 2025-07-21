@@ -1,0 +1,232 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-system
+  labels:
+    istio-injection: disabled
+---
+# VirtualService for agent service routing
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: agent-service-vs
+  namespace: agentic-flow
+spec:
+  hosts:
+  - agent-service
+  http:
+  - match:
+    - headers:
+        x-agent-priority:
+          exact: urgent
+    route:
+    - destination:
+        host: agent-service
+        port:
+          number: 8080
+      weight: 100
+    timeout: 10s
+  - route:
+    - destination:
+        host: agent-service
+        port:
+          number: 8080
+      weight: 100
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+---
+# DestinationRule for circuit breaking
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: agent-service-dr
+  namespace: agentic-flow
+spec:
+  host: agent-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+    loadBalancer:
+      consistentHash:
+        httpCookie:
+          name: "agent-affinity"
+          ttl: 3600s
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+---
+# Service mesh gateway for external access
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: agentic-flow-gateway
+  namespace: agentic-flow
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: agentic-flow-tls
+    hosts:
+    - "api.agentic-flow.io"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "api.agentic-flow.io"
+    tls:
+      httpsRedirect: true
+---
+# VirtualService for API gateway routing
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: agentic-flow-api
+  namespace: agentic-flow
+spec:
+  hosts:
+  - "api.agentic-flow.io"
+  gateways:
+  - agentic-flow-gateway
+  http:
+  # Agent service routes
+  - match:
+    - uri:
+        prefix: "/api/v1/agents"
+    route:
+    - destination:
+        host: agent-service
+        port:
+          number: 8080
+    corsPolicy:
+      allowOrigins:
+      - exact: "https://app.agentic-flow.io"
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      allowHeaders:
+      - authorization
+      - content-type
+      - x-request-id
+  # Coordination service routes
+  - match:
+    - uri:
+        prefix: "/api/v1/teams"
+    - uri:
+        prefix: "/api/v1/coordination"
+    route:
+    - destination:
+        host: coordination-service-lb
+        port:
+          number: 8081
+  # Workflow service routes
+  - match:
+    - uri:
+        prefix: "/api/v1/workflows"
+    route:
+    - destination:
+        host: workflow-service
+        port:
+          number: 8082
+---
+# PeerAuthentication for mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: agentic-flow
+spec:
+  mtls:
+    mode: STRICT
+---
+# AuthorizationPolicy for service-to-service communication
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: agent-service-authz
+  namespace: agentic-flow
+spec:
+  selector:
+    matchLabels:
+      app: agent-service
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/agentic-flow/sa/coordination-service"]
+    - source:
+        principals: ["cluster.local/ns/agentic-flow/sa/workflow-service"]
+    to:
+    - operation:
+        methods: ["GET", "POST", "PUT"]
+        paths: ["/api/v1/agents/*"]
+---
+# ServiceEntry for external LLM providers
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: openai-api
+  namespace: agentic-flow
+spec:
+  hosts:
+  - api.openai.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+---
+# ServiceEntry for Anthropic
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: anthropic-api
+  namespace: agentic-flow
+spec:
+  hosts:
+  - api.anthropic.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+---
+# Telemetry configuration
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: metrics
+  namespace: agentic-flow
+spec:
+  metrics:
+  - providers:
+    - name: prometheus
+    overrides:
+    - match:
+        metric: REQUEST_COUNT
+      tagOverrides:
+        agent_id:
+          value: request.headers["x-agent-id"] | "unknown"
+        agent_type:
+          value: request.headers["x-agent-type"] | "unknown"

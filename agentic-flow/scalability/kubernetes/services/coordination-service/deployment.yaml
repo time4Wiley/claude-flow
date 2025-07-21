@@ -1,0 +1,163 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coordination-service
+  namespace: agentic-flow
+  labels:
+    app: coordination-service
+    version: v1
+    app.kubernetes.io/name: coordination-service
+    app.kubernetes.io/part-of: agentic-flow
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: coordination-service
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: coordination-service
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+    spec:
+      serviceAccountName: coordination-service
+      containers:
+      - name: coordination-service
+        image: agentic-flow/coordination-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+          name: http
+        - containerPort: 9090
+          name: metrics
+        - containerPort: 50052
+          name: grpc
+        - containerPort: 7000
+          name: gossip
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: CONSENSUS_TYPE
+          value: "raft"
+        - name: RAFT_NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: RAFT_PEERS
+          value: "coordination-service-0,coordination-service-1,coordination-service-2,coordination-service-3,coordination-service-4"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: coordination-service-db
+              key: url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-config
+              key: url
+        - name: KAFKA_BROKERS
+          value: "kafka-0.kafka-headless:9092,kafka-1.kafka-headless:9092,kafka-2.kafka-headless:9092"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1000m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8081
+          initialDelaySeconds: 45
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8081
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: config
+          mountPath: /app/config
+      volumes:
+      - name: config
+        configMap:
+          name: coordination-service-config
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "fast-ssd"
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coordination-service
+  namespace: agentic-flow
+  labels:
+    app: coordination-service
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless service for StatefulSet
+  ports:
+  - port: 8081
+    targetPort: 8081
+    name: http
+  - port: 50052
+    targetPort: 50052
+    name: grpc
+  - port: 7000
+    targetPort: 7000
+    name: gossip
+  selector:
+    app: coordination-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coordination-service-lb
+  namespace: agentic-flow
+  labels:
+    app: coordination-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8081
+    targetPort: 8081
+    name: http
+  - port: 50052
+    targetPort: 50052
+    name: grpc
+  selector:
+    app: coordination-service
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: coordination-service
+  namespace: agentic-flow
+spec:
+  serviceName: coordination-service
+  replicas: 5
+  selector:
+    matchLabels:
+      app: coordination-service
+  template:
+    metadata:
+      labels:
+        app: coordination-service
+        version: v1
+    spec:
+      containers:
+      - name: coordination-service
+        image: agentic-flow/coordination-service:latest
+        # ... rest of container spec same as Deployment

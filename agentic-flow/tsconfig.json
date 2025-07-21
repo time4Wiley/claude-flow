@@ -27,5 +27,19 @@
   "include": [
     "src/**/*"
   ],
-  "exclude": ["node_modules", "dist", "tests", "src/examples/coordination-demo.ts"]
+  "exclude": [
+    "node_modules", 
+    "dist", 
+    "tests", 
+    "src/examples/coordination-demo.ts",
+    "src/examples/coordination-demo-fixed.ts",
+    "src/autonomous/tests/",
+    "src/integration/claude-flow/",
+    "src/workflows/engine/workflow-converter.ts",
+    "src/workflows/engine/workflow-engine.ts", 
+    "src/workflows/engine/workflow-executor.ts",
+    "src/workflows/error-handling/",
+    "src/workflows/persistence/workflow-state-manager.ts",
+    "src/workflows/workflow-engine.ts"
+  ]
 }

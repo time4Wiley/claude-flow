@@ -205,6 +205,25 @@ export class ProviderManager {
     let lastError: Error | undefined;
     const startTime = Date.now();
 
+    // Try to use cost optimizer if available
+    const preferredProvider = options.metadata?.provider;
+    if (preferredProvider) {
+      const instance = this.providers.get(preferredProvider);
+      if (instance && instance.circuitBreaker.isCallable()) {
+        try {
+          const response = await instance.circuitBreaker.execute(async () => {
+            return await instance.provider.complete(options);
+          });
+          
+          this.updateProviderMetrics(instance, true, response.usage?.estimatedCost || 0);
+          return response;
+        } catch (error) {
+          lastError = error as Error;
+          this.updateProviderMetrics(instance, false, 0);
+        }
+      }
+    }
+
     for (const instance of providers) {
       // Check circuit breaker state
       if (!instance.circuitBreaker.isCallable()) {
@@ -245,6 +264,13 @@ export class ProviderManager {
     }
 
     throw lastError || new Error('All providers failed or unavailable');
+  }
+
+  /**
+   * Get all available providers
+   */
+  async getAllProviders(): Promise<LLMProvider[]> {
+    return Array.from(this.providers.keys());
   }
 
   /**

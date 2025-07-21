@@ -1,0 +1,355 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cross-region-sync
+---
+# CRD for managing cross-region synchronization
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: regionsyncs.sync.agentic-flow.io
+spec:
+  group: sync.agentic-flow.io
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              sourceRegion:
+                type: string
+              targetRegions:
+                type: array
+                items:
+                  type: string
+              syncInterval:
+                type: string
+                default: "1m"
+              resources:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: ["agents", "workflows", "teams", "memory"]
+                    filters:
+                      type: object
+                    priority:
+                      type: string
+                      enum: ["high", "medium", "low"]
+              conflictResolution:
+                type: string
+                enum: ["source-wins", "target-wins", "latest-wins", "manual"]
+              encryption:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    default: true
+                  keyVaultSecret:
+                    type: string
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+              lastSyncTime:
+                type: string
+              syncedItems:
+                type: integer
+              errors:
+                type: array
+                items:
+                  type: string
+  scope: Namespaced
+  names:
+    plural: regionsyncs
+    singular: regionsync
+    kind: RegionSync
+---
+# Cross-region data replication service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: region-sync-controller
+  namespace: cross-region-sync
+spec:
+  serviceName: region-sync-controller
+  replicas: 3
+  selector:
+    matchLabels:
+      app: region-sync-controller
+  template:
+    metadata:
+      labels:
+        app: region-sync-controller
+    spec:
+      serviceAccountName: region-sync-controller
+      containers:
+      - name: controller
+        image: agentic-flow/region-sync-controller:latest
+        env:
+        - name: REGION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['region.agentic-flow.io/name']
+        - name: KAFKA_BROKERS
+          value: "kafka-0.kafka-headless:9092,kafka-1.kafka-headless:9092,kafka-2.kafka-headless:9092"
+        - name: ETCD_ENDPOINTS
+          value: "etcd-0.etcd-headless:2379,etcd-1.etcd-headless:2379,etcd-2.etcd-headless:2379"
+        - name: S3_BUCKET
+          value: "agentic-flow-sync-${REGION}"
+        - name: SYNC_BATCH_SIZE
+          value: "1000"
+        - name: SYNC_WORKERS
+          value: "10"
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        volumeMounts:
+        - name: sync-state
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+  volumeClaimTemplates:
+  - metadata:
+      name: sync-state
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "fast-ssd"
+      resources:
+        requests:
+          storage: 50Gi
+---
+# Kafka MirrorMaker 2 for event replication
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mirrormaker-config
+  namespace: cross-region-sync
+data:
+  mm2.properties: |
+    # Kafka clusters
+    clusters = us-east-1, us-west-2, eu-west-1, eu-central-1, ap-southeast-1, ap-northeast-1
+    
+    us-east-1.bootstrap.servers = us-east-1-kafka.agentic-flow.io:9092
+    us-west-2.bootstrap.servers = us-west-2-kafka.agentic-flow.io:9092
+    eu-west-1.bootstrap.servers = eu-west-1-kafka.agentic-flow.io:9092
+    eu-central-1.bootstrap.servers = eu-central-1-kafka.agentic-flow.io:9092
+    ap-southeast-1.bootstrap.servers = ap-southeast-1-kafka.agentic-flow.io:9092
+    ap-northeast-1.bootstrap.servers = ap-northeast-1-kafka.agentic-flow.io:9092
+    
+    # Replication flows
+    us-east-1->us-west-2.enabled = true
+    us-east-1->eu-west-1.enabled = true
+    us-east-1->ap-southeast-1.enabled = true
+    
+    eu-west-1->eu-central-1.enabled = true
+    eu-west-1->us-east-1.enabled = true
+    
+    ap-southeast-1->ap-northeast-1.enabled = true
+    ap-southeast-1->us-west-2.enabled = true
+    
+    # Topic configuration
+    topics = agent-events, coordination-events, workflow-events
+    groups = .*
+    
+    # Replication policy
+    replication.policy.class = org.apache.kafka.connect.mirror.IdentityReplicationPolicy
+    
+    # Sync settings
+    sync.topic.configs.enabled = true
+    sync.topic.acls.enabled = true
+    
+    # Performance tuning
+    tasks.max = 10
+    replication.factor = 3
+    
+    # Monitoring
+    emit.checkpoints.enabled = true
+    emit.checkpoints.interval.seconds = 60
+    
+    # Consumer configuration
+    consumer.group.id = mirrormaker-consumer
+    consumer.auto.offset.reset = earliest
+    
+    # Producer configuration
+    producer.compression.type = lz4
+    producer.batch.size = 32768
+    producer.linger.ms = 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-mirrormaker
+  namespace: cross-region-sync
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka-mirrormaker
+  template:
+    metadata:
+      labels:
+        app: kafka-mirrormaker
+    spec:
+      containers:
+      - name: mirrormaker
+        image: confluentinc/cp-kafka-connect:7.5.0
+        command:
+        - /bin/bash
+        - -c
+        - |
+          connect-mirror-maker.sh /etc/mirrormaker/mm2.properties
+        volumeMounts:
+        - name: config
+          mountPath: /etc/mirrormaker
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+      volumes:
+      - name: config
+        configMap:
+          name: mirrormaker-config
+---
+# Cross-region state synchronization
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: state-sync-job
+  namespace: cross-region-sync
+spec:
+  schedule: "*/5 * * * *"  # Every 5 minutes
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: state-sync
+            image: agentic-flow/state-sync:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              # Sync agent states across regions
+              echo "Starting cross-region state synchronization..."
+              
+              # Export from source region
+              etcdctl --endpoints=$ETCD_ENDPOINTS snapshot save /tmp/snapshot.db
+              
+              # Encrypt snapshot
+              openssl enc -aes-256-cbc -salt -in /tmp/snapshot.db -out /tmp/snapshot.enc -k $ENCRYPTION_KEY
+              
+              # Upload to S3 for other regions
+              aws s3 cp /tmp/snapshot.enc s3://${S3_BUCKET}/snapshots/$(date +%Y%m%d-%H%M%S).enc
+              
+              # Notify other regions
+              kafka-console-producer --broker-list $KAFKA_BROKERS --topic sync-notifications <<EOF
+              {
+                "type": "state-snapshot",
+                "region": "$REGION",
+                "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                "location": "s3://${S3_BUCKET}/snapshots/$(date +%Y%m%d-%H%M%S).enc"
+              }
+              EOF
+            env:
+            - name: ETCD_ENDPOINTS
+              value: "etcd-0.etcd-headless:2379,etcd-1.etcd-headless:2379,etcd-2.etcd-headless:2379"
+            - name: KAFKA_BROKERS
+              value: "kafka-0.kafka-headless:9092"
+            - name: S3_BUCKET
+              value: "agentic-flow-sync"
+            - name: REGION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['region.agentic-flow.io/name']
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sync-encryption
+                  key: key
+          restartPolicy: OnFailure
+---
+# Service for cross-region API gateway
+apiVersion: v1
+kind: Service
+metadata:
+  name: cross-region-gateway
+  namespace: cross-region-sync
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "alb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 443
+    targetPort: 8443
+    protocol: TCP
+    name: https
+  selector:
+    app: cross-region-gateway
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cross-region-gateway
+  namespace: cross-region-sync
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cross-region-gateway
+  template:
+    metadata:
+      labels:
+        app: cross-region-gateway
+    spec:
+      containers:
+      - name: gateway
+        image: agentic-flow/cross-region-gateway:latest
+        ports:
+        - containerPort: 8443
+          name: https
+        env:
+        - name: REGIONS
+          value: "us-east-1,us-west-2,eu-west-1,eu-central-1,ap-southeast-1,ap-northeast-1"
+        - name: LOCAL_REGION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['region.agentic-flow.io/name']
+        - name: TLS_CERT
+          valueFrom:
+            secretKeyRef:
+              name: cross-region-tls
+              key: tls.crt
+        - name: TLS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cross-region-tls
+              key: tls.key
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi

@@ -1,0 +1,335 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: global-ingress
+---
+# Global Load Balancer using GSLB (Global Server Load Balancing)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gslb-config
+  namespace: global-ingress
+data:
+  config.yaml: |
+    domains:
+      - name: api.agentic-flow.io
+        type: weighted
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 5s
+          threshold: 3
+        endpoints:
+          - region: us-east-1
+            weight: 40
+            address: us-east-1.api.agentic-flow.io
+            priority: 1
+          - region: eu-west-1
+            weight: 30
+            address: eu-west-1.api.agentic-flow.io
+            priority: 1
+          - region: ap-southeast-1
+            weight: 30
+            address: ap-southeast-1.api.agentic-flow.io
+            priority: 1
+          # Backup regions
+          - region: us-west-2
+            weight: 0
+            address: us-west-2.api.agentic-flow.io
+            priority: 2
+          - region: eu-central-1
+            weight: 0
+            address: eu-central-1.api.agentic-flow.io
+            priority: 2
+      
+      - name: agents.agentic-flow.io
+        type: geoproximity
+        healthCheck:
+          path: /health
+          interval: 5s
+        endpoints:
+          - region: us-east-1
+            geoCode: US-EAST
+            address: us-east-1.agents.agentic-flow.io
+          - region: us-west-2
+            geoCode: US-WEST
+            address: us-west-2.agents.agentic-flow.io
+          - region: eu-west-1
+            geoCode: EU-WEST
+            address: eu-west-1.agents.agentic-flow.io
+          - region: eu-central-1
+            geoCode: EU-CENTRAL
+            address: eu-central-1.agents.agentic-flow.io
+          - region: ap-southeast-1
+            geoCode: ASIA-SE
+            address: ap-southeast-1.agents.agentic-flow.io
+          - region: ap-northeast-1
+            geoCode: ASIA-NE
+            address: ap-northeast-1.agents.agentic-flow.io
+    
+    failover:
+      enabled: true
+      threshold: 2
+      cooldown: 30s
+    
+    monitoring:
+      enabled: true
+      metrics:
+        - latency
+        - availability
+        - throughput
+      exporters:
+        - prometheus
+        - cloudwatch
+---
+# External DNS configuration for multi-cloud DNS management
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-dns
+  namespace: global-ingress
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: external-dns
+rules:
+- apiGroups: [""]
+  resources: ["services","endpoints","pods"]
+  verbs: ["get","watch","list"]
+- apiGroups: ["extensions","networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get","watch","list"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["list","watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: external-dns-viewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: external-dns
+subjects:
+- kind: ServiceAccount
+  name: external-dns
+  namespace: global-ingress
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-dns
+  namespace: global-ingress
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: external-dns
+  template:
+    metadata:
+      labels:
+        app: external-dns
+    spec:
+      serviceAccountName: external-dns
+      containers:
+      - name: external-dns
+        image: k8s.gcr.io/external-dns/external-dns:v0.13.5
+        args:
+        - --source=service
+        - --source=ingress
+        - --domain-filter=agentic-flow.io
+        - --provider=aws
+        - --aws-zone-type=public
+        - --registry=txt
+        - --txt-owner-id=agentic-flow
+        - --log-level=info
+        - --policy=sync
+        - --interval=1m
+        env:
+        - name: AWS_REGION
+          value: us-east-1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+---
+# Traffic Director for intelligent routing
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traffic-director-config
+  namespace: global-ingress
+data:
+  routing-policy.yaml: |
+    version: v1
+    kind: RoutingPolicy
+    spec:
+      # Latency-based routing
+      latencyRouting:
+        enabled: true
+        measurementInterval: 30s
+        adjustmentThreshold: 20ms
+      
+      # Cost-based routing
+      costRouting:
+        enabled: true
+        providers:
+          - name: openai
+            costPerRequest: 0.002
+            regions: ["us-east-1", "us-west-2"]
+          - name: anthropic
+            costPerRequest: 0.001
+            regions: ["us-east-1", "eu-west-1"]
+          - name: google
+            costPerRequest: 0.0015
+            regions: ["us-central1", "europe-west1", "asia-east1"]
+      
+      # Capacity-based routing
+      capacityRouting:
+        enabled: true
+        metrics:
+          - name: concurrent_agents
+            maxPerRegion: 1000
+          - name: requests_per_second
+            maxPerRegion: 2000
+      
+      # Failover configuration
+      failover:
+        automaticFailover: true
+        healthCheckInterval: 5s
+        failureThreshold: 3
+        regions:
+          us-east-1:
+            primary: true
+            failoverTo: ["us-west-2", "eu-west-1"]
+          eu-west-1:
+            primary: true
+            failoverTo: ["eu-central-1", "us-east-1"]
+          ap-southeast-1:
+            primary: true
+            failoverTo: ["ap-northeast-1", "us-west-2"]
+---
+# Multi-region ingress controller
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx-global
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: k8s.io/ingress-nginx-global
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-global-config
+  namespace: global-ingress
+data:
+  use-forwarded-headers: "true"
+  compute-full-forwarded-for: "true"
+  use-proxy-protocol: "true"
+  proxy-real-ip-cidr: "0.0.0.0/0"
+  
+  # Global rate limiting
+  limit-rate: "10000"
+  limit-rate-after: "500000"
+  limit-burst-multiplier: "5"
+  
+  # Geo-IP configuration
+  use-geoip: "true"
+  use-geoip2: "true"
+  geoip2-database: "/etc/nginx/geoip/GeoLite2-City.mmdb"
+  
+  # Custom headers
+  add-headers: "global-ingress/custom-headers"
+  
+  # Upstream configuration
+  upstream-keepalive-connections: "320"
+  upstream-keepalive-timeout: "60"
+  upstream-keepalive-requests: "10000"
+  
+  # SSL configuration
+  ssl-protocols: "TLSv1.2 TLSv1.3"
+  ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256"
+  ssl-prefer-server-ciphers: "true"
+  ssl-session-cache: "true"
+  ssl-session-cache-size: "10m"
+  ssl-session-timeout: "10m"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-headers
+  namespace: global-ingress
+data:
+  X-Region: "$geoip_city_continent_code"
+  X-Country: "$geoip_city_country_code"
+  X-Request-Start: "$msec"
+  X-Global-Transaction-ID: "$request_id"
+---
+# Health check service for global endpoints
+apiVersion: v1
+kind: Service
+metadata:
+  name: global-health-check
+  namespace: global-ingress
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: health-checker
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-checker
+  namespace: global-ingress
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: health-checker
+  template:
+    metadata:
+      labels:
+        app: health-checker
+    spec:
+      containers:
+      - name: health-checker
+        image: agentic-flow/health-checker:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: CHECK_ENDPOINTS
+          value: |
+            us-east-1.api.agentic-flow.io
+            us-west-2.api.agentic-flow.io
+            eu-west-1.api.agentic-flow.io
+            eu-central-1.api.agentic-flow.io
+            ap-southeast-1.api.agentic-flow.io
+            ap-northeast-1.api.agentic-flow.io
+        - name: CHECK_INTERVAL
+          value: "10s"
+        - name: PROMETHEUS_PORT
+          value: "9090"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
