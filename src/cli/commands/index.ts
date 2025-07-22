@@ -15,6 +15,7 @@ import { SimpleMemoryManager } from './memory.js';
 import { sparcAction } from './sparc.js';
 import { createMigrateCommand } from './migrate.js';
 import { enterpriseCommands } from './enterprise.js';
+import { uiCommand } from './ui.js';
 
 // Import enhanced orchestration commands
 import { startCommand } from './start.js';
@@ -2263,6 +2264,35 @@ Now, please proceed with the task: ${task}`;
         console.log(`  ${blue('claude-flow session save mywork')}      # Save session`);
         console.log(`  ${blue('claude-flow session restore abc123')}   # Restore session`);
         console.log(`  ${blue('claude-flow session validate --fix')}   # Validate and fix`);
+      } else if (command === 'ui') {
+        console.log(bold(blue('Agentic Flow UI Interface')));
+        console.log();
+        console.log('Launch the modern web-based UI for Claude Flow with Mastra integration.');
+        console.log();
+        console.log(bold('Usage:'));
+        console.log('  claude-flow ui [options]');
+        console.log();
+        console.log(bold('Options:'));
+        console.log('  -p, --port <port>        Port to run the UI server on (default: 5173)');
+        console.log('  -h, --host <host>        Host to bind the UI server to (default: localhost)');
+        console.log('  -o, --open               Open browser automatically');
+        console.log('  -m, --mode <mode>        Development or production mode');
+        console.log();
+        console.log(bold('Examples:'));
+        console.log(`  ${blue('claude-flow ui')}                   # Start UI on default port`);
+        console.log(`  ${blue('claude-flow ui --port 8080')}       # Use custom port`);
+        console.log(`  ${blue('claude-flow ui --open')}            # Open browser automatically`);
+        console.log(`  ${blue('claude-flow ui --mode production')} # Run in production mode`);
+        console.log();
+        console.log(bold('Integration:'));
+        console.log('  • Real-time agent monitoring and control');
+        console.log('  • Visual swarm orchestration');
+        console.log('  • MCP tool management interface');
+        console.log('  • HiveMind WebSocket integration');
+        console.log('  • Mastra agent wrappers');
+        console.log();
+        console.log('You can also start the UI with the orchestrator:');
+        console.log(`  ${blue('claude-flow start --vite')}  # Start orchestrator + UI server`);
       } else {
         // Show general help with enhanced commands
         console.log(bold(blue('Claude-Flow Enhanced Orchestration System')));
@@ -2275,6 +2305,7 @@ Now, please proceed with the task: ${task}`;
         console.log('  swarm        Self-orchestrating agent swarms');
         console.log('  sparc        Enhanced TDD development modes');
         console.log('  agent        Agent management and coordination');
+        console.log('  ui           Launch the Agentic Flow UI interface');
         console.log('  task         Task creation and management');
         console.log('  memory       Memory bank operations');
         console.log('  mcp          MCP server management');
@@ -2431,6 +2462,9 @@ Now, please proceed with the task: ${task}`;
       }
     },
   });
+
+  // UI command
+  cli.command(uiCommand as any);
 
   // Add enterprise commands
   for (const command of enterpriseCommands) {

@@ -24,6 +24,7 @@ export const startCommand = new Command()
   .option('-u, --ui', 'Launch interactive process management UI')
   .option('-v, --verbose', 'Enable verbose logging')
   .option('--auto-start', 'Automatically start all processes')
+  .option('--vite', 'Also start the Vite UI server')
   .option('--config <path:string>', 'Configuration file path')
   .option('--force', 'Force start even if already running')
   .option('--health-check', 'Perform health checks before starting')
@@ -188,6 +189,30 @@ export const startCommand = new Command()
 
         // Wait for services to be fully ready
         await waitForSystemReady(processManager);
+
+        // Start Vite UI server if requested
+        if (options.vite) {
+          console.log(chalk.blue('Starting Vite UI server...'));
+          try {
+            const { spawn } = await import('child_process');
+            const uiPath = new URL('../../../../ui/agentic-flow', import.meta.url).pathname;
+            
+            const viteProcess = spawn('npm', ['run', 'dev'], {
+              cwd: uiPath,
+              stdio: 'inherit',
+              shell: true,
+            });
+
+            viteProcess.on('error', (err) => {
+              console.error(chalk.red(`Failed to start Vite UI: ${err.message}`));
+            });
+
+            console.log(chalk.green('✨ Vite UI server started'));
+            console.log(chalk.cyan('UI available at: http://localhost:5173'));
+          } catch (viteError) {
+            console.error(chalk.red(`Failed to start Vite UI: ${viteError}`));
+          }
+        }
 
         console.log(chalk.green.bold('✓'), 'Daemon started successfully');
         console.log(chalk.gray('Use "claude-flow status" to check system status'));

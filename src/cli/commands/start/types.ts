@@ -61,6 +61,7 @@ export interface StartOptions {
   mcpTransport?: string;
   ui?: boolean;
   autoStart?: boolean;
+  vite?: boolean;
 }
 
 export interface UIAction {
