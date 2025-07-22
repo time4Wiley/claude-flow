@@ -13,16 +13,16 @@
       "timestamp": 1752724794280
     },
     {
-      "key": "test-key",
-      "value": "test-value",
-      "namespace": "default",
-      "timestamp": 1752725674570
-    },
-    {
       "key": "mcp-test-key",
       "value": "MCP persistence working",
       "namespace": "default",
       "timestamp": 1752726326756
+    },
+    {
+      "key": "test-key",
+      "value": "test-value",
+      "namespace": "default",
+      "timestamp": 1753196102351
     }
   ]
 }

@@ -1,0 +1,52 @@
+{
+  "env": {
+    "CLAUDE_FLOW_HOOKS_ENABLED": "true"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npx claude-flow *)",
+      "Bash(npm *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(node *)",
+      "Bash(pwd)",
+      "Bash(ls *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'PreToolUse:Bash hook executed for command: $CLAUDE_COMMAND'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'PostToolUse:Bash hook executed'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Stop hook executed'"
+          }
+        ]
+      }
+    ]
+  },
+  "includeCoAuthoredBy": true,
+  "enabledMcpjsonServers": ["claude-flow", "ruv-swarm"]
+}
