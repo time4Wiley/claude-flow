@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP WebSocket Client Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #000;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .log {
+            background: #001100;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            margin: 10px 0;
+            height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background: #003300;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005500;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #00ff00;
+        }
+        .connected { border-color: #00ff00; color: #00ff00; }
+        .disconnected { border-color: #ff0000; color: #ff0000; }
+        .error { border-color: #ff0000; color: #ff0000; }
+    </style>
+</head>
+<body>
+    <h1>🔌 MCP WebSocket Client Test</h1>
+    
+    <div id="status" class="status disconnected">
+        Status: Disconnected
+    </div>
+    
+    <div>
+        <button onclick="testConnect()">Connect</button>
+        <button onclick="testInitialize()">Initialize</button>
+        <button onclick="testListTools()">List Tools</button>
+        <button onclick="testSwarmInit()">Test swarm_init</button>
+        <button onclick="testSwarmStatus()">Test swarm_status</button>
+        <button onclick="testDisconnect()">Disconnect</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div id="log" class="log"></div>
+    
+    <script type="module">
+        // Simple WebSocket client for testing
+        class TestMCPClient {
+            constructor() {
+                this.ws = null;
+                this.requestId = 0;
+                this.pendingRequests = new Map();
+            }
+            
+            connect() {
+                return new Promise((resolve, reject) => {
+                    try {
+                        this.ws = new WebSocket('ws://localhost:3008');
+                        
+                        this.ws.onopen = () => {
+                            this.updateStatus('Connected', 'connected');
+                            this.log('✅ WebSocket connected to ws://localhost:3008');
+                            resolve();
+                        };
+                        
+                        this.ws.onclose = (event) => {
+                            this.updateStatus('Disconnected', 'disconnected');
+                            this.log(`❌ WebSocket closed: ${event.code} ${event.reason}`);
+                        };
+                        
+                        this.ws.onerror = (error) => {
+                            this.updateStatus('Error', 'error');
+                            this.log(`❌ WebSocket error: ${error}`);
+                            reject(error);
+                        };
+                        
+                        this.ws.onmessage = (event) => {
+                            this.handleMessage(event.data);
+                        };
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+            
+            handleMessage(data) {
+                try {
+                    const message = JSON.parse(data);
+                    this.log(`📨 Received: ${JSON.stringify(message, null, 2)}`);
+                    
+                    if ('id' in message && message.id !== null) {
+                        const pending = this.pendingRequests.get(message.id);
+                        if (pending) {
+                            this.pendingRequests.delete(message.id);
+                            if (message.error) {
+                                pending.reject(new Error(message.error.message));
+                            } else {
+                                pending.resolve(message.result);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    this.log(`❌ Failed to parse message: ${error}`);
+                }
+            }
+            
+            sendRequest(method, params) {
+                return new Promise((resolve, reject) => {
+                    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                        reject(new Error('WebSocket not connected'));
+                        return;
+                    }
+                    
+                    const id = ++this.requestId;
+                    const request = {
+                        jsonrpc: '2.0',
+                        id,
+                        method,
+                        params
+                    };
+                    
+                    this.pendingRequests.set(id, { resolve, reject });
+                    
+                    this.log(`📤 Sending: ${JSON.stringify(request, null, 2)}`);
+                    this.ws.send(JSON.stringify(request));
+                    
+                    // Timeout after 30 seconds
+                    setTimeout(() => {
+                        if (this.pendingRequests.has(id)) {
+                            this.pendingRequests.delete(id);
+                            reject(new Error('Request timeout'));
+                        }
+                    }, 30000);
+                });
+            }
+            
+            async initialize() {
+                const result = await this.sendRequest('initialize', {
+                    protocolVersion: '0.1.0',
+                    capabilities: {
+                        roots: [],
+                        sampling: {}
+                    },
+                    clientInfo: {
+                        name: 'mcp-websocket-test',
+                        version: '1.0.0'
+                    }
+                });
+                
+                this.log(`✅ MCP initialized: ${JSON.stringify(result, null, 2)}`);
+                return result;
+            }
+            
+            async listTools() {
+                const result = await this.sendRequest('tools/list', {});
+                this.log(`✅ Found ${result.tools?.length || 0} tools`);
+                if (result.tools) {
+                    result.tools.slice(0, 5).forEach(tool => {
+                        this.log(`  - ${tool.name}: ${tool.description || 'No description'}`);
+                    });
+                    if (result.tools.length > 5) {
+                        this.log(`  ... and ${result.tools.length - 5} more tools`);
+                    }
+                }
+                return result;
+            }
+            
+            async callTool(name, args) {
+                const result = await this.sendRequest('tools/call', {
+                    name,
+                    arguments: args || {}
+                });
+                
+                this.log(`✅ Tool ${name} result: ${JSON.stringify(result, null, 2)}`);
+                return result;
+            }
+            
+            disconnect() {
+                if (this.ws) {
+                    this.ws.close(1000, 'Test disconnect');
+                    this.ws = null;
+                }
+                this.updateStatus('Disconnected', 'disconnected');
+            }
+            
+            log(message) {
+                const logDiv = document.getElementById('log');
+                const timestamp = new Date().toLocaleTimeString();
+                logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+            
+            updateStatus(text, className) {
+                const statusDiv = document.getElementById('status');
+                statusDiv.textContent = `Status: ${text}`;
+                statusDiv.className = `status ${className}`;
+            }
+        }
+        
+        // Global client instance
+        window.client = new TestMCPClient();
+        
+        // Test functions
+        window.testConnect = async () => {
+            try {
+                await window.client.connect();
+            } catch (error) {
+                window.client.log(`❌ Connection failed: ${error.message}`);
+            }
+        };
+        
+        window.testInitialize = async () => {
+            try {
+                await window.client.initialize();
+            } catch (error) {
+                window.client.log(`❌ Initialize failed: ${error.message}`);
+            }
+        };
+        
+        window.testListTools = async () => {
+            try {
+                await window.client.listTools();
+            } catch (error) {
+                window.client.log(`❌ List tools failed: ${error.message}`);
+            }
+        };
+        
+        window.testSwarmInit = async () => {
+            try {
+                await window.client.callTool('swarm_init', {
+                    topology: 'mesh',
+                    maxAgents: 3
+                });
+            } catch (error) {
+                window.client.log(`❌ swarm_init failed: ${error.message}`);
+            }
+        };
+        
+        window.testSwarmStatus = async () => {
+            try {
+                await window.client.callTool('swarm_status', {});
+            } catch (error) {
+                window.client.log(`❌ swarm_status failed: ${error.message}`);
+            }
+        };
+        
+        window.testDisconnect = () => {
+            window.client.disconnect();
+        };
+        
+        window.clearLog = () => {
+            document.getElementById('log').innerHTML = '';
+        };
+        
+        // Auto-log on page load
+        window.client.log('🚀 MCP WebSocket Test Client initialized');
+        window.client.log('📝 Click "Connect" to start testing WebSocket connection to ws://localhost:3008');
+    </script>
+</body>
+</html>

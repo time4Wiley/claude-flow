@@ -4,6 +4,7 @@
  */
 
 import { getHiveMindClient } from './hive-client';
+import { getMCPWebSocketClient, MCPWebSocketClient } from './mcp-websocket-client';
 
 export interface MCPTool {
   name: string;
@@ -47,6 +48,7 @@ export interface ToolExecutionOptions {
  */
 export class MCPBridge {
   private client = getHiveMindClient();
+  private wsClient: MCPWebSocketClient;
   private toolCache = new Map<string, MCPTool>();
   private executionHistory: Array<{
     tool: string;
@@ -55,6 +57,7 @@ export class MCPBridge {
     success: boolean;
   }> = [];
   private availableTools: MCPTool[] = [];
+  private wsConnected = false;
 
   /**
    * Get all available MCP tools
@@ -849,11 +852,104 @@ export class MCPBridge {
    * Initialize tools on construction
    */
   constructor() {
+    this.wsClient = getMCPWebSocketClient();
     this.initializeTools();
+    this.setupWebSocketHandlers();
   }
 
   private async initializeTools() {
-    this.availableTools = await this.getAvailableTools();
+    try {
+      // Try to connect to WebSocket first
+      await this.connectWebSocket();
+      
+      if (this.wsConnected) {
+        // Get tools from WebSocket server
+        const tools = await this.wsClient.listTools();
+        this.availableTools = this.convertMCPToolsToLocal(tools);
+      } else {
+        // Fallback to static list
+        this.availableTools = await this.getAvailableTools();
+      }
+    } catch (error) {
+      console.warn('Failed to initialize from WebSocket, using static tools:', error);
+      this.availableTools = await this.getAvailableTools();
+    }
+  }
+
+  /**
+   * Connect to WebSocket and initialize MCP
+   */
+  private async connectWebSocket(): Promise<void> {
+    try {
+      console.log('Attempting to connect to MCP WebSocket server...');
+      await this.wsClient.connect();
+      console.log('MCP WebSocket connected, initializing...');
+      await this.wsClient.initialize();
+      console.log('MCP WebSocket initialized successfully');
+      this.wsConnected = true;
+    } catch (error) {
+      console.warn('WebSocket connection failed, will use HTTP fallback:', error);
+      this.wsConnected = false;
+      // Don't throw error to allow HTTP fallback
+    }
+  }
+
+  /**
+   * Setup WebSocket event handlers
+   */
+  private setupWebSocketHandlers(): void {
+    this.wsClient.on('connected', () => {
+      console.log('MCP WebSocket connected');
+      this.initializeTools(); // Refresh tools on reconnect
+    });
+
+    this.wsClient.on('disconnected', () => {
+      console.log('MCP WebSocket disconnected');
+      this.wsConnected = false;
+    });
+
+    this.wsClient.on('error', (error) => {
+      console.error('MCP WebSocket error:', error);
+    });
+
+    this.wsClient.on('stream', ({ streamId, data }) => {
+      // Handle streaming responses
+      console.log('Stream data:', streamId, data);
+    });
+  }
+
+  /**
+   * Convert MCP tools to local format
+   */
+  private convertMCPToolsToLocal(mcpTools: any[]): MCPTool[] {
+    return mcpTools.map(tool => {
+      // Extract category from tool name pattern
+      let category: ToolCategory = 'system';
+      if (tool.name.includes('swarm') || tool.name.includes('agent') || tool.name.includes('task')) {
+        category = 'coordination';
+      } else if (tool.name.includes('memory') || tool.name.includes('cache')) {
+        category = 'memory';
+      } else if (tool.name.includes('neural') || tool.name.includes('model')) {
+        category = 'neural';
+      } else if (tool.name.includes('github') || tool.name.includes('repo')) {
+        category = 'github';
+      } else if (tool.name.includes('monitor') || tool.name.includes('status') || tool.name.includes('metrics')) {
+        category = 'monitoring';
+      } else if (tool.name.includes('workflow')) {
+        category = 'workflow';
+      } else if (tool.name.includes('daa')) {
+        category = 'daa';
+      } else if (tool.name.includes('sparc')) {
+        category = 'sparc';
+      }
+
+      return {
+        name: tool.name,
+        description: tool.description || '',
+        parameters: tool.inputSchema || {},
+        category
+      };
+    });
   }
 
   /**
@@ -988,10 +1084,37 @@ export class MCPBridge {
    * Internal tool execution
    */
   private async executeToolInternal(toolName: string, parameters: any): Promise<any> {
-    const client = this.client;
+    // Try WebSocket first if connected
+    if (this.wsConnected) {
+      try {
+        const result = await this.wsClient.callTool(`mcp__claude-flow__${toolName}`, parameters);
+        
+        // Extract content from MCP response format
+        if (result && result.content) {
+          const textContent = result.content.find(c => c.type === 'text');
+          if (textContent && textContent.text) {
+            try {
+              // Try to parse as JSON if possible
+              return JSON.parse(textContent.text);
+            } catch {
+              // Return as-is if not JSON
+              return textContent.text;
+            }
+          }
+          
+          // Return the first content item's data if no text
+          if (result.content[0] && result.content[0].data) {
+            return result.content[0].data;
+          }
+        }
+        
+        return result;
+      } catch (wsError) {
+        console.warn('WebSocket tool execution failed, falling back to HTTP:', wsError);
+      }
+    }
     
-    // For now, execute all tools via the API endpoint
-    // This allows the backend to handle tool execution properly
+    // Fallback to HTTP API
     const response = await fetch('http://localhost:3001/api/mcp/execute', {
       method: 'POST',
       headers: {
@@ -1159,6 +1282,28 @@ export class MCPBridge {
     }
     
     return finalStats;
+  }
+
+  /**
+   * Get WebSocket connection status
+   */
+  isWebSocketConnected(): boolean {
+    return this.wsConnected;
+  }
+
+  /**
+   * Manually reconnect WebSocket
+   */
+  async reconnectWebSocket(): Promise<void> {
+    await this.connectWebSocket();
+  }
+
+  /**
+   * Disconnect WebSocket
+   */
+  disconnectWebSocket(): void {
+    this.wsClient.disconnect();
+    this.wsConnected = false;
   }
 }
 

@@ -18,28 +18,73 @@ interface TerminalSession {
 
 // Helper function to convert ANSI escape codes to HTML
 const ansiToHtml = (text: string): string => {
-  // Basic ANSI color code conversion
-  return text
-    .replace(/\x1b\[0m/g, '</span>') // Reset
-    .replace(/\x1b\[1m/g, '<span style="font-weight: bold">') // Bold
-    .replace(/\x1b\[30m/g, '<span style="color: #000000">') // Black
-    .replace(/\x1b\[31m/g, '<span style="color: #ff5555">') // Red
-    .replace(/\x1b\[32m/g, '<span style="color: #50fa7b">') // Green
-    .replace(/\x1b\[33m/g, '<span style="color: #f1fa8c">') // Yellow
-    .replace(/\x1b\[34m/g, '<span style="color: #bd93f9">') // Blue
-    .replace(/\x1b\[35m/g, '<span style="color: #ff79c6">') // Magenta
-    .replace(/\x1b\[36m/g, '<span style="color: #8be9fd">') // Cyan
-    .replace(/\x1b\[37m/g, '<span style="color: #f8f8f2">') // White
-    .replace(/\x1b\[90m/g, '<span style="color: #6272a4">') // Bright Black
-    .replace(/\x1b\[91m/g, '<span style="color: #ff6e6e">') // Bright Red
-    .replace(/\x1b\[92m/g, '<span style="color: #69ff94">') // Bright Green
-    .replace(/\x1b\[93m/g, '<span style="color: #ffffa5">') // Bright Yellow
-    .replace(/\x1b\[94m/g, '<span style="color: #d6acff">') // Bright Blue
-    .replace(/\x1b\[95m/g, '<span style="color: #ff92df">') // Bright Magenta
-    .replace(/\x1b\[96m/g, '<span style="color: #a4ffff">') // Bright Cyan
-    .replace(/\x1b\[97m/g, '<span style="color: #ffffff">') // Bright White
+  // First, escape any HTML to prevent injection
+  let result = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  
+  // Keep track of open spans to ensure they're closed
+  let openSpans = 0;
+  
+  // Replace ANSI codes with HTML
+  result = result
+    // Handle various ANSI escape sequences
+    .replace(/\x1b\[([0-9;]+)?m/g, (match, codes) => {
+      if (!codes || codes === '0') {
+        // Reset - close any open spans
+        const closeTags = '</span>'.repeat(openSpans);
+        openSpans = 0;
+        return closeTags;
+      }
+      
+      const codeArray = codes.split(';');
+      let style = '';
+      let bold = false;
+      
+      for (const code of codeArray) {
+        switch (code) {
+          case '1': bold = true; break;
+          case '30': style += 'color: #000000;'; break;
+          case '31': style += 'color: #ff5555;'; break;
+          case '32': style += 'color: #50fa7b;'; break;
+          case '33': style += 'color: #f1fa8c;'; break;
+          case '34': style += 'color: #bd93f9;'; break;
+          case '35': style += 'color: #ff79c6;'; break;
+          case '36': style += 'color: #8be9fd;'; break;
+          case '37': style += 'color: #f8f8f2;'; break;
+          case '90': style += 'color: #6272a4;'; break;
+          case '91': style += 'color: #ff6e6e;'; break;
+          case '92': style += 'color: #69ff94;'; break;
+          case '93': style += 'color: #ffffa5;'; break;
+          case '94': style += 'color: #d6acff;'; break;
+          case '95': style += 'color: #ff92df;'; break;
+          case '96': style += 'color: #a4ffff;'; break;
+          case '97': style += 'color: #ffffff;'; break;
+        }
+      }
+      
+      if (bold) style += 'font-weight: bold;';
+      
+      if (style) {
+        openSpans++;
+        return `<span style="${style}">`;
+      }
+      return '';
+    })
+    // Remove other control sequences that might show as �
+    .replace(/\x1b\[[0-9;]*[A-Za-z]/g, '') // Remove all other escape sequences
+    .replace(/\x1b\]/g, '') // Remove OSC sequences
+    .replace(/\x1b\(/g, '') // Remove character set sequences
+    .replace(/\x00/g, '') // Remove null bytes
+    .replace(/[\x01-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '') // Remove other control characters
     .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '')
+    .replace(/\r/g, '');
+  
+  // Close any remaining open spans
+  result += '</span>'.repeat(openSpans);
+  
+  return result;
 }
 
 const Terminal: React.FC = () => {
@@ -69,23 +114,44 @@ const Terminal: React.FC = () => {
       setIsConnected(true)
       
       // Create terminal session
-      newSocket.emit('terminal-create', (response: { success: boolean; sessionId?: string; error?: string }) => {
-        if (response.success) {
-          setSession({ id: response.sessionId!, connected: true })
-          setIsLoading(false)
-          
-          // Add welcome message
-          setHistory([{
-            command: '',
-            output: ['Connected to real terminal session', ''],
-            timestamp: new Date(),
-            type: 'success'
-          }])
-        } else {
-          console.error('Failed to create terminal:', response.error)
-          setIsLoading(false)
-        }
+      newSocket.emit('terminal:create', {
+        cols: 80,
+        rows: 24,
+        cwd: '/workspaces/claude-code-flow/ui/agentic-flow'
       })
+    })
+
+    // Handle terminal creation response
+    newSocket.on('terminal:created', (data: { sessionId: string; cwd: string; shell: string; cols: number; rows: number }) => {
+      console.log('Terminal session created:', data.sessionId)
+      setSession({ 
+        id: data.sessionId, 
+        cwd: data.cwd,
+        shell: data.shell,
+        cols: data.cols,
+        rows: data.rows
+      })
+      setIsLoading(false)
+      
+      // Add welcome message
+      setHistory([{
+        command: '',
+        output: ['Connected to real terminal session', ''],
+        timestamp: new Date(),
+        type: 'success'
+      }])
+    })
+
+    // Handle terminal errors
+    newSocket.on('terminal:error', (data: { sessionId: string | null; error: string }) => {
+      console.error('Terminal error:', data.error)
+      setIsLoading(false)
+      setHistory(prev => [...prev, {
+        command: '',
+        output: [`Terminal Error: ${data.error}`],
+        timestamp: new Date(),
+        type: 'error'
+      }])
     })
 
     newSocket.on('disconnect', () => {
@@ -95,7 +161,16 @@ const Terminal: React.FC = () => {
     })
 
     // Terminal output handler
-    newSocket.on('terminal-output', (data: string) => {
+    newSocket.on('terminal:output', (response: { sessionId: string; data: string; type: string }) => {
+      // Clean the data to remove any null bytes or control characters that might appear as �
+      const cleanData = response.data
+        .replace(/\x00/g, '') // Remove null bytes
+        .replace(/\x1b\[([0-9;]+)?[HfABCDJKmsu]/g, (match) => {
+          // Preserve valid ANSI sequences but remove cursor movement ones
+          if (match.includes('m')) return match; // Keep color codes
+          return ''; // Remove cursor movement and other control sequences
+        });
+      
       setHistory(prev => {
         const lastEntry = prev[prev.length - 1]
         
@@ -104,7 +179,7 @@ const Terminal: React.FC = () => {
             Date.now() - lastEntry.timestamp.getTime() < 100) {
           const updatedEntry = {
             ...lastEntry,
-            output: [...lastEntry.output.slice(0, -1), (lastEntry.output[lastEntry.output.length - 1] || '') + data],
+            output: [...lastEntry.output.slice(0, -1), (lastEntry.output[lastEntry.output.length - 1] || '') + cleanData],
             timestamp: new Date()
           }
           return [...prev.slice(0, -1), updatedEntry]
@@ -113,9 +188,9 @@ const Terminal: React.FC = () => {
         // Create new entry
         const newEntry: CommandOutput = {
           command: '',
-          output: [data],
+          output: [cleanData],
           timestamp: new Date(),
-          type: 'output'
+          type: response.type === 'error' ? 'error' : 'output'
         }
         
         return [...prev, newEntry]
@@ -229,7 +304,10 @@ const Terminal: React.FC = () => {
     }])
 
     // Send command to terminal
-    socket.emit('terminal-input', trimmedCmd + '\n')
+    socket.emit('terminal:input', {
+      sessionId: session.id,
+      input: trimmedCmd + '\r'  // Use \r for carriage return in PTY
+    })
   }, [socket, session, commandHistory])
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {

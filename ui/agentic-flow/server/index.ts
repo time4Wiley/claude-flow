@@ -16,6 +16,7 @@ import { MastraIntegration } from './mastra-integration.js';
 import { setupRoutes } from './routes.js';
 import { setupWebSocket } from './websocket.js';
 import { TerminalHandler } from './terminal-handler.js';
+import { initializeMCPHandler } from './mcp-handler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -112,6 +113,9 @@ class AgenticFlowServer {
 
       console.log('🤖 Initializing Mastra integration...');
       await this.mastra.initialize();
+
+      console.log('🔧 Initializing MCP handler...');
+      await initializeMCPHandler();
 
       // Start server
       this.server.listen(PORT, () => {

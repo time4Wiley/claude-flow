@@ -1,6 +1,6 @@
 /**
  * HiveMind Client Integration
- * Connects to HiveMind WebSocket server at localhost:3006
+ * Connects to Socket.IO server at localhost:3001 for real-time MCP tool execution
  */
 
 import { 

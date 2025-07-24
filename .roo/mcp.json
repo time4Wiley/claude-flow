@@ -1,5 +1,36 @@
 {
   "mcpServers": {
+    "claude-flow": {
+      "command": "npx",
+      "args": [
+        "claude-flow@alpha",
+        "mcp",
+        "start"
+      ],
+      "alwaysAllow": [
+        "swarm_init",
+        "agent_spawn",
+        "task_orchestrate",
+        "swarm_status",
+        "agent_list",
+        "agent_metrics",
+        "task_status",
+        "task_results",
+        "memory_usage",
+        "memory_search",
+        "memory_persist",
+        "neural_status",
+        "neural_train",
+        "neural_patterns",
+        "performance_report",
+        "workflow_create",
+        "workflow_execute",
+        "github_repo_analyze",
+        "features_detect",
+        "benchmark_run",
+        "terminal_execute"
+      ]
+    },
     "supabase": {
       "command": "npx",
       "args": [

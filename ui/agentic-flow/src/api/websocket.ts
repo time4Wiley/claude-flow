@@ -37,7 +37,7 @@ class EventEmitter {
     return this;
   }
 }
-import { getHiveMindClient, HiveMindClient } from './hive-client';
+import { getHiveMindClient, HiveMindClient } from './socket-client';
 
 export interface WebSocketConfig {
   url?: string;

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 // Components (to be implemented)
 import Dashboard from './components/dashboard/Dashboard'
 import SwarmViewEnhanced from './components/swarm/SwarmViewEnhanced'
-import MCPTools from './components/mcp/MCPTools'
+import MCPToolsWebSocket from './components/mcp/MCPToolsWebSocket'
 import Terminal from './components/shared/Terminal'
 import Navigation from './components/shared/Navigation'
 import MemoryExplorerV2 from './components/memory/MemoryExplorerV2'
@@ -68,7 +68,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/swarm" element={<SwarmViewEnhanced />} />
-                <Route path="/mcp-tools" element={<MCPTools />} />
+                <Route path="/mcp-tools" element={<MCPToolsWebSocket />} />
                 <Route path="/memory" element={<MemoryExplorerV2 />} />
                 <Route path="/terminal" element={<Terminal />} />
               </Routes>

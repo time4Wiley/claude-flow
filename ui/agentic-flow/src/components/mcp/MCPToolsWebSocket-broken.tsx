@@ -1,110 +1,50 @@
-import React, { useState, useMemo, useEffect } from 'react'
-import { Search, Terminal, Brain, Database, Activity, Workflow, Github, Settings, ChevronRight, Play, Copy, Check, AlertCircle, Loader } from 'lucide-react'
-import { MCPBridge, MCPTool, ToolExecutionResult } from '../../api/mcp-bridge'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import { Search, Terminal, Brain, Database, Activity, Workflow, Github, Settings, ChevronRight, Play, Copy, Check, AlertCircle, Loader, Wifi, WifiOff, Zap } from 'lucide-react'
+import { getMCPBridge, MCPBridge, MCPTool, ToolExecutionResult } from '../../api/mcp-bridge'
 
-// Tool categories - empty initially, will be populated from API
+// Tool categories - empty initially, will be populated from WebSocket
 const toolCategories = {
   neural: {
     name: 'Neural Network Tools',
     icon: Brain,
     color: 'text-purple-400',
-    tools: [] // Will be populated from API
+    tools: [] // Will be populated from WebSocket
   },
   memory: {
     name: 'Memory & Persistence',
     icon: Database,
     color: 'text-blue-400',
-    tools: [
-      { name: 'memory_usage', description: 'Store/retrieve memory', params: [{ name: 'action', type: 'select', options: ['store', 'retrieve', 'list'], required: true }, { name: 'key', type: 'string' }, { name: 'value', type: 'json' }] },
-      { name: 'memory_search', description: 'Search memory patterns', params: [{ name: 'query', type: 'string', required: true }] },
-      { name: 'memory_clear', description: 'Clear memory storage', params: [{ name: 'pattern', type: 'string' }] },
-      { name: 'memory_export', description: 'Export memory database', params: [{ name: 'format', type: 'select', options: ['json', 'sqlite'] }] },
-      { name: 'memory_import', description: 'Import memory data', params: [{ name: 'path', type: 'string', required: true }] },
-      { name: 'memory_stats', description: 'Memory usage statistics', params: [] },
-      { name: 'memory_compact', description: 'Compact memory storage', params: [] },
-      { name: 'memory_backup', description: 'Backup memory database', params: [{ name: 'destination', type: 'string' }] },
-      { name: 'memory_restore', description: 'Restore memory backup', params: [{ name: 'source', type: 'string', required: true }] },
-      { name: 'memory_sync', description: 'Sync memory across agents', params: [] }
-    ]
+    tools: []
   },
   monitoring: {
     name: 'Monitoring & Analysis',
     icon: Activity,
     color: 'text-green-400',
-    tools: [
-      { name: 'swarm_monitor', description: 'Monitor swarm activity', params: [{ name: 'interval', type: 'number' }] },
-      { name: 'agent_metrics', description: 'Get agent performance metrics', params: [{ name: 'agent_id', type: 'string' }] },
-      { name: 'task_status', description: 'Check task progress', params: [{ name: 'task_id', type: 'string' }] },
-      { name: 'benchmark_run', description: 'Run performance benchmarks', params: [{ name: 'type', type: 'select', options: ['speed', 'memory', 'tokens'] }] },
-      { name: 'bottleneck_detect', description: 'Detect performance bottlenecks', params: [] },
-      { name: 'performance_report', description: 'Generate performance report', params: [{ name: 'format', type: 'select', options: ['text', 'json', 'html'] }] },
-      { name: 'token_usage', description: 'Analyze token consumption', params: [{ name: 'period', type: 'string' }] },
-      { name: 'real_time_view', description: 'Real-time activity monitor', params: [] },
-      { name: 'swarm_status', description: 'Get swarm status overview', params: [] },
-      { name: 'agent_list', description: 'List active agents', params: [] },
-      { name: 'task_results', description: 'View task results', params: [{ name: 'task_id', type: 'string', required: true }] },
-      { name: 'error_logs', description: 'View error logs', params: [{ name: 'limit', type: 'number' }] },
-      { name: 'metrics_export', description: 'Export metrics data', params: [{ name: 'format', type: 'select', options: ['csv', 'json'] }] }
-    ]
+    tools: []
   },
   workflow: {
     name: 'Workflow & Automation',
     icon: Workflow,
     color: 'text-yellow-400',
-    tools: [
-      { name: 'workflow_create', description: 'Create new workflow', params: [{ name: 'name', type: 'string', required: true }, { name: 'steps', type: 'json' }] },
-      { name: 'workflow_execute', description: 'Execute workflow', params: [{ name: 'workflow_id', type: 'string', required: true }] },
-      { name: 'workflow_export', description: 'Export workflow definition', params: [{ name: 'workflow_id', type: 'string', required: true }] },
-      { name: 'auto_agent', description: 'Auto-spawn optimal agents', params: [{ name: 'task', type: 'string', required: true }] },
-      { name: 'smart_spawn', description: 'Intelligently spawn agents', params: [{ name: 'context', type: 'string' }] },
-      { name: 'workflow_select', description: 'Select best workflow', params: [{ name: 'task', type: 'string', required: true }] },
-      { name: 'parallel_execute', description: 'Execute tasks in parallel', params: [{ name: 'tasks', type: 'json', required: true }] },
-      { name: 'cache_manage', description: 'Manage workflow cache', params: [{ name: 'action', type: 'select', options: ['clear', 'optimize', 'stats'] }] },
-      { name: 'topology_optimize', description: 'Optimize swarm topology', params: [] },
-      { name: 'workflow_list', description: 'List available workflows', params: [] },
-      { name: 'workflow_delete', description: 'Delete workflow', params: [{ name: 'workflow_id', type: 'string', required: true }] }
-    ]
+    tools: []
   },
   github: {
     name: 'GitHub Integration',
     icon: Github,
     color: 'text-orange-400',
-    tools: [
-      { name: 'github_swarm', description: 'Create GitHub management swarm', params: [{ name: 'repository', type: 'string', required: true }, { name: 'agents', type: 'number' }] },
-      { name: 'repo_analyze', description: 'Deep repository analysis', params: [{ name: 'deep', type: 'boolean' }, { name: 'include', type: 'json' }] },
-      { name: 'pr_enhance', description: 'Enhance pull request', params: [{ name: 'pr_number', type: 'number', required: true }, { name: 'add_tests', type: 'boolean' }] },
-      { name: 'issue_triage', description: 'Triage GitHub issues', params: [{ name: 'labels', type: 'json' }] },
-      { name: 'code_review', description: 'Automated code review', params: [{ name: 'pr_number', type: 'number', required: true }] },
-      { name: 'pr_create', description: 'Create pull request', params: [{ name: 'title', type: 'string', required: true }, { name: 'body', type: 'string' }] },
-      { name: 'issue_create', description: 'Create GitHub issue', params: [{ name: 'title', type: 'string', required: true }, { name: 'body', type: 'string' }] },
-      { name: 'release_notes', description: 'Generate release notes', params: [{ name: 'tag', type: 'string' }] }
-    ]
+    tools: []
   },
   system: {
     name: 'System & Utilities',
     icon: Settings,
     color: 'text-cyan-400',
-    tools: [
-      { name: 'features_detect', description: 'Detect available features', params: [] },
-      { name: 'system_info', description: 'Get system information', params: [] },
-      { name: 'config_get', description: 'Get configuration', params: [{ name: 'key', type: 'string' }] },
-      { name: 'config_set', description: 'Set configuration', params: [{ name: 'key', type: 'string', required: true }, { name: 'value', type: 'json' }] },
-      { name: 'version_info', description: 'Get version information', params: [] },
-      { name: 'health_check', description: 'System health check', params: [] }
-    ]
+    tools: []
   },
   coordination: {
     name: 'Swarm Coordination',
     icon: Terminal,
     color: 'text-red-400',
-    tools: [
-      { name: 'swarm_init', description: 'Initialize swarm topology', params: [{ name: 'topology', type: 'select', options: ['mesh', 'hierarchical', 'ring', 'star'], required: true }, { name: 'maxAgents', type: 'number' }] },
-      { name: 'agent_spawn', description: 'Spawn specialized agent', params: [{ name: 'type', type: 'select', options: ['architect', 'coder', 'analyst', 'tester', 'researcher', 'coordinator'], required: true }, { name: 'name', type: 'string' }] },
-      { name: 'task_orchestrate', description: 'Orchestrate complex task', params: [{ name: 'task', type: 'string', required: true }, { name: 'strategy', type: 'select', options: ['parallel', 'sequential', 'adaptive'] }] },
-      { name: 'swarm_reset', description: 'Reset swarm state', params: [] },
-      { name: 'agent_communicate', description: 'Send message between agents', params: [{ name: 'from', type: 'string' }, { name: 'to', type: 'string' }, { name: 'message', type: 'string' }] },
-      { name: 'task_split', description: 'Split task into subtasks', params: [{ name: 'task', type: 'string', required: true }] }
-    ]
+    tools: []
   }
 }
 
@@ -119,7 +59,7 @@ interface Tool {
   }>
 }
 
-const MCPTools: React.FC = () => {
+const MCPToolsWebSocket: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedTool, setSelectedTool] = useState<MCPTool | null>(null)
@@ -131,40 +71,67 @@ const MCPTools: React.FC = () => {
   const [toolsLoaded, setToolsLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [executing, setExecuting] = useState(false)
-  const [wsConnected, setWsConnected] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('disconnected')
+  const [streamingProgress, setStreamingProgress] = useState<string[]>([])
   
-  // Real MCP Bridge
-  const mcpBridge = new MCPBridge()
+  // MCP Bridge (WebSocket + HTTP fallback)
+  const [mcpBridge] = useState(() => getMCPBridge())
   
-  // Load real MCP tools on component mount
+  // Set up WebSocket connection and load tools
   useEffect(() => {
-    const loadTools = async () => {
+    const connectAndLoadTools = async () => {
       setLoading(true)
       setError(null)
+      setConnectionStatus('connecting')
+      
       try {
+        // Try to connect to WebSocket (with HTTP fallback)
+        if (!mcpBridge.isWebSocketConnected()) {
+          // Wait for connection
+          await new Promise((resolve) => {
+            const checkConnection = setInterval(() => {
+              if (mcpBridge.isWebSocketConnected()) {
+                clearInterval(checkConnection)
+                resolve(undefined)
+              }
+            }, 100)
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+              clearInterval(checkConnection)
+              resolve(undefined)
+            }, 10000)
+          })
+        }
+        
+        // Always try to load tools (works with both WebSocket and HTTP)
+        setConnectionStatus(mcpBridge.isWebSocketConnected() ? 'connected' : 'disconnected')
+          
+          try {
+            await mcpBridge.reconnectWebSocket()
+            console.log('WebSocket connection established')
+          } catch (wsError) {
+            console.log('WebSocket failed, using HTTP fallback:', wsError)
+          }
+        }
+        
+        // Load tools (works with both WebSocket and HTTP)
         const tools = await mcpBridge.getAvailableTools()
         setRealTools(tools)
         setToolsLoaded(true)
-        console.log(`Loaded ${tools.length} real MCP tools`, tools)
-        // Log tool names to debug
-        console.log('Tool names:', tools.map(t => t.name))
+        setConnectionStatus(mcpBridge.isWebSocketConnected() ? 'connected' : 'disconnected')
+        console.log(`Loaded ${tools.length} MCP tools`, { websocket: mcpBridge.isWebSocketConnected() })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load MCP tools')
-        console.error('Failed to load MCP tools:', err)
+        setConnectionStatus('disconnected')
+        setError(err instanceof Error ? err.message : 'Failed to connect to MCP server')
+        console.error('Failed to connect to MCP server:', err)
       } finally {
         setLoading(false)
       }
     }
     
-    loadTools()
-    
-    // Check WebSocket connection status periodically
-    const checkWsStatus = setInterval(() => {
-      setWsConnected(mcpBridge.isWebSocketConnected())
-    }, 1000)
-    
-    return () => clearInterval(checkWsStatus)
-  }, [])
+    connectAndLoadTools()
+  }, [mcpBridge])
   
   // Helper function to get category info
   const getCategoryInfo = (category: string) => {
@@ -280,6 +247,7 @@ const MCPTools: React.FC = () => {
     setParamValues({})
     setExecutionResult(null)
     setError(null)
+    setStreamingProgress([])
   }
 
   const handleParamChange = (paramName: string, value: any) => {
@@ -293,8 +261,14 @@ const MCPTools: React.FC = () => {
     setError(null)
     setExecutionResult(null)
     setCopiedResult(false)
+    setStreamingProgress([])
     
     try {
+      // Check connection
+      if (!mcpBridge.isConnected()) {
+        throw new Error('Not connected to MCP server. Please refresh the page.')
+      }
+      
       // Validate parameters
       const validation = await mcpBridge.validateParameters(selectedTool.name, paramValues)
       if (!validation.valid) {
@@ -302,10 +276,18 @@ const MCPTools: React.FC = () => {
         return
       }
       
-      // Execute the real MCP tool
+      // Execute the real MCP tool via WebSocket with progress tracking
       const result = await mcpBridge.executeTool(selectedTool.name, paramValues, {
         trackMetrics: true,
-        cacheResult: true
+        cacheResult: true,
+        onProgress: (progress) => {
+          // Handle streaming progress updates
+          if (typeof progress === 'string') {
+            setStreamingProgress(prev => [...prev, progress])
+          } else if (progress.message) {
+            setStreamingProgress(prev => [...prev, progress.message])
+          }
+        }
       })
       
       setExecutionResult(result)
@@ -333,12 +315,13 @@ const MCPTools: React.FC = () => {
     
     return `
 ╔════════════════════════════════════════════════════════════════╗
-║ MCP TOOL EXECUTION RESULT                                      ║
+║ MCP TOOL EXECUTION RESULT (WebSocket)                         ║
 ╠════════════════════════════════════════════════════════════════╣
 ║ Tool: mcp__claude-flow__${selectedTool?.name}                  ║
 ║ Category: ${selectedCategory}                                   ║
 ║ Status: ${status} ${statusIcon}                                ║
 ║ Execution Time: ${result.executionTime}ms                      ║
+║ Connection: WebSocket                                          ║
 ║                                                                ║
 ║ Parameters:                                                    ║
 ${Object.entries(paramValues).map(([key, value]) => 
@@ -359,34 +342,92 @@ ${result.metadata ? Object.entries(result.metadata).map(([key, value]) =>
     `.trim()
   }
 
+  // Connection retry function
+  const handleRetryConnection = useCallback(async () => {
+    setConnectionStatus('connecting')
+    setError(null)
+    try {
+      // Force reconnection
+      mcpBridge.disconnect()
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Wait for connection
+      await new Promise((resolve) => {
+        const checkConnection = setInterval(() => {
+          if (mcpBridge.isConnected()) {
+            clearInterval(checkConnection)
+            resolve(undefined)
+          }
+        }, 100)
+        
+        setTimeout(() => {
+          clearInterval(checkConnection)
+          resolve(undefined)
+        }, 10000)
+      })
+      
+      if (mcpBridge.isConnected()) {
+        setConnectionStatus('connected')
+        const tools = await mcpBridge.getAvailableTools()
+        setRealTools(tools)
+        setToolsLoaded(true)
+      } else {
+        throw new Error('Reconnection failed')
+      }
+    } catch (err) {
+      setConnectionStatus('disconnected')
+      setError('Failed to reconnect to WebSocket server')
+    }
+  }, [mcpBridge])
+
   return (
     <div className="p-6 h-full overflow-hidden flex flex-col">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2 glitch" data-text="MCP TOOLS INTERFACE">
-          MCP TOOLS INTERFACE
+        <h1 className="text-2xl font-bold mb-2 glitch" data-text="MCP TOOLS INTERFACE (WebSocket)">
+          MCP TOOLS INTERFACE (WebSocket)
         </h1>
         <div className="flex items-center justify-between">
           <p className="text-green-600 text-sm">
-            {totalTools}+ {toolsLoaded ? 'Real ' : ''}Claude Flow MCP Tools • {Object.keys(filteredCategories).length} Categories
+            {totalTools}+ {toolsLoaded ? 'Real-time ' : ''}Claude Flow MCP Tools • {Object.keys(filteredCategories).length} Categories
           </p>
-          {loading && (
-            <div className="flex items-center gap-2 text-yellow-400 text-sm">
-              <Loader className="w-3 h-3 animate-spin" />
-              Loading real MCP tools...
+          <div className="flex items-center gap-4">
+            {/* Connection Status */}
+            <div className={`flex items-center gap-2 text-sm ${
+              connectionStatus === 'connected' ? 'text-green-400' : 
+              connectionStatus === 'connecting' ? 'text-yellow-400' : 
+              'text-red-400'
+            }`}>
+              {connectionStatus === 'connected' ? (
+                <><Wifi className="w-3 h-3" /> WebSocket Connected</>
+              ) : connectionStatus === 'connecting' ? (
+                <><Loader className="w-3 h-3 animate-spin" /> Connecting...</>
+              ) : (
+                <>
+                  <WifiOff className="w-3 h-3" /> 
+                  Disconnected
+                  <button 
+                    onClick={handleRetryConnection}
+                    className="ml-2 px-2 py-1 text-xs bg-red-900/30 border border-red-400 text-red-400 hover:bg-red-900/50"
+                  >
+                    Retry
+                  </button>
+                </>
+              )}
             </div>
-          )}
-          {toolsLoaded && (
-            <div className="flex items-center gap-4">
+            
+            {loading && (
+              <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                <Loader className="w-3 h-3 animate-spin" />
+                Loading MCP tools...
+              </div>
+            )}
+            {toolsLoaded && (
               <div className="text-green-400 text-sm">
-                ✅ {realTools.length} real tools loaded
+                ✅ {realTools.length} tools ready
               </div>
-              <div className={`text-sm flex items-center gap-2 ${wsConnected ? 'text-green-400' : 'text-yellow-400'}`}>
-                <div className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-green-400' : 'bg-yellow-400'} ${wsConnected ? '' : 'animate-pulse'}`} />
-                {wsConnected ? 'WebSocket Connected' : 'HTTP Fallback Mode'}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         {error && (
           <div className="mt-2 p-2 bg-red-900/30 border border-red-400 text-red-400 text-xs flex items-center gap-2">
@@ -428,6 +469,7 @@ ${result.metadata ? Object.entries(result.metadata).map(([key, value]) =>
                     <Icon className="w-4 h-4" />
                     <span className="font-bold text-sm">{category.name}</span>
                     <span className="text-xs text-green-600 ml-auto">{category.tools.length} tools</span>
+                    {toolsLoaded && <Zap className="w-3 h-3 text-yellow-400" title="Real-time WebSocket" />}
                   </div>
                   <div className="p-2 space-y-1">
                     {category.tools.map((tool) => (
@@ -460,8 +502,9 @@ ${result.metadata ? Object.entries(result.metadata).map(([key, value]) =>
             <div className="space-y-4">
               {/* Tool Header */}
               <div className="border-b border-green-900 pb-4">
-                <h2 className="text-lg font-bold text-green-400 mb-2">
+                <h2 className="text-lg font-bold text-green-400 mb-2 flex items-center gap-2">
                   mcp__claude-flow__{selectedTool.name}
+                  <Zap className="w-4 h-4 text-yellow-400" title="WebSocket Enabled" />
                 </h2>
                 <p className="text-sm text-green-600">{selectedTool.description}</p>
               </div>
@@ -531,32 +574,57 @@ ${result.metadata ? Object.entries(result.metadata).map(([key, value]) =>
               {/* Execute Button */}
               <button
                 onClick={handleExecute}
-                disabled={executing || !selectedTool}
+                disabled={executing || !selectedTool || connectionStatus !== 'connected'}
                 className={`w-full px-4 py-2 border border-green-400 flex items-center justify-center gap-2 transition-all ${
                   executing 
                     ? 'bg-yellow-900/30 text-yellow-400 border-yellow-400' 
+                    : connectionStatus !== 'connected'
+                    ? 'bg-red-900/30 text-red-400 border-red-400'
                     : 'bg-green-900/30 text-green-400 hover:bg-green-900/50'
-                } ${(!selectedTool || executing) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                } ${(!selectedTool || executing || connectionStatus !== 'connected') ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={connectionStatus !== 'connected' ? 'Connect to WebSocket first' : ''}
               >
                 {executing ? (
                   <>
                     <Loader className="w-4 h-4 animate-spin" />
-                    Executing...
+                    Executing via WebSocket...
+                  </>
+                ) : connectionStatus !== 'connected' ? (
+                  <>
+                    <WifiOff className="w-4 h-4" />
+                    Not Connected
                   </>
                 ) : (
                   <>
                     <Play className="w-4 h-4" />
-                    Execute Tool
+                    <Zap className="w-3 h-3" />
+                    Execute Tool (WebSocket)
                   </>
                 )}
               </button>
+              
+              {/* Streaming Progress */}
+              {executing && streamingProgress.length > 0 && (
+                <div className="mt-2 p-2 bg-black border border-green-900 rounded">
+                  <div className="text-xs text-green-600 font-bold mb-1 flex items-center gap-2">
+                    <Zap className="w-3 h-3" />
+                    Real-time Streaming Output:
+                  </div>
+                  <div className="text-xs text-green-400 font-mono space-y-1 max-h-32 overflow-y-auto">
+                    {streamingProgress.map((line, idx) => (
+                      <div key={idx} className="animate-pulse">{line}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Execution Result */}
               {executionResult && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <h3 className={`text-sm font-bold ${executionResult.success ? 'text-green-400' : 'text-red-400'}`}>
-                      Execution Result: {executionResult.success ? '✅ SUCCESS' : '❌ FAILED'}
+                    <h3 className={`text-sm font-bold flex items-center gap-2 ${executionResult.success ? 'text-green-400' : 'text-red-400'}`}>
+                      <Zap className="w-3 h-3" />
+                      WebSocket Result: {executionResult.success ? '✅ SUCCESS' : '❌ FAILED'}
                     </h3>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-green-600">{executionResult.executionTime}ms</span>
@@ -612,10 +680,13 @@ ${result.metadata ? Object.entries(result.metadata).map(([key, value]) =>
           ) : (
             <div className="h-full flex items-center justify-center text-center">
               <div className="space-y-2">
-                <Terminal className="w-12 h-12 text-green-600 mx-auto animate-pulse" />
-                <p className="text-green-600">Select a tool to view details and execute</p>
+                <div className="flex items-center justify-center gap-2">
+                  <Terminal className="w-12 h-12 text-green-600 animate-pulse" />
+                  <Zap className="w-6 h-6 text-yellow-400" />
+                </div>
+                <p className="text-green-600">Select a tool to view details and execute via WebSocket</p>
                 <p className="text-xs text-green-700">
-                  {filteredToolsCount} tools available across {Object.keys(filteredCategories).length} categories
+                  {filteredToolsCount} real-time tools available across {Object.keys(filteredCategories).length} categories
                 </p>
               </div>
             </div>
@@ -626,4 +697,4 @@ ${result.metadata ? Object.entries(result.metadata).map(([key, value]) =>
   )
 }
 
-export default MCPTools
+export default MCPToolsWebSocket

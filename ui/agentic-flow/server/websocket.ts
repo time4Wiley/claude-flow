@@ -6,12 +6,116 @@ import { Server, Socket } from 'socket.io';
 import { HiveMindIntegration } from './hive-integration.js';
 import { MastraIntegration } from './mastra-integration.js';
 import { TerminalHandler } from './terminal-handler.js';
+import { getMCPHandler, MCPToolResult } from './mcp-handler.js';
 
 interface SocketData {
   subscribedSwarms: Set<string>;
   subscribedAgents: Set<string>;
   subscribedTasks: Set<string>;
   authenticated: boolean;
+}
+
+// Helper function to get MCP tools list
+async function getMCPToolsList() {
+  const mcpHandler = getMCPHandler();
+  try {
+    const tools = await mcpHandler.discoverTools();
+    return tools.map(tool => ({
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters,
+      category: getCategoryFromToolName(tool.name)
+    }));
+  } catch (error) {
+    console.warn('Failed to discover MCP tools, using static list');
+    return getStaticToolsList();
+  }
+}
+
+// Helper function to execute MCP tool
+async function executeMCPTool(toolName: string, parameters: any): Promise<MCPToolResult> {
+  const mcpHandler = getMCPHandler();
+  return await mcpHandler.executeTool(toolName, parameters);
+}
+
+// Helper function to determine tool category
+function getCategoryFromToolName(toolName: string): string {
+  if (toolName.includes('swarm') || toolName.includes('agent') || toolName.includes('task')) {
+    return 'coordination';
+  } else if (toolName.includes('memory') || toolName.includes('cache')) {
+    return 'memory';
+  } else if (toolName.includes('neural') || toolName.includes('model')) {
+    return 'neural';
+  } else if (toolName.includes('github') || toolName.includes('repo')) {
+    return 'github';
+  } else if (toolName.includes('monitor') || toolName.includes('status') || toolName.includes('metrics')) {
+    return 'monitoring';
+  } else if (toolName.includes('workflow') || toolName.includes('orchestrate')) {
+    return 'workflow';
+  } else if (toolName.includes('daa')) {
+    return 'daa';
+  } else if (toolName.includes('sparc')) {
+    return 'sparc';
+  } else {
+    return 'system';
+  }
+}
+
+// Fallback static tools list
+function getStaticToolsList() {
+  return [
+    {
+      name: 'swarm_init',
+      description: 'Initialize swarm with topology and configuration',
+      parameters: {
+        type: 'object',
+        properties: {
+          topology: { type: 'string', enum: ['hierarchical', 'mesh', 'ring', 'star'] },
+          maxAgents: { type: 'number', default: 8 }
+        },
+        required: ['topology']
+      },
+      category: 'coordination'
+    },
+    {
+      name: 'agent_spawn',
+      description: 'Create specialized AI agents',
+      parameters: {
+        type: 'object',
+        properties: {
+          type: { type: 'string', enum: ['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester'] },
+          name: { type: 'string' }
+        },
+        required: ['type']
+      },
+      category: 'coordination'
+    },
+    {
+      name: 'memory_usage',
+      description: 'Store/retrieve persistent memory',
+      parameters: {
+        type: 'object',
+        properties: {
+          action: { type: 'string', enum: ['store', 'retrieve', 'list', 'delete'] },
+          key: { type: 'string' },
+          value: { type: 'string' }
+        },
+        required: ['action']
+      },
+      category: 'memory'
+    },
+    {
+      name: 'performance_report',
+      description: 'Generate performance reports',
+      parameters: {
+        type: 'object',
+        properties: {
+          format: { type: 'string', enum: ['summary', 'detailed', 'json'] }
+        }
+      },
+      category: 'system'
+    }
+  ];
 }
 
 export function setupWebSocket(
@@ -288,6 +392,80 @@ export function setupWebSocket(
         socket.emit('error', {
           message: 'Failed to orchestrate task',
           error: error.message,
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // ===== MCP TOOL ACTIONS =====
+
+    socket.on('mcp:tools:discover', async () => {
+      try {
+        // Get available MCP tools (for now using static list, could be dynamic)
+        const tools = await getMCPToolsList();
+        
+        socket.emit('mcp:tools:list', {
+          tools,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error: any) {
+        socket.emit('error', {
+          message: 'Failed to discover MCP tools',
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    socket.on('mcp:tool:execute', async (data: {
+      executionId: string;
+      toolName: string;
+      parameters: any;
+      options?: {
+        trackMetrics?: boolean;
+        cacheResult?: boolean;
+      };
+    }) => {
+      try {
+        console.log(`🔧 Executing MCP tool: ${data.toolName} (${data.executionId})`);
+        
+        // Send progress updates during execution
+        socket.emit('mcp:tool:progress', {
+          executionId: data.executionId,
+          progress: { message: `Starting execution of ${data.toolName}...` }
+        });
+
+        // Execute the MCP tool via the MCP handler
+        const startTime = Date.now();
+        const result = await executeMCPTool(data.toolName, data.parameters);
+        const executionTime = Date.now() - startTime;
+
+        // Send progress update
+        socket.emit('mcp:tool:progress', {
+          executionId: data.executionId,
+          progress: { message: `Tool execution completed in ${executionTime}ms` }
+        });
+
+        // Send final result
+        socket.emit('mcp:tool:response', {
+          executionId: data.executionId,
+          success: result.success,
+          result: result.data,
+          error: result.error,
+          executionTime,
+          tokenUsage: result.metadata?.tokenUsage,
+          agentId: result.metadata?.agentId,
+          timestamp: new Date().toISOString()
+        });
+
+      } catch (error: any) {
+        console.error(`❌ MCP tool execution error:`, error);
+        
+        socket.emit('mcp:tool:response', {
+          executionId: data.executionId,
+          success: false,
+          error: error.message || 'Tool execution failed',
+          executionTime: 0,
           timestamp: new Date().toISOString()
         });
       }
