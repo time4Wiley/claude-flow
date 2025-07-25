@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { motion } from 'framer-motion'
@@ -20,27 +20,25 @@ import { useMCPStore } from './stores/mcpStore'
 import useRealTimeStore from './stores/realTimeStore'
 import useRealTimeSync from './hooks/useRealTimeSync'
 
+// Hooks
+import { useSystemInit } from './hooks/useSystemInit'
+
 // Utils
 import { cn } from './utils/cn'
 
 function App() {
-  const [isInitialized, setIsInitialized] = useState(false)
+  const { isInitialized, progress, error } = useSystemInit()
   
   // Real-time sync state
   const { connected, agents, swarms, performance } = useRealTimeStore()
-  const { connecting, error } = useRealTimeSync({ 
+  const { connecting, error: syncError } = useRealTimeSync({ 
     autoConnect: true,
     reconnectInterval: 3000,
     maxReconnectAttempts: 10
   })
 
-  useEffect(() => {
-    // Simulate initialization with a more realistic delay
-    setTimeout(() => setIsInitialized(true), 2000)
-  }, [])
-
   if (!isInitialized) {
-    return <LoadingScreen />
+    return <LoadingScreen progress={progress} />
   }
 
   return (

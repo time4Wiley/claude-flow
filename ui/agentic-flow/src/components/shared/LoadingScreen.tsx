@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react'
 
-const LoadingScreen: React.FC = () => {
+interface LoadingScreenProps {
+  progress?: {
+    current: number
+    total: number
+    message: string
+    status: {
+      api: boolean
+      websocket: boolean
+      mcp: boolean
+      memory: boolean
+    }
+  }
+}
+
+const LoadingScreen: React.FC<LoadingScreenProps> = ({ progress }) => {
   const [frame, setFrame] = useState(0)
   const [dots, setDots] = useState(0)
   
@@ -31,6 +45,10 @@ const LoadingScreen: React.FC = () => {
     return () => clearInterval(interval)
   }, [loadingFrames.length])
 
+  // Calculate actual progress
+  const actualProgress = progress ? Math.floor((progress.current / progress.total) * 100) : Math.floor((frame / (loadingFrames.length - 1)) * 100)
+  const progressFrame = progress ? Math.floor((progress.current / progress.total) * (loadingFrames.length - 1)) : frame
+
   const getDots = () => '.'.repeat(dots).padEnd(3, ' ')
 
   return (
@@ -48,34 +66,53 @@ const LoadingScreen: React.FC = () => {
 
           {/* Loading bar */}
           <div className="text-center mb-4">
-            <div className="mb-2">{loadingFrames[frame]}</div>
-            <div className="text-xs text-green-600">{Math.floor((frame / (loadingFrames.length - 1)) * 100)}%</div>
+            <div className="mb-2">{loadingFrames[progressFrame]}</div>
+            <div className="text-xs text-green-600">{actualProgress}%</div>
           </div>
 
           {/* Status messages */}
           <div className="text-xs space-y-1">
             <div className="flex items-center gap-2">
               <span>{spinners[frame % spinners.length]}</span>
-              <span className="text-green-600">INITIALIZING{getDots()}</span>
+              <span className="text-green-600">
+                {progress?.message || `INITIALIZING${getDots()}`}
+              </span>
             </div>
             
-            {frame >= 3 && (
-              <div className="text-green-500 pl-4">✓ Neural pathways connected</div>
-            )}
-            
-            {frame >= 6 && (
-              <div className="text-green-500 pl-4">✓ Memory systems online</div>
-            )}
-            
-            {frame >= 9 && (
-              <div className="text-green-500 pl-4">✓ Swarm protocols ready</div>
+            {progress ? (
+              <>
+                {progress.status.api && (
+                  <div className="text-green-500 pl-4">✓ API connected</div>
+                )}
+                {progress.status.websocket && (
+                  <div className="text-green-500 pl-4">✓ WebSocket ready</div>
+                )}
+                {progress.status.mcp && (
+                  <div className="text-green-500 pl-4">✓ MCP tools activated</div>
+                )}
+                {progress.status.memory && (
+                  <div className="text-green-500 pl-4">✓ Memory systems online</div>
+                )}
+              </>
+            ) : (
+              <>
+                {frame >= 3 && (
+                  <div className="text-green-500 pl-4">✓ Neural pathways connected</div>
+                )}
+                {frame >= 6 && (
+                  <div className="text-green-500 pl-4">✓ Memory systems online</div>
+                )}
+                {frame >= 9 && (
+                  <div className="text-green-500 pl-4">✓ Swarm protocols ready</div>
+                )}
+              </>
             )}
           </div>
 
           {/* System info */}
           <div className="text-center mt-4 pt-4 border-t border-green-900">
             <div className="text-xs text-green-600">
-              SYSTEM BOOT • SEQUENCE {frame + 1}/{loadingFrames.length}
+              SYSTEM BOOT • SEQUENCE {progress?.current || frame + 1}/{progress?.total || loadingFrames.length}
             </div>
           </div>
         </div>
