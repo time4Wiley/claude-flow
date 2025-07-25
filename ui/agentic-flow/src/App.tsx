@@ -12,6 +12,7 @@ import Navigation from './components/shared/Navigation'
 import MemoryExplorerV2 from './components/memory/MemoryExplorerV2'
 import ClaudeFlowTabs from './components/claude-flow/ClaudeFlowTabs'
 import ApiDocs from './components/api-docs/ApiDocs'
+import LoadingScreen from './components/shared/LoadingScreen'
 
 // Stores
 import { useSwarmStore } from './stores/swarmStore'
@@ -34,12 +35,12 @@ function App() {
   })
 
   useEffect(() => {
-    // Simulate initialization
-    setTimeout(() => setIsInitialized(true), 100)
+    // Simulate initialization with a more realistic delay
+    setTimeout(() => setIsInitialized(true), 2000)
   }, [])
 
   if (!isInitialized) {
-    return null
+    return <LoadingScreen />
   }
 
   return (
