@@ -27,39 +27,72 @@ const WebSocketTester: React.FC = () => {
   }, [messages])
 
   const connect = useCallback(() => {
-    try {
-      const ws = new WebSocket(url)
-      wsRef.current = ws
+    const attemptConnection = (wsUrl: string, fallbackUrl?: string) => {
+      try {
+        const ws = new WebSocket(wsUrl)
+        wsRef.current = ws
 
-      ws.onopen = () => {
-        setConnected(true)
-        addMessage('Connected to WebSocket server', 'received')
-      }
+        ws.onopen = () => {
+          setConnected(true)
+          addMessage(`Connected to WebSocket server at ${wsUrl}`, 'received')
+        }
 
-      ws.onmessage = (event) => {
-        addMessage(event.data, 'received')
-      }
+        ws.onmessage = (event) => {
+          addMessage(event.data, 'received')
+        }
 
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error)
-        addMessage('WebSocket error occurred', 'received')
-      }
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error)
+          addMessage('WebSocket error occurred', 'received')
+          
+          // Try fallback if this is the first attempt and fallback exists
+          if (fallbackUrl && wsUrl !== fallbackUrl) {
+            addMessage(`Connection failed, trying fallback: ${fallbackUrl}`, 'received')
+            wsRef.current = null
+            setTimeout(() => attemptConnection(fallbackUrl), 1000)
+          }
+        }
 
-      ws.onclose = () => {
-        setConnected(false)
-        addMessage('Disconnected from WebSocket server', 'received')
+        ws.onclose = (event) => {
+          setConnected(false)
+          
+          // If connection was closed immediately and we have a fallback, try it
+          if (event.code === 1006 && fallbackUrl && wsUrl !== fallbackUrl) {
+            addMessage(`Connection failed to ${wsUrl}, trying ${fallbackUrl}...`, 'received')
+            wsRef.current = null
+            setTimeout(() => attemptConnection(fallbackUrl), 1000)
+          } else {
+            addMessage('Disconnected from WebSocket server', 'received')
+            
+            if (autoReconnect) {
+              setTimeout(() => {
+                addMessage('Attempting to reconnect...', 'received')
+                connect()
+              }, 3000)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to connect:', error)
+        addMessage(`Failed to connect to ${wsUrl}: ${error}`, 'received')
         
-        if (autoReconnect) {
-          setTimeout(() => {
-            addMessage('Attempting to reconnect...', 'received')
-            connect()
-          }, 3000)
+        // Try fallback if available
+        if (fallbackUrl && wsUrl !== fallbackUrl) {
+          addMessage(`Trying fallback: ${fallbackUrl}`, 'received')
+          setTimeout(() => attemptConnection(fallbackUrl), 1000)
         }
       }
-    } catch (error) {
-      console.error('Failed to connect:', error)
-      addMessage(`Failed to connect: ${error}`, 'received')
     }
+
+    // Generate fallback URL if using localhost
+    let fallbackUrl: string | undefined
+    if (url.includes('localhost')) {
+      fallbackUrl = url.replace('localhost', '127.0.0.1')
+    } else if (url.includes('127.0.0.1')) {
+      fallbackUrl = url.replace('127.0.0.1', 'localhost')
+    }
+
+    attemptConnection(url, fallbackUrl)
   }, [url, autoReconnect])
 
   const disconnect = () => {

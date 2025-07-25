@@ -52,10 +52,16 @@ export const initializeConsole = () => {
 
   // Performance Metrics
   if (performance && performance.timing) {
-    const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart
+    const navStart = performance.timing.navigationStart
+    const loadEnd = performance.timing.loadEventEnd || Date.now()
+    const domReady = performance.timing.domContentLoadedEventEnd || Date.now()
+    
+    const loadTime = loadEnd > navStart ? loadEnd - navStart : Math.round(performance.now())
+    const domTime = domReady > navStart ? domReady - navStart : Math.round(performance.now())
+    
     console.group('%c[PERFORMANCE METRICS]', 'color: #4d2d4d; font-weight: bold;')
     console.log('%c├─ Page Load Time:', 'color: #663d66;', `${loadTime}ms`)
-    console.log('%c├─ DOM Ready:', 'color: #663d66;', `${performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart}ms`)
+    console.log('%c├─ DOM Ready:', 'color: #663d66;', `${domTime}ms`)
     console.log('%c└─ Resources:', 'color: #663d66;', `${performance.getEntriesByType('resource').length} loaded`)
     console.groupEnd()
   }
