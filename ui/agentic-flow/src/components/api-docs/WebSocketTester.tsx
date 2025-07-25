@@ -15,8 +15,11 @@ const WebSocketTester: React.FC = () => {
   const [messageInput, setMessageInput] = useState('')
   const [autoReconnect, setAutoReconnect] = useState(true)
   const [showRaw, setShowRaw] = useState(false)
+  const [connectionAttempts, setConnectionAttempts] = useState(0)
+  const [triedFallback, setTriedFallback] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -27,14 +30,28 @@ const WebSocketTester: React.FC = () => {
   }, [messages])
 
   const connect = useCallback(() => {
-    const attemptConnection = (wsUrl: string, fallbackUrl?: string) => {
+    // Clear any existing timeout
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+      reconnectTimeoutRef.current = null
+    }
+
+    // Reset state for new connection attempt
+    setConnectionAttempts(0)
+    setTriedFallback(false)
+
+    const attemptConnection = (wsUrl: string, isFallback = false) => {
+      setConnectionAttempts(prev => prev + 1)
+      
       try {
         const ws = new WebSocket(wsUrl)
         wsRef.current = ws
 
         ws.onopen = () => {
           setConnected(true)
-          addMessage(`Connected to WebSocket server at ${wsUrl}`, 'received')
+          setConnectionAttempts(0)
+          setTriedFallback(false)
+          addMessage(`✅ Connected to WebSocket server at ${wsUrl}`, 'received')
         }
 
         ws.onmessage = (event) => {
@@ -43,64 +60,97 @@ const WebSocketTester: React.FC = () => {
 
         ws.onerror = (error) => {
           console.error('WebSocket error:', error)
-          addMessage('WebSocket error occurred', 'received')
-          
-          // Try fallback if this is the first attempt and fallback exists
-          if (fallbackUrl && wsUrl !== fallbackUrl) {
-            addMessage(`Connection failed, trying fallback: ${fallbackUrl}`, 'received')
-            wsRef.current = null
-            setTimeout(() => attemptConnection(fallbackUrl), 1000)
-          }
         }
 
         ws.onclose = (event) => {
           setConnected(false)
+          wsRef.current = null
           
-          // If connection was closed immediately and we have a fallback, try it
-          if (event.code === 1006 && fallbackUrl && wsUrl !== fallbackUrl) {
-            addMessage(`Connection failed to ${wsUrl}, trying ${fallbackUrl}...`, 'received')
-            wsRef.current = null
-            setTimeout(() => attemptConnection(fallbackUrl), 1000)
-          } else {
-            addMessage('Disconnected from WebSocket server', 'received')
+          // Only try fallback once and if connection failed immediately
+          if (!triedFallback && event.code === 1006 && connectionAttempts < 2) {
+            const fallbackUrl = wsUrl.includes('localhost') 
+              ? wsUrl.replace('localhost', '127.0.0.1')
+              : wsUrl.replace('127.0.0.1', 'localhost')
             
-            if (autoReconnect) {
-              setTimeout(() => {
-                addMessage('Attempting to reconnect...', 'received')
-                connect()
-              }, 3000)
+            if (fallbackUrl !== wsUrl) {
+              setTriedFallback(true)
+              addMessage(`❌ Connection failed to ${wsUrl}`, 'received')
+              addMessage(`🔄 Trying fallback: ${fallbackUrl}`, 'received')
+              setTimeout(() => attemptConnection(fallbackUrl, true), 1000)
+              return
             }
+          }
+          
+          // Show appropriate disconnect message
+          if (event.code === 1006) {
+            addMessage(`❌ Failed to connect to WebSocket server`, 'received')
+          } else {
+            addMessage('🔌 Disconnected from WebSocket server', 'received')
+          }
+          
+          // Auto-reconnect logic (but not for initial connection failures)
+          if (autoReconnect && event.code !== 1006 && connectionAttempts < 3) {
+            reconnectTimeoutRef.current = setTimeout(() => {
+              addMessage('🔄 Attempting to reconnect...', 'received')
+              connect()
+            }, 3000)
+          } else if (connectionAttempts >= 3) {
+            addMessage('❌ Max connection attempts reached. Auto-reconnect disabled.', 'received')
+            setAutoReconnect(false)
           }
         }
       } catch (error) {
         console.error('Failed to connect:', error)
-        addMessage(`Failed to connect to ${wsUrl}: ${error}`, 'received')
+        addMessage(`❌ Failed to connect to ${wsUrl}: ${error}`, 'received')
         
-        // Try fallback if available
-        if (fallbackUrl && wsUrl !== fallbackUrl) {
-          addMessage(`Trying fallback: ${fallbackUrl}`, 'received')
-          setTimeout(() => attemptConnection(fallbackUrl), 1000)
+        // Try fallback only once
+        if (!triedFallback && connectionAttempts < 2) {
+          const fallbackUrl = wsUrl.includes('localhost') 
+            ? wsUrl.replace('localhost', '127.0.0.1')
+            : wsUrl.replace('127.0.0.1', 'localhost')
+          
+          if (fallbackUrl !== wsUrl) {
+            setTriedFallback(true)
+            addMessage(`🔄 Trying fallback: ${fallbackUrl}`, 'received')
+            setTimeout(() => attemptConnection(fallbackUrl, true), 1000)
+          }
         }
       }
     }
 
-    // Generate fallback URL if using localhost
-    let fallbackUrl: string | undefined
-    if (url.includes('localhost')) {
-      fallbackUrl = url.replace('localhost', '127.0.0.1')
-    } else if (url.includes('127.0.0.1')) {
-      fallbackUrl = url.replace('127.0.0.1', 'localhost')
-    }
-
-    attemptConnection(url, fallbackUrl)
-  }, [url, autoReconnect])
+    addMessage(`🔌 Attempting to connect to ${url}...`, 'received')
+    attemptConnection(url)
+  }, [url, autoReconnect, connectionAttempts, triedFallback])
 
   const disconnect = () => {
+    // Clear any pending reconnection
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+      reconnectTimeoutRef.current = null
+    }
+    
     if (wsRef.current) {
       wsRef.current.close()
       wsRef.current = null
     }
+    
+    setConnected(false)
+    setConnectionAttempts(0)
+    setTriedFallback(false)
+    addMessage('🔌 Manually disconnected', 'received')
   }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+      }
+      if (wsRef.current) {
+        wsRef.current.close()
+      }
+    }
+  }, [])
 
   const addMessage = (data: string, type: 'sent' | 'received') => {
     const message: Message = {
