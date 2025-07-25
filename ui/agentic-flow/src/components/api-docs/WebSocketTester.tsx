@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
-import { Zap, Send, Trash2, Copy, Check, Save } from 'lucide-react'
+import { Zap, Send, Trash2, Copy, Check, Save, Square } from 'lucide-react'
 
 interface Message {
   id: string
@@ -140,6 +140,28 @@ const WebSocketTester: React.FC = () => {
     addMessage('🔌 Manually disconnected', 'received')
   }
 
+  const stopAllConnections = () => {
+    // Clear any pending reconnection
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+      reconnectTimeoutRef.current = null
+    }
+    
+    // Close current connection if exists
+    if (wsRef.current) {
+      wsRef.current.close()
+      wsRef.current = null
+    }
+    
+    // Reset all states
+    setConnected(false)
+    setConnectionAttempts(0)
+    setTriedFallback(false)
+    setAutoReconnect(false)
+    
+    addMessage('⏹️ All connection attempts stopped', 'received')
+  }
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -233,6 +255,16 @@ const WebSocketTester: React.FC = () => {
               Connect
             </button>
           )}
+          
+          {/* Stop button - always visible for emergency stop */}
+          <button
+            onClick={stopAllConnections}
+            className="px-4 py-2 bg-gray-900/30 text-gray-400 border border-gray-700 rounded hover:bg-gray-800/50 transition-colors flex items-center gap-2"
+            title="Stop all connection attempts and disable auto-reconnect"
+          >
+            <Square className="w-4 h-4" />
+            Stop
+          </button>
         </div>
 
         <div className="flex items-center justify-between">
