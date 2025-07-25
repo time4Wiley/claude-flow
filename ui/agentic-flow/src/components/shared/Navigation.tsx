@@ -6,7 +6,8 @@ import {
   Wrench, 
   Terminal as TerminalIcon,
   Database,
-  Zap
+  Zap,
+  Globe
 } from 'lucide-react'
 
 const Navigation: React.FC = () => {
@@ -17,6 +18,7 @@ const Navigation: React.FC = () => {
     { to: '/mcp-tools', icon: Wrench, label: 'MCP TOOLS' },
     { to: '/memory', icon: Database, label: 'MEMORY' },
     { to: '/terminal', icon: TerminalIcon, label: 'TERMINAL' },
+    { to: '/api-docs', icon: Globe, label: 'API DOCS' },
   ]
 
   return (

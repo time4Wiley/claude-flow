@@ -11,6 +11,7 @@ import Terminal from './components/shared/Terminal'
 import Navigation from './components/shared/Navigation'
 import MemoryExplorerV2 from './components/memory/MemoryExplorerV2'
 import ClaudeFlowTabs from './components/claude-flow/ClaudeFlowTabs'
+import ApiDocs from './components/api-docs/ApiDocs'
 
 // Stores
 import { useSwarmStore } from './stores/swarmStore'
@@ -73,6 +74,7 @@ function App() {
                 <Route path="/mcp-tools" element={<MCPToolsWebSocket />} />
                 <Route path="/memory" element={<MemoryExplorerV2 />} />
                 <Route path="/terminal" element={<Terminal />} />
+                <Route path="/api-docs" element={<ApiDocs />} />
               </Routes>
             </main>
           </div>
