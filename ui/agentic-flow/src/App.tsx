@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { motion } from 'framer-motion'
@@ -28,6 +28,7 @@ import { cn } from './utils/cn'
 
 function App() {
   const { isInitialized, progress, error } = useSystemInit()
+  const [currentTime, setCurrentTime] = useState(new Date())
   
   // Real-time sync state
   const { connected, agents, swarms, performance } = useRealTimeStore()
@@ -36,6 +37,15 @@ function App() {
     reconnectInterval: 3000,
     maxReconnectAttempts: 10
   })
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   if (!isInitialized) {
     return <LoadingScreen progress={progress} />
@@ -107,7 +117,7 @@ function App() {
               <span className="status-value">{performance.cpu.toFixed(1)}%</span>
             </div>
             <div className="status-item status-time">
-              {new Date().toLocaleTimeString('en-US', { hour12: false })}
+              {currentTime.toLocaleTimeString('en-US', { hour12: false })}
             </div>
           </div>
         </div>
