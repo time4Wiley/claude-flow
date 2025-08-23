@@ -1,0 +1,1 @@
+{"tag": "checkpoint-20250824-000105", "file": "/Users/wei/Projects/claude-flow/CLAUDE.md", "timestamp": "2025-08-23T16:01:06Z", "type": "post-edit", "branch": "main", "diff_summary": " .claude/checkpoints/task-1755964624.json |   1 +  CLAUDE.md                                | 395 +++++++++++++++++--------------  2 files changed, 224 insertions(+), 172 deletions(-) "}
