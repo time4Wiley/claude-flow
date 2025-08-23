@@ -1,208 +1,259 @@
-# Claude Code Configuration - SPARC Development Environment
+# CLAUDE.md
 
-## 🚨 CRITICAL: Concurrent Execution Rules
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**ABSOLUTE RULE**: ALL operations MUST be concurrent/parallel in ONE message:
+## Essential Commands
 
-### 🔴 Mandatory Patterns:
-- **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ minimum)
-- **Task tool**: ALWAYS spawn ALL agents in ONE message
-- **File operations**: ALWAYS batch ALL reads/writes/edits
-- **Bash commands**: ALWAYS batch ALL terminal operations
-- **Memory operations**: ALWAYS batch ALL store/retrieve
+### Development
+```bash
+# Development server
+npm run dev                    # Run TypeScript development server
+npm run dev:build             # Watch mode for TypeScript compilation
 
-### ⚡ Golden Rule: "1 MESSAGE = ALL RELATED OPERATIONS"
+# Build
+npm run build                 # Full build (clean + compile ESM/CJS + binary)
+npm run build:esm            # Build ES modules only
+npm run build:cjs            # Build CommonJS modules only
+npm run typecheck            # Type checking without emitting files
 
-✅ **CORRECT**: Everything in ONE message
+# Testing
+npm test                     # Run all tests (Jest with experimental VM modules)
+npm run test:unit           # Unit tests only
+npm run test:integration    # Integration tests only
+npm run test:e2e           # End-to-end tests only
+npm run test:coverage      # Run tests with coverage report
+npm run test:watch         # Watch mode for tests
+npm run test:debug         # Debug tests with inspector
+
+# Quality
+npm run lint               # ESLint with max-warnings 0
+npm run format            # Prettier formatting
+
+# Publishing
+npm run publish:alpha     # Publish alpha version
+```
+
+### Single Test Execution
+```bash
+# Run a specific test file
+NODE_OPTIONS='--experimental-vm-modules' jest src/__tests__/unit/specific.test.ts
+
+# Run tests matching pattern
+NODE_OPTIONS='--experimental-vm-modules' jest --testNamePattern='Health'
+```
+
+## Architecture Overview
+
+### Core System Design
+Claude-Flow is an AI agent orchestration platform built on:
+- **Hive-Mind Architecture**: Queen-led coordination with specialized worker agents
+- **MCP Integration**: 87+ Model Context Protocol tools for Claude Code
+- **SPARC Methodology**: Systematic development phases (Specification → Pseudocode → Architecture → Refinement → Code)
+- **Swarm Intelligence**: Multiple coordination topologies (hierarchical, mesh, hybrid)
+- **SQLite Memory**: Persistent `.swarm/memory.db` with cross-session state
+
+### Module Structure
+
+#### `/src/cli/` - Command Line Interface
+- `main.ts`: Primary entry point for TypeScript CLI
+- `simple-cli.js`: Simplified JavaScript fallback
+- `cli-core.ts`: Core CLI infrastructure with command registry
+
+#### `/src/swarm/` - Swarm Orchestration
+- `coordinator.ts`: Main swarm coordination logic
+- `executor.ts`: Task execution engine
+- `prompt-copier.ts`: Intelligent prompt management
+- `claude-code-interface.ts`: Claude Code integration layer
+
+#### `/src/mcp/` - Model Context Protocol
+- `server.ts`: MCP server implementation
+- `tools.ts`: Tool definitions and routing
+- `ruv-swarm-tools.ts`: Ruv-swarm integration
+- `sparc-modes.ts`: SPARC mode implementations
+
+#### `/src/memory/` - Memory Management
+- `sqlite-store.js`: SQLite persistence layer with automatic fallback
+- `swarm-memory.ts`: Distributed memory coordination
+- `enhanced-memory.js`: Advanced memory operations
+- Windows: Automatic fallback to in-memory storage if SQLite fails
+
+#### `/src/coordination/` - Task Coordination
+- `hive-orchestrator.ts`: Hive-mind coordination
+- `scheduler.ts`: Task scheduling and prioritization
+- `load-balancer.ts`: Resource distribution
+- `conflict-resolution.ts`: Consensus mechanisms
+
+#### `/src/verification/` - Verification Pipeline
+- `verification-pipeline.ts`: Main verification orchestrator
+- `truth-scorer.ts`: Agent output validation
+- `rollback-engine.ts`: Automatic rollback on failures
+
+## Key Architectural Patterns
+
+### Concurrent Execution
+**CRITICAL**: Always batch operations in a single message for performance:
 ```javascript
-[Single Message]:
-  - TodoWrite { todos: [10+ todos] }
-  - Task("Agent 1"), Task("Agent 2"), Task("Agent 3")
-  - Read("file1.js"), Read("file2.js")
-  - Write("output1.js"), Write("output2.js")
-  - Bash("npm install"), Bash("npm test")
+// ✅ CORRECT - All operations in one message
+TodoWrite({ todos: [multiple todos] })
+Task("agent1"), Task("agent2"), Task("agent3")
+Read("file1"), Read("file2"), Write("file3")
+
+// ❌ WRONG - Sequential messages (6x slower)
 ```
 
-❌ **WRONG**: Multiple messages (6x slower!)
-
-## 🎯 Claude Code vs MCP Tools
-
-### Claude Code Handles ALL:
-- File operations (Read/Write/Edit/Glob/Grep)
-- Code generation & programming
-- Bash commands & system operations
-- TodoWrite & task management
-- Git operations & package management
-- Testing, debugging & implementation
-
-### MCP Tools ONLY:
-- Coordination & planning
-- Memory management
-- Performance tracking
-- Swarm orchestration
-- GitHub integration
-
-**Key**: MCP coordinates, Claude Code executes!
-
-## 📦 SPARC Commands
-
-### Core:
-- `npx claude-flow sparc modes` - List modes
-- `npx claude-flow sparc run <mode> "<task>"` - Execute mode
-- `npx claude-flow sparc tdd "<feature>"` - TDD workflow
-- `npx claude-flow sparc batch <modes> "<task>"` - Parallel modes
-- `npx claude-flow sparc pipeline "<task>"` - Full pipeline
-
-### Build:
-- `npm run build/test/lint/typecheck`
-
-## 🤖 Agent Reference (54 Total)
-
-### Core Development
-| Agent | Purpose |
-|-------|---------|
-| coder | Implementation |
-| reviewer | Code quality |
-| tester | Test creation |
-| planner | Strategic planning |
-| researcher | Information gathering |
-
-### Swarm Coordination
-| Agent | Purpose |
-|-------|---------|
-| hierarchical-coordinator | Queen-led |
-| mesh-coordinator | Peer-to-peer |
-| adaptive-coordinator | Dynamic topology |
-| collective-intelligence-coordinator | Hive-mind |
-| swarm-memory-manager | Distributed memory |
-
-### Specialized
-| Agent | Purpose |
-|-------|---------|
-| backend-dev | API development |
-| mobile-dev | React Native |
-| ml-developer | Machine learning |
-| system-architect | High-level design |
-| sparc-coder | TDD implementation |
-| production-validator | Real validation |
-
-### GitHub Integration
-| Agent | Purpose |
-|-------|---------|
-| github-modes | Comprehensive integration |
-| pr-manager | Pull requests |
-| code-review-swarm | Multi-agent review |
-| issue-tracker | Issue management |
-| release-manager | Release coordination |
-
-### Performance & Consensus
-| Agent | Purpose |
-|-------|---------|
-| perf-analyzer | Bottleneck identification |
-| performance-benchmarker | Performance testing |
-| byzantine-coordinator | Fault tolerance |
-| raft-manager | Leader election |
-| consensus-builder | Decision-making |
-
-## 🚀 Swarm Patterns
-
-### Full-Stack Swarm (8 agents)
+### Agent Spawning Pattern
 ```bash
-Task("Architecture", "...", "system-architect")
-Task("Backend", "...", "backend-dev")
-Task("Frontend", "...", "mobile-dev")
-Task("Database", "...", "coder")
-Task("API Docs", "...", "api-docs")
-Task("CI/CD", "...", "cicd-engineer")
-Task("Testing", "...", "performance-benchmarker")
-Task("Validation", "...", "production-validator")
+# Basic swarm spawn
+npx claude-flow@alpha swarm "task description" --claude
+
+# Hive-mind with specific agents
+npx claude-flow@alpha hive-mind spawn "task" --agents 8 --strategy parallel
 ```
 
-### Agent Count Rules
-1. **CLI Args First**: `npx claude-flow@alpha --agents 5`
-2. **Auto-Decide**: Simple (3-4), Medium (5-7), Complex (8-12)
-
-## 📋 Agent Coordination Protocol
-
-### Every Agent MUST:
-
-**1️⃣ START:**
+### Memory Namespace Pattern
 ```bash
-npx claude-flow@alpha hooks pre-task --description "[task]"
-npx claude-flow@alpha hooks session-restore --session-id "swarm-[id]"
+# Store with namespace
+npx claude-flow@alpha memory store "key" "value" --namespace project
+
+# Query with namespace
+npx claude-flow@alpha memory query "pattern" --namespace project
 ```
 
-**2️⃣ DURING (After EVERY step):**
+## SPARC Mode Integration
+
+Each SPARC mode provides specialized execution environments:
+- **orchestrator**: Multi-agent coordination for complex tasks
+- **coder**: Direct implementation with best practices
+- **architect**: System design and architecture planning
+- **tdd**: Test-driven development with London School methodology
+- **researcher**: Deep research with web integration
+- **analyst**: Code and performance analysis
+
+Usage:
 ```bash
-npx claude-flow@alpha hooks post-edit --file "[file]" --memory-key "swarm/[agent]/[step]"
-npx claude-flow@alpha hooks notify --message "[decision]"
+npx claude-flow sparc run <mode> "task description"
+npx claude-flow sparc batch <modes> "task"  # Parallel execution
+npx claude-flow sparc pipeline "task"       # Full SPARC pipeline
 ```
 
-**3️⃣ END:**
+## Error Handling & Recovery
+
+### SQLite Fallback (Windows)
+The system automatically handles SQLite module failures:
+1. Attempts native SQLite first
+2. Falls back to in-memory storage if unavailable
+3. All features remain functional (without persistence)
+
+### Session Recovery
 ```bash
-npx claude-flow@alpha hooks post-task --task-id "[task]" --analyze-performance true
-npx claude-flow@alpha hooks session-end --export-metrics true
+# Resume previous session
+npx claude-flow@alpha hive-mind resume <session-id>
+
+# Check session status
+npx claude-flow@alpha hive-mind status
 ```
 
-## 🛠️ MCP Setup
+## MCP Server Configuration
 
+The project includes comprehensive MCP integration:
+- Auto-configures during `init --force`
+- Provides 87+ tools to Claude Code
+- Handles swarm orchestration, memory, and workflow automation
+
+Key MCP tools:
+- `mcp__claude-flow__swarm_init`: Initialize swarm topology
+- `mcp__claude-flow__agent_spawn`: Create specialized agents
+- `mcp__claude-flow__task_orchestrate`: Coordinate tasks
+- `mcp__claude-flow__memory_usage`: Memory operations
+
+## Performance Considerations
+
+### Token Optimization
+- Batch file operations to reduce context usage
+- Use Task tool for complex searches
+- Enable memory compression for large contexts
+
+### Resource Management
+- Default agent limit: 10 concurrent agents
+- Memory namespace isolation for project separation
+- Automatic garbage collection for completed sessions
+
+## Testing Strategy
+
+### Test Organization
+- Unit tests: `/src/__tests__/unit/`
+- Integration tests: `/src/__tests__/integration/`
+- E2E tests: `/src/__tests__/e2e/`
+- Performance tests: `/src/__tests__/performance/`
+
+### Test Utilities
+- Mocks in `/tests/mocks/`
+- Fixtures in `/tests/fixtures/`
+- Test utilities in `/tests/utils/`
+
+## Common Development Tasks
+
+### Adding a New SPARC Mode
+1. Create mode definition in `/src/mcp/sparc-modes.ts`
+2. Add executor in `/src/swarm/sparc-executor.ts`
+3. Register in CLI commands
+4. Add tests in `/src/__tests__/unit/`
+
+### Creating a New Agent Type
+1. Define agent in `/src/constants/agent-types.ts`
+2. Implement loader in `/src/agents/agent-loader.ts`
+3. Add to registry in `/src/agents/agent-registry.ts`
+4. Create tests
+
+### Implementing MCP Tools
+1. Define tool in `/src/mcp/tools.ts`
+2. Add implementation in relevant module
+3. Update router in `/src/mcp/router.ts`
+4. Document in `/docs/MCP_TOOLS.md`
+
+## Debugging Tips
+
+### Enable Verbose Logging
 ```bash
-# Add MCP server
-claude mcp add claude-flow npx claude-flow@alpha mcp start
+export DEBUG=claude-flow:*
+export VERBOSE=true
 ```
 
-### Key MCP Tools:
-- `mcp__claude-flow__swarm_init` - Setup topology
-- `mcp__claude-flow__agent_spawn` - Create agents
-- `mcp__claude-flow__task_orchestrate` - Coordinate tasks
-- `mcp__claude-flow__memory_usage` - Persistent memory
-- `mcp__claude-flow__swarm_status` - Monitor progress
-
-## 📊 Progress Format
-
-```
-📊 Progress Overview
-├── Total: X | ✅ Complete: X | 🔄 Active: X | ⭕ Todo: X
-└── Priority: 🔴 HIGH | 🟡 MEDIUM | 🟢 LOW
+### Check Memory State
+```bash
+npx claude-flow@alpha memory stats
+npx claude-flow@alpha memory list
 ```
 
-## 🎯 Performance Tips
-
-1. **Batch Everything** - Multiple operations = 1 message
-2. **Parallel First** - Think concurrent execution
-3. **Memory is Key** - Cross-agent coordination
-4. **Monitor Progress** - Real-time tracking
-5. **Enable Hooks** - Automated coordination
-
-## ⚡ Quick Examples
-
-### Research Task
-```javascript
-// Single message with all operations
-mcp__claude-flow__swarm_init { topology: "mesh", maxAgents: 5 }
-mcp__claude-flow__agent_spawn { type: "researcher" }
-mcp__claude-flow__agent_spawn { type: "code-analyzer" }
-mcp__claude-flow__task_orchestrate { task: "Research patterns" }
+### Monitor Swarm Activity
+```bash
+npx claude-flow@alpha swarm monitor --real-time
 ```
 
-### Development Task
-```javascript
-// All todos in ONE call
-TodoWrite { todos: [
-  { id: "1", content: "Design API", status: "in_progress", priority: "high" },
-  { id: "2", content: "Implement auth", status: "pending", priority: "high" },
-  { id: "3", content: "Write tests", status: "pending", priority: "medium" },
-  { id: "4", content: "Documentation", status: "pending", priority: "low" }
-]}
-```
+## Cross-Platform Considerations
 
-## 🔗 Resources
+### Windows
+- SQLite may require Visual Studio Build Tools
+- Automatic fallback to in-memory storage
+- Use `pnpm` instead of `npm` for better native module handling
 
-- Docs: https://github.com/ruvnet/claude-flow
-- Issues: https://github.com/ruvnet/claude-flow/issues
-- SPARC: https://github.com/ruvnet/claude-flow/docs/sparc.md
+### Node.js Requirements
+- Minimum: Node.js 20.0.0
+- ES modules with experimental VM support
+- TypeScript 5.3.3+
 
----
+## CI/CD Integration
 
-**Remember**: Claude Flow coordinates, Claude Code creates!
-- Never save working files, text/mds and tests to the root folder. 
+GitHub Actions workflows handle:
+- Automated testing on PR
+- Alpha releases on merge to main
+- Performance regression detection
+- Cross-platform validation
+
+## Important Files
+
+- `/bin/claude-flow.js`: Main dispatcher with runtime detection
+- `/src/cli/simple-cli.js`: Fallback CLI implementation
+- `/.swarm/memory.db`: SQLite memory storage
+- `/.hive-mind/config.json`: Hive-mind configuration
+- `/memory/sessions/`: Session persistence data
